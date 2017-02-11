@@ -95,10 +95,17 @@ javaxt.dhtml.Table = function(parent, config) {
       //Create relative div
         var div = document.createElement("div");
         div.style.width="100%";
-        div.style.height = "100%"; //getPixels(td.offsetHeight); //<--Need to update on resize events!
+        div.style.height = "100%";
         div.style.position = "relative";
         td.appendChild(div);
-
+        
+        if (div.offsetHeight===0){
+            div.style.height = getPixels(td.offsetHeight);
+            setTimeout(function () {
+                div.style.height = "100%";
+            }, 500);
+        }
+        
 
       //Create wrapper for the inner table
         var wrapper = document.createElement("div");
@@ -129,6 +136,7 @@ javaxt.dhtml.Table = function(parent, config) {
         header.style.position = "absolute";
         header.style.left = 0;
         header.style.top = 0;
+        header.style.overflowY = "hidden";
         div.appendChild(header);
 
 
@@ -142,7 +150,6 @@ javaxt.dhtml.Table = function(parent, config) {
         table.border = config.border;
         tbody = document.createElement('tbody');
         table.appendChild(tbody);
-        createPhantomRow(tbody, 0);
         row = document.createElement('tr');
         tbody.appendChild(row);
         
@@ -179,6 +186,7 @@ javaxt.dhtml.Table = function(parent, config) {
             }
             row.appendChild(cell);
         }
+        createPhantomRow(tbody, 0);
         header.appendChild(table);
         me.header = table;
         updateCells(table);
@@ -194,14 +202,14 @@ javaxt.dhtml.Table = function(parent, config) {
         tbody = document.createElement('tbody');
         table.appendChild(tbody);
         
-        var headerRow = me.header.childNodes[0].childNodes[1];
+        var headerRow = me.header.childNodes[0].childNodes[0];
         var headerHeight = headerRow.offsetHeight;        
         if (headerHeight===0){ 
             console.log("Warning: Cannot determine header height!");
             headerHeight = 40;
-            
         }
-        row = createPhantomRow(tbody, headerHeight);
+        row = createPhantomRow(tbody, 1);
+        row.style.height = getPixels(headerHeight);
 
         wrapper.appendChild(table);
         me.body = table;
@@ -261,6 +269,7 @@ javaxt.dhtml.Table = function(parent, config) {
             cell.appendChild(x);
             row.appendChild(cell);
         }
+        return row;
     };
 
 
@@ -329,52 +338,79 @@ javaxt.dhtml.Table = function(parent, config) {
   //**************************************************************************
   //** updateCells
   //**************************************************************************
-  /** Used to update the width of the divs that hold the cell data.
+  /** Used to update the width and height of the divs inside the table cells.
    */
-    var updateCells = function(table){
+    var updateCells = function(el){
 
       //Precompute column widths (optimization for iPad)
         var colWidths = [];
         var colHeaders = me.header.childNodes[0].childNodes[0].childNodes;
         for (var i=0; i<colHeaders.length; i++){
-            colWidths.push(colHeaders[i].offsetWidth);
+            colWidths.push(getPixels(colHeaders[i].offsetWidth));
         }
 
 
-      //Update width of individual cells
-        var tbody = table.childNodes[0];
-        for (var i=0; i<tbody.childNodes.length; i++){
-            var row = tbody.childNodes[i];
+      //Find divs inside the table cells. We will defer updating the width and
+      //height of the cells for performance reasons (optimization for Firefox)
+        var divs = [];
+        var colHeights = [];
+        var getDivs = function(row){
+            var colHeight = null;
             for (var j=0; j<row.childNodes.length; j++){
                 var col = row.childNodes[j];
-                updateCell(col, j, colWidths[j]);
+                if (colHeight==null) colHeight = parseInt(col.offsetHeight);
+                if (col.childNodes[0].tagName.toLowerCase()=="div"){
+                    divs.push(col.childNodes[0]);
+                }                
+            }
+            colHeights.push(colHeight);
+        };
+        var tagName = el.tagName.toLowerCase();
+        if (tagName=="tr"){
+            getDivs(row);
+        }
+        else if (tagName=="table"){
+            var tbody = el.childNodes[0];
+            for (var i=0; i<tbody.childNodes.length; i++){
+                var row = tbody.childNodes[i];
+                getDivs(row);
             }
         }
-    };
+        else{
+            return;
+        }
 
 
-  //**************************************************************************
-  //** updateCell
-  //**************************************************************************
-    var updateCell = function(col, colIndex, colWidth){
-        if (colWidth==null) colWidth = me.getColumnWidth(colIndex);
-        if (col.childNodes[0].tagName.toLowerCase()=="div"){
-            var div = col.childNodes[0];
-            
-          //Update height of the div
-            var colHeight = parseInt(col.offsetHeight);
+      //Update heights
+        var x = 0;
+        var y = 0;
+        for (var i=0; i<divs.length; i++){
+            var colHeight = colHeights[y];
             if (colHeight>0){
-                div.style.height = (colHeight-1) + "px"; 
+                divs[i].style.height = (colHeight-1) + "px"; 
             }
-            
-          //Update width of the child nodes
+            x++;
+            if (x===colWidths.length){ 
+                x = 0;
+                y++;
+            }
+        }
+        
+
+
+      //Update widths
+        var j=0;
+        for (var i=0; i<divs.length; i++){
+            var div = divs[i];
             if (div.childNodes.length>0){
                 if (div.childNodes[0].tagName.toLowerCase()=="div"){
                     var innerDiv = div.childNodes[0];
                     innerDiv.style.height="100%";
-                    innerDiv.style.width=getPixels(colWidth);
+                    innerDiv.style.width=colWidths[j];
                 }
             }
+            j++;
+            if (j===colWidths.length) j = 0;
         }
     };
 
@@ -627,12 +663,7 @@ javaxt.dhtml.Table = function(parent, config) {
       //Update cell widths in the given row. If no row is given,
       //adjust the width of all the rows in the body
         if (row==null) updateCells(me.body);
-        else{
-            for (var j=0; j<row.childNodes.length; j++){
-                var col = row.childNodes[j];
-                updateCell(col, j);
-            }
-        }
+        else updateCells(row);
 
 
       //Update iScroll
