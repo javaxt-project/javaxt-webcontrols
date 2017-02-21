@@ -367,7 +367,7 @@ javaxt.dhtml.Table = function(parent, config) {
         };
         var tagName = el.tagName.toLowerCase();
         if (tagName=="tr"){
-            getDivs(row);
+            getDivs(el);
         }
         else if (tagName=="table"){
             var tbody = el.childNodes[0];
