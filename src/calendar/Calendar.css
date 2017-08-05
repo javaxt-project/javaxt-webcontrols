@@ -1,0 +1,251 @@
+
+/**************************************************************************/
+/** Header
+/**************************************************************************/
+
+/* style for the header row */
+.javaxt-cal-header {
+    border: 1px solid #99BBE8;
+    background: none repeat scroll 0 0 #EEEEEE;
+    height: 25px;
+
+}
+
+/* style for individual cells in the header */
+.javaxt-cal-header-col {
+    border-left: 1px solid #99BBE8;
+    border-right: 1px solid #99BBE8;
+    text-align: center;
+    font-family: tahoma,arial,verdana,sans-serif; 
+    font-size: 11px;
+    padding-top: 5px;
+}
+
+
+
+/**************************************************************************/
+/** Multiday Event Header
+/**************************************************************************/
+
+/* style for the header row */
+.javaxt-cal-multiday-header {
+    border-bottom: 1px solid #99BBE8;
+    border-left: 1px solid #000000;
+    border-right: 1px solid #000000;    
+    background-color: #FFFFFF;
+}
+
+/* style for individual cells in the header */
+.javaxt-cal-multiday-col {
+    border-left: 1px solid #000000;
+    border-right: 1px solid #000000;
+    padding-top: 0px;
+    vertical-align: top;
+}
+
+
+/**************************************************************************/
+/** Body
+/**************************************************************************/
+
+/* style for the body row */
+.javaxt-cal-body {
+    border-right: 1px solid #000000;
+    border-bottom: 1px solid #000000;
+    border-left: 1px solid #000000;
+}
+
+
+/**************************************************************************/
+/** Cells
+/**************************************************************************/
+
+/* Style for individual cells in the body. Note that the cell header and 
+   footer are set using seperate css classes
+*/
+.javaxt-cal-cell {
+    border-right: 1px solid #000000;
+    border-left: 1px solid #000000;
+    vertical-align: top;
+}
+
+/* Style for headers inside individual cells (e.g. numbers inside the month view)*/
+.javaxt-cal-cell-header {
+    height: 15px;
+    padding:0 2px 0 0;
+    text-align: right;
+    font-family: tahoma,arial,verdana,sans-serif; 
+    font-size: 11px;
+}
+
+.javaxt-cal-cell-footer {
+    border-bottom: 1px solid #000000;
+}
+
+
+/* background color for days before and after current month */
+.javaxt-cal-cell-prev-month, .javaxt-cal-cell-next-month {
+    background: none repeat scroll 0 0 #EFF9FC;
+    border-right: 1px solid #000000;
+    border-left: 1px solid #000000;
+}
+
+
+
+/**************************************************************************/
+/** Hours
+/**************************************************************************/
+/** Style for horizonal lines within the cells used to deliniate hours and
+ *  half hours. Note that the heights are very important. Make sure the 
+ *  height of the half-hour is exactly 1/2 the height of an hour. 
+ */
+
+.javaxt-cal-hour {
+    height: 55px; /* 56px-1px for border */
+    border-top: 1px solid #99BBE8;
+}
+
+.javaxt-cal-half-hour {
+    height: 27px; /* 28px-1px for border */
+    border-top: 1px solid #99BBE8;
+}
+
+.javaxt-cal-half-hour-sep {
+    border-top: 1px dotted #99BBE8;
+}
+
+
+
+/**************************************************************************/
+/** Hour Labels
+/**************************************************************************/
+/** Style for the hour labels that appear in the left column of the day and
+ *  week views.
+ */
+
+.javaxt-cal-label-hour {
+    font-family:"Times New Roman", Times, serif;
+    font-size: 18pt;
+    vertical-align: top;
+}
+
+.javaxt-cal-label-meridian {
+    font-family: tahoma,arial,verdana,sans-serif; 
+    font-size: 11px;
+    padding: 0px 0px 0px 3px;
+    vertical-align: top;
+}
+
+
+
+/**************************************************************************/
+/** Events
+/**************************************************************************/
+/** Style for individual events. */
+
+.javaxt-cal-event {
+    
+    font-family: tahoma,arial,verdana,sans-serif; 
+    font-size: 11px;
+    padding-left: 4px; /* Padding inside the event div */
+    white-space: nowrap;
+    
+    cursor: pointer;
+    
+    
+    border: 1px solid #803D5E;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;    
+    
+    background-color: #E2C0D0;
+    background: linear-gradient(#F1E2E9, #E2C0D0);
+    background: -ms-linear-gradient(#F1E2E9, #E2C0D0);
+    background: -webkit-linear-gradient(#F1E2E9, #E2C0D0);
+    background: -moz-linear-gradient(center top, #F1E2E9, #E2C0D0);
+}
+
+
+/* Left border for multi-day events that extend beyond the first cell in a 
+   row or view 
+*/
+.javaxt-cal-event-continue-left {
+    -moz-border-radius: 0px;
+    -webkit-border-radius: 0px 3px 3px 0px;
+    border-radius: 0px 3px 3px 0px;
+    border-left: 0px;
+}
+
+
+/* Right border for multi-day events that extend beyond the last cell in a 
+   row or view 
+*/
+.javaxt-cal-event-continue-right {
+    -moz-border-radius: 0px;
+    -webkit-border-radius: 3px 0px 0px 3px;
+    border-radius: 3px 0px 0px 3px;
+    border-right: 0px;
+}
+
+
+/* Left and Right borders for multi-day events that extend beyond the first and 
+   last cell in a row/view 
+*/
+.javaxt-cal-event-continue-left.javaxt-cal-event-continue-right {
+    -webkit-border-radius: 0px;
+    -moz-border-radius: 0px;
+    border-radius: 0px;
+}
+
+
+/**************************************************************************/
+/** Alternative Colors for Events
+/**************************************************************************/
+
+.javaxt-cal-event-blue {
+    border: 1px solid #6986BE;
+    background-color: #DBE1EF;
+    
+    background: linear-gradient(#FFFFFF, #DBE1EF);
+    background: -ms-linear-gradient(#FFFFFF, #DBE1EF);
+    background: -webkit-linear-gradient(#FFFFFF, #DBE1EF);
+    background: -moz-linear-gradient(center top, #FFFFFF, #DBE1EF);
+}
+
+.javaxt-cal-event-red {
+    border: 1px solid #A81D24;
+    background-color: #E55F66;
+    /*background-image: -moz-linear-gradient(center top , #F2B6B6, #E55F66);*/
+    
+    background: linear-gradient(#FFFFFF, #E55F66);
+    background: -ms-linear-gradient(#FFFFFF, #E55F66);
+    background: -webkit-linear-gradient(#FFFFFF, #E55F66);
+    background: -moz-linear-gradient(center top, #FFFFFF, #E55F66);
+}
+
+
+.javaxt-cal-event-yellow {
+    border: 1px solid #9D7925;
+    background-color: #FFFF83;
+    /*background-image: -moz-linear-gradient(center top , #FFFDD6, #FFFF83);*/
+    
+    background: linear-gradient(#FFFFFF, #FFFF83);
+    background: -ms-linear-gradient(#FFFFFF, #FFFF83);
+    background: -webkit-linear-gradient(#FFFFFF, #FFFF83);
+    background: -moz-linear-gradient(center top, #FFFFFF, #FFFF83);
+}
+
+
+
+/**************************************************************************/
+/** Misc
+/**************************************************************************/
+
+.javaxt-noselect {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    -ms-user-select: none;
+    -khtml-user-select: none;     
+    user-select: none;
+}
