@@ -5,9 +5,7 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 //**  Accordion Class
 //******************************************************************************
 /**
- *   A custom widget used to create an accordian control. Borrowed heavily from 
- *   the following tutorial:
- *   http://www.switchonthecode.com/tutorials/javascript-and-css-tutorial-accordion-menus
+ *   A custom widget used to create an accordian control. 
  *
  ******************************************************************************/
 
@@ -25,7 +23,7 @@ javaxt.dhtml.Accordion = function(parent, config) {
     
     var defaultConfig = {
         
-        activeOnTop: true,
+        activeOnTop: false,
         animate: true,
         animationSteps: 250.0, //time in milliseconds
         
@@ -117,15 +115,21 @@ javaxt.dhtml.Accordion = function(parent, config) {
         outerDiv.style.position = "relative";
         td.appendChild(outerDiv);
 
+        var overflowDiv = document.createElement('div');
+        overflowDiv.style.width="100%";
+        overflowDiv.style.height="100%";
+        overflowDiv.style.position = "absolute";
+        overflowDiv.style.overflow = "hidden";
+        outerDiv.appendChild(overflowDiv);
+        
+        
         innerDiv = document.createElement('div');
         innerDiv.style.width="100%";
         innerDiv.style.height="100%";
-        innerDiv.style.position = "absolute";
-        innerDiv.style.overflow = "hidden";
-        outerDiv.appendChild(innerDiv);
+        innerDiv.style.position = "relative";
+        overflowDiv.appendChild(innerDiv);
         
         
-
         
       //Watch for resize events
         addResizeListener(parent, function(){
@@ -349,6 +353,80 @@ javaxt.dhtml.Accordion = function(parent, config) {
             closing.style.MozOpacity=0;
         }
 
+
+
+
+
+        if (config.activeOnTop==true){
+
+
+
+          //Clone headers that appear above the current tab
+            var orgHeaders = [];
+            var newHeaders = [];
+            var offset = 0;
+            for (var i=0; i<innerDiv.childNodes.length; i++){
+                var node = innerDiv.childNodes[i];
+                if (node.nodeType===1){
+                    var tabID = node.getAttribute("tabID");
+                    if (tabID){
+                        
+                        if (tabID==currTab) break;
+
+
+                        var header = node.cloneNode(true);
+                        header.onclick = node.onclick;
+                        innerDiv.appendChild(header);
+
+                        orgHeaders.push(node);
+                        newHeaders.push(header);
+
+
+                        if (node.offsetHeight>0){ 
+                            offset+=node.offsetHeight;
+                        }
+                    }
+
+                }
+            }
+            
+            var movePanels = function(){
+              //Remove old headers
+                while (orgHeaders.length>0){
+                    var header = orgHeaders.shift();
+                    var panel = header.nextSibling;
+
+                  //Remove old header
+                    innerDiv.removeChild(header);
+
+                  //Move panel to under the new header
+                    header = newHeaders.shift();
+                    innerDiv.insertBefore(panel, header.nextSibling);
+                }
+
+                innerDiv.style.marginTop = "0px";
+                innerDiv.style.height = "100%";
+            };
+            
+            innerDiv.style.height = null;
+            
+//if (true){
+//    innerDiv.style.marginTop = -offset + "px";
+//    return;
+//}
+            
+            
+            if (config.animate==true){
+                slideUp(new Date().getTime(), 100.0, offset, movePanels);
+            }
+            else{
+                innerDiv.style.marginTop = -offset + "px";
+                movePanels();
+            }
+
+        }
+
+
         me.afterChange();
     };
 
@@ -400,6 +478,40 @@ javaxt.dhtml.Accordion = function(parent, config) {
 
         setTimeout(function(){
             animate(curTick, timeLeft, closing, opening);
+        }, 33);
+    };
+
+
+
+  //**************************************************************************
+  //** slideUp
+  //**************************************************************************
+  /**  Used to slide a panel open. */
+
+    var slideUp = function(lastTick, timeLeft, offset, callback){
+        
+        var curTick = new Date().getTime();
+        var elapsedTicks = curTick - lastTick;
+
+
+      //If the animation is complete, ensure that the panel is completely open 
+        if (timeLeft <= elapsedTicks){
+            
+            if (callback!=null){
+                callback.apply(me, []);
+            }
+            
+            return;
+        }
+
+
+        timeLeft -= elapsedTicks;
+        var marginTop = offset - Math.round((timeLeft/config.animationSteps) * offset);
+        innerDiv.style.marginTop = -marginTop + "px";
+
+
+        setTimeout(function(){
+            slideUp(curTick, timeLeft, offset, callback);
         }, 33);
     };
 
