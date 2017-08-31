@@ -1,0 +1,452 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+
+<title>Date Picker Demo</title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+
+<!-- Google Font for the Grey Date Picker -->
+<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" /> 
+
+<script type="text/javascript" src="../../src/datepicker/DatePicker.js"></script>
+
+
+<style>
+    /* Set body height to 100% so we can test vertical resize */
+    html, body {
+        height:100%;
+        margin: 10px;
+        
+    }
+    
+    
+    body, textarea, input, select, td, th {
+        font-family:helvetica,arial,verdana,sans-serif; font-size:14px;
+    }    
+
+
+    h2 {
+        font-size:18px;
+        font-weight: normal;
+        margin: 20px 0 5px 0;        
+    }
+    
+    p {
+        margin: 5px 0 15px 0;
+        color: #555555;
+    }
+    
+  /**************************************************************************/
+  /** Default style
+  /**************************************************************************/
+    
+   .default-panel {
+        font-family: helvetica,arial,verdana,sans-serif;
+        background: #ffffff;
+        border: 1px solid #b4cbdd;
+    }
+    
+    .default-title {
+        text-align: center;
+        white-space: nowrap;
+        font-size: 14px;
+        font-weight: bold;
+        color: #555555;
+        background: #d9e7f8;
+        height: 25px;
+        line-height: 25px;
+    }
+    
+    .default-cell {
+        width: 18px;
+        height: 18px;
+        line-height: 18px;
+        text-align: right;
+        padding: 2px 4px 1px 0px;
+        font-size: 11px;
+        color: #000000;
+        cursor: pointer;
+        border: 1px solid #ffffff;
+        margin: 1px;
+    }
+    
+    .default-cell-prev {
+        color: #aaaaaa;
+    }
+    
+    .default-cell-today {
+        width: 22px;
+        height: 21px;
+        border: 1px solid #FF7373;
+        top: -1px;
+        left: -1px;
+    }
+    
+    .default-cell-selected {
+        color: #000000;
+        font-weight: bold;
+        background: #fff4bf;
+        border: 1px solid #bfa52f;
+    }
+    
+    .default-cell-header {
+        color: #233d6d;
+        font-size: 10px;
+        line-height: 10px;
+        padding-bottom: 0px;
+        padding-top: 0px;
+        border: 0px;
+        border-top: 1px solid #bbccff;
+        border-bottom: 1px solid #bbccff;
+    }
+    
+    
+  /**************************************************************************/
+  /** Blue style
+  /**************************************************************************/
+    
+    .blue-panel {
+        font-family: 'Open Sans',helvetica,arial,verdana,sans-serif;
+        background: #ffffff;
+        border: 1px solid #b4cbdd;
+        padding-bottom: 3px;
+    }
+    
+    .blue-header {
+        background: #b4cbdd;
+        height: 34px;
+    }
+    
+    .blue-title {
+        position: absolute;
+        width: 100%;
+        text-align: center;
+        white-space: nowrap;
+        text-transform: uppercase;
+        font-size: 14px;
+        background: #b4cbdd;
+        height: 34px;
+        line-height: 34px;
+        color: #23436e;
+        cursor: pointer;
+    }
+    
+    
+    .blue-next {
+        float: right;
+        border-right: 2px solid #23436e;
+        border-bottom: 2px solid #23436e;
+        width: 6px;
+        height: 6px;
+        transform: rotate(-45deg);
+        -webkit-transform: rotate(-45deg);
+        margin: 12px 10px 0px 0px;
+        cursor: pointer;
+    }
+    
+    .blue-next:after{
+        content:"";
+        position:absolute;
+        border-top: 2px solid #23436e;
+        width: 10px;
+        transform: rotate(45deg);
+        -webkit-transform: rotate(45deg);
+        transform-origin: 0% 0%;
+        -webkit-transform-origin: 0% 0%;
+        margin-top: -1px;
+    }
+    
+    .blue-back {
+        float: left;
+        border-right: 2px solid #23436e;
+        border-bottom: 2px solid #23436e;
+        width: 6px;
+        height: 6px;
+        transform: rotate(135deg);
+        -webkit-transform: rotate(135deg);
+        margin: 12px 0px 0px 10px;
+        cursor: pointer;
+    }
+    
+    .blue-back:after{
+        content:"";
+        position:absolute;
+        border-top: 2px solid #23436e;
+        width: 10px;
+        transform: rotate(45deg);
+        -webkit-transform: rotate(45deg);
+        transform-origin: 0% 0%;
+        -webkit-transform-origin: 0% 0%;
+        margin-top: -1px;
+    }
+    
+    .blue-cell {
+        width: 24px;
+        height: 24px;
+        line-height: 24px;
+        text-align: right;
+        padding: 2px 4px 1px 0px;
+        font-size: 14px;
+        color: #757575;
+        cursor: pointer;
+    }
+    
+    .blue-cell-prev {
+        color: #bcbcbc;
+    }
+    
+    .blue-cell-today {
+        width: 24px;
+        height: 24px;
+        border: 1px solid #FF7373;
+        border-radius: 14px;
+        top: 1px;
+        left: 3px;
+    }
+    
+    .blue-cell-selected {
+        color: black;
+        background: #FFF581;
+    }
+    
+    .blue-cell-header {
+        color: #4fa4b3;
+        font-size: 8px;
+        line-height: 8px;
+        padding-bottom: 0px;
+        padding-top: 0px;
+    }
+    
+    
+  /**************************************************************************/
+  /** Grey style
+  /**************************************************************************/
+
+    .grey-panel {
+        font-family: 'Open Sans',helvetica,arial,verdana,sans-serif;
+        background: #4a4f65;
+        color: #ffffff;
+        padding: 2px 8px 5px 6px;
+    }
+    
+    .grey-header {
+        height: 25px;
+        padding: 6px 0px 0px 1px;
+        border-bottom: 1px solid #5c6175;
+        margin-left: 5px;
+    }    
+    
+    .grey-title {
+        position: absolute;
+        white-space: nowrap;
+        text-transform: uppercase;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    .grey-next {
+        float: right;
+        border-right: 1px solid #ffffff;
+        border-bottom: 1px solid #ffffff;
+        width: 6px;
+        height: 6px;
+        transform: rotate(-45deg);
+        -webkit-transform: rotate(-45deg);
+        margin: 7px 0px 0px 0px;
+        cursor: pointer;
+    }
+    
+    .grey-next:after{
+        content:"";
+        position:absolute;
+        border-top: 1px solid #ffffff;
+        width: 10px;
+        transform: rotate(45deg);
+        -webkit-transform: rotate(45deg);
+        transform-origin: 0% 0%;
+        -webkit-transform-origin: 0% 0%;
+        margin-top: -1px;
+    }
+    
+    .grey-back {
+        float: right;
+        border-right: 1px solid #ffffff;
+        border-bottom: 1px solid #ffffff;
+        width: 6px;
+        height: 6px;
+        transform: rotate(135deg);
+        -webkit-transform: rotate(135deg);
+        margin: 7px 12px 0px 0px;
+        cursor: pointer;
+    }
+    
+    .grey-back:after{
+        content:"";
+        position:absolute;
+        border-top: 1px solid #ffffff;
+        width: 10px;
+        transform: rotate(45deg);
+        -webkit-transform: rotate(45deg);
+        transform-origin: 0% 0%;
+        -webkit-transform-origin: 0% 0%;
+        margin-top: -1px;
+    }
+    
+    .grey-cell {
+        width: 18px;
+        height: 18px;
+        line-height: 18px;
+        text-align: right;
+        padding: 2px 4px 1px 2px;
+        font-size: 10px;
+        color: #bcbcbc;
+        cursor: pointer;
+    }
+    
+    .grey-cell-prev {
+        color: #757575;
+    }
+    
+    .grey-cell-today {
+        width: 16px;
+        height: 16px;
+        border: 1px solid #FF7373;
+        border-radius: 9px;
+        top: 2px;
+        left: 5px;
+    }
+    
+    .grey-cell-selected {
+        color: black;
+        background: #c99400;
+    }
+    
+    .grey-cell-header {
+        color: #4fa4b3;
+        font-size: 8px;
+    }
+    
+</style>
+
+
+
+<script type="text/javascript">
+window.onload = function() {
+
+
+  //**************************************************************************
+  //** Simple Date Picker
+  //************************************************************************** 
+    new javaxt.dhtml.DatePicker("datePicker1").onClick = function(date){
+        document.getElementById("output1").innerHTML = "You selected: " +  formatDate(date);
+    };
+
+
+
+  //**************************************************************************
+  //** Blue Date Picker
+  //**************************************************************************
+
+    new javaxt.dhtml.DatePicker("datePicker2", {
+        daysOfWeek: ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],
+        style: {
+            panel: "blue-panel",
+            header: "blue-header",
+            title: "blue-title",
+            next: "blue-next",
+            back: "blue-back",
+            cell: "blue-cell",
+            cellHeader: "blue-cell-header",
+            previousMonth: "blue-cell-prev",
+            nextMonth: "blue-cell-prev",
+            today: "blue-cell-today",
+            selected: "blue-cell-selected"
+        }
+    }).onClick = function(startDate, endDate){
+        document.getElementById("output2").innerHTML = "You selected: " +  formatDate(startDate) + 
+        (endDate ? " - " + formatDate(endDate) : "");
+    };
+
+  
+  //**************************************************************************
+  //** Grey Date Picker
+  //**************************************************************************
+  
+    var datePicker = new javaxt.dhtml.DatePicker("datePicker3", {
+        selectionMode: "week",
+        allowDeselect: false,
+        daysOfWeek: ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],
+        style: {
+            panel: "grey-panel",
+            header: "grey-header",
+            title: "grey-title",
+            back: "grey-next",
+            next: "grey-back",
+            cell: "grey-cell",
+            cellHeader: "grey-cell-header",
+            previousMonth: "grey-cell-prev",
+            nextMonth: "grey-cell-prev",
+            today: "grey-cell-today",
+            selected: "grey-cell-selected"
+        }
+    });
+    
+  //Swap next and back buttons (back and next buttons are reversed in the grey style definition)
+    var _next = datePicker.next;
+    var _back = datePicker.back;
+    datePicker.next = _back;
+    datePicker.back = _next;
+  
+  //Process on click events
+    datePicker.onClick = function(startDate, endDate){
+        document.getElementById("output3").innerHTML = "You selected: " +  formatDate(startDate) + 
+        (endDate ? " - " + formatDate(endDate) : "");
+    };
+
+
+
+
+    var formatDate = function(date){
+        return (date.getMonth()+1) + "/" + date.getDate() + "/" + date.getFullYear();
+    };
+
+};
+</script>
+
+
+</head>
+<body>
+       
+<h1>Date Picker Demos</h1>
+    
+
+<h2>Default Date Picker</h2>
+<p>Simple date picker with default style and default settings</p>
+  <div style="height:230px">
+    <div id="datePicker1"></div>
+    <div id="output1" style="padding-top:5px"></div> 
+  </div>
+
+
+<h2>Custom Style #1</h2>
+<p>Date picker with custom blue style</p>
+  <div style="height:260px">
+    <div id="datePicker2"></div>
+    <div id="output2" style="padding-top:5px"></div> 
+  </div>
+
+
+<h2>Custom Style #2</h2>
+<p>Date picker with custom grey style and selectionMode set to 'week'</p>
+  <div style="height:210px">
+    <div id="datePicker3"></div>
+    <div id="output3" style="padding-top:5px"></div> 
+  </div>
+
+</body>
+</html>
