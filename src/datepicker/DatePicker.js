@@ -19,10 +19,11 @@ javaxt.dhtml.DatePicker = function(parent, config) {
     var startDate, endDate;
     var numWeeks;
     
-    var innerDiv;
+    var mainDiv;
     var todayHighlightDiv;
     var cells = [];
     
+    var selectionMode;
 
     
     var defaultConfig = {
@@ -42,7 +43,8 @@ javaxt.dhtml.DatePicker = function(parent, config) {
             panel: {
                 fontFamily: "helvetica,arial,verdana,sans-serif", //"tahoma,arial,verdana,sans-serif",
                 background: "#ffffff",
-                border: "1px solid #b4cbdd"
+                border: "1px solid #b4cbdd",
+                display: "inline-block"
             },
             
             
@@ -164,35 +166,31 @@ javaxt.dhtml.DatePicker = function(parent, config) {
         merge(clone, defaultConfig);
         config = clone;     
         
+      //Get selection mode
+        selectionMode = config.selectionMode;
+        
         
       //Create container
-        var outerDiv = document.createElement('div');
-        outerDiv.style.display="inline-block";
-        parent.appendChild(outerDiv);
+        mainDiv = document.createElement('div');
+        addStyle(mainDiv, "panel");   
+        parent.appendChild(mainDiv);
+        me.el = mainDiv;
         
         
       //Disable text selection
-        outerDiv.unselectable="on";
-        outerDiv.onselectstart=function(){return false;};
-        outerDiv.onmousedown=function(){return false;};
-        
-        
-      //Create main panel
-        innerDiv = document.createElement('div');
-        addStyle(innerDiv, "panel");        
-        outerDiv.appendChild(innerDiv);
+        mainDiv.unselectable="on";
+        mainDiv.onselectstart=function(){return false;};
+        mainDiv.onmousedown=function(){return false;};
         
         
       //Create highlight div
         todayHighlightDiv = document.createElement('div');
         addStyle(todayHighlightDiv, "today");
         todayHighlightDiv.style.position = "absolute";        
-        
-        
-        
-        me.setDate(config.date);
 
-        me.el = outerDiv;
+        
+      //Render month
+        me.setDate(config.date);
     };
 
     
@@ -205,7 +203,7 @@ javaxt.dhtml.DatePicker = function(parent, config) {
     this.setDate = function(date){
         
       //Clear the current content
-        innerDiv.innerHTML = "";
+        mainDiv.innerHTML = "";
         
         
       //Compute date range
@@ -217,7 +215,7 @@ javaxt.dhtml.DatePicker = function(parent, config) {
         var headerDiv = document.createElement('div');
         addStyle(headerDiv, "header");
         headerDiv.style.position = "relative";
-        innerDiv.appendChild(headerDiv);
+        mainDiv.appendChild(headerDiv);
 
         var titleDiv = document.createElement('div');
         addStyle(titleDiv, "title");
@@ -331,112 +329,23 @@ javaxt.dhtml.DatePicker = function(parent, config) {
                 cell.onclick = function(e){
                     var cell = this;
 
-                    
-                  //Deselect function
-                    var deselect = function(_cell){
-                        _cell.selected=false;
-                        _cell.style = null;
-                        _cell.className = null;
-                        _cell.style.position = "relative";
 
-                        addStyle(_cell, "cell");
-
-                        switch(_cell.monthOffset){
-                            case -1:
-                                addStyle(_cell, "previousMonth");
-                                break;
-                            case 1:
-                                addStyle(_cell, "nextMonth");
-                                break;
-                        }
-                    };
-                    
-                    
-
-                    if (config.selectionMode==="day"){
-
-
-                      //Deselect previous selection
-                        for (var x=0; x<cells.length; x++){
-                            var _cell = cells[x];
-                            if (_cell.selected){
-                                if (cell===_cell){
-                                    if (config.allowDeselect){ 
-                                        deselect(_cell);
-                                    }
-                                    return;
-                                }
-                                else{
-                                     deselect(_cell);
-                                }
-                                break;
-                            }
-                        }
-
+                  //Select cell(s)
+                    var dateRange = select(cell);
 
                     
-                      //Highlight cell
-                        cell.selected=true;
-                        addStyle(cell, "selected"); 
-
-
-                    
-                      //Fire onClick event
-                        me.onClick(new Date(cell.date));                    
-                    
+                  //Fire onClick event
+                    switch(dateRange.length){
+                        case 0:
+                            me.onClick(new Date(cell.date)); 
+                            break;
+                        case 1:
+                            me.onClick(dateRange[0]); 
+                            break;
+                        case 2:
+                            me.onClick(dateRange[0], dateRange[1]);
+                            break;
                     }
-                    else if (config.selectionMode==="week"){
-                        
-                        var parentRow = cell.parentNode.parentNode;
-                        var d1, d2;
-                        
-                        
-                        for (var x=0; x<cells.length; x++){
-                            var _cell = cells[x];
-                            if (_cell.parentNode.parentNode===parentRow){
-                                
-                                
-                                if (_cell.selected){ 
-
-                                  //Deselect row
-                                    if (config.allowDeselect){
-                                        for (var y=0; y<cells.length; y++){
-                                            if (cells[y].selected) deselect(cells[y]);
-                                        }
-                                    }
-                                    return; 
-                                }
-                                
-                                
-                                if (d1){
-                                    if (_cell.date.getTime()<d1.getTime()){
-                                        d1 = _cell.date;
-                                    }
-                                    if (_cell.date.getTime()>d2.getTime()){
-                                        d2 = _cell.date;
-                                    }
-                                }
-                                else{
-                                    d1 = d2 = _cell.date;
-                                }
-                                
-                              //Highlight cell
-                                _cell.selected=true;
-                                addStyle(_cell, "selected"); 
-                            }
-                            else{
-                                
-                                if (_cell.selected) deselect(_cell);
-                            }
-                        }
-                        
-                        
-                      //Fire onClick event
-                        me.onClick(new Date(d1), new Date(d2));   
-                    }
-                    
-                    
-
                 };
                 
                 
@@ -448,7 +357,7 @@ javaxt.dhtml.DatePicker = function(parent, config) {
         
         
       //Append table
-        innerDiv.appendChild(table);
+        mainDiv.appendChild(table);
         
         
         
@@ -506,6 +415,202 @@ javaxt.dhtml.DatePicker = function(parent, config) {
             cell.appendChild(todayHighlightDiv);            
             
         }
+    };
+
+
+  //**************************************************************************
+  //** select
+  //**************************************************************************
+  /** Used to select a cell that corresponds to the given date. If the 
+   *  selectionMode is set to week, an entire row will be selected. 
+   */
+    this.select = function(date){
+        
+        
+      //Find cell that corresponds with the given date
+        var cell;
+        for (var x=0; x<cells.length; x++){
+            var _cell = cells[x];
+            var _date = _cell.date;
+            if (_date.getDate()===date.getDate() && 
+                _date.getMonth()===date.getMonth() && 
+                _date.getFullYear()===date.getFullYear()){
+                cell = _cell;
+                break;
+            }
+        }
+
+
+      //Select the cell
+        if (cell) select(cell);
+    };
+
+
+  //**************************************************************************
+  //** select
+  //**************************************************************************
+  /** Used to select a given cell. If the selectionMode is set to week, the
+   *  entire row will be selected. Returns an array of dates that correspond
+   *  to the selected cell(s).
+   */
+    var select = function(cell){
+        
+        if (selectionMode==="day"){
+
+          //Get date
+            var d = new Date(cell.date);
+            
+
+          //Deselect previous selection
+            for (var x=0; x<cells.length; x++){
+                var _cell = cells[x];
+                if (_cell.selected){
+                    
+                  //If a user clicked on a selected cell..
+                    if (cell===_cell){
+                        if (config.allowDeselect){ 
+                            deselect(_cell);
+                            return [];
+                        }
+                        else{
+                            return [d];
+                        }
+                    }
+                    else{
+                        
+                      //Deselect previously selected cell
+                        deselect(_cell);
+                    }
+                    
+                    
+                    break;
+                }
+            }
+
+
+
+          //Highlight cell
+            cell.selected=true;
+            addStyle(cell, "selected"); 
+
+
+          //Return selected date
+            return [d];
+
+        }
+        else if (selectionMode==="week"){
+
+          //Get start/end dates for the week
+            var parentRow = cell.parentNode.parentNode;
+            var d1 = new Date(parentRow.childNodes[0].childNodes[0].date);
+            var d2 = new Date(parentRow.childNodes[parentRow.childNodes.length-1].childNodes[0].date);
+            
+
+          //Select row
+            for (var x=0; x<cells.length; x++){
+                var _cell = cells[x];
+                if (_cell.parentNode.parentNode===parentRow){
+
+
+                  //If a user clicked on a selected row...
+                    if (_cell.selected){ 
+
+                        if (config.allowDeselect){
+                            
+                          //Deselect row
+                            for (var y=0; y<cells.length; y++){
+                                if (cells[y].selected) deselect(cells[y]);
+                            }
+                            return [];
+                        }
+                        else{
+                            
+                          //Do nothing, the row is already selected
+                            return [d1,d2];
+                        }
+                    }
+
+
+                  //Highlight cell
+                    _cell.selected=true;
+                    addStyle(_cell, "selected"); 
+                }
+                else{
+
+                  //Deselect previously selected row
+                    if (_cell.selected) deselect(_cell);
+                }
+            }
+
+
+          //Return selected date range
+            return [d1,d2];
+        }
+        else{
+            return [];
+        }
+        
+    };
+
+
+  //**************************************************************************
+  //** deselect
+  //**************************************************************************
+  /** Used to deselect any selected cells in the calendar.
+   */
+    this.deselect = function(){
+        
+        for (var x=0; x<cells.length; x++){
+            var _cell = cells[x];
+            if (_cell.selected){
+                
+                if (config.allowDeselect){
+                    
+                }
+                
+                deselect(_cell);
+            }
+        }
+    };
+
+
+  //**************************************************************************
+  //** deselect
+  //**************************************************************************
+  /** Used to deselect a given cell.
+   */
+    var deselect = function(_cell){
+        _cell.selected=false;
+        _cell.style = null;
+        _cell.className = null;
+        _cell.style.position = "relative";
+
+        addStyle(_cell, "cell");
+
+        switch(_cell.monthOffset){
+            case -1:
+                addStyle(_cell, "previousMonth");
+                break;
+            case 1:
+                addStyle(_cell, "nextMonth");
+                break;
+        }
+    };
+
+
+  //**************************************************************************
+  //** getSelectionMode
+  //**************************************************************************
+    this.getSelectionMode = function(){
+      return selectionMode;  
+    };
+
+
+  //**************************************************************************
+  //** setSelectionMode
+  //**************************************************************************
+    this.setSelectionMode = function(str){
+        selectionMode = str;
     };
 
 
