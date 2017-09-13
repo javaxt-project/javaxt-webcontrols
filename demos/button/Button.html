@@ -1,0 +1,396 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+
+<title>Button Demo</title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+
+<script type="text/javascript" src="../../src/button/Button.js"></script>
+
+
+<style>
+    /* Set body height to 100% so we can test vertical resize */
+    html, body {
+        height:100%;
+        margin:10px;
+    }
+    
+    
+    body, textarea, input, select, td, th {
+        font-family:helvetica,arial,verdana,sans-serif; font-size:14px;
+    }    
+
+
+    h2 {
+        font-size:18px;
+        font-weight: normal;
+        margin: 20px 0 5px 0;        
+    }
+    
+    
+    
+   /**************************************************************************/
+   /** Delete Icon
+   /**************************************************************************/
+
+    .deleteIcon {
+        width: 16px;
+        height: 16px;
+        position: relative;
+        border-color: #000000;
+    }
+
+    .deleteIcon:after {
+        content: '';
+        height: 14px;
+        border-left: 2px solid;
+        border-color: inherit;
+        position: absolute;
+        transform: rotate(45deg);
+        -webkit-transform: rotate(45deg);
+        left: 4px;
+        top: 1px;
+    }
+
+    .deleteIcon:before {
+        content: '';
+        height: 14px;
+        border-left: 2px solid;
+        border-color: inherit;
+        position: absolute;
+        transform: rotate(-45deg);
+        -webkit-transform: rotate(-45deg);
+        left: 4px;
+        top: 1px;
+    }
+    
+    .deleteIcon-hover {
+        border-color: #FF0000;
+    }
+    
+    .deleteIcon-select {
+        border-color: #FFFFFF;
+    }
+    
+    
+   /**************************************************************************/
+   /** New Icon
+   /**************************************************************************/
+
+    .newIcon {
+        width: 16px;
+        height: 16px;
+        position: relative;
+        border-color: #575757;
+    }
+
+    .newIcon:after {
+        content: '';
+        height: 10px;
+        border-left: 2px solid;
+        border-color: inherit;
+        position: absolute;
+        transform: rotate(90deg);
+        -webkit-transform: rotate(90deg);
+        left: 4px;
+        top: 3px;
+    }
+
+    .newIcon:before {
+        content: '';
+        height: 10px;
+        border-left: 2px solid;
+        border-color: inherit;
+        position: absolute;
+        left: 4px;
+        top: 3px;
+    }
+    
+
+    .newIcon-select {
+        border-color: #FFFFFF;
+    }
+    
+    
+    
+   /**************************************************************************/
+   /** Next Icon
+   /**************************************************************************/
+   
+    .nextIcon {
+        float: right;
+        border-color: #000000;
+        border-right: 2px solid;
+        border-bottom: 2px solid;
+        width: 6px;
+        height: 6px;
+        transform: rotate(-45deg);
+        -webkit-transform: rotate(-45deg);
+        margin: 0px 3px 0px 10px;
+        cursor: pointer;
+    }
+    
+    .nextIcon:after{
+        content:"";
+        position:absolute;
+        border-top: 2px solid;
+        border-color: inherit;
+        width: 10px;
+        transform: rotate(45deg);
+        -webkit-transform: rotate(45deg);
+        transform-origin: 0% 0%;
+        -webkit-transform-origin: 0% 0%;
+        margin-top: -1px;
+    }
+    
+    .nextIcon-hover {
+        border-color: #003EFF;
+    }
+    
+    .nextIcon-select {
+        border-color: #FFFFFF;
+    }    
+    
+    
+   /**************************************************************************/
+   /** Menu Buttons
+   /**************************************************************************/
+   
+    .menuButton {
+        border: 1px solid #F6F6F6;
+        border-radius: 3px;
+        background: #F6F6F6;
+        cursor: pointer;
+        padding: 3px 3px;
+        margin: 0px;
+        color: #2b2b2b;
+    }
+    
+    .menuButton-hover {
+        border-color: #cccccc;
+        background: #f0f8ff;
+    }
+    
+</style>
+
+
+
+<script type="text/javascript">
+window.onload = function() {
+
+
+  //**************************************************************************
+  //** Simple Button Demo
+  //**************************************************************************
+  
+    new javaxt.dhtml.Button("plainButton", {
+        label: "Submit"
+    }).onClick = function(){
+        console.log(this.getText());
+    };
+
+
+  //**************************************************************************
+  //** Button with Icon Demo
+  //**************************************************************************
+  
+    new javaxt.dhtml.Button("iconButton", {
+        label: "Delete",
+        style: {
+            icon: "deleteIcon",
+            iconHover: "deleteIcon-hover",
+            iconSelect: "deleteIcon-select"
+        }
+    }).onClick = function(){
+        console.log(this.getText());
+    };
+
+
+  //**************************************************************************
+  //** Button with Icon Demo #2
+  //**************************************************************************
+  
+    new javaxt.dhtml.Button("iconButton2", {
+        label: "Next",
+        style: {
+            icon: "nextIcon",
+            iconAlign: "right",
+            iconHover: "nextIcon-hover",
+            iconSelect: "nextIcon-select"
+        }
+    }).onClick = function(){
+        console.log(this.getText());
+    };
+    
+    
+  //**************************************************************************
+  //** Disabled Button Demo
+  //**************************************************************************
+  
+    new javaxt.dhtml.Button("disabledButton", {
+        label: "Add...",
+        disabled: true,
+        style: {
+            icon: "newIcon",
+            iconHover: "newIcon-hover",
+            iconSelect: "newIcon-select"
+        }
+    }).onClick = function(){
+        console.log(this.getText());
+    };
+
+    
+
+  //**************************************************************************
+  //** Toggle Button Demo
+  //**************************************************************************
+
+    var toggleButton = new javaxt.dhtml.Button("toggleButton", {
+        label: "Toggle Me!",
+        toggle: true,
+        selected: true
+    });
+    toggleButton.onClick = function(){
+        console.log(this.getText());
+    };
+
+
+
+  //**************************************************************************
+  //** Button Group Demo
+  //**************************************************************************
+
+    var dayButton = new javaxt.dhtml.Button("buttonGroup",{
+        label: "Day",
+        toggle: true,
+        style:{
+            button: {
+                margin: "0px",
+                width: "60px",
+                borderRadius: "3px 0 0 3px",
+                textAlign: "center"
+            }
+        }
+    });
+    var weekButton = new javaxt.dhtml.Button("buttonGroup",{
+        label: "Week",
+        toggle: true,
+        selected: true,
+        style:{
+            button: {
+                margin: "0px",
+                width: "60px",
+                borderRadius: "0px",
+                textAlign: "center"
+            }
+        }
+    });
+    var monthButton = new javaxt.dhtml.Button("buttonGroup",{
+        label: "Month",
+        toggle: true,
+        style:{
+            button: {
+                margin: "0px",
+                width: "60px",
+                borderRadius: "0 3px 3px 0",
+                textAlign: "center"
+            }
+        }
+    });
+
+    var selectedButton = weekButton;
+
+    dayButton.onClick = weekButton.onClick = monthButton.onClick = function(){
+        var button = this;
+        selectedButton.toggle();
+        if (button!==selectedButton){   
+            console.log("Selection change! " + button.getText() + " is now selected.");
+            selectedButton = button;
+        }
+    };
+    
+    
+    
+    
+    
+    
+  //**************************************************************************
+  //** Menu Button Demo
+  //**************************************************************************
+  
+    var menuButton = new javaxt.dhtml.Button("menuButton", {
+        label: "New",
+        menu: true
+    });
+    
+    var menuPanel = menuButton.getMenuPanel();
+    new javaxt.dhtml.Button(menuPanel, {
+        label: "New Contact...",
+        display: "inherit",
+        style: {
+            button: "menuButton",
+            hover: "menuButton-hover"
+        }
+    });
+    new javaxt.dhtml.Button(menuPanel, {
+        label: "New Appointment...",
+        display: "inherit",
+        style: {
+            button: "menuButton",
+            hover: "menuButton-hover"
+        }
+    });
+    new javaxt.dhtml.Button(menuPanel, {
+        label: "Exit",
+        display: "inherit",
+        style: {
+            button: "menuButton",
+            hover: "menuButton-hover"
+        }
+    });
+    
+    
+};
+</script>
+
+
+</head>
+<body>
+       
+<h1>Button Demos</h1>
+    
+
+<h2>Plain text button:</h2>
+<div id="plainButton"></div>
+
+
+<h2>Button with icon:</h2>
+<div id="iconButton"></div>
+
+
+<h2>Button with icon on the right:</h2>
+<div id="iconButton2"></div>
+
+
+<h2>Disabled button with fixed width:</h2>
+<div id="disabledButton"></div>
+
+
+<h2>Toggle button:</h2>
+<div id="toggleButton"></div>
+
+
+<h2>Button group:</h2>
+<div id="buttonGroup"></div>
+
+
+<h2>Button with menu:</h2>
+<div id="menuButton"></div>
+
+</body>
+</html>
