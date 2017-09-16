@@ -53,11 +53,20 @@ window.onload = function() {
 
 
     var accordion = new javaxt.dhtml.Accordion("facet-panel", {
-        headerStyle: "accordionHeader",
-        contentStyle : "accordionContent",
-        border: "0px",
         animate: true,
-        default: 2
+        default: 2,
+        style: {
+            
+            accordion: {
+                width: "100%",
+                height: "100%",
+                border: "1px solid #969696",
+                borderWidth: "0px 1px"
+            },
+            
+            tabHeader: "accordionHeader",
+            tabContent: "accordionContent"
+        }
     });
     
 
@@ -84,7 +93,7 @@ window.onload = function() {
 <body>
        
     
-    <table border="1" style="border-collapse:collapse;width:100%;height:100%;" cellpadding="0">
+    <table style="border-collapse:collapse;width:100%;height:100%;" cellpadding="0">
       <tr>
           <td id="facet-panel" style="width:250px;height:100%;vertical-align:top;">
               

@@ -11,7 +11,6 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 
 
 javaxt.dhtml.Accordion = function(parent, config) {
-
     this.className = "javaxt.dhtml.Accordion";
 
     var me = this;
@@ -27,23 +26,32 @@ javaxt.dhtml.Accordion = function(parent, config) {
         animate: true,
         animationSteps: 250.0, //time in milliseconds
         
-        width: "100%",
-        height: "100%",
-        border: "1px solid #969696",
-        margin: "0px",
+
+        style:{
+            
+            accordion: {
+                width: "100%",
+                height: "100%",
+                border: "1px solid #969696",
+                margin: "0px"
+            },
+            
+            tabHeader: {
+                background: "#F6F6F6",
+                borderBottom: "1px solid #969696",
+                padding: "7px 0 6px 7px",
+                cursor: "pointer",
+                whiteSpace: "nowrap" 
+            },
+
+            tabContent: {
+                borderBottom: "1px solid #969696",
+                padding: "3px 0 0 7px"
+            },
+            
+            activeTab: { //Only applies to the tab header
                 
-        
-        headerStyle: {
-            borderBottom: "1px solid #969696",
-            padding: "2px 0 3px 5px",
-            cursor: "pointer",
-            whiteSpace: "nowrap" 
-        },
-        
-        
-        contentStyle: {
-            borderBottom: "1px solid #969696",
-            padding: "2px 0 0 5px"
+            }
         }
     };
     
@@ -88,40 +96,40 @@ javaxt.dhtml.Accordion = function(parent, config) {
         
         
         
-      //Create outer table
+      //Create table to hold the accordion control. At the time of this writing,
+      //the table was the only thing I could use that would correctly maintain 
+      //100% height...
         var table = document.createElement('table');
-        table.style.width = getPixels(config.width);
-        table.style.height = getPixels(config.height);
+        setStyle(table, "accordion");
         table.cellSpacing = 0;
         table.cellPadding = 0;
         table.style.borderCollapse = "collapse";
-        table.style.margin = config.margin;
         var tbody = document.createElement('tbody');
         table.appendChild(tbody);
         var row = document.createElement('tr');
         var td = document.createElement('td');
         td.style.width="100%";
         td.style.height="100%";
-        td.style.border = config.border;
         td.style.verticalAlign = "top";
         row.appendChild(td);
         tbody.appendChild(row);
         parent.appendChild(table);
+        me.el = table;
         
         
-        var outerDiv = document.createElement('div');
-        outerDiv.style.width="100%";
-        outerDiv.style.height="100%";
-        outerDiv.style.position = "relative";
-        td.appendChild(outerDiv);
-
+      //Create overflow divs inside the table
+        var div = document.createElement('div');
+        div.style.width="100%";
+        div.style.height="100%";
+        div.style.position = "relative";
+        td.appendChild(div);
+        
         var overflowDiv = document.createElement('div');
         overflowDiv.style.width="100%";
         overflowDiv.style.height="100%";
         overflowDiv.style.position = "absolute";
         overflowDiv.style.overflow = "hidden";
-        outerDiv.appendChild(overflowDiv);
-        
+        div.appendChild(overflowDiv);
         
         innerDiv = document.createElement('div');
         innerDiv.style.width="100%";
@@ -155,13 +163,26 @@ javaxt.dhtml.Accordion = function(parent, config) {
     };
     
     
-
+  //**************************************************************************
+  //** enableAnimation
+  //**************************************************************************    
+    this.enableAnimation = function(){
+        config.animate = true;
+    };  
+    
+    
+  //**************************************************************************
+  //** disableAnimation
+  //************************************************************************** 
+    this.disableAnimation = function(){
+        config.animate = false;
+    };
 
 
   //**************************************************************************
-  //** addTab
+  //** add
   //**************************************************************************
-  /** Used to add a panel to the accordion control.
+  /** Used to add a tab/panel to the accordion control.
    *  
    *  @param el Element (e.g. div or span) to add to the accordion. It is 
    *  recommended that the element have a "title" attribute that can be used 
@@ -195,7 +216,7 @@ javaxt.dhtml.Accordion = function(parent, config) {
 
         
       //Add Content
-        setStyle(el, "contentStyle");
+        setStyle(el, "tabContent");
         el.style.height = "0px";
         el.style.overflow = "hidden";
         el.style.display = "none";
@@ -238,7 +259,7 @@ javaxt.dhtml.Accordion = function(parent, config) {
         //header.onmouseover = mouseOver;
         //header.onmouseout = mouseOut;
         header.onselectstart = function(){ return false; };
-        setStyle(header, "headerStyle");
+        setStyle(header, "tabHeader");
         return header;
     };
 
@@ -340,6 +361,7 @@ javaxt.dhtml.Accordion = function(parent, config) {
     var open = function(opening, closing){
         
         if (opening){
+            addStyle(opening.previousSibling, "activeTab");
             opening.style.display = 'block';
             opening.style.height = maxHeight + 'px';
             opening.style.filter='alpha(opacity=100)';
@@ -347,6 +369,7 @@ javaxt.dhtml.Accordion = function(parent, config) {
         }
 
         if (closing){
+            setStyle(closing.previousSibling, "tabHeader");
             closing.style.display = 'none';
             closing.style.height = '0px';
             closing.style.filter='alpha(opacity=0)';
@@ -410,10 +433,6 @@ javaxt.dhtml.Accordion = function(parent, config) {
             
             innerDiv.style.height = null;
             
-//if (true){
-//    innerDiv.style.marginTop = -offset + "px";
-//    return;
-//}
             
             
             if (config.animate==true){
@@ -629,23 +648,64 @@ javaxt.dhtml.Accordion = function(parent, config) {
     };
 
 
+
+  //**************************************************************************
+  //** addStyle
+  //**************************************************************************
+  /** Used to add style to a given element. Styles are defined via a CSS class
+   *  name or inline using the config.style definitions. 
+   */
+    var addStyle = function(el, style){
+        
+        style = config.style[style];
+        if (style===null) return;
+        
+        if (typeof style === 'string' || style instanceof String){
+            if (el.className && el.className!=null) el.className += " " + style;
+            else el.className = style;
+        }
+        else{
+            for (var key in style){
+                var val = style[key];
+
+                el.style[key] = val;
+                if (key==="transform"){
+                    el.style["-webkit-" +key] = val;
+                }
+            }
+        }
+    };
+
+
   //**************************************************************************
   //** setStyle
   //**************************************************************************
+  /** Used to set the style for a given element. Styles are defined via a CSS 
+   *  class name or inline using the config.style definitions. 
+   */
     var setStyle = function(el, style){
-        if (typeof config[style] === 'string' || config[style] instanceof String){
-            el.className = config[style];
-        }
-        else{
-            for (var o in config[style]){
-                var key = o;
-                var val = config[style][o];
-
-                if (key=="class") el.className = val;
-                else el.style[key] = val;
-            }
-        }              
         
+        style = config.style[style];
+        if (style===null) return;
+        
+        
+        el.style = null;
+        el.removeAttribute("style");
+        
+        
+        if (typeof style === 'string' || style instanceof String){
+            el.className = style;
+        }
+        else{    
+            for (var key in style){
+                var val = style[key];
+
+                el.style[key] = val;
+                if (key==="transform"){
+                    el.style["-webkit-" +key] = val;
+                }
+            }
+        }
     };
 
 
