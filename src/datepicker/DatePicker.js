@@ -15,10 +15,9 @@ javaxt.dhtml.DatePicker = function(parent, config) {
 
 
     var me = this;
-    var currMonth, currYear;
-    var startDate, endDate;
-    var numWeeks;
-    
+    var currDate;
+    var startDate;
+
     var mainDiv;
     var todayHighlightDiv;
     var cells = [];
@@ -143,7 +142,6 @@ javaxt.dhtml.DatePicker = function(parent, config) {
     };
     
     
-    
   //**************************************************************************
   //** Constructor
   //**************************************************************************
@@ -193,22 +191,50 @@ javaxt.dhtml.DatePicker = function(parent, config) {
         me.setDate(config.date);
     };
 
-    
-    
+
   //**************************************************************************
   //** setDate
   //**************************************************************************
-  /** Used to render a month in a year specified by a given date. 
+  /** Used to update the calendar and render a given date. 
    */
     this.setDate = function(date){
         
-      //Clear the current content
-        mainDiv.innerHTML = "";
+        date = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        if (currDate && date.getTime()===currDate.getTime()) return;
         
         
       //Compute date range
-        computeRange(date);
+        var range = computeRange(date);
         
+        
+        
+      //Check whether we should render a new calendar
+        if (startDate){
+            console.log(startDate + " vs " + range.startDate);
+            if (startDate.getTime()===range.startDate.getTime()){
+                
+              //No need to re-render the calendar. Fire the onUpdate event 
+              //as needed and exit.
+                if (currDate.getTime()!==date.getTime()){
+                    currDate = date;
+                    me.onUpdate(new Date(currDate));
+                }
+                return;
+            }
+        }
+
+
+
+      //Set variables
+        currDate = date;
+        startDate = range.startDate;
+        var currMonth = currDate.getMonth();
+        var numWeeks = range.numWeeks;
+
+                
+        
+      //Clear the current content
+        mainDiv.innerHTML = "";
         
         
       //Create header
@@ -219,7 +245,7 @@ javaxt.dhtml.DatePicker = function(parent, config) {
 
         var titleDiv = document.createElement('div');
         addStyle(titleDiv, "title");
-        titleDiv.innerHTML = config.months[currMonth] + " " + date.getFullYear();
+        titleDiv.innerHTML = config.months[currMonth] + " " + currDate.getFullYear();
         titleDiv.onclick = function(e){
             me.onHeaderClick(headerDiv, e);
         };
@@ -245,7 +271,6 @@ javaxt.dhtml.DatePicker = function(parent, config) {
         var table = document.createElement('table');
         table.cellSpacing = 0;
         table.cellPadding = 0;
-        table.style.width = "100%";
         table.style.fontFamily = "inherit";
         table.style.textAlign = "inherit";
         table.style.color = "inherit";
@@ -335,17 +360,8 @@ javaxt.dhtml.DatePicker = function(parent, config) {
 
                     
                   //Fire onClick event
-                    switch(dateRange.length){
-                        case 0:
-                            me.onClick(new Date(cell.date)); 
-                            break;
-                        case 1:
-                            me.onClick(dateRange[0]); 
-                            break;
-                        case 2:
-                            me.onClick(dateRange[0], dateRange[1]);
-                            break;
-                    }
+                    me.onClick(new Date(cell.date), dateRange);
+                    
                 };
                 
                 
@@ -387,8 +403,10 @@ javaxt.dhtml.DatePicker = function(parent, config) {
             }, msToMidnight);
         }        
         scheduledTask();
+        
+        
+        me.onUpdate(new Date(currDate));
     };
-
 
 
   //**************************************************************************
@@ -617,9 +635,14 @@ javaxt.dhtml.DatePicker = function(parent, config) {
   //**************************************************************************
   //** onClick
   //**************************************************************************
-  /** Called when a cell in the calendar is clicked.
+  /** Called when a cell in the calendar is clicked. 
+   *  @param date Date associated with the cell.
+   *  @param dateRange An array representing the selected date range. If the
+   *  selection mode is set to "week", the array will contain two entries: one
+   *  for the start date and one for the end date. Otherwise, the array will 
+   *  contain only one entry. 
    */
-    this.onClick = function(date){};
+    this.onClick = function(date, dateRange){};
     
     
   //**************************************************************************
@@ -632,12 +655,30 @@ javaxt.dhtml.DatePicker = function(parent, config) {
 
 
   //**************************************************************************
+  //** onUpdate
+  //**************************************************************************
+  /** Called when the date picker is first rendered or whenever the month is
+   *  changed.
+   */
+    this.onUpdate = function(date){};
+    
+
+  //**************************************************************************
   //** back
   //**************************************************************************
   /** Used to render the previous month.
    */
     this.back = function(){
-        me.setDate(new Date(currYear, currMonth-1, 1));
+        
+        var m = currDate.getMonth()-1;
+        var d = currDate.getDate();
+        var y = currDate.getFullYear();
+        
+        var x = new Date(y, m+1, 0).getDate();
+        if (d>x) console.log(d + " vs " + x);
+        if (d>x) d = x;
+        
+        me.setDate(new Date(y, m, d));
     };
 
 
@@ -647,9 +688,18 @@ javaxt.dhtml.DatePicker = function(parent, config) {
   /** Used to render the next month.
    */
     this.next = function(){
-        me.setDate(new Date(currYear, currMonth+1, 1));
+        
+        var m = currDate.getMonth()+1;
+        var d = currDate.getDate();
+        var y = currDate.getFullYear();
+        
+        var x = new Date(y, m+1, 0).getDate();
+        if (d>x) console.log(d + " vs " + x);
+        if (d>x) d = x;
+        
+        me.setDate(new Date(y, m, d));
     };
-
+    
 
   //**************************************************************************
   //** getMonth
@@ -657,16 +707,17 @@ javaxt.dhtml.DatePicker = function(parent, config) {
   /** Returns the month rendered in the date picker (0-11)
    */
     this.getMonth = function(){
-        return currMonth;
+        return currDate.getMonth();
     };
-    
+
+
   //**************************************************************************
   //** getYear
   //**************************************************************************
   /** Returns the year rendered in the date picker.
    */
     this.getYear = function(){
-        return currYear;
+        return currDate.getFullYear();
     };
 
 
@@ -679,20 +730,24 @@ javaxt.dhtml.DatePicker = function(parent, config) {
    */
     var computeRange = function(d){
         
-        currMonth = d.getMonth();
-        currYear = d.getFullYear();
-
         var year = d.getFullYear();
         var month = d.getMonth()+1;
         var firstOfMonth = new Date(year, month-1, 1);
         var lastOfMonth = new Date(year, month, 0);
-        numWeeks = Math.ceil( (firstOfMonth.getDay() + lastOfMonth.getDate()) / 7);
+        var numWeeks = Math.ceil( (firstOfMonth.getDay() + lastOfMonth.getDate()) / 7);
 
-        startDate = new Date(firstOfMonth);
+        var startDate = new Date(firstOfMonth);
         startDate.setDate(startDate.getDate()-firstOfMonth.getDay());
 
-        endDate = new Date(lastOfMonth);
+        var endDate = new Date(lastOfMonth);
         endDate.setDate(endDate.getDate()+(6-lastOfMonth.getDay()));
+        
+        
+        return {
+            numWeeks: numWeeks,
+            startDate: startDate,
+            endDate: endDate
+        };
     };
 
     

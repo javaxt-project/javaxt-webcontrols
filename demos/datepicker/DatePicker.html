@@ -369,7 +369,11 @@ window.onload = function() {
             today: "blue-cell-today",
             selected: "blue-cell-selected"
         }
-    }).onClick = function(startDate, endDate){
+    }).onClick = function(date, dateRange){
+        
+        var startDate = dateRange[0];
+        var endDate = dateRange.length>1 ? dateRange[1] : null;
+        
         document.getElementById("output2").innerHTML = "You selected: " +  formatDate(startDate) + 
         (endDate ? " - " + formatDate(endDate) : "");
     };
@@ -405,7 +409,11 @@ window.onload = function() {
     datePicker.back = _next;
   
   //Process on click events
-    datePicker.onClick = function(startDate, endDate){
+    datePicker.onClick = function(date, dateRange){
+        
+        var startDate = dateRange[0];
+        var endDate = dateRange.length>1 ? dateRange[1] : null;        
+        
         document.getElementById("output3").innerHTML = "You selected: " +  formatDate(startDate) + 
         (endDate ? " - " + formatDate(endDate) : "");
     };
