@@ -305,7 +305,6 @@ javaxt.dhtml.Button = function(parent, config) {
             var x1, x2, y1, y2;
 
             window.addEventListener('touchstart', function(e){
-                e.preventDefault();
                 x1 = e.changedTouches[0].pageX;
                 y1 = e.changedTouches[0].pageY;
                 touchStartTime = new Date().getTime();
