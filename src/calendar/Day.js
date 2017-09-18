@@ -389,6 +389,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
             innerTable.cellSpacing = 0;
             innerTable.cellPadding = 0;
             innerTable.style.width = "100%";
+            innerTable.style.borderCollapse = "collapse";
             tbody = document.createElement('tbody');
             innerTable.appendChild(tbody);
             cell.appendChild(innerTable);
