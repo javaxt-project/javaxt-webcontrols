@@ -210,7 +210,6 @@ javaxt.dhtml.DatePicker = function(parent, config) {
         
       //Check whether we should render a new calendar
         if (startDate){
-            console.log(startDate + " vs " + range.startDate);
             if (startDate.getTime()===range.startDate.getTime()){
                 
               //No need to re-render the calendar. Fire the onUpdate event 
