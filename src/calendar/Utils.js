@@ -215,10 +215,16 @@ javaxt.dhtml.calendar.Utils = {
             div.style.left = rect.left + 'px';
             div.style.top = (y-yOffset) + 'px';
             div.style.cursor = 'move';
-            div.style.zIndex = getNextHighestZindex(); 
+            div.style.zIndex = getNextHighestZindex();
+            
+            
+            
+          //Add javaxt-cal-event-drag class to the event div
+            var innerDiv = getInnerDiv(div);
+            innerDiv.className += " javaxt-cal-event-drag";
         };
         
-        
+               
 
       //This timeout, started on mousedown, triggers the beginning of a hold
         var holdStarter = null;
@@ -347,6 +353,11 @@ javaxt.dhtml.calendar.Utils = {
 
         /** Used to move an event from cell to cell.  */
         var moveDiv = function(div){
+            
+            
+          //Remove javaxt-cal-event-drag class from the event div
+            var innerDiv = getInnerDiv(div);
+            innerDiv.className.replace( /(?:^|\s)javaxt-cal-event-drag(?!\S)/g , '' );
             
             
           //Compute geometry of the div
@@ -550,6 +561,22 @@ javaxt.dhtml.calendar.Utils = {
             div.orgStyle = null;
         };
         
+  
+        /** Find the inner div with class="javaxt-cal-event" */
+        var getInnerDiv = function(div){
+
+            var el = div;
+            while (el.childNodes.length>0){
+                var firstChild = el.childNodes[0];
+                
+                if (firstChild.className.match(/(?:^|\s)javaxt-cal-event(?!\S)/) ){
+                    return firstChild;
+                }
+                else{
+                    el = firstChild;
+                }
+            }
+        };
   
   
         /** Returns a list of cells that intersect the four corners of a given rectangle. */
