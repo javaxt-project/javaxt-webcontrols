@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+
+<title>Checkbox Demo</title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+
+<script type="text/javascript" src="../../src/checkbox/Checkbox.js"></script>
+
+
+<style>
+    /* Set body height to 100% so we can test vertical resize */
+    html, body {
+        height:100%;
+        margin:10px;
+    }
+    
+    
+    body, textarea, input, select, td, th {
+        font-family:helvetica,arial,verdana,sans-serif; font-size:14px;
+    }    
+
+
+    h2 {
+        font-size:18px;
+        font-weight: normal;
+        margin: 20px 0 5px 0;        
+    }
+    
+    
+        
+</style>
+
+
+
+<script type="text/javascript">
+window.onload = function() {
+
+
+  //**************************************************************************
+  //** Simple Button Demo
+  //**************************************************************************
+  
+    new javaxt.dhtml.Checkbox("checkbox1",{
+        selected: true
+    }).onClick = function(selected){
+        console.log("Selected: " + selected);
+    };
+
+
+    new javaxt.dhtml.Checkbox("checkbox2",{
+        label: "Click Me!"
+    })
+    .onClick = function(selected){
+        console.log("Selected: " + selected);
+    };
+
+
+    new javaxt.dhtml.Checkbox("checkbox3",{
+        label: "Enable",
+        disabled: true,
+        selected: true
+    });
+};
+</script>
+
+
+</head>
+<body>
+       
+<h1>Checkbox Demos</h1>
+    
+
+<h2>Simple checkbox:</h2>
+<div id="checkbox1"></div>
+
+<h2>Checkbox with label:</h2>
+<div id="checkbox2"></div>
+
+<h2>Disabled checkbox:</h2>
+<div id="checkbox3"></div>
+
+</body>
+</html>
