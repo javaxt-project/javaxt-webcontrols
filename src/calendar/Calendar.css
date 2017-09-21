@@ -43,6 +43,11 @@
     vertical-align: top;
 }
 
+/* style for the left cell in the multiday header */
+.javaxt-cal-multiday-col-spacer {
+
+}
+
 
 /**************************************************************************/
 /** Body
@@ -114,6 +119,9 @@
     border-top: 1px dotted #99BBE8;
 }
 
+.javaxt-cal-hour-last {
+    border-bottom: 1px solid #99BBE8;
+}
 
 
 /**************************************************************************/
@@ -136,6 +144,17 @@
     vertical-align: top;
 }
 
+
+/**************************************************************************/
+/** Current Time Indicator
+/**************************************************************************/
+/** Style for the horizonal line used to indicate the current time in the
+ *  day and week views.
+ */
+ 
+.javaxt-cal-current-time-indicator {
+    border-top: 1px solid #FFA1A1;
+}
 
 
 /**************************************************************************/
@@ -197,6 +216,12 @@
     border-radius: 0px;
 }
 
+
+/* Style for events as they are being dragged */
+.javaxt-cal-event-drag {
+    cursor: move; 
+    box-shadow: 0 12px 14px 0 rgba(0, 0, 0, 0.2), 0 13px 20px 0 rgba(0, 0, 0, 0.2);
+}
 
 /**************************************************************************/
 /** Alternative Colors for Events
