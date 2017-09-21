@@ -21,6 +21,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
     var bodyDiv;
     var multidayRow;
     var multidayEventsTable;
+    var currTimeDiv, getCurrentDate;
     var store;
     var rendered;
     
@@ -64,6 +65,12 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         if (isNumeric(config.eventHeight)) eventHeight = parseInt(config.eventHeight);
         if (isNumeric(config.eventPadding)) eventPadding = parseInt(config.eventPadding);
         if (isNumeric(config.eventSpacing)) eventSpacing = parseInt(config.eventSpacing);
+        
+        
+      //Specify function used to get current date
+        getCurrentDate = config.getCurrentDate==null ? 
+        getCurrentDate = function(){return new Date();} : config.getCurrentDate;
+
         
         
       //Configure renderers
@@ -143,8 +150,14 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                 }
             }
         }
-
-
+        
+        
+      //Reset variables
+        cells = {};
+        widths = {};
+        rowHeights = [];
+        
+        
 
       //Create main table
         var div, tbody, tr, td;
@@ -226,6 +239,14 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         tr.appendChild(td);
         var footer = td;
 
+
+      //Create current time indicator
+        currTimeDiv = document.createElement("div");
+        currTimeDiv.className = "javaxt-cal-current-time-indicator";
+        currTimeDiv.style.position = "absolute";
+        currTimeDiv.style.width = "100%";
+        currTimeDiv.style.display = "none";
+        bodyDiv.appendChild(currTimeDiv);
 
 
       //Populate header
@@ -331,6 +352,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         leftCol.style.verticalAlign = "top";
         row.appendChild(leftCol);
         var hours = document.createElement('table');
+        hours.style.borderCollapse = "collapse";
         hours.cellSpacing = 0;
         hours.cellPadding = 0;
         leftCol.appendChild(hours);
@@ -457,6 +479,22 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         spacerLR.style.width = scrollWidth + 'px';
 
 
+      //Update position of the current time indicator
+        currTimeDiv.style.left = lt + 'px';
+        updateCurrTime();
+        
+        
+      //Kick off scheduled task to periodically update the current time indicator
+        var epoch = getCurrentDate().getTime() / 1000;
+        var secondsSinceLastTimerTrigger = epoch % 60;
+        var secondsUntilNextTimerTrigger = 60 - secondsSinceLastTimerTrigger;
+        setTimeout(function() {
+            setInterval(updateCurrTime, 60*1000);
+            updateCurrTime();
+        }, secondsUntilNextTimerTrigger*1000);
+        
+        
+
       //Scroll to start of workday
         me.scrollTo(6.5);
 
@@ -468,7 +506,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         }
     };
     
-    
+      
   //**************************************************************************
   //** createColumnHeader
   //**************************************************************************
@@ -551,7 +589,35 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         return div;
     };
     
-        
+
+  //**************************************************************************
+  //** updateCurrTime
+  //**************************************************************************
+  /** Used to update the position of the current time indicator.
+   */
+    var updateCurrTime = function(){
+
+        var date = getCurrentDate();
+        var cellID = (date.getMonth()+1) + "-" + date.getDate() + "-" + date.getFullYear();
+        var cell = cells[cellID];
+        if (cell){
+            
+            var hours = date.getHours();
+            var h1 = getVerticalOffset(hours, cell);
+            var h2 = getVerticalOffset(hours+1, cell);
+            
+            var pixelsPerMinute = (h2-h1)/60;
+            var h = h1+(date.getMinutes()*pixelsPerMinute);
+            
+            currTimeDiv.style.display = null;
+            currTimeDiv.style.top = h + "px";
+        }
+        else{
+            currTimeDiv.style.display = "none";
+        }
+    };
+
+
   //**************************************************************************
   //** scrollTo
   //**************************************************************************
@@ -1207,10 +1273,10 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
       //browsers interpret the cellpadding and cellspacing attributes. 
         if (isIE) {
             td.style.paddingTop = (eventSpacing/2) + "px";
-            td.style.paddingBottom = eventSpacing+1 + "px";
+            td.style.paddingBottom = (eventSpacing+1) + "px";
         }
         if (isFirefox){
-            td.style.paddingBottom = eventSpacing + "px";
+            td.style.paddingBottom = (((eventSpacing/2)+1)*2) + "px";
         }
 
 
@@ -1372,6 +1438,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
             var tr = document.createElement("tr");
             multidayEventsTable.appendChild(tr);
             var td = document.createElement("td");
+            td.className = "javaxt-cal-multiday-col-spacer";
             tr.appendChild(td);
 
 
@@ -1450,9 +1517,13 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
       //Update table height
         var numMultiDayEvents = multidayEventsTable.childNodes.length-1;
         var h = numMultiDayEvents*(eventHeight+eventSpacing);
-        h = (h+(eventSpacing));
-        multidayEventsTable.parentNode.parentNode.parentNode.style.height =  h + "px";
+        h = (h+(eventSpacing*2));
+        var multidayEventsDiv = multidayEventsTable.parentNode.parentNode.parentNode;
+        multidayEventsDiv.style.height =  h + "px";
+
         
+
+
       //Check whether the columns are aligned. For some browsers (e.g. Firefox),
       //the vertical scroll bar doesn't show up until the overflow container 
       //reaches a certain height. Without the scroll bar, the multiday event 
@@ -1467,11 +1538,19 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         }
         
       //Update the height of the vertical scroll bar until it becomes visible. 
+      //This should work assuming the multidayEventsTable and the header
+       var orgHeight = h;
         while (h1.offsetWidth>c1.offsetWidth){
             if (h<scrollWidth*2) h = scrollWidth*2;
             else h++;
-            multidayEventsTable.parentNode.parentNode.parentNode.style.height =  h + "px";
-            if (h===100) break; //<--safety release!
+            multidayEventsDiv.style.height =  h + "px";
+            
+          //If the widths don't align after growing to 100px in height, then
+          //there's something wrong - possibly a css style issue with borders.
+            if (h===100){
+                multidayEventsDiv.style.height = orgHeight + "px";
+                break;
+            }
         }
 
     };
@@ -1509,7 +1588,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   //** setDate
   //**************************************************************************
     this.setDate = function(d){
-        if (d==null) d = new Date(); //null date is sometimes passed in from the constructor
+        if (d==null) d = getCurrentDate(); //null date is sometimes passed in from the constructor
 
 
         if (date!=null){
