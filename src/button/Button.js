@@ -66,7 +66,6 @@ javaxt.dhtml.Button = function(parent, config) {
             arrow: {
 
             },
-
             
             select: {
                 background: "#007FFF",
@@ -250,7 +249,7 @@ javaxt.dhtml.Button = function(parent, config) {
             td.appendChild(icon);
         }
         
-        
+
         
       //On most browsers (not Firefox), if the left or right columns has a width, 
       //then the button display goes from "inline-block" to 100%. As a workaround
@@ -260,6 +259,7 @@ javaxt.dhtml.Button = function(parent, config) {
         table.cellSpacing = 0;
         table.cellPadding = 0;
         table.style.width = "100%";
+        table.style.height = "100%";
         table.style.fontFamily = "inherit";
         table.style.textAlign = "inherit";
         table.style.color = "inherit";
@@ -350,6 +350,12 @@ javaxt.dhtml.Button = function(parent, config) {
             addStyle(div, "select");
             addStyle(icon, "iconSelect");
             addStyle(arrow, "arrowSelect");
+            
+            if (menu){ 
+                me.toggle();
+                //TODO: Add mouseup events to buttons in the menu
+            }
+            
             return false;
         };
         
@@ -360,7 +366,12 @@ javaxt.dhtml.Button = function(parent, config) {
             
 
             if (config.toggle===true){
-                me.toggle();
+                if (menu){
+                    //Do nothing - button is toggled on mouse down...
+                }
+                else{
+                    me.toggle();
+                }
             }
             else{
                 setStyle(mainDiv,"button");
@@ -495,6 +506,9 @@ javaxt.dhtml.Button = function(parent, config) {
     this.select = function(){
         if (mainDiv.selected===true) return;
         mainDiv.selected = true;
+        setStyle(mainDiv,"button");
+        setStyle(icon,"icon");
+        setStyle(arrow,"arrow");
         addStyle(mainDiv,"select");
         addStyle(icon,"iconSelect");
         addStyle(arrow,"arrowSelect");
