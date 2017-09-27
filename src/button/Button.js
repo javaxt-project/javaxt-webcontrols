@@ -209,6 +209,7 @@ javaxt.dhtml.Button = function(parent, config) {
         var tableDiv = document.createElement('div');
         tableDiv.style.display = "table";
         if (config.width) tableDiv.style.width = outerDiv.style.width;
+        tableDiv.style.height = "100%";
         outerDiv.appendChild(tableDiv);
         tableDiv.appendChild(mainDiv);
 
