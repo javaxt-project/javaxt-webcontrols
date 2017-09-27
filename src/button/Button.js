@@ -162,8 +162,8 @@ javaxt.dhtml.Button = function(parent, config) {
         }
         
         
-        
-      //Create container
+
+      //Create outer div used to hold the button, mask, and menu
         var outerDiv = document.createElement('div');
         outerDiv.style.display = config.display;
         if (config.width){
@@ -187,15 +187,49 @@ javaxt.dhtml.Button = function(parent, config) {
         me.el = outerDiv;
         
         
-        
       //Create main div used to represent the button
         mainDiv = document.createElement('div');
+        mainDiv.setAttribute("desc", "button");
         addStyle(mainDiv, "button");
-        outerDiv.appendChild(mainDiv);
-        addEventHandlers(mainDiv);
+        addEventHandlers(mainDiv);          
         
         
-      //Create table with 3 columns
+      //The button is implemented using a simple HTML table with 3 columns. The
+      //left and right columns are for icons and the center column is for the
+      //button label. The width of the center column is set to 100% and the 
+      //width of the left and right columns are defined by the "icon" and
+      //"arrow" styles. Unfortunately, some browsers seem to have issues 
+      //rendering the table correctly inside of a div when the outerDiv's 
+      //display style set to "inline-block". For example, Mobile Safari will 
+      //completely ignore the "inline-block" style and stretch the button to 
+      //100% of the available width. In Chrome, if the left or right columns has 
+      //a width, the "inline-block" style is ignored and the button is stretched 
+      //to 100% of the available width. As a workaround, it looks like we can 
+      //wrap the button div in another div with the display style set to "table".
+        var tableDiv = document.createElement('div');
+        tableDiv.style.display = "table";
+        if (config.width) tableDiv.style.width = outerDiv.style.width;
+        outerDiv.appendChild(tableDiv);
+        tableDiv.appendChild(mainDiv);
+
+        
+        
+      
+        
+        
+      //Create button elements
+        icon = document.createElement("div");
+        setStyle(icon, "icon");
+
+        arrow = document.createElement("div");
+        setStyle(arrow, "arrow");
+            
+        label = document.createElement("div");
+        setStyle(label, "label");
+        if (config.label) label.innerHTML = config.label;
+        
+        
+        
         var table = document.createElement('table');
         table.cellSpacing = 0;
         table.cellPadding = 0;
@@ -210,8 +244,8 @@ javaxt.dhtml.Button = function(parent, config) {
         var tr = document.createElement('tr');
         tbody.appendChild(tr);
         var td;
-        
-        
+
+
         td = document.createElement('td');
         tr.appendChild(td);
         if (iconAlignment==="left"){
@@ -250,44 +284,21 @@ javaxt.dhtml.Button = function(parent, config) {
         }
         
 
-        
-      //On most browsers (not Firefox), if the left or right columns has a width, 
-      //then the button display goes from "inline-block" to 100%. As a workaround
-      //we'll wrap the table in another table.
-        var innerTable = table;
-        table = document.createElement('table');
-        table.cellSpacing = 0;
-        table.cellPadding = 0;
-        table.style.width = "100%";
-        table.style.height = "100%";
-        table.style.fontFamily = "inherit";
-        table.style.textAlign = "inherit";
-        table.style.color = "inherit";
-        table.style.borderCollapse = "collapse";
-        tbody = document.createElement('tbody');
-        table.appendChild(tbody);
-        var tr = document.createElement('tr');
-        tbody.appendChild(tr);
-        var td = document.createElement('td');
-        td.appendChild(innerTable);
-        tr.appendChild(td);
-        
-        
-        
       //Add table to the main div
         mainDiv.appendChild(table);
-        
+
 
 
       //Create menu panel as needed
         if (config.menu===true){
             config.toggle = true;
             menu = document.createElement('div');
+            menu.setAttribute("desc", "menu");
             setStyle(menu, "menu");
             menu.style.position = "absolute";
             menu.style.visibility = "hidden";
             outerDiv.appendChild(menu);
-          
+
             
             var hideMenu = function(e){
                 if (!mainDiv.contains(e.target)){
@@ -345,20 +356,6 @@ javaxt.dhtml.Button = function(parent, config) {
         div.unselectable="on";
         div.onselectstart=function(){return false;};
         
-        
-        div.onmousedown=function(){
-            addStyle(div, "select");
-            addStyle(icon, "iconSelect");
-            addStyle(arrow, "arrowSelect");
-            
-            if (menu){ 
-                me.toggle();
-                //TODO: Add mouseup events to buttons in the menu
-            }
-            
-            return false;
-        };
-        
 
       //Create onclick function
         var onclick = function(){
@@ -367,7 +364,13 @@ javaxt.dhtml.Button = function(parent, config) {
 
             if (config.toggle===true){
                 if (menu){
-                    //Do nothing - button is toggled on mouse down...
+                    
+                    if (isTouch){
+                        me.toggle();
+                    }
+                    else{
+                        //Do nothing - button is toggled on mouse down...
+                    }
                 }
                 else{
                     me.toggle();
@@ -420,32 +423,52 @@ javaxt.dhtml.Button = function(parent, config) {
                 (duration > 500 && distance <= 10)) {  //Long press
                 onclick();
             }
+            else{
+                setStyle(div, "button");
+                setStyle(icon, "icon");
+                setStyle(arrow, "arrow");
+            }
         };
 
 
 
       //Logic to process mouse events
-        div.onclick = function(){
-            if (!isTouch) onclick();
-        };
-        div.onmouseover = function(){
-            
-            if (div.selected!==true){
-                addStyle(div, "hover");
-                addStyle(icon, "iconHover");
-                addStyle(arrow, "arrowHover");
-            }
+        if (!isTouch){
+            div.onmousedown=function(){
 
-        };
-        div.onmouseout = function(){
+                addStyle(div, "select");
+                addStyle(icon, "iconSelect");
+                addStyle(arrow, "arrowSelect");
 
-            if (div.selected!==true){
-                setStyle(div, "button");
-                setStyle(icon, "icon");
-                setStyle(arrow, "arrow");
-            }
-            
-        };
+                if (menu){ 
+                    me.toggle();
+                    //TODO: Add mouseup events to buttons in the menu
+                }
+
+                return false;
+            };
+            div.onclick = function(){
+                onclick();
+            };
+            div.onmouseover = function(){
+
+                if (div.selected!==true){
+                    addStyle(div, "hover");
+                    addStyle(icon, "iconHover");
+                    addStyle(arrow, "arrowHover");
+                }
+
+            };
+            div.onmouseout = function(){
+
+                if (div.selected!==true){
+                    setStyle(div, "button");
+                    setStyle(icon, "icon");
+                    setStyle(arrow, "arrow");
+                }
+
+            };
+        }
     };
     
 
@@ -488,6 +511,7 @@ javaxt.dhtml.Button = function(parent, config) {
         else{
             
             mask = document.createElement('div');
+            mask.setAttribute("desc", "mask");
             setStyle(mask, "disable");
             mask.style.position = "absolute";
             mask.style.zIndex = "1";
