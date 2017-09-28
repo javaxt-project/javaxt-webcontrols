@@ -32,9 +32,13 @@ javaxt.dhtml.calendar.View = function(view, config) {
 
     this.show = function(){};
     this.hide = function(){};
+    this.showFooter = function(){};
+    this.hideFooter = function(){};
     this.getDOM = function(){};
 
-    
+
+    this.enableTouch = function(){};
+    this.disableTouch = function(){};
 
 
   //**************************************************************************
