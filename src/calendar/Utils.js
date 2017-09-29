@@ -15,7 +15,7 @@ javaxt.dhtml.calendar.Utils = {
   //**************************************************************************
   /** Returns the number of days between 2 dates. Returns a decimal value.
    */
-    getDaysBetween: function(startDate, endDate){
+    getDaysBetween : function(startDate, endDate){
         
         function treatAsUTC(date) {
             var result = new Date(date);
@@ -116,29 +116,6 @@ javaxt.dhtml.calendar.Utils = {
 
 
   //**************************************************************************
-  //** getNextHighestZindex
-  //**************************************************************************
-  /** Private method used to get the next highest z index. 
-   *  http://greengeckodesign.com/blog/2007/07/get-highest-z-index-in-javascript.html
-   */
-    getNextHighestZindex : function(obj){
-       var highestIndex = 0;
-       var currentIndex = 0;
-       var elArray = Array();
-       if(obj){elArray = obj.getElementsByTagName('*');}else{elArray = document.getElementsByTagName('*');}
-       for(var i=0; i < elArray.length; i++){
-          if (elArray[i].currentStyle){
-             currentIndex = parseFloat(elArray[i].currentStyle['zIndex']);
-          }else if(window.getComputedStyle){
-             currentIndex = parseFloat(document.defaultView.getComputedStyle(elArray[i],null).getPropertyValue('z-index'));
-          }
-          if(!isNaN(currentIndex) && currentIndex > highestIndex){highestIndex = currentIndex;}
-       }
-       return(highestIndex+1);
-    },
-
-
-  //**************************************************************************
   //** initDrag
   //**************************************************************************
   /** Used to enable/initialize event dragging. Drag events are initiated 
@@ -191,13 +168,16 @@ javaxt.dhtml.calendar.Utils = {
 
 
       //MouseUp
-        var onMouseUp = function (e){
+        var onMouseUp = function(e){
             
             
           //Remove javaxt-cal-event-drag class from the event div
             var innerDiv = getInnerDiv(div);
             innerDiv.className = innerDiv.className.replace( /(?:^|\s)javaxt-cal-event-drag(?!\S)/g , '' );
 
+
+          //Remove z-index
+            div.style.zIndex = null;
             
             
           //If the mouse is released immediately (i.e., a click), before the
@@ -290,6 +270,10 @@ javaxt.dhtml.calendar.Utils = {
             var innerDiv = getInnerDiv(div);
             innerDiv.className = innerDiv.className.replace( /(?:^|\s)javaxt-cal-event-drag(?!\S)/g , '' );
             
+
+          //Remove z-index
+            div.style.zIndex = null;
+
 
           //Remove "touchmove" event listener
             if (document.removeEventListener) { // For all major browsers, except IE 8 and earlier
@@ -771,8 +755,27 @@ javaxt.dhtml.calendar.Utils = {
         };
         
         
-        var getNextHighestZindex = javaxt.dhtml.calendar.Utils.getNextHighestZindex;
+
         var _getRect = javaxt.dhtml.calendar.Utils.getRect;   
+  
+  
+  
+
+        var getNextHighestZindex = function(obj){
+           var highestIndex = 0;
+           var currentIndex = 0;
+           var elArray = Array();
+           if(obj){elArray = obj.getElementsByTagName('*');}else{elArray = document.getElementsByTagName('*');}
+           for(var i=0; i < elArray.length; i++){
+              if (elArray[i].currentStyle){
+                 currentIndex = parseFloat(elArray[i].currentStyle['zIndex']);
+              }else if(window.getComputedStyle){
+                 currentIndex = parseFloat(document.defaultView.getComputedStyle(elArray[i],null).getPropertyValue('z-index'));
+              }
+              if(!isNaN(currentIndex) && currentIndex > highestIndex){highestIndex = currentIndex;}
+           }
+           return(highestIndex+1);
+        };
   
     }
 };
