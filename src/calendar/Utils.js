@@ -190,7 +190,7 @@ javaxt.dhtml.calendar.Utils = {
                 if (listener!=null){
                     var callback = listener.callback;
                     var scope = listener.scope;
-                    callback.apply(scope, [div.event, e]);
+                    callback.apply(scope, [div.event, view, e]);
                 }
             }
             
@@ -299,7 +299,7 @@ javaxt.dhtml.calendar.Utils = {
                 if (listener!=null){
                     var callback = listener.callback;
                     var scope = listener.scope;
-                    callback.apply(scope, [div.event, e]);
+                    callback.apply(scope, [div.event, view, e]);
                 }
             }
             
@@ -539,7 +539,7 @@ javaxt.dhtml.calendar.Utils = {
                 
                   //Call the aftermove callback
                     listener = view.getListener('aftermove');
-                    if (listener!=null) listener.callback.apply(listener.scope, [event]);                
+                    if (listener!=null) listener.callback.apply(listener.scope, [event, view]);      
                 }
                 else{
                     returnDiv(div);
@@ -551,7 +551,7 @@ javaxt.dhtml.calendar.Utils = {
 
           //Call the beforemove callback
             var listener = view.getListener('beforemove');
-            if (listener!=null) listener.callback.apply(listener.scope, [event, startDate, endDate, fn]);
+            if (listener!=null) listener.callback.apply(listener.scope, [event, new Date(startDate), new Date(endDate), fn]);
             else fn(true);
 
         };

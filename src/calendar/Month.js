@@ -943,7 +943,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
                 if (listener!=null){
                     var callback = listener.callback;
                     var scope = listener.scope;
-                    callback.apply(scope, [this.event, e]);
+                    callback.apply(scope, [this.event, me, e]);
                 }  
             };            
         }
@@ -1105,7 +1105,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
                 if (listener!=null){
                     var callback = listener.callback;
                     var scope = listener.scope;
-                    callback.apply(scope, [this.event, e]);
+                    callback.apply(scope, [this.event, me, e]);
                 }  
             };
             
