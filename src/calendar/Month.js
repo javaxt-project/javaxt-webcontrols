@@ -11,28 +11,36 @@ if(!javaxt.dhtml.calendar) javaxt.dhtml.calendar={};
  ******************************************************************************/
 
 javaxt.dhtml.calendar.Month = function(parent, config) {
-
     this.className = "javaxt.dhtml.calendar.Month";
 
     var me = this;
+    
+  //DOM elements
     var table;
-    var date;
+    
+    
+  //Class variables
     var startDate, endDate;
     var numWeeks;
-    var days = javaxt.dhtml.calendar.Utils.dayNames;
-
     var cells = {};
     var multiDayCols = {};
     var singleDayCols = {};
     var mutiDayEventDivs = [];
-    
-    var eventHeight = 17; 
-    var eventPadding = 2;
-    var eventSpacing = 4;
-
-    var store;
+    var touchEnabled = true;
     var rendered;
+    
+    
+  //Config options
+    var date;
+    var days = javaxt.dhtml.calendar.Utils.dayNames;
+    var store;
+    var eventHeight = 17; 
+    var eventPadding = 2; //padding with a cell
+    var eventSpacing = 2; //vertical spacing between events
+    var holdDelay = 500;
     var debug = false;
+
+
 
   //**************************************************************************
   //** Constructor
@@ -98,6 +106,9 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
     };
 
 
+  //**************************************************************************
+  //** hasHours
+  //**************************************************************************
     this.hasHours = function(){
         return false;
     };
@@ -119,6 +130,23 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
         var el = me.getDOM();
         parent.removeChild(el);
     };
+    
+    
+  //**************************************************************************
+  //** enableTouch
+  //**************************************************************************
+    this.enableTouch = function(){
+        touchEnabled = true;
+    };
+    
+    
+  //**************************************************************************
+  //** disableTouch
+  //**************************************************************************
+    this.disableTouch = function(){
+        touchEnabled = false;
+    };
+    
     
 
   //**************************************************************************
@@ -144,7 +172,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
         var tbody = createTable();
         table = tbody.parentNode;
         table.className = "javaxt-noselect";
-        table.style.cursor = "default";
+        table.style.cursor = "default";        
         var tr = document.createElement('tr');
         tr.setAttribute("desc", "header-row");
         tr.className = "javaxt-cal-header";
@@ -159,7 +187,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
         var body = document.createElement('td');
         body.style.width = "100%";
         body.style.height = "100%";
-        tr.appendChild(body);        
+        tr.appendChild(body);
 
 
       //Create header table
@@ -276,12 +304,13 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
                         
                         
                       //Add event listener
-                        td.date = new Date(d); 
+                        td.date = new Date(d);
+                        var onclick;
                         if (x==1){
-                            td.onclick = function(e){
+                            onclick = function(e, el){
                                 
                                 var clickedEvent = false;
-                                var div = this.childNodes[0];
+                                var div = el.childNodes[0];
                                 if (div.childNodes.length>0){
                                     var firstEvent = _getRect(div.childNodes[0]);
                                     var lastEvent = div.childNodes.length==1 ? 
@@ -293,7 +322,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
                                 
                                 
                                 if (!clickedEvent){
-                                    var _date = new Date(this.date);
+                                    var _date = new Date(el.date);
                                     var listener = me.getListener('cellclick');
                                     if (listener!=null){
                                         var callback = listener.callback;
@@ -304,8 +333,8 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
                             };
                         }
                         else{
-                            td.onclick = function(e){
-                                var _date = new Date(this.date);
+                            onclick = function(e, el){
+                                var _date = new Date(el.date);
                                 var listener = me.getListener('cellclick');
                                 if (listener!=null){
                                     var callback = listener.callback;
@@ -314,6 +343,29 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
                                 }
                             };
                         }
+                        td.onclick = function(e) {
+                            onclick(e, this);
+                        };
+                        
+                        
+                        td.ontouchstart = function(e) {
+
+                          //Disable select/highlight behaviour
+                            e.preventDefault();
+                            
+                          
+                          //Call onclick function
+                            if (touchEnabled){
+                                var touch = e.touches[0];
+                                var x = touch.pageX;
+                                var y = touch.pageY;
+
+                                onclick({
+                                    clientX: x,
+                                    clientY: y
+                                }, this);
+                            }
+                        };
                         
                         
 
@@ -856,13 +908,13 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
         
       //Create div used to render the event
         var div = event.createDiv(me);
-        
+     
         
       //Wrap the div in a bunch of divs for overflow purposes
         var wrapper = document.createElement('div');
         wrapper.style.width = "100%";
         wrapper.style.height = eventHeight + "px";
-        wrapper.style.marginTop = eventSpacing + "px";  //Vertical padding
+        wrapper.style.marginTop = (eventSpacing*2) + "px";  //Vertical padding
         wrapper.style.position = "relative";
         wrapper.style.cursor = 'pointer';
         wrapper.event = event;    
@@ -877,14 +929,14 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
 
         var innerDiv = document.createElement('div');
         innerDiv.style.height = "100%";
-        innerDiv.style.padding = "0px " + eventPadding + "px"; //Horizontal padding
-        innerDiv.style.position = "relative";            
+        innerDiv.style.padding = "0px " + eventPadding + "px"; //Horizontal padding 
+        innerDiv.style.position = "relative";
         outerDiv.appendChild(innerDiv);
         innerDiv.appendChild(div);
 
 
       //Initialize mouse events
-        if (event.isEditable()) initDrag(wrapper, me);
+        if (event.isEditable()) initDrag(wrapper, me, holdDelay);
         else{
             wrapper.onclick = function(e){
                 var listener = me.getListener('eventclick');
@@ -1045,7 +1097,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
             wrapper.style.width = "100%";
             wrapper.style.height = eventHeight + "px"; //"100%";
             wrapper.style.position = "relative";
-            if (k>1) wrapper.style.marginTop = eventSpacing + "px";  //Vertical padding
+            if (k>1) wrapper.style.marginTop = (eventSpacing*2) + "px";  //Vertical padding
             wrapper.appendChild(outerDiv);
             wrapper.event = event;
             wrapper.onclick = function(e){
@@ -1112,7 +1164,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
                 }
                 else{
                     y1 = _getRect(tr.parentNode.childNodes[0]).top;
-                    offset = ((y2-y1)+(eventSpacing-1)); //-1px for spacer row?
+                    offset = ((y2-y1)+((eventSpacing*2)-1)); //-1px for spacer row?
                 }
                 
 
