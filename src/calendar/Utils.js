@@ -141,22 +141,214 @@ javaxt.dhtml.calendar.Utils = {
   //**************************************************************************
   //** initDrag
   //**************************************************************************
-  /** Used to enable/initialize event dragging. 
+  /** Used to enable/initialize event dragging. Drag events are initiated 
+   *  after a predefined holdDelay.
+   *  @param holdDelay Number of milliseconds to wait before recognizing a hold
    */
-    initDrag : function(div, view){
-
-
-        var getNextHighestZindex = javaxt.dhtml.calendar.Utils.getNextHighestZindex;
-        var _getRect = javaxt.dhtml.calendar.Utils.getRect;        
+    initDrag : function(div, view, holdDelay){
+     
                 
+      //This timeout, started on mousedown, triggers the beginning of a hold
+        var holdStarter = null;
 
         
+      //This flag indicates the user is currently holding the mouse down
+        var holdActive = false;
+
+       
+      //OnClick
+        //div.onclick = NOTHING!! not using onclick at all - onmousedown and onmouseup take care of everything
+
+   
+      //MouseDown
+        div.onmousedown = function(e){
+
+            
+          //Set the holdStarter and wait for the predetermined delay, and then begin a hold
+            holdStarter = setTimeout(function() {
+                holdStarter = null;
+                holdActive = true;
+
+
+              //Initiate drag
+                startDrag(e);
+                
+                
+              //Add event listeners
+                if (document.addEventListener) { // For all major browsers, except IE 8 and earlier
+                    document.addEventListener("mousemove", onMouseMove);
+                    document.addEventListener("mouseup", onMouseUp);
+                } 
+                else if (document.attachEvent) { // For IE 8 and earlier versions
+                    document.attachEvent("onmousemove", onMouseMove);
+                    document.attachEvent("onmouseup", onMouseUp);
+                }             
+
+            }, holdDelay);
+            
+        };
+
+
+
+      //MouseUp
+        var onMouseUp = function (e){
+            
+            
+          //Remove javaxt-cal-event-drag class from the event div
+            var innerDiv = getInnerDiv(div);
+            innerDiv.className = innerDiv.className.replace( /(?:^|\s)javaxt-cal-event-drag(?!\S)/g , '' );
+
+            
+            
+          //If the mouse is released immediately (i.e., a click), before the
+          //holdStarter runs, then cancel the holdStarter and do the click
+            if (holdStarter) {
+                clearTimeout(holdStarter);
+                
+                
+                var listener = view.getListener('eventclick');
+                if (listener!=null){
+                    var callback = listener.callback;
+                    var scope = listener.scope;
+                    callback.apply(scope, [div.event, e]);
+                }
+            }
+            
+          //Otherwise, if the mouse was being held, end the hold
+            else if (holdActive) {
+                holdActive = false;
+
+              //Remove event listeners
+                if (document.removeEventListener) { // For all major browsers, except IE 8 and earlier
+                    document.removeEventListener("mousemove", onMouseMove);
+                    document.removeEventListener("mouseup", onMouseUp);
+                } else if (document.detachEvent) { // For IE 8 and earlier versions
+                    document.detachEvent("onmousemove", onMouseMove);
+                    document.detachEvent("onmouseup", onMouseUp);
+                }
+                
+              //Update cursor
+                div.style.cursor = 'pointer';
+                
+              //Move div
+                moveDiv(div);
+                
+              //Remove the "javaxt-noselect" class
+                var body = document.getElementsByTagName('body')[0];
+                body.className = body.className.replace( /(?:^|\s)javaxt-noselect(?!\S)/g , '' );
+            }
+        };
+
+
+        div.onmouseup = onMouseUp;
+
         
+
+      //Start touch (similar to "onmousedown")
+        div.ontouchstart = function(e) {
+
+            e.preventDefault();
+            var touch = e.touches[0];
+            var x = touch.pageX;
+            var y = touch.pageY;
+
+            
+          //Disable scrolling in the view
+            view.disableTouch();
+
+            
+            
+          //Set the holdStarter and wait for the holdDelay before starting the drag
+            holdStarter = setTimeout(function() {
+                holdStarter = null;
+                holdActive = true;
+
+              //Initiate drag
+                startDrag({
+                    clientX: x,
+                    clientY: y
+                });
+                
+                
+              //Add "touchmove" event listener
+                if (document.removeEventListener) { // For all major browsers, except IE 8 and earlier
+                    div.addEventListener("touchmove", onTouchMove); //,false?
+                }
+                else if (document.detachEvent) {
+                    div.attachEvent("ontouchmove", onTouchMove);
+                }
+                
+                
+            }, holdDelay);            
+        };
+
+      //End touch (similar to "onmouseup")
+        div.ontouchend = function(e) {
+
+
+          //Remove javaxt-cal-event-drag class from the event div
+            var innerDiv = getInnerDiv(div);
+            innerDiv.className = innerDiv.className.replace( /(?:^|\s)javaxt-cal-event-drag(?!\S)/g , '' );
+            
+
+          //Remove "touchmove" event listener
+            if (document.removeEventListener) { // For all major browsers, except IE 8 and earlier
+                div.removeEventListener("touchmove", onTouchMove);
+            }
+            else if (document.detachEvent) {
+                div.detachEvent("ontouchmove", onTouchMove);
+            }
+
+
+          //Enable scrolling in the view
+            view.enableTouch();
+
+
+          //If the mouse is released immediately (i.e., a click), before the
+          //holdStarter runs, then cancel the holdStarter and do the click
+            if (holdStarter) {
+                clearTimeout(holdStarter);
+                
+              //run click-only operation here
+                //console.log("Click!");
+                var listener = view.getListener('eventclick');
+                if (listener!=null){
+                    var callback = listener.callback;
+                    var scope = listener.scope;
+                    callback.apply(scope, [div.event, e]);
+                }
+            }
+            
+          //Otherwise, if the mouse was being held, end the hold
+            else if (holdActive) {
+                holdActive = false;
+                moveDiv(div);
+            }
+           
+        };
+        
+
+
+
+
+                
         var onMouseMove = function(e){
             var x = e.clientX;
             var y = e.clientY;
             div.style.left = (x-div.xOffset) + 'px';
             div.style.top = (y-div.yOffset) + 'px';
+        };
+        
+        var onTouchMove = function(e) {
+            e.preventDefault();
+            var touch = e.touches[0];
+            var x = touch.pageX;
+            var y = touch.pageY;
+
+            onMouseMove({
+                clientX: x,
+                clientY: y
+            });
         };
         
         
@@ -224,140 +416,11 @@ javaxt.dhtml.calendar.Utils = {
             innerDiv.className += " javaxt-cal-event-drag";
         };
         
-               
-
-      //This timeout, started on mousedown, triggers the beginning of a hold
-        var holdStarter = null;
-
-      //This is how many milliseconds to wait before recognizing a hold
-        var holdDelay = 500;
-
-      //This flag indicates the user is currently holding the mouse down
-        var holdActive = false;
-
-
-      //OnClick
-        //div.onclick = NOTHING!! not using onclick at all - onmousedown and onmouseup take care of everything
-
-
-      //MouseDown
-        div.onmousedown = function(e){
-            
-            
-            // Do not take any immediate action - just set the holdStarter
-            // to wait for the predetermined delay, and then begin a hold
-            holdStarter = setTimeout(function() {
-                holdStarter = null;
-                holdActive = true;
-
-              //begin hold-only operation here, if desired
-                console.log("Init Drag!");
-                
-                startDrag(e);
-                if (document.addEventListener) { // For all major browsers, except IE 8 and earlier
-                    document.addEventListener("mousemove", onMouseMove);
-                    document.addEventListener("mouseup", onMouseUp);
-                } 
-                else if (document.attachEvent) { // For IE 8 and earlier versions
-                    document.attachEvent("onmousemove", onMouseMove);
-                    document.addEventListener("onmouseup", onMouseUp);
-                }             
-
-            }, holdDelay);
-            
-        };
-
-
-
-      //MouseUp
-        var onMouseUp = function (e){
-
-          //If the mouse is released immediately (i.e., a click), before the
-          //holdStarter runs, then cancel the holdStarter and do the click
-            if (holdStarter) {
-                clearTimeout(holdStarter);
-                
-              //run click-only operation here
-                //console.log("Click!");
-                var listener = view.getListener('eventclick');
-                if (listener!=null){
-                    var callback = listener.callback;
-                    var scope = listener.scope;
-                    callback.apply(scope, [div.event, e]);
-                }
-            }
-            
-          //Otherwise, if the mouse was being held, end the hold
-            else if (holdActive) {
-                holdActive = false;
-
-              //end hold-only operation here, if desired
-                //console.log("End Drag!");
-                if (document.removeEventListener) { // For all major browsers, except IE 8 and earlier
-                    document.removeEventListener("mousemove", onMouseMove);
-                    document.removeEventListener("mouseup", onMouseUp);
-                } else if (document.detachEvent) { // For IE 8 and earlier versions
-                    document.detachEvent("onmousemove", onMouseMove);
-                    document.detachEvent("onmouseup", onMouseUp);
-                }
-                div.style.cursor = 'pointer';
-                moveDiv(div);
-                
-                var body = document.getElementsByTagName('body')[0];
-                body.className.replace( /(?:^|\s)javaxt-noselect(?!\S)/g , '' );
-            }
-
-        };
-
-
-        div.onmouseup = onMouseUp;
-
-
-
-//        //The rest of this function is only applicable to touch devices
-//        var xOffset = 0;
-//        var yOffset = 0;
-//
-//        div.addEventListener('touchstart', function(event) {
-//
-//            var touch = event.touches[0];
-//            var x = touch.pageX;
-//            var y = touch.pageY;
-//
-//            startDrag();
-//
-//            xOffset = x-parseInt(div.style.left);
-//            yOffset = y-parseInt(div.style.top);
-//
-//        }, false);
-//
-//        div.addEventListener('touchmove', function(event) {
-//            event.preventDefault();
-//            var touch = event.touches[0];
-//
-//            var x = touch.pageX-xOffset;
-//            var y = touch.pageY-yOffset;
-//
-//            this.style.left = x + 'px';
-//            this.style.top = y + 'px';
-//
-//        }, false);
-//
-//        div.addEventListener('touchend', function(e) {
-//            moveDiv(div);
-//            xOffset = 0;
-//            yOffset = 0;
-//        }, false);
 
 
 
         /** Used to move an event from cell to cell.  */
         var moveDiv = function(div){
-            
-            
-          //Remove javaxt-cal-event-drag class from the event div
-            var innerDiv = getInnerDiv(div);
-            innerDiv.className.replace( /(?:^|\s)javaxt-cal-event-drag(?!\S)/g , '' );
             
             
           //Compute geometry of the div
@@ -463,6 +526,9 @@ javaxt.dhtml.calendar.Utils = {
             
         };
         
+        
+        
+
         
         /** Used to update the start/end date of an event and render it in a given cell. */
         var moveEvent = function(event, startDate, endDate){
@@ -703,6 +769,10 @@ javaxt.dhtml.calendar.Utils = {
             endDate.setHours(endDate.getHours()+h);
             endDate.setMinutes(endDate.getMinutes()+m);
         };
+        
+        
+        var getNextHighestZindex = javaxt.dhtml.calendar.Utils.getNextHighestZindex;
+        var _getRect = javaxt.dhtml.calendar.Utils.getRect;   
   
     }
 };
