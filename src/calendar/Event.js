@@ -107,29 +107,49 @@ javaxt.dhtml.calendar.Event = function(config) {
 
     this.toJson = function(){
         var json = {};
+        
+      //Add all the original attributes
+        for (var key in attr) {
+            if (attr.hasOwnProperty(key)) {
+                json[key] = attr[key];
+            }   
+        }
+        
+      //Update JSON with values retrieved from public "get" and "is" methods
         for (var key in me) {
             if (me.hasOwnProperty(key)) {
-                if (key.indexOf("get")==0){
+                
+                if (key.indexOf("get")==0 && key!="get"){
+                    
+                  //Get function
                     var fn = me[key];
-                    json[key.substring(3)] = fn.apply(me, []);
+                    
+                  //Update key
+                    key = key.substring(3,4).toLowerCase() + key.substring(4);
+                    if (key=="iD") key = "id";
+                    
+                  //Get value
+                    var val = fn.apply(me, []);
+                    if (val instanceof Date) {
+                        val = getISOString(val);
+                    }
+                    
+                  //Update JSON
+                    json[key] = val;
                 }
                 else if (key.indexOf("is")==0){
                     var fn = me[key];
-                    json[key.substring(2)] = fn.apply(me, []);
+                    key = key.substring(2,3).toLowerCase() + key.substring(3);
+                    json[key] = fn.apply(me, []);
                 }
             }
         }
-        
-        
-        
-//        for (var key in attr) {
-//            if (attr.hasOwnProperty(key)) {
-//                json[key] = attr[key];
-//            }   
-//        }
-        
+
         return json;
     };
+
+
+
 
     this.equals = function(event){
 
@@ -187,6 +207,18 @@ javaxt.dhtml.calendar.Event = function(config) {
         
         return outerDiv;
     };
+
+
+    var getISOString = function(date) {
+        function pad(n) {return n < 10 ? '0' + n : n;}
+        return date.getUTCFullYear() + '-'
+            + pad(date.getUTCMonth() + 1) + '-'
+            + pad(date.getUTCDate()) + 'T'
+            + pad(date.getUTCHours()) + ':'
+            + pad(date.getUTCMinutes()) + ':'
+            + pad(date.getUTCSeconds()) + 'Z';
+    };
+
 
     init();
 };
