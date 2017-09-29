@@ -10,38 +10,44 @@ if(!javaxt.dhtml) javaxt.dhtml={};
  ******************************************************************************/
 
 javaxt.dhtml.calendar.Day = function(parent, config) {
-
     this.className = "javaxt.dhtml.calendar.Day";
 
     var me = this;
-    var date;
-    var startDate, endDate;
-    var days = 1;
+    
+    
+  //DOM elements
     var el;
     var bodyDiv;
-    var multidayRow;
-    var multidayEventsTable;
+    var footerRow;
+    var multidayRow, multidayEventsTable;
     var currTimeDiv, getCurrentDate;
-    var store;
-    var rendered;
     
+    
+  //Class variables
+    var rendered;
+    var startDate, endDate;
     var cells = {};
     var widths = {};
     var rowHeights = [];
     var scrollWidth;
+    var scrollable = true;
     
     
+  //Config options
+    var days = 1;
+    var date;
+    var store;
     var eventHeight = 17; //Only applies to multiday events
     var eventPadding = 2;
-    var eventSpacing = 4;
+    var holdDelay = 500;
+    var debug = false;
 
-    
+
+  //Browser detection used to adjust event padding
     var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
     var isIE = window.navigator.userAgent.indexOf("MSIE ") > -1 ||
                window.navigator.userAgent.indexOf("Trident/") > -1;
 
-    
-    var debug = false;
 
 
   //**************************************************************************
@@ -64,7 +70,6 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         function isNumeric(n){ return !isNaN(parseFloat(n)) && isFinite(n); }
         if (isNumeric(config.eventHeight)) eventHeight = parseInt(config.eventHeight);
         if (isNumeric(config.eventPadding)) eventPadding = parseInt(config.eventPadding);
-        if (isNumeric(config.eventSpacing)) eventSpacing = parseInt(config.eventSpacing);
         
         
       //Specify function used to get current date
@@ -112,6 +117,9 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
     };
 
 
+  //**************************************************************************
+  //** hasHours
+  //**************************************************************************
     this.hasHours = function(){
         return true;
     };
@@ -132,6 +140,38 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         parent.removeChild(el);
     };
 
+
+  //**************************************************************************
+  //** showFooter
+  //**************************************************************************
+    this.showFooter = function(){
+        footerRow.style.display = null;
+    };
+    
+    
+  //**************************************************************************
+  //** hideFooter
+  //**************************************************************************
+    this.hideFooter = function(){
+        footerRow.style.display = "none";
+    };
+
+
+  //**************************************************************************
+  //** enableTouch
+  //**************************************************************************
+    this.enableTouch = function(){
+        scrollable = true;
+    };
+    
+    
+  //**************************************************************************
+  //** disableTouch
+  //**************************************************************************
+    this.disableTouch = function(){
+        scrollable = false;
+    };
+    
 
   //**************************************************************************
   //** renderTable
@@ -227,6 +267,14 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         bodyDiv.appendChild(div);
         bodyDiv = div;
         
+      //Add logic to enable/disable scroll. This is important for touch devices.
+        bodyDiv.addEventListener('touchstart', function(e) {
+            if (!scrollable) e.preventDefault();
+        }, false);
+        bodyDiv.addEventListener('touchmove', function(e) {
+            if (!scrollable)e.preventDefault();
+        }, false);
+        
         
       //Create footer row
         tr = document.createElement("tr");
@@ -237,8 +285,9 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         td.style.width = "100%";
         td.style.height = "inherit";
         tr.appendChild(td);
+        footerRow = tr;
         var footer = td;
-
+        
 
       //Create current time indicator
         currTimeDiv = document.createElement("div");
@@ -301,7 +350,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         tr.appendChild(td);
         var spacerLR = document.createElement('div');
         td.appendChild(spacerLR);
-
+        
 
         
       //Populate multiday div
@@ -665,8 +714,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         }
         return 0;
     };
-
-
+    
+    
   //**************************************************************************
   //** getEventStore
   //**************************************************************************
@@ -972,13 +1021,13 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   
                             
                           //Update table height
-                            var maxHeight = (multidayEventsTable.childNodes.length-1)*(eventHeight+eventSpacing);
+                            var maxHeight = (multidayEventsTable.childNodes.length-1)*(eventHeight+eventPadding);
                             if (maxHeight==0){
                                 multidayRow.style.display = "none"; 
                                 multidayRow.style.visibility = "hidden";
                             }
                             else{
-                                multidayEventsTable.parentNode.parentNode.parentNode.style.height = (maxHeight+(eventSpacing)) + "px";
+                                multidayEventsTable.parentNode.parentNode.parentNode.style.height = (maxHeight+(eventPadding)) + "px";
                             }
 
                             
@@ -1144,7 +1193,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   /** Used to render events that start and end on the same day.
    */
     var addSingleDayEvent = function(event, deferUpdates){
-        
+
         if (deferUpdates!=true) deferUpdates = false;
 
       //Find cell used to render event
@@ -1226,6 +1275,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
                     _outerDiv.style.width = _width + "%";
                     _outerDiv.style.left = "0px";
+                    updatePadding(_outerDiv);
                     if (!deferUpdates) updatePosition(_outerDiv, _event, _width);
                 }
             }
@@ -1237,6 +1287,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         var outerDiv = document.createElement('div');
         outerDiv.style.width = width + "%";
         outerDiv.style.left = "0px";
+        updatePadding(outerDiv);
         outerDiv.style.position = "absolute";
         var startTime = event.getStartDate().getHours() + (event.getStartDate().getMinutes()/60);
         var endTime = event.getEndDate().getHours() + (event.getEndDate().getMinutes()/60);
@@ -1262,7 +1313,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         td.style.verticalAlign = "top";
         td.style.width = "100%";
         td.style.height = "100%";
-        td.style.padding = ((eventSpacing/2)+1) + "px " + eventPadding + "px " + (eventSpacing/2) + "px";
+        td.style.padding = ((eventPadding/2)+1) + "px " + eventPadding + "px " + (eventPadding/2) + "px"; //+1 for half-hour border
         td.appendChild(div);
         
         
@@ -1272,17 +1323,18 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
       //FF adds 1 px to the bottom. This might have something to do with how
       //browsers interpret the cellpadding and cellspacing attributes. 
         if (isIE) {
-            td.style.paddingTop = (eventSpacing/2) + "px";
-            td.style.paddingBottom = (eventSpacing+1) + "px";
+            td.style.paddingTop = (eventPadding/2) + "px";
+            td.style.paddingBottom = (eventPadding+1) + "px";
         }
         if (isFirefox){
-            td.style.paddingBottom = (((eventSpacing/2)+1)*2) + "px";
+            td.style.paddingTop = (eventPadding/2) + "px";
+            td.style.paddingBottom = (((eventPadding/2)+1)*2) + "px";
         }
 
 
 
       //Initialize mouse events
-        if (event.isEditable()) initDrag(outerDiv, me);
+        if (event.isEditable()) initDrag(outerDiv, me, holdDelay);
         else{
             outerDiv.onclick = function(e){
                 var listener = me.getListener('eventclick');
@@ -1290,8 +1342,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                     var callback = listener.callback;
                     var scope = listener.scope;
                     callback.apply(scope, [this.event, e]);
-                }  
-            };            
+                }
+            };         
         }
         
         
@@ -1493,7 +1545,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         wrapper.style.width = "100%";
         wrapper.style.height = eventHeight + "px";
         wrapper.style.position = "relative";
-        wrapper.style.marginTop = (multidayEventsTable.childNodes.length>2 ? eventSpacing : eventSpacing/2) + "px";
+        wrapper.style.marginTop = (multidayEventsTable.childNodes.length>2 ? (eventPadding*2) : 0) + "px";
         wrapper.appendChild(outerDiv);
         wrapper.event = event;
         wrapper.onclick = function(e){
@@ -1516,8 +1568,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         
       //Update table height
         var numMultiDayEvents = multidayEventsTable.childNodes.length-1;
-        var h = numMultiDayEvents*(eventHeight+eventSpacing);
-        h = (h+(eventSpacing*2));
+        var h = numMultiDayEvents*(eventHeight+eventPadding);
+        h = (h+(eventPadding*2));
         var multidayEventsDiv = multidayEventsTable.parentNode.parentNode.parentNode;
         multidayEventsDiv.style.height =  h + "px";
 
@@ -1739,6 +1791,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
             if (shiftRight){
                 x++;
                 div.style.left = (x*width) + "%";
+                updatePadding(div);
                 r1 = _getRect(div);
                 r1 = {
                     left: r1.left+1,
@@ -1767,6 +1820,35 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                 log("   -- Updating " + _event.getSubject() + " width to " + newWidth + "% (was " + width + "%)");
                 div.style.width = newWidth + "%";
                 widths["_"+newWidth] = width;
+            }
+        }
+    };
+
+
+  //**************************************************************************
+  //** updatePadding
+  //**************************************************************************
+  /** Used to add/remove left padding to an event div 
+   */
+    var updatePadding = function(outerDiv){
+        
+        var td;
+        var el = outerDiv;
+        while (el.childNodes.length>0){
+            el = el.childNodes[0];
+            if (el.tagName.toUpperCase()==="TD"){
+                td = el;
+                break;
+            }
+        }
+        
+        if (td){
+            var left = parseInt(outerDiv.style.left);
+            if (left===0){ 
+                td.style.paddingLeft = eventPadding+"px";
+            }
+            else{ 
+                td.style.paddingLeft = "0px";
             }
         }
     };
