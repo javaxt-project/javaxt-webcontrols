@@ -142,7 +142,7 @@ javaxt.dhtml.Accordion = function(parent, config) {
       //Watch for resize events
         addResizeListener(parent, function(){
             me.resize();
-        });        
+        });
         
         
         
@@ -727,23 +727,7 @@ javaxt.dhtml.Accordion = function(parent, config) {
         }
     };
     
-    
-  //**************************************************************************
-  //** getPixels
-  //**************************************************************************
-  /** Appends "px" if the object does not end in "px" or "%".
-   */
-    var getPixels = function(obj){
-        var str = obj+"";
-        var x = str.substring(str.length-1).toLowerCase();
-        if (x=="x" || x =="%") return str;
-        
-        x = parseFloat(obj);
-        if (isNaN(x)) return obj;
-        else return x + "px";
-    };
-    
-    
+
   //**************************************************************************
   //** addResizeListener
   //**************************************************************************
