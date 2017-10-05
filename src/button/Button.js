@@ -623,7 +623,7 @@ javaxt.dhtml.Button = function(parent, config) {
         if (style===null) return;
         
         
-        el.style = null;
+        el.style = '';
         el.removeAttribute("style");
         
         

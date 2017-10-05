@@ -145,7 +145,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   //** showFooter
   //**************************************************************************
     this.showFooter = function(){
-        footerRow.style.display = null;
+        footerRow.style.display = '';
     };
     
     
@@ -658,7 +658,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
             var pixelsPerMinute = (h2-h1)/60;
             var h = h1+(date.getMinutes()*pixelsPerMinute);
             
-            currTimeDiv.style.display = null;
+            currTimeDiv.style.display = '';
             currTimeDiv.style.top = h + "px";
         }
         else{
@@ -1496,7 +1496,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
           //Remove height from spacer col of previous row and set current col height
             if (multidayEventsTable.childNodes.length>1){ 
-                tr.previousSibling.childNodes[0].style.height = null;
+                tr.previousSibling.childNodes[0].style.height = '';
             }
             td.style.height = "100%";
             
@@ -1561,8 +1561,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         
         
       //Update the visibility of the multiday row
-        multidayRow.style.removeProperty("display");
-        multidayRow.style.display = null;
+        multidayRow.style.display = '';
         multidayRow.style.visibility = "visible";
         
         

@@ -261,7 +261,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
   //** show
   //**************************************************************************
     this.show = function(){
-        outerDiv.style.display = null;
+        outerDiv.style.display = '';
     };
     
     

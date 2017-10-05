@@ -598,8 +598,9 @@ javaxt.dhtml.DatePicker = function(parent, config) {
    */
     var deselect = function(_cell){
         _cell.selected=false;
-        _cell.style = null;
-        _cell.className = null;
+        _cell.style = '';
+        _cell.className = '';
+        _cell.removeAttribute("class");
         _cell.style.position = "relative";
 
         addStyle(_cell, "cell");

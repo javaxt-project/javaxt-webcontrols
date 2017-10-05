@@ -431,7 +431,7 @@ javaxt.dhtml.Accordion = function(parent, config) {
                 innerDiv.style.height = "100%";
             };
             
-            innerDiv.style.height = null;
+            innerDiv.style.height = '';
             
             
             
@@ -689,7 +689,7 @@ javaxt.dhtml.Accordion = function(parent, config) {
         if (style===null) return;
         
         
-        el.style = null;
+        el.style = '';
         el.removeAttribute("style");
         
         

@@ -177,7 +177,7 @@ javaxt.dhtml.calendar.Utils = {
 
 
           //Remove z-index
-            div.style.zIndex = null;
+            div.style.zIndex = '';
             
             
           //If the mouse is released immediately (i.e., a click), before the
@@ -272,7 +272,7 @@ javaxt.dhtml.calendar.Utils = {
             
 
           //Remove z-index
-            div.style.zIndex = null;
+            div.style.zIndex = '';
 
 
           //Remove "touchmove" event listener
