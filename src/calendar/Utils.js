@@ -223,14 +223,59 @@ javaxt.dhtml.calendar.Utils = {
         div.onmouseup = onMouseUp;
 
         
+        
+      //Touch-specifc variables
+        var x1, x2, y1, y2;        
+        var scrollableDiv, scrollOffset;
+        var scroll = function(e){
+            x2 = e.changedTouches[0].pageX;
+            y2 = e.changedTouches[0].pageY;
+            if (scrollableDiv && holdActive===false){
+                scrollableDiv.scrollTop = scrollOffset+(y1-y2);
+            }
+        };
+        var endScroll = function(){
+            if (document.removeEventListener) {
+                document.removeEventListener("touchmove", scroll); 
+                document.removeEventListener("touchend", endScroll); 
+            }
+            else if (document.detachEvent) {
+                document.detachEvent("ontouchmove", scroll);
+                document.detachEvent("ontouchend", endScroll);
+            }
+        };
+        
+        
 
       //Start touch (similar to "onmousedown")
         div.ontouchstart = function(e) {
 
+          //Prevent default "select" behavior. Also, disables scrolling 
+          //if the client starts scrolling over an event div
             e.preventDefault();
+            
+            
+          //Get coordinates
             var touch = e.touches[0];
             var x = touch.pageX;
             var y = touch.pageY;
+            x1 = e.changedTouches[0].pageX;
+            y1 = e.changedTouches[0].pageY;
+            
+
+          //Add logic to manage scroll events
+            scrollableDiv = view.getScrollDiv();
+            if (scrollableDiv){
+                scrollOffset = scrollableDiv.scrollTop;
+                if (document.addEventListener) { 
+                    document.addEventListener("touchmove", scroll); 
+                    document.addEventListener("touchend", endScroll);
+                }
+                else if (document.attachEvent) {
+                    document.attachEvent("ontouchmove", scroll);
+                    document.attachEvent("ontouchend", endScroll);
+                }
+            }
 
             
           //Disable scrolling in the view
@@ -241,7 +286,23 @@ javaxt.dhtml.calendar.Utils = {
           //Set the holdStarter and wait for the holdDelay before starting the drag
             holdStarter = setTimeout(function() {
                 holdStarter = null;
+                
+
+              //Check whether the client's finger has moved more than 10 pixels. 
+              //If so the client is probably scrolling.
+                var distance = Math.sqrt( (x2-=x1)*x2 + (y2-=y1)*y2 );
+                if (distance<0) distance = -distance;
+                if (distance>10){
+                    holdActive = false;
+                    return;
+                }
+
+
+                
                 holdActive = true;
+                
+
+
 
               //Initiate drag
                 startDrag({
@@ -251,38 +312,20 @@ javaxt.dhtml.calendar.Utils = {
                 
                 
               //Add "touchmove" event listener
-                if (document.removeEventListener) { // For all major browsers, except IE 8 and earlier
-                    div.addEventListener("touchmove", onTouchMove); //,false?
+                if (document.addEventListener) {
+                    div.addEventListener("touchmove", onTouchMove);
                 }
-                else if (document.detachEvent) {
+                else if (document.attachEvent) {
                     div.attachEvent("ontouchmove", onTouchMove);
                 }
                 
                 
-            }, holdDelay);            
+            }, holdDelay);
         };
 
       //End touch (similar to "onmouseup")
         div.ontouchend = function(e) {
-
-
-          //Remove javaxt-cal-event-drag class from the event div
-            var innerDiv = getInnerDiv(div);
-            innerDiv.className = innerDiv.className.replace( /(?:^|\s)javaxt-cal-event-drag(?!\S)/g , '' );
             
-
-          //Remove z-index
-            div.style.zIndex = '';
-
-
-          //Remove "touchmove" event listener
-            if (document.removeEventListener) { // For all major browsers, except IE 8 and earlier
-                div.removeEventListener("touchmove", onTouchMove);
-            }
-            else if (document.detachEvent) {
-                div.detachEvent("ontouchmove", onTouchMove);
-            }
-
 
           //Enable scrolling in the view
             view.enableTouch();
@@ -296,7 +339,7 @@ javaxt.dhtml.calendar.Utils = {
               //run click-only operation here
                 //console.log("Click!");
                 var listener = view.getListener('eventclick');
-                if (listener!=null){
+                if (listener){
                     var callback = listener.callback;
                     var scope = listener.scope;
                     callback.apply(scope, [div.event, view, e]);
@@ -307,6 +350,26 @@ javaxt.dhtml.calendar.Utils = {
             else if (holdActive) {
                 holdActive = false;
                 moveDiv(div);
+                
+                
+                
+              //Remove javaxt-cal-event-drag class from the event div
+                var innerDiv = getInnerDiv(div);
+                innerDiv.className = innerDiv.className.replace( /(?:^|\s)javaxt-cal-event-drag(?!\S)/g , '' );
+
+
+              //Remove z-index
+                div.style.zIndex = '';
+
+
+              //Remove "touchmove" event listener
+                if (document.removeEventListener) {
+                    div.removeEventListener("touchmove", onTouchMove);
+                }
+                else if (document.detachEvent) {
+                    div.detachEvent("ontouchmove", onTouchMove);
+                }                
+                
             }
            
         };

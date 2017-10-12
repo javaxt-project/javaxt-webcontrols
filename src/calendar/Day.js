@@ -272,7 +272,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
             if (!scrollable) e.preventDefault();
         }, false);
         bodyDiv.addEventListener('touchmove', function(e) {
-            if (!scrollable)e.preventDefault();
+            if (!scrollable) e.preventDefault();
         }, false);
         
         
@@ -679,8 +679,16 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         var offset = getVerticalOffset(hour, cell);
         bodyDiv.scrollTop = offset+1; //+1 for border
     };
-    
-    
+
+
+  //**************************************************************************
+  //** getScrollDiv
+  //**************************************************************************
+    this.getScrollDiv = function(){
+        return bodyDiv;
+    };
+
+
   //**************************************************************************
   //** getVerticalOffset
   //**************************************************************************

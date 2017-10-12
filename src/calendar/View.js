@@ -39,7 +39,8 @@ javaxt.dhtml.calendar.View = function(view, config) {
 
     this.enableTouch = function(){};
     this.disableTouch = function(){};
-
+    this.getScrollDiv = function(){};
+    
 
   //**************************************************************************
   //** addEvents
