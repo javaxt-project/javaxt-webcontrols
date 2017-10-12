@@ -207,8 +207,10 @@ javaxt.dhtml.Button = function(parent, config) {
       //to 100% of the available width. As a workaround, it looks like we can 
       //wrap the button div in another div with the display style set to "table".
         var tableDiv = document.createElement('div');
-        tableDiv.style.display = "table";
-        if (config.width) tableDiv.style.width = outerDiv.style.width;
+        if (outerDiv.style.display==="inline-block"){
+            tableDiv.style.display = "table";
+            if (config.width) tableDiv.style.width = outerDiv.style.width;
+        }
         tableDiv.style.height = "100%";
         outerDiv.appendChild(tableDiv);
         tableDiv.appendChild(mainDiv);
