@@ -195,9 +195,34 @@ javaxt.dhtml.DatePicker = function(parent, config) {
   //**************************************************************************
   //** setDate
   //**************************************************************************
-  /** Used to update the calendar and render a given date. 
+  /** Used to update the calendar and select the given date. 
    */
     this.setDate = function(date){
+        date = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        
+      //Render date
+        me.render(date);
+        
+      //Deselect current selection
+        me.deselect();
+        
+      //Select date
+        for (var i=0; i<cells.length; i++){
+            var d = cells[i].date;
+            if (d.getTime()===date.getTime()){
+                select(cells[i]);
+                return;
+            }
+        }
+    };
+    
+    
+  //**************************************************************************
+  //** render
+  //**************************************************************************
+  /** Used to update the calendar and render a given date. 
+   */
+    this.render = function(date){
         
         date = new Date(date.getFullYear(), date.getMonth(), date.getDate());
         if (currDate && date.getTime()===currDate.getTime()) return;
@@ -442,8 +467,8 @@ javaxt.dhtml.DatePicker = function(parent, config) {
    *  selectionMode is set to week, an entire row will be selected. 
    */
     this.select = function(date){
-        
-        
+        if (!date) return;
+
       //Find cell that corresponds with the given date
         var cell;
         for (var x=0; x<cells.length; x++){
@@ -678,7 +703,7 @@ javaxt.dhtml.DatePicker = function(parent, config) {
         if (d>x) console.log(d + " vs " + x);
         if (d>x) d = x;
         
-        me.setDate(new Date(y, m, d));
+        me.render(new Date(y, m, d));
     };
 
 
@@ -697,7 +722,7 @@ javaxt.dhtml.DatePicker = function(parent, config) {
         if (d>x) console.log(d + " vs " + x);
         if (d>x) d = x;
         
-        me.setDate(new Date(y, m, d));
+        me.render(new Date(y, m, d));
     };
     
 
