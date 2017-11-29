@@ -472,39 +472,12 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                 var tr = document.createElement('tr');
                 tbody.appendChild(tr);
                 
-
                 var col = document.createElement('td');
                 col.className = "javaxt-cal-half-hour" + (j % 2 == 0 ? "" : " javaxt-cal-half-hour-sep") + (j==47 ? " javaxt-cal-hour-last" : "");
                 if (j==0) col.style.borderTop = "0px";
+                
                 tr.appendChild(col);
-                
-                
-                
-                tr.onclick = function(e){
-                    var listener = me.getListener('cellclick');
-                    if (listener!=null){
-                        var callback = listener.callback;
-                        var scope = listener.scope;
-
-                        var _tbody = this.parentNode;
-                        var _cell = _tbody.parentNode.parentNode;
-                        var _date = new Date(_cell.date);
-                        
-
-                        var hour = 0;
-                        for (var i=0; i<_tbody.childNodes.length; i++){            
-                            var tr = _tbody.childNodes[i];
-                            if (tr==this){
-                                hour = (i/2);
-                                break;
-                            }
-                        }
-                        _date.setTime(_date.getTime() + ((hour*60) * 60 * 1000));
-
-
-                        callback.apply(scope, [_date, me, e]);
-                    }
-                };
+                addListeners(tr, holdDelay);                
             }
 
 
@@ -554,8 +527,130 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
             if (listener!=null) listener.callback.apply(listener.scope, [me]);
         }
     };
-    
-      
+
+
+  //**************************************************************************
+  //** addListeners
+  //**************************************************************************
+  /** Used to initialize a cell for click and hold events. */
+  
+    var addListeners = function(cell, holdDelay){
+
+        
+      //This timeout, started on mousedown, triggers the beginning of a hold
+        var holdStarter = null;
+
+        
+      //This flag indicates the user is currently holding the mouse down
+        var holdActive = false;
+
+       
+      //OnClick
+        //cell.onclick = NOTHING!! not using onclick at all - onmousedown and onmouseup take care of everything
+
+   
+      //MouseDown
+        var onMouseDown = function(e){
+
+            
+          //Set the holdStarter and wait for the predetermined delay, and then begin a hold
+            holdStarter = setTimeout(function() {
+                holdStarter = null;
+                holdActive = true;
+
+
+                //start hold
+                var listener = me.getListener('cellhold');
+                if (listener){
+                    var callback = listener.callback;
+                    var scope = listener.scope;
+                    var date = getDate();
+                    callback.apply(scope, [date, me, e]);
+                } 
+
+            }, holdDelay);
+            
+        };
+
+        
+
+      //MouseUp
+        var onMouseUp = function(e){
+            
+
+          //Get date associated with the selected cell
+            var date = getDate();
+            
+            
+            
+          //If the mouse is released immediately (i.e., a click), before the
+          //holdStarter runs, then cancel the holdStarter and do the click
+            if (holdStarter) {
+                clearTimeout(holdStarter);
+                
+                
+                var listener = me.getListener('cellclick');
+                if (listener){
+                    var callback = listener.callback;
+                    var scope = listener.scope;
+                    callback.apply(scope, [date, me, e]);
+                }           
+                
+            }
+            
+          //Otherwise, if the mouse was being held, end the hold
+            else if (holdActive) {
+                holdActive = false;
+
+              //End hold
+                var listener = me.getListener('cellrelease');
+                if (listener){
+                    var callback = listener.callback;
+                    var scope = listener.scope;
+                    callback.apply(scope, [date, me, e]);
+                }   
+            }
+        };
+
+
+        cell.onmousedown = onMouseDown;
+        cell.onmouseup = onMouseUp;
+        cell.ontouchend = onMouseUp;
+        cell.ontouchstart = function(e) {
+            e.preventDefault();
+            
+            var touch = e.touches[0]; //vs e.changedTouches[0]
+            var x = touch.pageX;
+            var y = touch.pageY;
+            
+            onMouseDown({
+                clientX: x,
+                clientY: y
+            });
+        };
+
+
+      //Get date associated with the selected cell
+        var getDate = function(){
+          
+            var tbody = cell.parentNode;
+            var _cell = tbody.parentNode.parentNode;
+            var date = new Date(_cell.date);
+
+            var hour = 0;
+            for (var i=0; i<tbody.childNodes.length; i++){            
+                var tr = tbody.childNodes[i];
+                if (tr===cell){
+                    hour = (i/2);
+                    break;
+                }
+            }
+            date.setTime(date.getTime() + ((hour*60) * 60 * 1000));
+            return date;
+        };
+    };
+
+
   //**************************************************************************
   //** createColumnHeader
   //**************************************************************************
