@@ -327,7 +327,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
                                     if (listener!=null){
                                         var callback = listener.callback;
                                         var scope = listener.scope;
-                                        callback.apply(scope, [_date, me, e]);
+                                        callback.apply(scope, [_date, el, me, e]);
                                     }
                                 }
                             };
@@ -339,7 +339,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
                                 if (listener!=null){
                                     var callback = listener.callback;
                                     var scope = listener.scope;
-                                    callback.apply(scope, [_date, me, e]);
+                                    callback.apply(scope, [_date, el, me, e]);
                                 }
                             };
                         }
@@ -943,7 +943,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
                 if (listener!=null){
                     var callback = listener.callback;
                     var scope = listener.scope;
-                    callback.apply(scope, [this.event, me, e]);
+                    callback.apply(scope, [this.event, this, me, e]);
                 }  
             };            
         }
@@ -1105,7 +1105,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
                 if (listener!=null){
                     var callback = listener.callback;
                     var scope = listener.scope;
-                    callback.apply(scope, [this.event, me, e]);
+                    callback.apply(scope, [this.event, this, me, e]);
                 }  
             };
             

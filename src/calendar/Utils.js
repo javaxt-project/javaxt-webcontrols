@@ -190,7 +190,7 @@ javaxt.dhtml.calendar.Utils = {
                 if (listener!=null){
                     var callback = listener.callback;
                     var scope = listener.scope;
-                    callback.apply(scope, [div.event, view, e]);
+                    callback.apply(scope, [div.event, div, view, e]);
                 }
             }
             
@@ -342,7 +342,7 @@ javaxt.dhtml.calendar.Utils = {
                 if (listener){
                     var callback = listener.callback;
                     var scope = listener.scope;
-                    callback.apply(scope, [div.event, view, e]);
+                    callback.apply(scope, [div.event, div, view, e]);
                 }
             }
             

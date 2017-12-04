@@ -552,6 +552,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
       //MouseDown
         var onMouseDown = function(e){
 
+            var tr = this;
             
           //Set the holdStarter and wait for the predetermined delay, and then begin a hold
             holdStarter = setTimeout(function() {
@@ -565,7 +566,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                     var callback = listener.callback;
                     var scope = listener.scope;
                     var date = getDate();
-                    callback.apply(scope, [date, me, e]);
+                    callback.apply(scope, [date, tr, me, e]);
                 } 
 
             }, holdDelay);
@@ -576,6 +577,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
       //MouseUp
         var onMouseUp = function(e){
+            
+            var tr = this;
             
 
           //Get date associated with the selected cell
@@ -593,7 +596,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                 if (listener){
                     var callback = listener.callback;
                     var scope = listener.scope;
-                    callback.apply(scope, [date, me, e]);
+                    callback.apply(scope, [date, tr, me, e]);
                 }           
                 
             }
@@ -607,7 +610,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                 if (listener){
                     var callback = listener.callback;
                     var scope = listener.scope;
-                    callback.apply(scope, [date, me, e]);
+                    callback.apply(scope, [date, tr, me, e]);
                 }   
             }
         };
@@ -623,10 +626,14 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
             var x = touch.pageX;
             var y = touch.pageY;
             
-            onMouseDown({
+//            onMouseDown({
+//                clientX: x,
+//                clientY: y
+//            });
+            onMouseDown.apply(this, [{
                 clientX: x,
                 clientY: y
-            });
+            }]);
         };
 
 
@@ -1444,7 +1451,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                 if (listener!=null){
                     var callback = listener.callback;
                     var scope = listener.scope;
-                    callback.apply(scope, [this.event, me, e]);
+                    callback.apply(scope, [this.event, this, me, e]);
                 }
             };         
         }
@@ -1656,7 +1663,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
             if (listener!=null){
                 var callback = listener.callback;
                 var scope = listener.scope;
-                callback.apply(scope, [this.event, me, e]);
+                callback.apply(scope, [this.event, this, me, e]);
             }  
         };
         
