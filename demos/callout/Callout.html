@@ -1,0 +1,189 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+
+<title>Callout Demo</title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+
+<script type="text/javascript" src="../../src/callout/Callout.js"></script>
+
+
+<style>
+
+    html, body {
+        height:100%;
+        margin:0;
+    }
+    
+    body {
+        padding: 20px;
+    }
+    
+    body, textarea, input, select, td, th {
+        font-family:helvetica,arial,verdana,sans-serif; font-size:14px;
+    }    
+
+    h1 {
+        margin-top: 0px;
+    }
+    
+    h2 {
+        font-size:18px;
+        font-weight: normal;
+        margin: 20px 0 5px 0;        
+    }
+    
+    p {
+        margin: 5px 0 15px 0;
+        color: #555555;
+    }
+
+    input[type="button"] {
+        width: 72px;
+        height: 26px;
+    }
+    
+    #demo2 {
+        border: 2px dashed #bbb;
+        -moz-border-radius: 5px;
+        -webkit-border-radius: 5px;
+        border-radius: 5px;
+        padding: 25px;
+        text-align: center;
+        font-size: 20pt;
+        font-weight: bold;
+        color: #bbb;
+        cursor: pointer;
+        
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -o-user-select: none;
+        -ms-user-select: none;
+        -khtml-user-select: none;     
+        user-select: none;
+    }
+</style>
+
+
+
+<script type="text/javascript">
+   
+window.onload = function() {
+
+  //Create callout for Demo #1
+    var body = document.getElementsByTagName("body")[0];
+    var callout1 = new javaxt.dhtml.Callout(body);
+    
+
+  //Populate callout for Demo #1
+    var innerDiv = callout1.getInnerDiv();
+    innerDiv.style.width = "165px";        
+    innerDiv.style.height = "165px";
+    var contentDiv = document.createElement("div");
+    contentDiv.style.padding = "5px";
+    contentDiv.innerHTML = "Hello World!";
+    innerDiv.appendChild(contentDiv);
+
+
+  //Make the callout visible when the button is clicked
+    document.getElementById("demo1").onclick = function(e){
+        var rect = getRect(this);
+        console.log(rect);
+        var x = rect.x + rect.width;
+        var y = rect.y + (rect.height/2);
+        callout1.showAt(x, y, "right", "top");
+    };
+    
+    
+  //Simple function to get coordinates and dimensions of a DOM element
+    var getRect = function(el){
+
+        function findPosX(obj){
+            var curleft = 0;
+            if (obj.offsetParent){
+                while (obj.offsetParent) {
+                    curleft += obj.offsetLeft;
+                    obj = obj.offsetParent;
+                }
+            }
+            else if (obj.x)
+                    curleft += obj.x;
+            return curleft;
+        };
+
+
+        function findPosY(obj){
+            var curtop = 0;
+            if (obj.offsetParent) {
+                while (obj.offsetParent){
+                    curtop += obj.offsetTop;
+                    obj = obj.offsetParent;
+                }
+            }
+            else if (obj.y) {
+                curtop += obj.y;
+            }
+            return curtop;
+        };
+
+
+
+        var x = 0;
+        var y = 0;
+        var h = el.offsetHeight;
+        var w = el.offsetWidth;
+
+        x = findPosX(el);
+        y = findPosY(el);
+
+        return{
+            x: x,
+            y: y,
+            width: w,
+            height: h
+        };
+    };
+    
+    
+    
+  //Demo #2
+    var callout2 = new javaxt.dhtml.Callout(body);
+    innerDiv = callout2.getInnerDiv();
+    innerDiv.style.width = "165px";        
+    innerDiv.style.height = "165px";
+    var contentDiv = document.createElement("div");
+    contentDiv.style.padding = "5px";
+    contentDiv.innerHTML = "Hello Demo 2!";
+    innerDiv.appendChild(contentDiv);
+    document.getElementById("demo2").onclick = function(e){
+        var x = e.pageX;
+        var y = e.pageY;
+        callout2.showAt(x, y, "below", "left");
+    };
+};
+</script>
+
+
+</head>
+<body>
+       
+<h1>Callout Demo</h1>
+    
+
+
+<h2>Demo 1</h2>
+<p>Simple callout that will appear to the right of the button when clicked. </p>
+<input type="button" value="Open" id="demo1"></input>
+
+
+<h2>Demo 2</h2>
+<p>Callout that will appear whenever clicked inside the box. </p>
+<div id="demo2">Click me!</div>
+
+</body>
+</html>
