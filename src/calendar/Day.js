@@ -276,6 +276,15 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         }, false);
         
         
+      //Add scroll listener
+        var listener = me.getListener('scroll');
+        if (listener){
+            div.addEventListener('scroll', function(e) {
+                listener.callback.apply(listener.scope, [me]);
+            }, false);
+        }
+        
+        
       //Create footer row
         tr = document.createElement("tr");
         tr.setAttribute("desc", "footer");
@@ -619,7 +628,6 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         cell.onmousedown = onMouseDown;
         cell.onmouseup = onMouseUp;
         cell.ontouchstart = function(e) {
-            e.preventDefault();
             
             var touch = e.touches[0];
             var x = touch.pageX;
