@@ -325,7 +325,7 @@ javaxt.dhtml.calendar.Utils = {
 
       //End touch (similar to "onmouseup")
         div.ontouchend = function(e) {
-            
+
 
           //Enable scrolling in the view
             view.enableTouch();
@@ -339,10 +339,18 @@ javaxt.dhtml.calendar.Utils = {
               //run click-only operation here
                 //console.log("Click!");
                 var listener = view.getListener('eventclick');
-                if (listener){
+                if (listener!=null){
                     var callback = listener.callback;
                     var scope = listener.scope;
-                    callback.apply(scope, [div.event, div, view, e]);
+                    
+                    var touch = e.changedTouches[0];
+                    var x = touch.pageX;
+                    var y = touch.pageY;
+                    
+                    callback.apply(scope, [div.event, div, view, {
+                        clientX: x,
+                        clientY: y
+                    }]);
                 }
             }
             
