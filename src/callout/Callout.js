@@ -266,6 +266,33 @@ javaxt.dhtml.Callout = function(parent, config) {
 
 
   //**************************************************************************
+  //** getSize
+  //**************************************************************************
+  /** Returns the width and height of the callout. */
+    this.getSize = function(){      
+        var size;
+        
+        if (div.style.display === 'none'){
+            div.style.visibility = 'hidden';
+            div.style.display = 'block';
+            size = {
+                width: div.offsetWidth,
+                height: div.offsetHeight
+            };
+            div.style.visibility = '';
+            div.style.display = 'none';
+        }
+        else{
+            size = {
+                width: div.offsetWidth,
+                height: div.offsetHeight
+            };
+        }
+        return size;
+    };
+    
+
+  //**************************************************************************
   //** show
   //**************************************************************************
   /** Used to render the callout. 
@@ -315,7 +342,7 @@ javaxt.dhtml.Callout = function(parent, config) {
 
         
         
-        var halign = function(){
+        var halign = function(){            
             if (align==="left"){
                 notchOffset = config.arrow.paddingLeft;
                 div.style.left = (x-(notchOffset+notchCenter)) + "px";
@@ -324,7 +351,7 @@ javaxt.dhtml.Callout = function(parent, config) {
             else if (align==="right"){
                 notchOffset = config.arrow.paddingRight;
                 div.style.left = ((x-div.offsetWidth) + (notchOffset+notchCenter)) + "px";
-                notch.style.right=notchBorder.style.right=notchOffset + "px";
+                notch.style.left=notchBorder.style.left= (div.offsetWidth-(notchOffset+(notchCenter*2))) + "px";
             }
             else if (align==="center" || align==="middle"){
                 var center = div.offsetWidth/2;
@@ -338,6 +365,8 @@ javaxt.dhtml.Callout = function(parent, config) {
         
         
         var valign = function(){
+            callout.style.top = "0px";
+            
             if (align==="top"){
                 notchOffset = config.arrow.paddingTop;
                 div.style.top = (y-(notchOffset+notchCenter)) + "px";
@@ -359,6 +388,8 @@ javaxt.dhtml.Callout = function(parent, config) {
         };
         
         
+      //Update notch style align elements. Notch style is based on a CSS triangle
+      //described here: https://css-tricks.com/snippets/css/css-triangle/
         if (position==="above"){
 
           //Update notch style so the arrow is pointing down
@@ -391,7 +422,7 @@ javaxt.dhtml.Callout = function(parent, config) {
             
           //Set vertical position of the notch, div, and callout
             div.style.top = y + "px";
-            callout.style.top = notchSize + "px";
+            callout.style.top = notchHeight + "px";
             notch.style.top = "1px"; //+1 for border width
             notchBorder.style.top = "0px";
             
@@ -403,10 +434,17 @@ javaxt.dhtml.Callout = function(parent, config) {
             
           //Update notch style so the arrow is pointing right
             notch.style.borderTop=notchBorder.style.borderTop=notchSize+"px solid transparent";
-            notch.style.borderLeft=notchBorder.style.borderLeft=notchSize+"px solid transparent";
+            notch.style.borderLeft=notchBorder.style.borderLeft=notchSize+"px solid " + backgroundColor;
             notch.style.borderRight=notchBorder.style.borderRight=0;
-            notch.style.borderBottom=notchBorder.style.borderBottom=notchSize+"px solid " + backgroundColor;
+            notch.style.borderBottom=notchBorder.style.borderBottom=notchSize+"px solid transparent"; 
             notchBorder.style.borderLeftColor=borderColor; //<--Make sure this appears after all other border definitions!
+            
+            
+          //Set horizontal position 
+            div.style.left = (x-(div.offsetWidth+notchHeight)) + "px";
+            callout.style.left = "0px";
+            notch.style.left = (div.offsetWidth-1) + "px";
+            notchBorder.style.left = div.offsetWidth + "px";
             
             
           //Set vertical position of the notch and div
@@ -417,6 +455,7 @@ javaxt.dhtml.Callout = function(parent, config) {
             
           //Update notch style so the arrow is pointing left
             notch.style.borderTop=notchBorder.style.borderTop=notchSize+"px solid transparent";
+            notch.style.borderLeft=notchBorder.style.borderLeft=0;
             notch.style.borderRight=notchBorder.style.borderRight=notchSize+"px solid " + backgroundColor;
             notch.style.borderBottom=notchBorder.style.borderBottom=notchSize+"px solid transparent";
             notchBorder.style.borderRightColor=borderColor; //<--Make sure this appears after all other border definitions!
