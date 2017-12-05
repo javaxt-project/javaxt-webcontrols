@@ -305,10 +305,9 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
                         
                       //Add event listener
                         td.date = new Date(d);
-                        var onclick;
                         if (x==1){
-                            onclick = function(e, el){
-                                
+                            td.onclick = function(e){
+                                var el = this;
                                 var clickedEvent = false;
                                 var div = el.childNodes[0];
                                 if (div.childNodes.length>0){
@@ -319,7 +318,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
                                     if (y<firstEvent.top || y>lastEvent.bottom){}
                                     else clickedEvent = true;
                                 }
-                                
+
                                 
                                 if (!clickedEvent){
                                     var _date = new Date(el.date);
@@ -333,7 +332,8 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
                             };
                         }
                         else{
-                            onclick = function(e, el){
+                            td.onclick = function(e){
+                                var el = this;
                                 var _date = new Date(el.date);
                                 var listener = me.getListener('cellclick');
                                 if (listener!=null){
@@ -343,11 +343,8 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
                                 }
                             };
                         }
-                        td.onclick = function(e) {
-                            onclick(e, this);
-                        };
-                        
-                        
+
+
                         td.ontouchstart = function(e) {
 
                           //Disable select/highlight behaviour
@@ -359,11 +356,10 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
                                 var touch = e.touches[0];
                                 var x = touch.pageX;
                                 var y = touch.pageY;
-
-                                onclick({
+                                this.onclick.apply(this, [{
                                     clientX: x,
                                     clientY: y
-                                }, this);
+                                }]);
                             }
                         };
                         
