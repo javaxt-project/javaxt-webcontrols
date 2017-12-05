@@ -618,24 +618,28 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
         cell.onmousedown = onMouseDown;
         cell.onmouseup = onMouseUp;
-        cell.ontouchend = onMouseUp;
         cell.ontouchstart = function(e) {
             e.preventDefault();
             
-            var touch = e.touches[0]; //vs e.changedTouches[0]
+            var touch = e.touches[0];
             var x = touch.pageX;
             var y = touch.pageY;
-            
-//            onMouseDown({
-//                clientX: x,
-//                clientY: y
-//            });
-            onMouseDown.apply(this, [{
+
+            this.onmousedown.apply(this, [{
                 clientX: x,
                 clientY: y
             }]);
         };
+        cell.ontouchend = function(e){
+            var touch = e.changedTouches[0];
+            var x = touch.pageX;
+            var y = touch.pageY;
 
+            this.onmouseup.apply(this, [{
+                clientX: x,
+                clientY: y
+            }]);
+        };
 
       //Get date associated with the selected cell
         var getDate = function(){
