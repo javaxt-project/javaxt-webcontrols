@@ -1,0 +1,167 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+
+<title>Date Input Demo</title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+
+
+<script type="text/javascript" src="../../src/datepicker/DatePicker.js"></script>
+<script type="text/javascript" src="../../src/datepicker/DateInput.js"></script>
+
+<style>
+    /* Set body height to 100% so we can test vertical resize */
+    html, body {
+        height:100%;
+        margin: 10px;
+        
+    }
+    
+    
+    body, textarea, input, select, td, th {
+        font-family:helvetica,arial,verdana,sans-serif; font-size:14px;
+    }    
+
+
+    h2 {
+        font-size:18px;
+        font-weight: normal;
+        margin: 30px 0 5px 0;        
+    }
+    
+    p {
+        margin: 5px 0 15px 0;
+        color: #555555;
+    }
+    
+    
+    #demo1, #demo2 {
+        display: inline-block;
+        width: 184px;
+    }
+    
+    input, select, textarea { /* Allows overriding native style of form elements on mobile safari */
+        -webkit-appearance: none; 
+        -webkit-border-radius:0; 
+        border-radius: 0; 
+    }
+    
+
+    
+    
+    .form-input {
+        
+        border-radius: 3px 0 0 3px;
+        -moz-border-radius: 3px 0 0 3px;
+        -webkit-border-radius: 3px 0 0 3px;
+        
+        color: #363636;
+        font-size: 14px;
+        height: 26px;
+        line-height: 26px;
+        padding: 0px 6px;
+        vertical-align: middle;
+        transition: border 0.2s linear 0s, box-shadow 0.2s linear 0s;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
+    }
+    
+
+    
+    .form-input-button {
+        
+        border-radius: 0 3px 3px 0;
+        -moz-border-radius: 0 3px 3px 0;
+        -webkit-border-radius: 0 3px 3px 0;
+
+        
+        color: #363636;
+        height: 28px;
+        width: 26px;
+        border: 1px solid #b4b4b4;
+        cursor: pointer;
+        background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAB0klEQVQ4jZWSsUsjQRyF379gYSOHoCa2KSyuSptS0thI4A5W0kVYUSKIChOIabTziHbChZPD4tZCEGwMNop4xeliERViIBJv2Qs6YXcd911zN2zEgA58zLx5zMevGKB7fQTw6d/+cvXuGoC4BXbWgVPbtrkOnN4CO1Fedg1AaMEVsMtCgRfJJC3L4kUySS4tddHVFQq8Ana14BzYf87neZhIsNTXx8NEgk/T011Eu+d8nufAvhacANUgl+OTbfP31hbb29u8OzqinJrSuJkMG+PjdDMZBrkcT4CqFlSBY88weJ1KsZlOs5lO8zqV4p/JyVfxDINV4FgLRoEZkgzfCEmOAjNaEAfmVBgyUIpfLYsr5TK/VCoMlNJ3xXJZZxWGjANzWhAD5j2lKH1fs7i21jN7SjEGzEcnWHgMArpS8uflJU0h+OPggK6UGlMIfX4MAsaBhegEy67n8a7d1hizsz2z63mMActaMAKI+06Hdcdh3XH46+aGE9mszhPZrKbuOLzvdDgS/YnDQLEpJc9qNX42TZpC8NveHmut1qs0peQwUNSCIWC15ftsPDy8iZbvcwhY/f9+YBDY/L6xwfcwCGwCGACAsX6g9AGovId+oARg7C+8TTgBSG8JuwAAAABJRU5ErkJggg==');
+        background-position: 4px 5px;
+        background-repeat: no-repeat;
+        background-color: #e4e4e4;
+    }
+    
+    
+    .form-input:focus {
+        border-color: rgba(82, 168, 236, 0.8);
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6);
+        outline: 0 none;
+    }
+    
+    .form-input-button:hover {
+        border-color: rgba(82, 168, 236, 0.8);
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6);
+        outline: 0 none;
+    }
+
+    .form-input-button:focus {
+
+        outline: 0 none;
+    }
+</style>
+
+
+
+<script type="text/javascript">
+window.onload = function() {
+  
+
+  //Demo 1
+    new javaxt.dhtml.DateInput(
+        document.getElementById("demo1")
+    );
+
+    
+  //Demo 2
+    new javaxt.dhtml.DateInput(
+        document.getElementById("demo2"),
+        {
+            date: new Date('6/7/1976'),
+            style: {
+                input: "form-input",
+                button: "form-input-button"
+            },
+            formatDate: function(date){
+                var daysOfWeek = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+                var day = daysOfWeek[date.getDay()];
+                return  day + " " + (date.getMonth()+1) + "/" + date.getDate() + "/" + date.getFullYear();
+            }
+        }
+    );
+    
+};
+</script>
+
+
+</head>
+<body>
+       
+<h1>Date Input Demos</h1>
+
+
+<h2>Default Date Input</h2>
+<p>Simple date input with default style and default settings.</p>
+
+<div id="demo1" ></div>
+
+
+
+
+<h2>Custom Style #1</h2>
+<p>Date input with custom icon, border radius, and blue hover/focus style.</p>
+
+<div id="demo2" ></div>
+
+</body>
+</html>
