@@ -73,14 +73,6 @@ javaxt.dhtml.Button = function(parent, config) {
                 color: "#FFFFFF"
             },
             
-            disable: {
-                background: "#ffffff",
-                border: "1px solid #ffffff",
-                borderRadius: "3px",
-                cursor: "pointer",
-                opacity: "0.5"
-            },
-            
             hover: {
                 background: "#ededed"
             },
@@ -499,6 +491,8 @@ javaxt.dhtml.Button = function(parent, config) {
   /** Used to enable the button.
    */
     this.enable = function(){
+        var outerDiv = me.el;
+        outerDiv.style.opacity = "";
         mask.style.visibility = "hidden";
     };
 
@@ -508,6 +502,9 @@ javaxt.dhtml.Button = function(parent, config) {
   //**************************************************************************
     this.disable = function(){
         
+        var outerDiv = me.el;
+        outerDiv.style.opacity = "0.5";
+        
         if (mask){
             mask.style.visibility = "visible";
         }
@@ -515,13 +512,11 @@ javaxt.dhtml.Button = function(parent, config) {
             
             mask = document.createElement('div');
             mask.setAttribute("desc", "mask");
-            setStyle(mask, "disable");
             mask.style.position = "absolute";
             mask.style.zIndex = "1";
             mask.style.width = "100%";
             mask.style.height = "100%";
 
-            var outerDiv = me.el;
             outerDiv.insertBefore(mask, outerDiv.firstChild);
         }
     };
