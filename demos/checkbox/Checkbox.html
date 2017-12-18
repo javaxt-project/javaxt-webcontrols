@@ -47,24 +47,24 @@ window.onload = function() {
   //**************************************************************************
   
     new javaxt.dhtml.Checkbox("checkbox1",{
-        selected: true
-    }).onClick = function(selected){
-        console.log("Selected: " + selected);
+        checked: true
+    }).onClick = function(checked){
+        console.log("checkbox1 is checked: " + checked);
     };
 
 
     new javaxt.dhtml.Checkbox("checkbox2",{
         label: "Click Me!"
     })
-    .onClick = function(selected){
-        console.log("Selected: " + selected);
+    .onClick = function(checked){
+        console.log("checkbox2 is checked: " + checked);
     };
 
 
     new javaxt.dhtml.Checkbox("checkbox3",{
         label: "Enable",
         disabled: true,
-        selected: true
+        checked: true
     });
 };
 </script>

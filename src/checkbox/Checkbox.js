@@ -21,12 +21,12 @@ javaxt.dhtml.Checkbox = function(parent, config) {
     var defaultConfig = {
 
         label: null, //Text to display 
-        id: null, //ID or description metadata
+        value: null,
         
         
         
       //Checkbox state
-        selected: false,
+        checked: false,
         disabled: false,
         
         
@@ -170,7 +170,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
 
       //Set button state
         if (config.disabled===true) me.disable();
-        if (config.selected===true) me.select();
+        if (config.checked===true) me.select();
     };
     
 
@@ -194,7 +194,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
         var onclick = function(){
             if (config.sound!=null) config.sound.play();
             me.toggle();
-            me.onClick(box.selected);
+            me.onClick(box.checked);
         };
 
 
@@ -213,7 +213,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
             touchStartTime = new Date().getTime();
             touchEndTime = null;
             
-            if (box.selected!==true){
+            if (box.checked!==true){
                 addStyle(box, "hover");
             }
         };
@@ -242,14 +242,14 @@ javaxt.dhtml.Checkbox = function(parent, config) {
         };
         div.onmouseover = function(){
             
-            if (box.selected!==true){
+            if (box.checked!==true){
                 addStyle(box, "hover");
             }
 
         };
         div.onmouseout = function(){
 
-            if (box.selected!==true){
+            if (box.checked!==true){
                 setStyle(box, "box");
             }
             
@@ -278,7 +278,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
   //**************************************************************************
   /** Called whenever the checkbox is clicked.
    */
-    this.onClick = function(selected){};
+    this.onClick = function(checked){};
     
 
 
@@ -319,8 +319,8 @@ javaxt.dhtml.Checkbox = function(parent, config) {
   //** select
   //**************************************************************************
     this.select = function(){
-        if (box.selected===true) return;
-        box.selected = true;
+        if (box.checked===true) return;
+        box.checked = true;
         addStyle(box,"select");
         
         if (check){
@@ -338,8 +338,8 @@ javaxt.dhtml.Checkbox = function(parent, config) {
   //** deselect
   //**************************************************************************
     this.deselect = function(){
-        if (box.selected===true){
-            box.selected = false;
+        if (box.checked===true){
+            box.checked = false;
             setStyle(box,"box");
             check.style.visibility = "hidden";
         }
@@ -352,7 +352,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
   /** Used to toggle the button's selection state.
    */
     this.toggle = function(){
-        if (box.selected===true){
+        if (box.checked===true){
             me.deselect();
         }
         else{
@@ -364,21 +364,21 @@ javaxt.dhtml.Checkbox = function(parent, config) {
   //**************************************************************************
   //** getValue
   //**************************************************************************
-  /** Returns true if the checkbox is selected.
+  /** Returns the value associated with the checkbox. The value is defined in 
+   *  the config used to instantiate this class.
    */
     this.getValue = function(){
-        return box.selected;
+        return config.value;
     };
     
     
   //**************************************************************************
-  //** getID
+  //** isChecked
   //**************************************************************************
-  /** Returns the ID of the checkbox. THe ID is defined in the config used to 
-   *  instantiate this class.
+  /** Returns true if the checkbox is checked.
    */
-    this.getID = function(){
-        return config.id;
+    this.isChecked = function(){
+        return box.checked;
     };
 
 
