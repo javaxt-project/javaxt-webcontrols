@@ -11,37 +11,41 @@ if(!javaxt.dhtml) javaxt.dhtml={};
  ******************************************************************************/
 
 javaxt.dhtml.Table = function(parent, config) {
-
     this.className = "javaxt.dhtml.Table";
 
     var me = this;
     var deferUpdate = false;
+    var header, body; //tbody elements
+    var bodyDiv; //overflow div
+    var prevSelection;
+    
 
     var defaultConfig = {
-        width: "100%",
-        height: "100%",
-        border: "1px solid #969696",
 
-        headerStyle: {
-            background: "#4F81BD",
-            fontFamily: "tahoma,arial,verdana,sans-serif",
-            fontSize: "11px",
-            fontWeight: "Bold",
-            color: "#FFFFFF",
-            verticalAlign: "middle",
-            textAlign: "center",
-            height: 20,
-            cursor: "default",
-            padding: 5
-        },
-        
-        rowStyle:{
-            cursor: "default",
-            fontFamily: "tahoma,arial,verdana,sans-serif",
-            fontSize: "11px",
-            color: "#656565",
-            height: 20,
-            padding: 5
+        multiselect: false,
+
+        style: {
+
+            
+            headerRow: {
+                height: "20px"
+            },
+            
+            headerColumn: {
+                
+            },
+            
+            row: {
+                height: "20px"
+            },
+            
+            column: {
+                
+            },
+            
+            select: {
+                backgroundColor: "#FFFFB1"
+            }
         }
     };
     
@@ -67,114 +71,82 @@ javaxt.dhtml.Table = function(parent, config) {
         config = clone;
 
 
-      //Create outer table
-        var table = document.createElement('table');
-        table.style.width = getPixels(config.width);
-        table.style.height = getPixels(config.height);
-        table.cellSpacing = 0;
-        table.cellPadding = 0;
-        table.style.borderCollapse = "collapse";
-        table.style.border = config.border;
-        var tbody = document.createElement('tbody');
-        table.appendChild(tbody);
-        var row = document.createElement('tr');
-        var td = document.createElement('td');
-        td.style.width="100%";
-        td.style.height="100%";
-        row.appendChild(td);
-        tbody.appendChild(row);
+
+      //Create main table
+        var div, table, tbody, tr, td;
+        tbody = createTable();
+        table = tbody.parentNode;
+        table.setAttribute("desc", me.className);
         parent.appendChild(table);
-        me.table = table;
+        me.el = table;
         
-      //Watch for resize events
-        addResizeListener(parent, function(){
-            me.update();
-        });
+        
+        
+      //Create header
+        tr = document.createElement("tr");
+        tr.setAttribute("desc", "Header Row");
+        setStyle(tr, "headerRow");
+        tbody.appendChild(tr);
+        td = document.createElement("td");
+        td.style.width = "100%";
+        td.style.height = "inherit";
+        tr.appendChild(td);
+        header = createTable();
+        td.appendChild(header.parentNode);
 
-
-      //Create relative div
-        var div = document.createElement("div");
-        div.style.width="100%";
+        
+        
+      //Create body
+        tr = document.createElement("tr");
+        tr.setAttribute("desc", "Body Row");
+        tbody.appendChild(tr);
+        td = document.createElement("td");
+        td.style.width = "100%";
+        td.style.height = "100%";
+        tr.appendChild(td);  
+        
+        bodyDiv = document.createElement('div');
+        bodyDiv.setAttribute("desc", "body-div"); 
+        bodyDiv.style.width = "100%";
+        bodyDiv.style.height = "100%";
+        bodyDiv.style.position = "relative";
+        td.appendChild(bodyDiv);
+        div = document.createElement('div');
+        div.style.width = "100%";
         div.style.height = "100%";
-        div.style.position = "relative";
-        td.appendChild(div);
+        div.style.position = "absolute";
+        div.style.overflow = 'scroll';
+        div.style.overflowX = 'hidden';
+        bodyDiv.appendChild(div);
+        bodyDiv = div;
         
-        if (div.offsetHeight===0){
-            div.style.height = getPixels(td.offsetHeight);
-            setTimeout(function () {
-                div.style.height = "100%";
-            }, 500);
-        }
+        body = createTable();
+        body.parentNode.style.height = '';
+        div.appendChild(body.parentNode);
         
-
-      //Create wrapper for the inner table
-        var wrapper = document.createElement("div");
-        wrapper.style.width="100%";
-        wrapper.style.height = "100%"; //getPixels(td.offsetHeight); //<--Need to update on resize events!
-        wrapper.style.position = "absolute";
-        wrapper.style.left = 0;
-        wrapper.style.top = 0;
-        wrapper.style.overflow = "scroll";
-        wrapper.style.overflowX = 'hidden';
-        if (typeof IScroll !== 'undefined'){ 
-            wrapper.style.overflowY = 'hidden';
-        }
-        else{
-            wrapper.onscroll = function(){
-                var maxScrollPosition = wrapper.scrollHeight - wrapper.clientHeight;
-                me.onScroll(wrapper.scrollTop, maxScrollPosition);
-            }
-        }
-        div.appendChild(wrapper);
-        me.wrapper = wrapper;
         
-
-      //Create header div
-        var header = document.createElement('div');
-        header.style.width="100%";
-        header.style.height=getPixels(config.headerStyle.height);
-        header.style.position = "absolute";
-        header.style.left = 0;
-        header.style.top = 0;
-        header.style.overflowY = "hidden";
-        div.appendChild(header);
-
-
-      //Add header table
-        table = document.createElement('table');
-        table.style.width = "100%";
-        table.style.height = "100%";
-        table.cellSpacing = 0;
-        table.cellPadding = 0;
-        table.style.borderCollapse = "collapse";
-        table.border = config.border;
-        tbody = document.createElement('tbody');
-        table.appendChild(tbody);
-        row = document.createElement('tr');
-        tbody.appendChild(row);
         
-
-        if (typeof config.headerStyle === 'string' || config.headerStyle instanceof String){
-            row.className = config.headerStyle;
-        }
-        else{
-            for (var o in config.headerStyle){
-                var key = o;
-                var val = config.headerStyle[o];
-
-                if (key=="class") row.className = val;
-                else row.style[key] = val;
-            }
-        }   
+      //Populate header
+        tr = createPhantomRow(header, 1);
+        td = document.createElement("td");
+        tr.appendChild(td);
+        var spacerUR = document.createElement('div');
+        td.appendChild(spacerUR);
+        
+        tr = document.createElement("tr");
+        header.appendChild(tr);
         for (var i=0; i<config.columns.length; i++){
             var columnConfig = config.columns[i];
             var clonedColumnConfig = {};
             merge(clonedColumnConfig, columnConfig);
-            if (clonedColumnConfig.align!="center") clonedColumnConfig.align = "left";
-            var cell = createCell(clonedColumnConfig, i<config.columns.length-1);
-            cell.setAttribute("colID", i);
+            //right aligned columns have center align headers
+            if (clonedColumnConfig.align=="right") clonedColumnConfig.align = "center"; 
+            
+            var cell = createCell(clonedColumnConfig, true, i<config.columns.length-1);
+            cell.setContent(columnConfig.header);
+            cell.colID = i;
             cell.onclick = function(event){
-                var colID = parseInt(this.getAttribute("colID"));
+                var colID = this.colID;
                 var colConfig = config.columns[colID];
                 me.onHeaderClick(colID,colConfig,this,event);
                 if (colConfig!=null){
@@ -183,54 +155,87 @@ javaxt.dhtml.Table = function(parent, config) {
                         callback.apply(me, [i,cell,event]);
                     }
                 }
-            }
-            row.appendChild(cell);
+            };
+            tr.appendChild(cell);
         }
-        createPhantomRow(tbody, 0);
-        header.appendChild(table);
-        me.header = table;
-        updateCells(table);
-
-
-      //Add content table
-        table = document.createElement('table');
-        table.style.width = "100%";
-        table.cellSpacing = 0;
-        table.cellPadding = 0;
-        table.style.borderCollapse = "collapse";
-        table.border = config.border;
-        tbody = document.createElement('tbody');
-        table.appendChild(tbody);
+        tr.appendChild(document.createElement("td")); //cell under the spacer
         
-        var headerRow = me.header.childNodes[0].childNodes[0];
-        var headerHeight = headerRow.offsetHeight;        
-        if (headerHeight===0){ 
-            console.log("Warning: Cannot determine header height!");
-            headerHeight = 40;
-        }
-        row = createPhantomRow(tbody, 1);
-        row.style.height = getPixels(headerHeight);
 
-        wrapper.appendChild(table);
-        me.body = table;
+        
+        
+      //Populate body
+        createPhantomRow(body, 1);
 
 
-        if (typeof IScroll !== 'undefined'){
-            setTimeout(function () {
-                me.iScroll = new IScroll(wrapper, {
-                    
+
+
+      //Function called after the table has been added to the DOM
+        var onRender = function(){
+            
+            
+          //Configure iScroll as needed and watch for scroll events
+            if (typeof IScroll !== 'undefined'){ 
+                bodyDiv.style.overflowY = 'hidden';
+                me.iScroll = new IScroll(bodyDiv, {
+
                     scrollbars: true,
                     fadeScrollbars: false,
                     hideScrollbars: false,
-                    
+
                     onScrollStart : function(e) {
                         //document.onselectstart = new Function ("return false");
                         //document.onmousedown = function(e){return false;};
                         //me.body.onselectstart='return false;'
                     }
                 });
-            }, 100);
+            }
+            else{
+                bodyDiv.onscroll = function(){
+                    var maxScrollPosition = bodyDiv.scrollHeight - bodyDiv.clientHeight;
+                    me.onScroll(bodyDiv.scrollTop, maxScrollPosition);
+                };
+            }
+            
+            
+          //Update the spacer in the right column of the header
+            var bodyWidth = bodyDiv.offsetWidth;
+            var tableWidth = body.parentNode.offsetWidth;
+            var scrollWidth = Math.abs(bodyWidth-tableWidth);
+            spacerUR.style.width = scrollWidth + "px";
+
+
+          //Watch for resize events
+            addResizeListener(parent, function(){
+                me.update();
+            });
+        };
+
+
+
+
+      //Check whether the table has been added to the DOM
+        var w = bodyDiv.offsetWidth;
+        if (w===0 || isNaN(w)){
+            var timer;
+            
+            var checkWidth = function(){ 
+                var w = bodyDiv.offsetWidth;
+                if (w===0 || isNaN(w)){
+                    timer = setTimeout(checkWidth, 100);
+                }
+                else{
+                    clearTimeout(timer);
+                    onRender();
+                }
+            };
+            
+            timer = setTimeout(checkWidth, 100);
         }
+        else{
+            onRender();
+        }
+        
+
     };
 
 
@@ -277,15 +282,17 @@ javaxt.dhtml.Table = function(parent, config) {
   //** createCell
   //**************************************************************************
 
-    var createCell = function(columnConfig, addHandle){
+    var createCell = function(columnConfig, isHeader, addHandle){
 
         var cell = document.createElement('td');
-        cell.style.font = "inherit";
-        cell.style.padding = "0px"; //"inherit";
-        cell.style.verticalAlign = "middle";
-        
-        var align = columnConfig.align==null ? "left" : columnConfig.align;
-        if (align=="center") cell.style.paddingLeft = cell.style.paddingRight = 0;
+        if (isHeader===true){
+            setStyle(cell, "headerColumn");
+        }
+        else{
+            setStyle(cell, "column");
+        }
+
+        cell.style.textAlign = columnConfig.align;
         
         
       //Hide column as needed
@@ -303,126 +310,41 @@ javaxt.dhtml.Table = function(parent, config) {
             cell.setAttribute("unselectable", "on"); // For IE and Opera
         }
 
-        var div = document.createElement("div");
-        div.style.position = "relative";
-        div.style.textAlign = align;
-        cell.appendChild(div);
+        
 
-        var wrapper = document.createElement("div");
-        wrapper.style.position = "absolute";
-        wrapper.style.left = 0;
-        wrapper.style.top = 0;
-        wrapper.style.width = 0; //<--This gets updated by the updateCells() method
-        wrapper.style.overflow = "scroll";
-        wrapper.style.overflowX = 'hidden';
-        wrapper.style.overflowY = 'hidden';
-        div.appendChild(wrapper);
-        wrapper.innerHTML = columnConfig.header;
+        var outerDiv = document.createElement("div");
+        outerDiv.style.position = "relative";
+        outerDiv.style.height = "100%";
+        outerDiv.style.cursor = "inherit";
+        cell.appendChild(outerDiv);
+
+        var innerDiv = document.createElement("div");
+        innerDiv.style.position = "absolute";
+        innerDiv.style.width = "100%";
+        innerDiv.style.height = "100%";
+        innerDiv.style.overflow = "hidden";
+        innerDiv.style.whiteSpace = 'nowrap';
+        innerDiv.style.cursor = "inherit";
+        outerDiv.appendChild(innerDiv);
+        cell.innerDiv = innerDiv;
+        cell.setContent = setContent;
+        cell.getContent = getContent;
 
 
-        if (addHandle==true){
+        if (isHeader===true && addHandle===true){
             var handle = document.createElement("div");
             handle.style.position = "absolute";
             handle.style.right = 0;
             handle.style.top = 0;
-            handle.style.width = 5;
-            handle.style.height = 15; //<-- this might be too big!
+            handle.style.width = "5px";
+            handle.style.height = "100%"; //<-- this might be too big!
             handle.style.cursor = "col-resize";
-            div.appendChild(handle);
+            outerDiv.appendChild(handle);
         }
 
         return cell;
     };
 
-
-  //**************************************************************************
-  //** updateCells
-  //**************************************************************************
-  /** Used to update the width and height of the divs inside the table cells.
-   */
-    var updateCells = function(el){
-
-      //Precompute column widths (optimization for iPad)
-        var colWidths = [];
-        var colHeaders = me.header.childNodes[0].childNodes[0].childNodes;
-        for (var i=0; i<colHeaders.length; i++){
-            colWidths.push(getPixels(colHeaders[i].offsetWidth));
-        }
-
-
-      //Find divs inside the table cells. We will defer updating the width and
-      //height of the cells for performance reasons (optimization for Firefox)
-        var divs = [];
-        var colHeights = [];
-        var getDivs = function(row){
-            var colHeight = null;
-            for (var j=0; j<row.childNodes.length; j++){
-                var col = row.childNodes[j];
-                if (colHeight==null) colHeight = parseInt(col.offsetHeight);
-                if (col.childNodes[0].tagName.toLowerCase()=="div"){
-                    divs.push(col.childNodes[0]);
-                }                
-            }
-            colHeights.push(colHeight);
-        };
-        var tagName = el.tagName.toLowerCase();
-        if (tagName=="tr"){
-            getDivs(el);
-        }
-        else if (tagName=="table"){
-            var tbody = el.childNodes[0];
-            for (var i=0; i<tbody.childNodes.length; i++){
-                var row = tbody.childNodes[i];
-                getDivs(row);
-            }
-        }
-        else{
-            return;
-        }
-
-
-      //Update heights
-        var x = 0;
-        var y = 0;
-        for (var i=0; i<divs.length; i++){
-            var colHeight = colHeights[y];
-            if (colHeight>0){
-                divs[i].style.height = (colHeight-1) + "px"; 
-            }
-            x++;
-            if (x===colWidths.length){ 
-                x = 0;
-                y++;
-            }
-        }
-        
-
-
-      //Update widths
-        var j=0;
-        for (var i=0; i<divs.length; i++){
-            var div = divs[i];
-            if (div.childNodes.length>0){
-                if (div.childNodes[0].tagName.toLowerCase()=="div"){
-                    var innerDiv = div.childNodes[0];
-                    innerDiv.style.height="100%";
-                    innerDiv.style.width=colWidths[j];
-                }
-            }
-            j++;
-            if (j===colWidths.length) j = 0;
-        }
-    };
-
-
-  //**************************************************************************
-  //** getColumnWidth
-  //**************************************************************************
-  /** Returns the width of a given column
-   */
-    this.getColumnWidth = function(index){
-        return me.header.childNodes[0].childNodes[0].childNodes[index].offsetWidth;
-    };
 
 
   //**************************************************************************
@@ -433,6 +355,25 @@ javaxt.dhtml.Table = function(parent, config) {
    *  Example: table.addRows([["Bob","12/30","$5.25"],["Jim","10/28","$7.33"]]);
    */
     this.addRows = function(rows){
+        
+      //Check if rows is a number
+        if (!isArray(rows)){
+            rows = parseInt(rows);
+            if (isNaN(rows)) return;
+            else{
+                var numRows = rows;
+                rows = [];
+                var data = [];
+                for (var i=0; i<config.columns.length; i++){
+                    data.push("");
+                }
+                for (var i=0; i<numRows; i++){
+                    rows.push(data);
+                }
+            }
+        }
+        
+        
         deferUpdate = true;
 
         var arr = [];
@@ -465,24 +406,13 @@ javaxt.dhtml.Table = function(parent, config) {
 
       //Create row
         var row = document.createElement('tr');
-        if (typeof config.rowStyle === 'string' || config.rowStyle instanceof String){
-            row.className = config.rowStyle;
-        }
-        else{
-            for (var o in config.rowStyle){
-                var key = o;
-                var val = config.rowStyle[o];
-                if (key=="width" || key=="height") val = getPixels(val);
-                
-                if (key=="class") row.className = val;
-                else row.style[key] = val;
-            }
-        }
+        row.selected = false;
+        setStyle(row, "row");
         
-
-
-        row.onclick = function(event){ selectRows(this,event); }
-
+        
+      //Row operations
+        row.set = setRowContent;
+        row.onclick = selectRows;
 
 
       //Insert cells
@@ -490,21 +420,83 @@ javaxt.dhtml.Table = function(parent, config) {
             var columnConfig = config.columns[i];
             var clonedColumnConfig = {};
             merge(clonedColumnConfig, columnConfig);
-            clonedColumnConfig.header = data[i];
-            row.appendChild(createCell(clonedColumnConfig));
+            var cell = createCell(clonedColumnConfig);
+            cell.setContent(data[i]);
+            row.appendChild(cell);
         }
-        me.body.childNodes[0].appendChild(row);
+        body.appendChild(row);
 
 
       //Update table as needed
-        if (!deferUpdate) me.update(row);
+        if (!deferUpdate) me.update();
 
 
         return row;
     };
     
+    
+  //**************************************************************************
+  //** setContent
+  //**************************************************************************
+  /** Used to set the content of a cell.
+   */
+    var setContent = function(content){
+        if (content==null){
+            this.innerDiv.innerHTML = "";
+        }
+        else{
+            if (typeof content === "string"){
+                this.innerDiv.innerHTML = content;
+            }
+            else{
+                this.innerDiv.innerHTML = "";
+                try{
+                    this.innerDiv.appendChild(content);
+                }
+                catch(e){
+                }
+            }
+        }
+    };
+    
+    
+  //**************************************************************************
+  //** getContent
+  //**************************************************************************
+  /** Returns the content of a cell.
+   */
+    var getContent = function(){
+        if (this.innerDiv.childNodes){
+            if (this.innerDiv.childNodes.length>0){
+                var content = this.innerDiv.childNodes[0];
+                if (content.nodeType===1) return content;
+                else return this.innerDiv.innerHTML;
+            }
+        }
+        return null;
+    };
 
-    var prevSelection;
+
+  //**************************************************************************
+  //** setRowContent
+  //**************************************************************************
+  /** Used to set the content of a cell using a column name or index.
+   */
+    var setRowContent = function(key, val){
+        var id = parseInt(key);
+        if (isNaN(id)){
+            for (var i=0; i<config.columns.length; i++){
+                var columnConfig = config.columns[i];
+                if (columnConfig.header===key){
+                    this.childNodes[i].setContent(val);
+                    return;
+                }
+            }
+        }
+        else{
+            this.childNodes[id].setContent(val);
+        }
+    };
 
 
   //**************************************************************************
@@ -512,8 +504,8 @@ javaxt.dhtml.Table = function(parent, config) {
   //**************************************************************************
   /** Private method used to select rows in the grid.
    */
-    var selectRows = function(row, event){
-
+    var selectRows = function(event){
+        var row = this;
         if (config.multiselect === true){
       
             var e;
@@ -530,11 +522,11 @@ javaxt.dhtml.Table = function(parent, config) {
 
 
           //select row (change row color and set "selected" attribute)     
-            if (row.getAttribute("selected")) { //then the row is already selected
-                row.removeAttribute("selected");
+            if (row.selected) { //then the row is already selected
+                deselect(row);
             }
             else{ //then the row is not already selected
-               row.setAttribute("selected","true");
+               select(row);
             }
 
 
@@ -556,18 +548,51 @@ javaxt.dhtml.Table = function(parent, config) {
 
                 for (var i = Math.min(currID, prevID); i <= Math.max(currID, prevID); i++){
                     var tr = tbody.childNodes[i];
-                    tr.setAttribute("selected","true");
+                    select(tr);
                 }
             }
         
+            me.onSelectionChange();
+        
         }
         else{
-            me.deselectAll();
-            row.setAttribute("selected","true");
+            if (!row.selected){
+                for (var i=1; i<body.childNodes.length; i++){
+                    var tr = body.childNodes[i];
+                    if (tr.selected){
+                        deselect(tr);
+                    }
+                }
+
+                select(row);
+                me.onSelectionChange();
+            }
         }
         
         prevSelection = row;
-        me.onSelectionChange();
+        
+    };
+
+
+  //**************************************************************************
+  //** select
+  //**************************************************************************
+  /** Used to select a given row.
+   */
+    var select = function(row){
+        row.selected=true;
+        setStyle(row, "select");
+    };
+
+
+  //**************************************************************************
+  //** deselect
+  //**************************************************************************
+  /** Used to deselect a given row.
+   */
+    var deselect = function(row){
+        row.selected=false;
+        setStyle(row, "row");
     };
 
 
@@ -577,14 +602,17 @@ javaxt.dhtml.Table = function(parent, config) {
   /** Selects all the rows in the table.
    */
     this.selectAll = function(){
+        var selectionChanged = false;
         if (config.multiselect === true){
-            var tbody = me.body.childNodes[0];
-            for (var i=0; i<tbody.childNodes.length; i++){
-                var tr = tbody.childNodes[i];
-                tr.setAttribute("selected","true");
-                prevSelection = row;
+            for (var i=1; i<body.childNodes.length; i++){
+                var tr = body.childNodes[i];
+                if (!tr.selected){
+                    select(tr);
+                    selectionChanged=true;
+                }
             }
-            me.onSelectionChange();
+            prevSelection = null;
+            if (selectionChanged) me.onSelectionChange();
         }
     };
 
@@ -595,15 +623,16 @@ javaxt.dhtml.Table = function(parent, config) {
   /** Deselects all the rows in the table.
    */
     this.deselectAll = function(){
-        var tbody = me.body.childNodes[0];
-        for (var i=0; i<tbody.childNodes.length; i++){
-            var tr = tbody.childNodes[i];
-            if (tr.getAttribute("selected")){
-                tr.removeAttribute("selected");
+        var selectionChanged = false;
+        for (var i=1; i<body.childNodes.length; i++){
+            var tr = body.childNodes[i];
+            if (tr.selected){
+                deselect(tr);
+                selectionChanged=true;
             }
         }
         prevSelection = null;
-        me.onSelectionChange();
+        if (selectionChanged) me.onSelectionChange();
     };
 
 
@@ -613,7 +642,7 @@ javaxt.dhtml.Table = function(parent, config) {
   /** Called whenever a row in the grid is selected or deselected. Selected 
    *  rows can be retrieved using the forEachRow method. Example:
       table.forEachRow(function (row, content) {
-          if (row.getAttribute("selected")) {
+          if (row.selected) {
               console.log(content);
           }
       });
@@ -636,47 +665,46 @@ javaxt.dhtml.Table = function(parent, config) {
    */
     this.clear = function(){
         me.deselectAll();
-        var tbody = me.body.childNodes[0];
-        while (tbody.childNodes.length>1){
-            var row = tbody.childNodes[1];
-            tbody.removeChild(row);
+        while (body.childNodes.length>1){
+            var row = body.childNodes[1];
+            body.removeChild(row);
         }
         me.update();
-    }
+    };
 
 
   //**************************************************************************
   //** update
   //**************************************************************************
-  /** Used to adjust the width of all the cells in the table and refresh the
-   *  scroll.
+  /** Called whenever rows are added or removed from the table.
    */
-    this.update = function(row){
+    this.update = function(){
+        
+        
+        me.onOverflow(me.hasOverflow());
 
-      //Adjust header width in case of overflow
-        if (me.header.offsetWidth != me.body.offsetWidth){
-            me.header.style.width = getPixels(me.body.offsetWidth);
-            updateCells(me.header);
-        }
-
-
-      //Update cell widths in the given row. If no row is given,
-      //adjust the width of all the rows in the body
-        if (row==null) updateCells(me.body);
-        else updateCells(row);
-
-
-      //Update iScroll
+        
         if (me.iScroll) me.iScroll.refresh();
     };
-
+    
 
   //**************************************************************************
-  //** getDOM
+  //** hasOverflow
   //**************************************************************************
-    this.getDOM = function(){
-        return me.table;
+  /** Returns true if the table is overflowing. 
+   */
+    this.hasOverflow = function(){
+        return (bodyDiv.offsetHeight < bodyDiv.scrollHeight ||
+        bodyDiv.offsetWidth < bodyDiv.scrollWidth);
     };
+    
+    
+  //**************************************************************************
+  //** onOverflow
+  //**************************************************************************
+  /** Called whenever the table overflow status changes. 
+   */
+    this.onOverflow = function(hasOverflow){};
 
 
   //**************************************************************************
@@ -693,7 +721,17 @@ javaxt.dhtml.Table = function(parent, config) {
   //** scrollTo
   //**************************************************************************
     this.scrollTo = function(x, y){
-        me.wrapper.scrollTop = y;
+        bodyDiv.scrollTop = y;
+    };
+
+
+  //**************************************************************************
+  //** getRowCount
+  //**************************************************************************
+  /** Returns the total number of rows in the table.
+   */
+    this.getRowCount = function(){
+        return body.childNodes.length-1; //skip phantom row!
     };
     
 
@@ -711,27 +749,17 @@ javaxt.dhtml.Table = function(parent, config) {
    */
     this.forEachRow = function(callback){
         if (callback==null) return;
-        var tbody = me.body.childNodes[0];
-        for (var i=0; i<tbody.childNodes.length; i++){
-            if (i>0){//skip phantom row!
-                var row = tbody.childNodes[i];
-                var content = [];
-                for (var j=0; j<row.childNodes.length; j++){ //skip phantom row!
-                    var col = row.childNodes[j];
-                    if (col.childNodes[0].tagName.toLowerCase()=="div"){
-                        var div = col.childNodes[0];
-                        if (div.childNodes.length>0){
-                            if (div.childNodes[0].tagName.toLowerCase()=="div"){
-                                var innerDiv = div.childNodes[0];
-                                content.push(innerDiv.innerHTML);
-                            }
-                        }
-                    }
-                }
 
-                var b = callback.apply(me, [row, content]);
-                if (b===true) return;
+        for (var i=1; i<body.childNodes.length; i++){ //skip phantom row!
+            var row = body.childNodes[i];
+            var content = [];
+            for (var j=0; j<row.childNodes.length; j++){ 
+                var col = row.childNodes[j];
+                content.push(col.getContent());
             }
+
+            var b = callback.apply(me, [row, content]);
+            if (b===true) return;
         }
     };
 
@@ -742,39 +770,20 @@ javaxt.dhtml.Table = function(parent, config) {
   /** Used to update contents of a given row.
    */
     this.updateRow = function(row, data){
-        var x = 0;
-        for (var j=0; j<row.childNodes.length; j++){ //skip phantom row!
-            var col = row.childNodes[j];
-            if (col.childNodes[0].tagName.toLowerCase()=="div"){
-                var div = col.childNodes[0];
-                if (div.childNodes.length>0){
-                    if (div.childNodes[0].tagName.toLowerCase()=="div"){
-                        var innerDiv = div.childNodes[0];
-                        innerDiv.innerHTML = data[x];
-                        x++;
-                    }
-                }
-            }
+        for (var i=0; i<row.childNodes.length; i++){
+            var col = row.childNodes[i];
+            col.setContent(data[i]);
         }
     };
 
 
   //**************************************************************************
-  //** merge
+  //** getColumnWidth
   //**************************************************************************
-  /** Used to merge properties from one json object into another. Credit:
-   *  https://github.com/stevenleadbeater/JSONT/blob/master/JSONT.js
+  /** Returns the width of a given column
    */
-    var merge = function(settings, defaults) {
-        for (var p in defaults) {
-            if ( defaults.hasOwnProperty(p) && typeof settings[p] !== "undefined" ) {
-                if (p!=0) //<--Added this as a bug fix
-                merge(settings[p], defaults[p]);
-            }
-            else {
-                settings[p] = defaults[p];
-            }
-        }
+    this.getColumnWidth = function(index){
+        return body.childNodes[0].childNodes[index].offsetWidth;
     };
 
 
@@ -803,6 +812,54 @@ javaxt.dhtml.Table = function(parent, config) {
         x = parseFloat(obj);
         if (isNaN(x)) return obj;
         else return x + "px";
+    };
+
+
+  //**************************************************************************
+  //** createTable
+  //**************************************************************************
+    var createTable = function(){
+        var table = document.createElement('table');        
+        table.style.width = "100%";
+        table.style.height = "100%";
+        table.cellSpacing = 0;
+        table.cellPadding = 0;
+        table.style.borderCollapse = "collapse";
+        var tbody = document.createElement('tbody');
+        table.appendChild(tbody);
+        return tbody;
+    };
+
+
+  //**************************************************************************
+  //** setStyle
+  //**************************************************************************
+  /** Used to set the style for a given element. Styles are defined via a CSS 
+   *  class name or inline using the config.style definitions. 
+   */
+    var setStyle = function(el, style){
+        
+        style = config.style[style];
+        if (style===null) return;
+        
+        el.style = '';
+        el.removeAttribute("style");
+        
+        
+        if (typeof style === 'string' || style instanceof String){
+            el.className = style;
+        }
+        else{    
+            for (var key in style){
+                var val = style[key];
+                if (key==="content"){
+                    el.innerHTML = val;
+                }
+                else{
+                    el.style[key] = val;
+                }
+            }
+        }
     };
 
 
@@ -864,7 +921,24 @@ javaxt.dhtml.Table = function(parent, config) {
 
     };
 
-    
+
+  //**************************************************************************
+  //** merge
+  //**************************************************************************
+  /** Used to merge properties from one json object into another. Credit:
+   *  https://github.com/stevenleadbeater/JSONT/blob/master/JSONT.js
+   */
+    var merge = function(settings, defaults) {
+        for (var p in defaults) {
+            if ( defaults.hasOwnProperty(p) && typeof settings[p] !== "undefined" ) {
+                if (p!=0) //<--Added this as a bug fix
+                merge(settings[p], defaults[p]);
+            }
+            else {
+                settings[p] = defaults[p];
+            }
+        }
+    };
     
     init();
 };
