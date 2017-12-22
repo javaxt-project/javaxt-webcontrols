@@ -43,8 +43,14 @@ javaxt.dhtml.Table = function(parent, config) {
                 
             },
             
-            select: {
+            selectedRow: {
                 backgroundColor: "#FFFFB1"
+            },
+            
+            resizeHandle: {
+                width: "5px",
+                cursor: "col-resize",
+                marginRight: "-2px"
             }
         }
     };
@@ -56,6 +62,12 @@ javaxt.dhtml.Table = function(parent, config) {
   /** Creates a new instance of this class. */
 
     var init = function(){
+        
+        if (typeof parent === "string"){
+            parent = document.getElementById(parent);
+        }
+        if (!parent) return;
+        
 
       //Exit if no columns defined
         if (config==null || config.columns==null) return;
@@ -137,13 +149,29 @@ javaxt.dhtml.Table = function(parent, config) {
         header.appendChild(tr);
         for (var i=0; i<config.columns.length; i++){
             var columnConfig = config.columns[i];
-            var clonedColumnConfig = {};
-            merge(clonedColumnConfig, columnConfig);
-            //right aligned columns have center align headers
-            if (clonedColumnConfig.align=="right") clonedColumnConfig.align = "center"; 
+
+          //Update right aligned columns to have center align headers
+            var align = columnConfig.align;
+            if (align=="right") columnConfig.align = "center"; 
             
-            var cell = createCell(clonedColumnConfig, true, i<config.columns.length-1);
+          //Create cell
+            var cell = createCell(columnConfig, true, i);
+            
+          //Reset alignment in the config
+            columnConfig.align = align;
+            
+          //Set content
             cell.setContent(columnConfig.header);
+            
+          //Create label/alias (see setRowContent)
+            if (typeof columnConfig.header === "string"){
+                columnConfig.label = columnConfig.header;
+            }
+            else{
+                columnConfig.label = columnConfig.header.innerText;
+            }
+            
+          //OnClick events
             cell.colID = i;
             cell.onclick = function(event){
                 var colID = this.colID;
@@ -158,7 +186,7 @@ javaxt.dhtml.Table = function(parent, config) {
             };
             tr.appendChild(cell);
         }
-        tr.appendChild(document.createElement("td")); //cell under the spacer
+        tr.appendChild(document.createElement("td")); //<-- add cell under the spacer
         
 
         
@@ -282,7 +310,7 @@ javaxt.dhtml.Table = function(parent, config) {
   //** createCell
   //**************************************************************************
 
-    var createCell = function(columnConfig, isHeader, addHandle){
+    var createCell = function(columnConfig, isHeader, idx){
 
         var cell = document.createElement('td');
         if (isHeader===true){
@@ -331,15 +359,16 @@ javaxt.dhtml.Table = function(parent, config) {
         cell.getContent = getContent;
 
 
-        if (isHeader===true && addHandle===true){
-            var handle = document.createElement("div");
-            handle.style.position = "absolute";
-            handle.style.right = 0;
-            handle.style.top = 0;
-            handle.style.width = "5px";
-            handle.style.height = "100%"; //<-- this might be too big!
-            handle.style.cursor = "col-resize";
-            outerDiv.appendChild(handle);
+        if (columnConfig.resizable===true){
+            if (isHeader && idx<config.columns.length-1){
+                var handle = document.createElement("div");
+                setStyle(handle, "resizeHandle");
+                handle.style.position = "absolute";
+                handle.style.right = 0;
+                handle.style.top = 0;
+                handle.style.height = "100%";
+                outerDiv.appendChild(handle);
+            }
         }
 
         return cell;
@@ -441,7 +470,7 @@ javaxt.dhtml.Table = function(parent, config) {
   /** Used to set the content of a cell.
    */
     var setContent = function(content){
-        if (content==null){
+        if (content==null || typeof content === "undefined"){
             this.innerDiv.innerHTML = "";
         }
         else{
@@ -487,7 +516,8 @@ javaxt.dhtml.Table = function(parent, config) {
         if (isNaN(id)){
             for (var i=0; i<config.columns.length; i++){
                 var columnConfig = config.columns[i];
-                if (columnConfig.header===key){
+                var label = columnConfig.label;
+                if (label===key){
                     this.childNodes[i].setContent(val);
                     return;
                 }
@@ -581,7 +611,7 @@ javaxt.dhtml.Table = function(parent, config) {
    */
     var select = function(row){
         row.selected=true;
-        setStyle(row, "select");
+        setStyle(row, "selectedRow");
     };
 
 
@@ -655,7 +685,7 @@ javaxt.dhtml.Table = function(parent, config) {
   //**************************************************************************
   /** Called whenever a header cell is clicked.
    */
-    this.onHeaderClick = function(idx, cell, event){};
+    this.onHeaderClick = function(idx, colConfig, cell, event){};
 
 
   //**************************************************************************
