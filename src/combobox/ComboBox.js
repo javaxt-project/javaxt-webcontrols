@@ -150,6 +150,20 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         };
         
         input.oninput = function(){
+
+            
+            var foundMatch = false;
+            var filter = input.value.replace(/^\s*/, "").replace(/\s*$/, "").toLowerCase();
+            for (var i=0; i<menu.childNodes.length; i++){
+                var div = menu.childNodes[i];
+                if (div.innerHTML.toLowerCase()===filter){
+                    foundMatch = true;
+                    input.data = div.value;
+                    break;
+                }
+            }
+            if (!foundMatch) input.data = null;
+
             me.onChange(input.value, input.data);
         };
         input.onpaste = input.oninput;
@@ -227,6 +241,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
    */
     this.setValue = function(text, value){
         input.value = getText(text);
+        if (typeof value === "undefined") value = text;
         input.data = value;
     };
 
