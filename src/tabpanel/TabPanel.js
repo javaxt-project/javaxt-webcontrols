@@ -138,8 +138,30 @@ javaxt.dhtml.TabPanel = function(parent, config) {
         
         tabContent.appendChild(el);
     };
-    
-   
+
+
+  //**************************************************************************
+  //** getTabs
+  //**************************************************************************
+  /** Returns a list of tabs in the tab panel.
+   */
+    this.getTabs = function(){
+        var tabs = [];
+        for (var i=0; i<tabList.childNodes.length; i++){
+            var tab = tabList.childNodes[i];
+            var hidden = (tab.style.display === 'none');
+            var active = (tab.el.style.display !== 'none');
+            tabs.push({
+                name: tab.innerHTML,
+                el: tab.el,
+                hidden: hidden,
+                active: active
+            });
+        }
+        return tabs;
+    };
+
+
   //**************************************************************************
   //** raiseTab
   //**************************************************************************
