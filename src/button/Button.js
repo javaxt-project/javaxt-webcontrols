@@ -31,7 +31,7 @@ javaxt.dhtml.Button = function(parent, config) {
         disabled: false,
         toggle: false,
         menu: false,
-        
+        hidden: false,
         
         
       //Properties for the outer div
@@ -175,6 +175,10 @@ javaxt.dhtml.Button = function(parent, config) {
             }
         }
         outerDiv.style.position = "relative";
+        if (config.hidden===true){
+            outerDiv.style.visibility = 'hidden';
+            outerDiv.style.display = 'none';
+        }
         parent.appendChild(outerDiv);
         me.el = outerDiv;
         
@@ -465,9 +469,26 @@ javaxt.dhtml.Button = function(parent, config) {
             };
         }
     };
-    
 
-    
+
+  //**************************************************************************
+  //** show
+  //**************************************************************************
+    this.show = function(){
+        me.el.style.visibility = '';
+        me.el.style.display = '';
+    };
+
+
+  //**************************************************************************
+  //** hide
+  //**************************************************************************
+    this.hide = function(){
+        me.el.style.visibility = 'hidden';
+        me.el.style.display = 'none';
+    };
+
+
   //**************************************************************************
   //** onClick
   //**************************************************************************
