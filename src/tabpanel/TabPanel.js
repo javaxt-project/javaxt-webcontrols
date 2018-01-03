@@ -22,17 +22,29 @@ javaxt.dhtml.TabPanel = function(parent, config) {
         closable: false,
         style : {
             tabBar: {
+                border: "1px solid #ccc",
                 backgroundColor: "#eaeaea",
-                height: "30px"
+                height: "30px",
+                borderBottom: "0px"
             },
             activeTab: {
-                backgroundColor: "#fafafa"
+                lineHeight: "30px",
+                padding: "0 7px",
+                backgroundColor: "#fafafa",
+                cursor: "default",
+                borderRight: "1px solid #ccc",
+                borderBottom: "1px solid #fafafa"
             },
             inactiveTab: {
-                
+                lineHeight: "30px",
+                padding: "0 7px",
+                cursor: "pointer",
+                borderRight: "1px solid #ccc",
+                borderBottom: "0px"
             },
             tabBody: {
-                border: "1px solid #ccc"
+                border: "1px solid #ccc",
+                verticalAlign: "top"
             },
             closeIcon: {
                 
