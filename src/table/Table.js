@@ -28,19 +28,32 @@ javaxt.dhtml.Table = function(parent, config) {
 
             
             headerRow: {
-                height: "20px"
+                height: "35px",
+                borderBottom: "1px solid #8f8f8f",
+                background: "#eaeaea"
             },
             
             headerColumn: {
-                
+                lineHeight: "35px",
+                borderLeft: "1px solid #cccccc",
+                borderRight: "1px solid #cccccc",
+                padding: "0 5px",
+                color: "#272727",
+                cursor: "pointer"
             },
             
             row: {
-                height: "20px"
+                height: "35px",
+                borderBottom: "1px solid #cccccc"
             },
             
             column: {
-                
+                lineHeight: "35px",
+                borderLeft: "1px solid #cccccc",
+                borderRight: "1px solid #cccccc",
+                padding: "0 5px",
+                color: "#272727",
+                cursor: "default"
             },
             
             selectedRow: {
