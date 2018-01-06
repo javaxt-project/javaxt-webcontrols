@@ -236,13 +236,32 @@ javaxt.dhtml.ComboBox = function(parent, config) {
   //** setValue
   //**************************************************************************
   /** Used to set the value for the input. 
-   *  @param text Text to display in the input.
-   *  @param value Value associated with the input.
    */
-    this.setValue = function(text, value){
-        input.value = getText(text);
-        if (typeof value === "undefined") value = text;
-        input.data = value;
+    this.setValue = function(val){
+        
+      //Try to match the val to one of the menu items using the menu data
+        for (var i=0; i<menu.childNodes.length; i++){
+            var div = menu.childNodes[i];
+            if (div.value===val){
+                input.value = div.innerText;
+                input.data = div.value;
+                return;
+            }
+        }
+
+      //Try to match the val to one of the menu items using the menu text
+        for (var i=0; i<menu.childNodes.length; i++){
+            var div = menu.childNodes[i];
+            if (div.innerText.toLowerCase() === getText(val)){
+                input.value = div.innerText;
+                input.data = div.value;
+                return;
+            }
+        }
+
+        
+        //input.value = getText(val);
+        //input.data = val;
     };
 
 
@@ -441,7 +460,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         var div = null;
         var max = 0;
         for (var i=0; i<menu.childNodes.length; i++){
-            var b = menu.childNodes[i].innerHTML;
+            var b = menu.childNodes[i].innerText;
             var x = 0;
             for (var j=0; j<Math.min(a.length, b.length); j++) {
                 if (a.charAt(j) !== b.charAt(j)){
@@ -529,7 +548,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         var arr = [];
         for (var i=0; i<menu.childNodes.length; i++){
             var div = menu.childNodes[i];
-            if (div.innerHTML === getText(name)){
+            if (div.innerText === getText(name)){
                 arr.push(div);
             }
         }
