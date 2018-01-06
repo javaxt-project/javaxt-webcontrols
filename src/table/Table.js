@@ -57,6 +57,8 @@ javaxt.dhtml.Table = function(parent, config) {
             },
             
             selectedRow: {
+                height: "35px",
+                borderBottom: "1px solid #cccccc",
                 backgroundColor: "#FFFFB1"
             },
             
