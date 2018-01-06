@@ -161,14 +161,7 @@ javaxt.dhtml.TabPanel = function(parent, config) {
         var tabs = [];
         for (var i=0; i<tabList.childNodes.length; i++){
             var tab = tabList.childNodes[i];
-            var hidden = (tab.style.display === 'none');
-            var active = (tab.el.style.display !== 'none');
-            tabs.push({
-                name: tab.innerHTML,
-                el: tab.el,
-                hidden: hidden,
-                active: active
-            });
+            tabs.push(getTabInfo(tab));
         }
         return tabs;
     };
@@ -189,12 +182,24 @@ javaxt.dhtml.TabPanel = function(parent, config) {
 
         if (tab.el.style.display === 'none'){
 
+          //Find current tab
+            var currTab = null;
+            for (var i=0; i<tabList.childNodes.length; i++){
+                var t = tabList.childNodes[i];
+                if (t.el.style.display=='block'){
+                    currTab = t;
+                    break;
+                }
+            }
+            
+
           //Make tab active
             setStyle(tab, "activeTab");
             tab.style.position = "relative";
             tab.style.float = "left";
             tab.style.height = "100%";
             tab.el.style.display = '';
+            
 
           //Make other tabs inactive
             for (var i=0; i<tabList.childNodes.length; i++){
@@ -207,8 +212,30 @@ javaxt.dhtml.TabPanel = function(parent, config) {
             }
 
 
+          //Display tab content
             tab.el.style.display = 'block';
+            
+            
+          //Call onTabChange
+            me.onTabChange(getTabInfo(tab), getTabInfo(currTab));
         }
+    };
+
+
+  //**************************************************************************
+  //** getTabInfo
+  //**************************************************************************
+    var getTabInfo = function(tab){
+        if (tab==null) return null;
+        
+        var hidden = (tab.style.display === 'none');
+        var active = (tab.el.style.display !== 'none');
+        return {
+            name: tab.innerText,
+            el: tab.el,
+            hidden: hidden,
+            active: active
+        };
     };
 
 
@@ -217,6 +244,8 @@ javaxt.dhtml.TabPanel = function(parent, config) {
   //**************************************************************************
     this.setActiveTab = this.raiseTab;
 
+
+    this.onTabChange = function(currTab, prevTab){};
 
   //**************************************************************************
   //** removeTab
