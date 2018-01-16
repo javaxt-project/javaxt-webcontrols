@@ -455,6 +455,7 @@ javaxt.dhtml.Table = function(parent, config) {
         
         
       //Row operations
+        row.get = getRowContent;
         row.set = setRowContent;
         row.onclick = selectRows;
 
@@ -489,7 +490,7 @@ javaxt.dhtml.Table = function(parent, config) {
             this.innerDiv.innerHTML = "";
         }
         else{
-            if (typeof content === "string"){
+            if (typeof content === "string" || !isNaN(parseFloat(content))){
                 this.innerDiv.innerHTML = content;
             }
             else{
@@ -518,6 +519,28 @@ javaxt.dhtml.Table = function(parent, config) {
             }
         }
         return null;
+    };
+
+
+  //**************************************************************************
+  //** getRowContent
+  //**************************************************************************
+  /** Returns the content of a cell using a column name or index.
+   */
+    var getRowContent = function(key){
+        var id = parseInt(key);
+        if (isNaN(id)){
+            for (var i=0; i<config.columns.length; i++){
+                var columnConfig = config.columns[i];
+                var label = columnConfig.label;
+                if (label===key){
+                    return this.childNodes[i].getContent();
+                }
+            }
+        }
+        else{
+            return this.childNodes[id].getContent();
+        }
     };
 
 
