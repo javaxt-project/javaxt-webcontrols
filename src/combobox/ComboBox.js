@@ -252,7 +252,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
       //Try to match the val to one of the menu items using the menu text
         for (var i=0; i<menu.childNodes.length; i++){
             var div = menu.childNodes[i];
-            if (div.innerText.toLowerCase() === getText(val)){
+            if (div.innerText.toLowerCase() === getText(val).toLowerCase()){
                 input.value = div.innerText;
                 input.data = div.value;
                 return;
