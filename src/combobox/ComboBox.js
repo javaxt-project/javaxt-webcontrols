@@ -213,6 +213,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         menu.style.overflowX = 'hidden';
         menu.style.overflowY = 'hidden';
         menu.style.width = "100%";
+        menu.style.zIndex = 1;
         div.appendChild(menu);
         
         
