@@ -197,6 +197,15 @@ javaxt.dhtml.Tree = function (parent, config) {
             show(ul);
             
             
+          //If the item is a node, expand children
+            if (getNodeType(li)!="leaf"){
+                var nextNode = li.nextSibling;
+                if (nextNode.tagName.toLowerCase()=="ul"){
+                    show(nextNode);
+                }
+            }
+            
+            
           //Check if the node is visible
             if (li.offsetParent===null && ul!==me.el){
                 
