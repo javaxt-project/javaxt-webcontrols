@@ -1,0 +1,106 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+
+<title>Carousel</title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+
+
+<script type="text/javascript" src="../../src/carousel/Carousel.js"></script>
+
+
+<style>
+    /* Set body height to 100% so we can test vertical resize */
+    html, body {
+        height:100%;
+        margin: 0;
+    }
+    
+    
+    body, textarea, input, select, td, th {
+        font-family:helvetica,arial,verdana,sans-serif; font-size:14px;
+    }    
+    
+    .panelID {
+        font-size:50px;
+        color:  #757575;
+        border: 5px solid #757575;
+        border-radius: 100px;
+        width: 100px;
+        height: 100px;
+        line-height: 100px;
+        position: relative;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    
+.javaxt-noselect {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    -ms-user-select: none;
+    -khtml-user-select: none;     
+    user-select: none;
+}
+</style>
+
+
+
+<script type="text/javascript">
+window.onload = function() {
+    
+    var carousel = new javaxt.dhtml.Carousel(document.getElementById("carousel"),{
+        loop: true,
+        animate: true
+    });
+    
+    document.getElementById("Back").onclick = function(){
+        carousel.back();
+    };
+    document.getElementById("Next").onclick = function(){
+        carousel.next();
+    };
+};
+</script>
+
+
+</head>
+<body>
+       
+    
+    <h1>Demo 1</h1>
+    <table style="width:100%;">
+      <tr>
+        <td align="center" class="javaxt-noselect">
+                
+
+    
+        <div id="carousel" style="width:250px;height:250px;border:1px solid #757575;">
+            <div style="background:#f0f8ff;height:100%;">
+                <div class="panelID">1</div>
+            </div>
+            <div style="background:#96a5b2;height:100%;">
+                <div class="panelID">2</div>
+            </div>
+            <div style="background:#ffd8d6;height:100%;">
+                <div class="panelID">3</div>
+            </div>
+        </div>
+
+        <div style="padding-top:10px;">
+          <input type="button" id="Back" value="Back"/>
+          <input type="button" id="Next" value="Next"/>
+        </div>
+            
+        </td>
+      </tr>
+    </table>
+    
+</body>
+</html>
