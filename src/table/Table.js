@@ -18,7 +18,7 @@ javaxt.dhtml.Table = function(parent, config) {
     var header, body; //tbody elements
     var bodyDiv; //overflow div
     var prevSelection;
-    
+    var template;
 
     var defaultConfig = {
 
@@ -354,7 +354,7 @@ javaxt.dhtml.Table = function(parent, config) {
         }
 
         
-
+      //Create overflow divs
         var outerDiv = document.createElement("div");
         outerDiv.style.position = "relative";
         outerDiv.style.height = "100%";
@@ -369,11 +369,9 @@ javaxt.dhtml.Table = function(parent, config) {
         innerDiv.style.whiteSpace = 'nowrap';
         innerDiv.style.cursor = "inherit";
         outerDiv.appendChild(innerDiv);
-        cell.innerDiv = innerDiv;
-        cell.setContent = setContent;
-        cell.getContent = getContent;
 
 
+      //Add resize handle
         if (columnConfig.resizable===true){
             if (isHeader && idx<config.columns.length-1){
                 var handle = document.createElement("div");
@@ -385,6 +383,13 @@ javaxt.dhtml.Table = function(parent, config) {
                 outerDiv.appendChild(handle);
             }
         }
+        
+        
+      //Set custom properties on the cell. Note that these  
+      //properties will be lost if the cell is cloned.
+        cell.innerDiv = innerDiv;
+        cell.setContent = setContent;
+        cell.getContent = getContent;
 
         return cell;
     };
@@ -436,7 +441,9 @@ javaxt.dhtml.Table = function(parent, config) {
   //** addRow
   //**************************************************************************
   /** Appends a row to the table and populates the cells with given values.
-   *  Example: table.addRow("Bob","12/30","$5.25");
+   *  Example: table.addRow("Bob","12/30","$5.25"); 
+   *  Note that this method also accepts an array of values. 
+   *  Example: table.addRow(["Bob","12/30","$5.25"]);
    */
     this.addRow = function(){
 
@@ -453,19 +460,34 @@ javaxt.dhtml.Table = function(parent, config) {
         row.selected = false;
         setStyle(row, "row");
         
-        
-      //Row operations
+
+      //Add custom functions to the row
         row.get = getRowContent;
         row.set = setRowContent;
         row.onclick = selectRows;
 
 
+      //Create template as needed. The template is a collection of cells that
+      //are cloned whenever a new row is added. This approach results in faster 
+      //row rendering.
+        if (!template){
+            template = [];
+            for (var i=0; i<config.columns.length; i++){
+                var columnConfig = config.columns[i];
+                var clonedColumnConfig = {};
+                merge(clonedColumnConfig, columnConfig);
+                var cell = createCell(clonedColumnConfig);
+                template.push(cell);
+            }
+        }
+        
+        
       //Insert cells
         for (var i=0; i<config.columns.length; i++){
-            var columnConfig = config.columns[i];
-            var clonedColumnConfig = {};
-            merge(clonedColumnConfig, columnConfig);
-            var cell = createCell(clonedColumnConfig);
+            var cell = template[i].cloneNode(true);
+            cell.innerDiv = cell.firstChild.firstChild;
+            cell.setContent = setContent;
+            cell.getContent = getContent;
             cell.setContent(data[i]);
             row.appendChild(cell);
         }
@@ -574,6 +596,7 @@ javaxt.dhtml.Table = function(parent, config) {
    */
     var selectRows = function(event){
         var row = this;
+        var rows = [];
         if (config.multiselect === true){
       
             var e;
@@ -591,12 +614,14 @@ javaxt.dhtml.Table = function(parent, config) {
 
           //select row (change row color and set "selected" attribute)     
             if (row.selected) { //then the row is already selected
-                deselect(row);
+                me.deselect(row);
             }
             else{ //then the row is not already selected
-               select(row);
+                me.select(row);
             }
-
+            
+            rows.push(row);
+            
 
           //shift + select event (highlight multiple rows)
             if (e.shiftKey){
@@ -616,29 +641,35 @@ javaxt.dhtml.Table = function(parent, config) {
 
                 for (var i = Math.min(currID, prevID); i <= Math.max(currID, prevID); i++){
                     var tr = tbody.childNodes[i];
-                    select(tr);
+                    me.select(tr);
+                    rows.push(tr);
                 }
             }
         
-            me.onSelectionChange();
+            me.onSelectionChange(rows);
         
         }
         else{
             if (!row.selected){
+                
+              //Deselect previous selection
                 for (var i=1; i<body.childNodes.length; i++){
                     var tr = body.childNodes[i];
                     if (tr.selected){
-                        deselect(tr);
+                        me.deselect(tr);
+                        rows.push(tr);
                     }
                 }
 
-                select(row);
-                me.onSelectionChange();
+              //Select row
+                me.select(row);
+                
+                rows.push(row);
+                me.onSelectionChange(rows);
             }
         }
         
         prevSelection = row;
-        
     };
 
 
@@ -647,7 +678,7 @@ javaxt.dhtml.Table = function(parent, config) {
   //**************************************************************************
   /** Used to select a given row.
    */
-    var select = function(row){
+    this.select = function(row){
         row.selected=true;
         setStyle(row, "selectedRow");
     };
@@ -658,7 +689,7 @@ javaxt.dhtml.Table = function(parent, config) {
   //**************************************************************************
   /** Used to deselect a given row.
    */
-    var deselect = function(row){
+    this.deselect = function(row){
         row.selected=false;
         setStyle(row, "row");
     };
@@ -670,17 +701,17 @@ javaxt.dhtml.Table = function(parent, config) {
   /** Selects all the rows in the table.
    */
     this.selectAll = function(){
-        var selectionChanged = false;
+        var rows = [];
         if (config.multiselect === true){
             for (var i=1; i<body.childNodes.length; i++){
                 var tr = body.childNodes[i];
                 if (!tr.selected){
-                    select(tr);
-                    selectionChanged=true;
+                    me.select(tr);
+                    rows.push(tr);
                 }
             }
             prevSelection = null;
-            if (selectionChanged) me.onSelectionChange();
+            if (rows.length) me.onSelectionChange(rows);
         }
     };
 
@@ -691,31 +722,39 @@ javaxt.dhtml.Table = function(parent, config) {
   /** Deselects all the rows in the table.
    */
     this.deselectAll = function(){
-        var selectionChanged = false;
+        var rows = [];
         for (var i=1; i<body.childNodes.length; i++){
             var tr = body.childNodes[i];
             if (tr.selected){
-                deselect(tr);
-                selectionChanged=true;
+                me.deselect(tr);
+                rows.push(tr);
             }
         }
         prevSelection = null;
-        if (selectionChanged) me.onSelectionChange();
+        if (rows.length>0) me.onSelectionChange(rows);
     };
 
 
   //**************************************************************************
   //** onSelectionChange
   //**************************************************************************
-  /** Called whenever a row in the grid is selected or deselected. Selected 
-   *  rows can be retrieved using the forEachRow method. Example:
-      table.forEachRow(function (row, content) {
-          if (row.selected) {
-              console.log(content);
-          }
-      });
+  /** Called whenever a row in the grid is selected or deselected. Contents of
+   *  the selected rows can be retrieved using the getContent method. Example:
+        
+        table.onSelectionChange = function(rows){
+            for (var i=0; i<rows.length; i++){
+                var row = rows[i];
+                if (row.selected){
+                    var col = row.getChildNodes();
+                    var col1 = col[0].getContent();
+                }
+                else{
+
+                }
+            }
+        };
    */
-    this.onSelectionChange = function(){};
+    this.onSelectionChange = function(rows){};
 
 
   //**************************************************************************
