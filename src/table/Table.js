@@ -596,6 +596,7 @@ javaxt.dhtml.Table = function(parent, config) {
    */
     var selectRows = function(event){
         var row = this;
+        me.onRowClick(row, event);
         var rows = [];
         if (config.multiselect === true){
       
@@ -756,6 +757,16 @@ javaxt.dhtml.Table = function(parent, config) {
    */
     this.onSelectionChange = function(rows){};
 
+
+
+  //**************************************************************************
+  //** onRowClick
+  //**************************************************************************
+  /** Called whenever a row in the table is clicked. Use the onSelectionChange
+   *  event listener to determine whether selection has changed.
+   */
+    this.onRowClick = function(row, e){};
+    
 
   //**************************************************************************
   //** onHeaderClick
