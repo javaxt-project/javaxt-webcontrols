@@ -125,7 +125,7 @@ javaxt.dhtml.TabPanel = function(parent, config) {
    */
     this.addTab = function(name, el){
         var tab = document.createElement('li');
-        setStyle(tab, "activeTab");
+        setStyle(tab, "inactiveTab");
         tab.style.position = "relative";
         tab.style.float = "left";
         tab.style.height = "100%";
@@ -148,7 +148,11 @@ javaxt.dhtml.TabPanel = function(parent, config) {
             }
         }
         
+        el.style.display='none'; //<-- style used to test whether the tab is visible (see raiseTab)
+        
         tabContent.appendChild(el);
+        
+        raiseTab(tab);
     };
 
 
@@ -186,7 +190,7 @@ javaxt.dhtml.TabPanel = function(parent, config) {
             var currTab = null;
             for (var i=0; i<tabList.childNodes.length; i++){
                 var t = tabList.childNodes[i];
-                if (t.el.style.display=='block'){
+                if (t.el.style.display === 'block'){
                     currTab = t;
                     break;
                 }
@@ -245,7 +249,11 @@ javaxt.dhtml.TabPanel = function(parent, config) {
     this.setActiveTab = this.raiseTab;
 
 
+  //**************************************************************************
+  //** onTabChange
+  //**************************************************************************
     this.onTabChange = function(currTab, prevTab){};
+
 
   //**************************************************************************
   //** removeTab
