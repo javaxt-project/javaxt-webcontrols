@@ -178,6 +178,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
         if (isNaN(w)) w = 0;
 
 
+
       //Create divs (for overflow purposes)
         var div = document.createElement('div');
         div.style.width=outerDiv.offsetWidth+"px";
@@ -210,6 +211,10 @@ javaxt.dhtml.Carousel = function(parent, config) {
         innerDiv.style.width = (w+div.offsetWidth)+"px";
         
         if (!currPanel) currPanel = div;
+        
+        
+      //Resize all the divs (bug fix for Chrome)
+        me.resize();
     };
 
 
