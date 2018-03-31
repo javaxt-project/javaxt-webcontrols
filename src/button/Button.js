@@ -9,7 +9,6 @@ if(!javaxt.dhtml) javaxt.dhtml={};
  *
  ******************************************************************************/
 
-
 javaxt.dhtml.Button = function(parent, config) {
     this.className = "javaxt.dhtml.Button";
 
@@ -234,6 +233,8 @@ javaxt.dhtml.Button = function(parent, config) {
         table.cellPadding = 0;
         table.style.width = "100%";
         table.style.height = "100%";
+        table.style.margin = 0;
+        table.style.padding = 0;
         table.style.fontFamily = "inherit";
         table.style.textAlign = "inherit";
         table.style.color = "inherit";
