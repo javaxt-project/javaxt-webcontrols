@@ -26,6 +26,13 @@ javaxt.dhtml.Table = function(parent, config) {
 
         style: {
 
+            table: {
+                width:  "100%",
+                height:  "100%",
+                margin:  0,
+                padding:  0,
+                borderCollapse:  "collapse"
+            },
             
             headerRow: {
                 height: "35px",
@@ -39,7 +46,8 @@ javaxt.dhtml.Table = function(parent, config) {
                 borderRight: "1px solid #cccccc",
                 padding: "0 5px",
                 color: "#272727",
-                cursor: "pointer"
+                cursor: "pointer",
+                whiteSpace: "nowrap"
             },
             
             row: {
@@ -53,7 +61,8 @@ javaxt.dhtml.Table = function(parent, config) {
                 borderRight: "1px solid #cccccc",
                 padding: "0 5px",
                 color: "#272727",
-                cursor: "default"
+                cursor: "default",
+                whiteSpace: "nowrap"
             },
             
             selectedRow: {
@@ -104,6 +113,7 @@ javaxt.dhtml.Table = function(parent, config) {
         tbody = createTable();
         table = tbody.parentNode;
         table.setAttribute("desc", me.className);
+        setStyle(table, "table");
         parent.appendChild(table);
         me.el = table;
         
@@ -235,7 +245,7 @@ javaxt.dhtml.Table = function(parent, config) {
             else{
                 bodyDiv.onscroll = function(){
                     var maxScrollPosition = bodyDiv.scrollHeight - bodyDiv.clientHeight;
-                    me.onScroll(bodyDiv.scrollTop, maxScrollPosition);
+                    me.onScroll(bodyDiv.scrollTop, maxScrollPosition, bodyDiv.offsetHeight);
                 };
             }
             
@@ -358,7 +368,7 @@ javaxt.dhtml.Table = function(parent, config) {
         var outerDiv = document.createElement("div");
         outerDiv.style.position = "relative";
         outerDiv.style.height = "100%";
-        outerDiv.style.cursor = "inherit";
+        //outerDiv.style.cursor = "inherit";
         cell.appendChild(outerDiv);
 
         var innerDiv = document.createElement("div");
@@ -366,8 +376,8 @@ javaxt.dhtml.Table = function(parent, config) {
         innerDiv.style.width = "100%";
         innerDiv.style.height = "100%";
         innerDiv.style.overflow = "hidden";
-        innerDiv.style.whiteSpace = 'nowrap';
-        innerDiv.style.cursor = "inherit";
+        //innerDiv.style.whiteSpace = "inherit";
+        //innerDiv.style.cursor = "inherit";
         outerDiv.appendChild(innerDiv);
 
 
@@ -383,7 +393,7 @@ javaxt.dhtml.Table = function(parent, config) {
                 outerDiv.appendChild(handle);
             }
         }
-        
+
         
       //Set custom properties on the cell. Note that these  
       //properties will be lost if the cell is cloned.
@@ -832,7 +842,7 @@ javaxt.dhtml.Table = function(parent, config) {
    *  can be used, for example, to load records when a client scrolls to the
    *  bottom of the page. 
    */
-    this.onScroll = function(y, maxY){};
+    this.onScroll = function(y, maxY, h){};
     
     
   //**************************************************************************
@@ -940,6 +950,8 @@ javaxt.dhtml.Table = function(parent, config) {
         var table = document.createElement('table');        
         table.style.width = "100%";
         table.style.height = "100%";
+        table.style.margin = 0;
+        table.style.padding = 0;
         table.cellSpacing = 0;
         table.cellPadding = 0;
         table.style.borderCollapse = "collapse";
