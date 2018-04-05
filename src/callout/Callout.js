@@ -5,8 +5,7 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 //**  Callout Class
 //******************************************************************************
 /**
- *   Simple div with an arrow. This class can be used as a pop-up dialog or  
- *   inside another element.
+ *   Used to create simple tooltip/popup boxes with an arrow.
  *
  ******************************************************************************/
 
@@ -69,13 +68,14 @@ javaxt.dhtml.Callout = function(parent, config) {
 
       //Create outer div
         div = document.createElement("div");
+        div.setAttribute("desc", me.className);
         if (config.position==="absolute"){
             div.style.display = "none";
             div.style.position = "absolute";
             div.style.top = div.style.left = 0;
         }
         parent.appendChild(div);
-
+        me.el = div;
 
 
       //Create callout box
