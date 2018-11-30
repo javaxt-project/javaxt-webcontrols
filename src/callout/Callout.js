@@ -22,7 +22,7 @@ javaxt.dhtml.Callout = function(parent, config) {
         arrowLocation: "left",
         arrowAlignment: "top",
 
-        
+
         style: {
 
             panel: {
@@ -31,18 +31,18 @@ javaxt.dhtml.Callout = function(parent, config) {
                 borderRadius: "6px",
                 boxShadow: "0 12px 14px 0 rgba(0, 0, 0, 0.2), 0 13px 20px 0 rgba(0, 0, 0, 0.2)"
             },
-            
-            arrow: { 
-                
-              //Only backgroundColor, borderColor, width, height, and padding 
-              //are considered. All other properties are ignored. 
+
+            arrow: {
+
+              //Only backgroundColor, borderColor, width, height, and padding
+              //are considered. All other properties are ignored.
                 borderColor: "#c5d9e8",
                 backgroundColor: "#eef4f9",
                 width: "10px",
                 height: "10px",
                 padding: "10px"
             }
-            
+
         }
     };
 
@@ -107,7 +107,7 @@ javaxt.dhtml.Callout = function(parent, config) {
         body.appendChild(temp);
         var style = temp.currentStyle || window.getComputedStyle(temp);
         var getStyle = function(prop){
-            
+
             var _getStyle = function(prop){
                 if (style.getPropertyValue){
                     var val = style.getPropertyValue(prop);
@@ -117,9 +117,9 @@ javaxt.dhtml.Callout = function(parent, config) {
                 }
                 else{
                     return style[prop];
-                }  
+                }
             };
-            
+
             if (prop instanceof Array){
                 var arr = prop;
                 for (var i=0; i<arr.length; i++){
@@ -165,9 +165,9 @@ javaxt.dhtml.Callout = function(parent, config) {
         notch.style.height=0;
         notch.style.fontSize=0;
         notch.style.lineHeight=0;
-        
 
-      
+
+
       //Create border for the notch
         notchBorder = document.createElement("b");
         notchBorder.setAttribute("desc","notchBorder");
@@ -179,8 +179,8 @@ javaxt.dhtml.Callout = function(parent, config) {
         notchBorder.style.width=0;
         notchBorder.style.height=0;
         notchBorder.style.fontSize=0;
-        notchBorder.style.lineHeight=0; 
-        
+        notchBorder.style.lineHeight=0;
+
 
         // ie6 transparent fix
         //_border-right-color: pink;
@@ -196,7 +196,7 @@ javaxt.dhtml.Callout = function(parent, config) {
 
       //Add event listeners
         if (config.position==="absolute"){
-            
+
             var onresize = function(){
                 me.hide();
             };
@@ -213,20 +213,20 @@ javaxt.dhtml.Callout = function(parent, config) {
                 hideIfOutside(x, y);
             };
 
-          
+
             if (document.addEventListener) { // For all major browsers, except IE 8 and earlier
                 document.addEventListener("click", onclick);
                 document.addEventListener("touchstart", ontouchstart);
                 window.addEventListener("resize", onresize);
-            } 
+            }
             else if (document.attachEvent) { // For IE 8 and earlier versions
                 document.attachEvent("onclick", onclick);
                 document.attachEvent("ontouchstart", ontouchstart);
-                window.attachEvent("onresize", onresize); 
+                window.attachEvent("onresize", onresize);
             }
         }
     };
-    
+
 
   //**************************************************************************
   //** hideIfOutside
@@ -235,8 +235,8 @@ javaxt.dhtml.Callout = function(parent, config) {
 
         if (opening) return;
 
-        if (div.style.display === 'block'){            
-  
+        if (div.style.display === 'block'){
+
             var x1 = parseInt(div.style.left);
             var x2 = x1+div.offsetWidth;
             var y1 = parseInt(div.style.top);
@@ -257,7 +257,7 @@ javaxt.dhtml.Callout = function(parent, config) {
   //**************************************************************************
   //** getInnerDiv
   //**************************************************************************
-  /** Returns the content div inside the callout that can be populated with 
+  /** Returns the content div inside the callout that can be populated with
    *  text, html, menu buttons, etc.
    */
     this.getInnerDiv = function(){
@@ -269,9 +269,9 @@ javaxt.dhtml.Callout = function(parent, config) {
   //** getSize
   //**************************************************************************
   /** Returns the width and height of the callout. */
-    this.getSize = function(){      
+    this.getSize = function(){
         var size;
-        
+
         if (div.style.display === 'none'){
             div.style.visibility = 'hidden';
             div.style.display = 'block';
@@ -290,59 +290,59 @@ javaxt.dhtml.Callout = function(parent, config) {
         }
         return size;
     };
-    
+
 
   //**************************************************************************
   //** show
   //**************************************************************************
-  /** Used to render the callout. 
+  /** Used to render the callout.
    */
     this.show = function(){
         opening = true;
-        
+
         div.style.zIndex = getNextHighestZindex();
         div.style.display = 'block';
+        me.onShow();
 
-        
         setTimeout(function() {
             opening = false;
-        }, 500);          
+        }, 500);
     };
 
 
   //**************************************************************************
   //** showAt
   //**************************************************************************
-  /** Used to render the callout at a specific coordinate. The tip of the 
+  /** Used to render the callout at a specific coordinate. The tip of the
    *  arrow associated with the callout will appear at the given coordinate.
-   *  
-   *  @param position Where to place the callout box relative to the given 
+   *
+   *  @param position Where to place the callout box relative to the given
    *  coordinate. Options include left, right, above, and below.
-   *  
-   *  @param align Options include left, right, center if the "position" is 
+   *
+   *  @param align Options include left, right, center if the "position" is
    *  above or below. Otherwise, options are top, bottom, or middle.
    */
     this.showAt = function(x, y, position, align){
         opening = true;
-        
+
 
       //Hack to get div width/height BEFORE making the div visible
         div.style.visibility = 'hidden';
         div.style.display = 'block';
-        
-        
+
+
         var backgroundColor = config.arrow.backgroundColor;
         var borderColor = config.arrow.borderColor;
 
-        
+
         var notchSize = Math.max(config.arrow.width, config.arrow.height);
-        var notchOffset = 0; 
+        var notchOffset = 0;
         var notchCenter = notchSize;
         var notchHeight = notchSize;
 
-        
-        
-        var halign = function(){            
+
+
+        var halign = function(){
             if (align==="left"){
                 notchOffset = config.arrow.paddingLeft;
                 div.style.left = (x-(notchOffset+notchCenter)) + "px";
@@ -362,11 +362,11 @@ javaxt.dhtml.Callout = function(parent, config) {
                 return;
             }
         };
-        
-        
+
+
         var valign = function(){
             callout.style.top = "0px";
-            
+
             if (align==="top"){
                 notchOffset = config.arrow.paddingTop;
                 div.style.top = (y-(notchOffset+notchCenter)) + "px";
@@ -386,8 +386,8 @@ javaxt.dhtml.Callout = function(parent, config) {
                 return;
             }
         };
-        
-        
+
+
       //Update notch style align elements. Notch style is based on a CSS triangle
       //described here: https://css-tricks.com/snippets/css/css-triangle/
         if (position==="above"){
@@ -405,69 +405,69 @@ javaxt.dhtml.Callout = function(parent, config) {
             callout.style.top = "0px";
             notch.style.top = (div.offsetHeight-1) + "px"; //-1 for the border width
             notchBorder.style.top = div.offsetHeight + "px";
-            
-            
+
+
           //Set horizontal alignment of the notch and div
             halign();
         }
         else if (position==="below"){
-            
+
           //Update notch style so the arrow is pointing up
             notch.style.borderTop=notchBorder.style.borderTop=0;
             notch.style.borderLeft=notchBorder.style.borderLeft=notchSize+"px solid transparent";
             notch.style.borderRight=notchBorder.style.borderRight=notchSize+"px solid transparent";
             notch.style.borderBottom=notchBorder.style.borderBottom=notchSize+"px solid " + backgroundColor;
             notchBorder.style.borderBottomColor=borderColor; //<--Make sure this appears after all other border definitions!
-            
-            
+
+
           //Set vertical position of the notch, div, and callout
             div.style.top = y + "px";
             callout.style.top = notchHeight + "px";
             notch.style.top = "1px"; //+1 for border width
             notchBorder.style.top = "0px";
-            
-            
+
+
           //Set horizontal position of the notch and div
             halign();
         }
         else if (position==="left"){
-            
+
           //Update notch style so the arrow is pointing right
             notch.style.borderTop=notchBorder.style.borderTop=notchSize+"px solid transparent";
             notch.style.borderLeft=notchBorder.style.borderLeft=notchSize+"px solid " + backgroundColor;
             notch.style.borderRight=notchBorder.style.borderRight=0;
-            notch.style.borderBottom=notchBorder.style.borderBottom=notchSize+"px solid transparent"; 
+            notch.style.borderBottom=notchBorder.style.borderBottom=notchSize+"px solid transparent";
             notchBorder.style.borderLeftColor=borderColor; //<--Make sure this appears after all other border definitions!
-            
-            
-          //Set horizontal position 
+
+
+          //Set horizontal position
             div.style.left = (x-(div.offsetWidth+notchHeight)) + "px";
             callout.style.left = "0px";
             notch.style.left = (div.offsetWidth-1) + "px";
             notchBorder.style.left = div.offsetWidth + "px";
-            
-            
+
+
           //Set vertical position of the notch and div
             valign();
         }
         else if (position==="right"){
 
-            
+
           //Update notch style so the arrow is pointing left
             notch.style.borderTop=notchBorder.style.borderTop=notchSize+"px solid transparent";
             notch.style.borderLeft=notchBorder.style.borderLeft=0;
             notch.style.borderRight=notchBorder.style.borderRight=notchSize+"px solid " + backgroundColor;
             notch.style.borderBottom=notchBorder.style.borderBottom=notchSize+"px solid transparent";
             notchBorder.style.borderRightColor=borderColor; //<--Make sure this appears after all other border definitions!
-            
-            
-          //Set horizontal position 
+
+
+          //Set horizontal position
             div.style.left = x + "px";
             callout.style.left = notchHeight + "px";
             notch.style.left = "1px";
             notchBorder.style.left = "0px";
-            
-            
+
+
           //Set vertical position of the notch and div
             valign();
         }
@@ -475,13 +475,13 @@ javaxt.dhtml.Callout = function(parent, config) {
             return;
         }
 
-        
+
         div.style.visibility = "";
-        
+
         me.show();
     };
 
-    
+
 
   //**************************************************************************
   //** hide
@@ -490,28 +490,33 @@ javaxt.dhtml.Callout = function(parent, config) {
     this.hide = function(){
         div.style.display = 'none';
         opening = false;
+        me.onHide();
     };
 
+
+    this.onShow = function(){};
+    this.onHide = function(){};
+    
 
   //**************************************************************************
   //** setStyle
   //**************************************************************************
-  /** Used to set the style for a given element. Styles are defined via a CSS 
-   *  class name or inline using the config.style definitions. 
+  /** Used to set the style for a given element. Styles are defined via a CSS
+   *  class name or inline using the config.style definitions.
    */
     var setStyle = function(el, style){
-        
+
         style = config.style[style];
         if (style===null) return;
-        
+
         el.style = '';
         el.removeAttribute("style");
-        
-        
+
+
         if (typeof style === 'string' || style instanceof String){
             el.className = style;
         }
-        else{    
+        else{
             for (var key in style){
                 var val = style[key];
                 if (key==="content"){
@@ -523,7 +528,7 @@ javaxt.dhtml.Callout = function(parent, config) {
             }
         }
     };
-    
+
 
   //**************************************************************************
   //** getNextHighestZindex
