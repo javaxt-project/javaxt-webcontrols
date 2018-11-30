@@ -318,12 +318,12 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
         var nextDiv = currPanel.nextSibling;
         if (nextDiv) {
-            me.beforeChange(currPanel.childNodes[0], nextDiv.childNodes[0]);
+            me.beforeChange(currPanel.childNodes[0].childNodes[0], nextDiv.childNodes[0].childNodes[0]);
             
             w = nextDiv.offsetWidth;
             
             next(function(){
-                me.onChange(nextDiv.childNodes[0], currPanel.childNodes[0]);
+                me.onChange(nextDiv.childNodes[0].childNodes[0], currPanel.childNodes[0].childNodes[0]);
                 currPanel = nextDiv;
                 sliding = false;
             });
@@ -336,7 +336,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
                 var clone = firstDiv.cloneNode(true);
                 innerDiv.style.width = (innerDiv.offsetWidth+w)+"px";
                 innerDiv.appendChild(clone);
-                me.beforeChange(currPanel.childNodes[0], clone.childNodes[0]);
+                me.beforeChange(currPanel.childNodes[0].childNodes[0], clone.childNodes[0].childNodes[0]);
                 
                 next(function(){
 
@@ -344,7 +344,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
                     innerDiv.removeChild(firstDiv);
                     innerDiv.style.width = (innerDiv.offsetWidth-w)+"px";
                     
-                    me.onChange(clone.childNodes[0], currPanel.childNodes[0]);
+                    me.onChange(clone.childNodes[0].childNodes[0], currPanel.childNodes[0].childNodes[0]);
                     currPanel = clone;
                     sliding = false;
 
@@ -381,14 +381,14 @@ javaxt.dhtml.Carousel = function(parent, config) {
         
         var previousDiv = currPanel.previousSibling;
         if (previousDiv){
-            me.beforeChange(currPanel.childNodes[0], previousDiv.childNodes[0]);
+            me.beforeChange(currPanel.childNodes[0].childNodes[0], previousDiv.childNodes[0].childNodes[0]);
             
             w = previousDiv.offsetWidth;
             start = parseFloat(innerDiv.style.left);
             end = start + w;
             
             back(function(){
-                me.onChange(previousDiv.childNodes[0], currPanel.childNodes[0]);
+                me.onChange(previousDiv.childNodes[0].childNodes[0], currPanel.childNodes[0].childNodes[0]);
                 currPanel = previousDiv;
                 sliding = false;
             });
@@ -401,7 +401,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
                 var clone = lastDiv.cloneNode(true);
                 innerDiv.style.width = (innerDiv.offsetWidth+w)+"px";
                 innerDiv.insertBefore(clone, innerDiv.firstChild);
-                me.beforeChange(currPanel.childNodes[0], clone.childNodes[0]);
+                me.beforeChange(currPanel.childNodes[0].childNodes[0], clone.childNodes[0].childNodes[0]);
                 
                 start = -w;
                 end = 0;
@@ -414,7 +414,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
                     innerDiv.removeChild(lastDiv);
                     innerDiv.style.width = (innerDiv.offsetWidth-w)+"px";
                     
-                    me.onChange(clone.childNodes[0], currPanel.childNodes[0]);
+                    me.onChange(clone.childNodes[0].childNodes[0], currPanel.childNodes[0].childNodes[0]);
                     currPanel = clone;
                     sliding = false;
                     
@@ -451,7 +451,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
             var div = innerDiv.childNodes[i];
             var isVisible = (div==currPanel); //Only valid if config.visiblePanels==1
             arr.push({
-               div: div.childNodes[0],
+               div: div.childNodes[0].childNodes[0],
                isVisible: isVisible
             });
         }
@@ -470,6 +470,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
         var holdDelay = 50;
         
         var startX, offsetX;
+        var prevPanel;
 
       //Function called when a drag is initiated
         var onDragStart = function(e){
@@ -484,12 +485,13 @@ javaxt.dhtml.Carousel = function(parent, config) {
                 body.className += (body.className.length==0 ? "" : " ") + "javaxt-noselect";
             } 
             
-
+            
+            prevPanel = currPanel;
             innerDiv.style.cursor = 'move';
         };
         
-
         
+
       //Function called while the div is being dragged 
         var onDrag = function(e){
             var x = e.clientX;
@@ -608,7 +610,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
             
             var debug = "Snap to panel " + innerDiv.childNodes[visiblePanel].innerText;
             if (debug.length>60) debug = debug.substring(0, 60);
-            console.log(debug + " idx=" + visiblePanel);
+            //console.log(debug + " idx=" + visiblePanel);
             
             var start = parseInt(innerDiv.style.left);
             var end = 0;
@@ -620,10 +622,13 @@ javaxt.dhtml.Carousel = function(parent, config) {
             
             var animationSteps = ((start-end)/config.animationSteps);
             if (animationSteps<0) animationSteps = -animationSteps;
-            console.log(start + "/" + end + " --> move " + (start-end) + "px in " + animationSteps + "ms");
+            //console.log(start + "/" + end + " --> move " + (start-end) + "px in " + animationSteps + "ms");
             
             slide(start, end, new Date().getTime(), 100, function(){
                 currPanel = innerDiv.childNodes[visiblePanel];
+                if (currPanel!=prevPanel){
+                    me.onChange(currPanel.childNodes[0].childNodes[0], prevPanel.childNodes[0].childNodes[0]);
+                }
             });
             
         };
@@ -653,7 +658,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
                 holdActive = true;
 
               //begin hold-only operation here, if desired
-                console.log("Init Drag!");
+                //console.log("Init Drag!");
                 
                 onDragStart(e);
                 if (document.addEventListener) { // For all major browsers, except IE 8 and earlier
