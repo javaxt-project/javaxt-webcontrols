@@ -82,6 +82,8 @@ javaxt.dhtml.TabPanel = function(parent, config) {
         table.cellPadding = 0;
         table.style.width = "100%";
         table.style.height = "100%";
+        table.style.margin = 0;
+        table.style.padding = 0;
         table.style.borderCollapse = "collapse";
         var tbody = document.createElement('tbody');
         table.appendChild(tbody);
@@ -110,7 +112,14 @@ javaxt.dhtml.TabPanel = function(parent, config) {
         td.style.width = "100%";
         td.style.height = "100%";
         tr.appendChild(td);
-        tabContent = td;
+        
+        
+        tabContent = document.createElement('div');
+        tabContent.style.width = "100%";
+        tabContent.style.height = "100%";
+        tabContent.style.position = "relative";
+        td.appendChild(tabContent);
+        
         
         parent.appendChild(table);
     };
@@ -121,9 +130,18 @@ javaxt.dhtml.TabPanel = function(parent, config) {
   //**************************************************************************
   /** Used to add a new tab to the panel. 
    *  @param name Title or name associated with the tab. 
-   *  @param el DOM element rendered when the tab is active. 
+   *  @param _el DOM element rendered when the tab is active. 
    */
-    this.addTab = function(name, el){
+    this.addTab = function(name, _el){
+        
+        var el = document.createElement('div');
+        el.style.width = "100%";
+        el.style.height = "100%";
+        el.style.position = "absolute";
+        el.appendChild(_el);
+
+        
+        
         var tab = document.createElement('li');
         setStyle(tab, "inactiveTab");
         tab.style.position = "relative";
@@ -149,7 +167,7 @@ javaxt.dhtml.TabPanel = function(parent, config) {
         }
         
         el.style.display='none'; //<-- style used to test whether the tab is visible (see raiseTab)
-        
+
         tabContent.appendChild(el);
         
         raiseTab(tab);
@@ -307,7 +325,7 @@ javaxt.dhtml.TabPanel = function(parent, config) {
   //**************************************************************************
     var findTab = function(id){
         if (isNaN(id)){
-            if (typeof parent === "string"){
+            if (typeof id === "string"){
                 for (var i=0; i<tabList.childNodes.length; i++){
                     var t = tabList.childNodes[i];
                     if (t.innerHTML === id ){
