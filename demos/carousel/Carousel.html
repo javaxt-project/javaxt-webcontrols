@@ -15,16 +15,26 @@
 
 
 <style>
-    /* Set body height to 100% so we can test vertical resize */
     html, body {
-        height:100%;
-        margin: 0;
+        margin: 0px;
+        padding: 10px;
     }
-    
     
     body, textarea, input, select, td, th {
         font-family:helvetica,arial,verdana,sans-serif; font-size:14px;
     }    
+    
+    
+    h2 {
+        font-size:18px;
+        font-weight: normal;
+        margin: 35px 0 5px 0;        
+    }
+
+    p {
+        margin: -5px 0 20px 0;
+        color: #555555;
+    }
     
     .panelID {
         font-size:50px;
@@ -49,11 +59,43 @@
     user-select: none;
 }
 </style>
+</head>
+<body>
+
+<h1>Carousel Demos</h1>
+    
+<h2>Demo 1</h2>
+<p>Basic looping carousel initiated using existing DOM elements</p>
+<table style="width:500px;">
+  <tr>
+    <td align="center" class="javaxt-noselect">
 
 
 
+    <div id="carousel" style="width:250px;height:250px;border:1px solid #757575;">
+        <div style="background:#f0f8ff;height:100%;">
+            <div class="panelID">1</div>
+        </div>
+        <div style="background:#96a5b2;height:100%;">
+            <div class="panelID">2</div>
+        </div>
+        <div style="background:#ffd8d6;height:100%;">
+            <div class="panelID">3</div>
+        </div>
+    </div>
+
+    <div style="padding-top:10px;">
+      <input type="button" id="Back" value="Back"/>
+      <input type="button" id="Next" value="Next"/>
+    </div>
+
+    </td>
+  </tr>
+</table>
+    
+    
 <script type="text/javascript">
-window.onload = function() {
+var demo1 = function() {
     
     var carousel = new javaxt.dhtml.Carousel(document.getElementById("carousel"),{
         loop: true,
@@ -70,37 +112,129 @@ window.onload = function() {
 </script>
 
 
-</head>
-<body>
-       
-    
-    <h1>Demo 1</h1>
-    <table style="width:100%;">
-      <tr>
-        <td align="center" class="javaxt-noselect">
-                
+<h2>Demo 2</h2>
+<p>Looping carousel with incrementing/decrementing panel IDs. 
+   The carousel consists of only 3 panels but the content is updated to appear
+   as though it is made up of many panels.
+</p>
+<table style="width:500px;">
+  <tr>
+    <td align="center" class="javaxt-noselect">
 
-    
-        <div id="carousel" style="width:250px;height:250px;border:1px solid #757575;">
-            <div style="background:#f0f8ff;height:100%;">
-                <div class="panelID">1</div>
-            </div>
-            <div style="background:#96a5b2;height:100%;">
-                <div class="panelID">2</div>
-            </div>
-            <div style="background:#ffd8d6;height:100%;">
-                <div class="panelID">3</div>
-            </div>
-        </div>
+    <div id="carousel2" style="width:250px;height:250px;border:1px solid #757575;"></div>
 
-        <div style="padding-top:10px;">
-          <input type="button" id="Back" value="Back"/>
-          <input type="button" id="Next" value="Next"/>
-        </div>
+    <div style="padding-top:10px;">
+      <input type="button" id="Back2" value="Back"/>
+      <input type="button" id="Next2" value="Next"/>
+    </div>
+
+    </td>
+  </tr>
+</table>
+    
+    
+    
+<script type="text/javascript">
+var demo2 = function() {
+    
+    var carouselDiv = document.getElementById("carousel2");
+    var carousel = new javaxt.dhtml.Carousel(carouselDiv,{
+        loop: true,
+        animate: true
+    });    
+    
+    
+  //Create 3 panels
+    var currPanel = document.createElement('div');
+    currPanel.style.background = "#f0f8ff";
+    currPanel.style.height = "100%";
+    currPanel.setAttribute("panelID", "currPanel");
+    
+    var nextPanel = document.createElement('div');
+    nextPanel.style.background = "#96a5b2";
+    nextPanel.style.height = "100%";
+    nextPanel.setAttribute("panelID", "nextPanel");
+    
+    var prevPanel = document.createElement('div');
+    prevPanel.style.background = "#ffd8d6";
+    prevPanel.style.height = "100%";
+    prevPanel.setAttribute("panelID", "prevPanel");
+
+
+  //Populate the first panel
+    var currDate = 0;
+    var panelID = document.createElement('div');
+    panelID.className = "panelID";
+    panelID.innerHTML = currDate;
+    currPanel.appendChild(panelID);
+    
+    
+  //Add panels to the carousel
+    carousel.add(currPanel);
+    carousel.add(nextPanel);
+    carousel.add(prevPanel);
+    
+
+  //Catch for onChange events
+    carousel.onChange = function(currPanel, prevPanel){
+        
+        if (currPanel.getAttribute("panelID")=="nextPanel"){
+            currDate++;
+            currPanel.setAttribute("panelID", "currPanel");
+            prevPanel.setAttribute("panelID", "prevPanel");
             
-        </td>
-      </tr>
-    </table>
+            var panels = carousel.getPanels();
+            for (var i=0; i<panels.length; i++){
+                var panel = panels[i];
+                var div = panel.div;
+                if (div!=currPanel && div!=prevPanel){
+                    div.setAttribute("panelID", "nextPanel");
+                }
+            }     
+            
+        }
+        else if (currPanel.getAttribute("panelID")=="prevPanel"){
+            currDate--;
+            
+            currPanel.setAttribute("panelID", "currPanel");
+            prevPanel.setAttribute("panelID", "nextPanel");
+            
+            var panels = carousel.getPanels();
+            for (var i=0; i<panels.length; i++){
+                var panel = panels[i];
+                var div = panel.div;
+                if (div!=currPanel && div!=prevPanel){
+                    div.setAttribute("panelID", "prevPanel");
+                }
+            } 
+            
+        }
+        
+        
+        var div = panelID.cloneNode();
+        div.innerHTML = currDate;
+        currPanel.innerHTML = "";
+        currPanel.appendChild(div);
+    };
     
+    
+    
+    document.getElementById("Back2").onclick = function(){
+        carousel.back();
+    };
+    document.getElementById("Next2").onclick = function(){
+        carousel.next();
+    };    
+    
+};
+</script>
+
+
+<script type="text/javascript">
+window.onload = function() {    
+    demo1();
+    demo2();
+};
+</script>
 </body>
 </html>
