@@ -162,10 +162,10 @@ var demo2 = function() {
 
 
   //Populate the first panel
-    var currDate = 0;
+    var currID = 0;
     var panelID = document.createElement('div');
     panelID.className = "panelID";
-    panelID.innerHTML = currDate;
+    panelID.innerHTML = currID;
     currPanel.appendChild(panelID);
     
     
@@ -179,7 +179,7 @@ var demo2 = function() {
     carousel.onChange = function(currPanel, prevPanel){
         
         if (currPanel.getAttribute("panelID")=="nextPanel"){
-            currDate++;
+            currID++;
             currPanel.setAttribute("panelID", "currPanel");
             prevPanel.setAttribute("panelID", "prevPanel");
             
@@ -194,7 +194,7 @@ var demo2 = function() {
             
         }
         else if (currPanel.getAttribute("panelID")=="prevPanel"){
-            currDate--;
+            currID--;
             
             currPanel.setAttribute("panelID", "currPanel");
             prevPanel.setAttribute("panelID", "nextPanel");
@@ -212,7 +212,7 @@ var demo2 = function() {
         
         
         var div = panelID.cloneNode();
-        div.innerHTML = currDate;
+        div.innerHTML = currID;
         currPanel.innerHTML = "";
         currPanel.appendChild(div);
     };
