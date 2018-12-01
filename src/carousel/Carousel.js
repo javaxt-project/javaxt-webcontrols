@@ -423,11 +423,6 @@ javaxt.dhtml.Carousel = function(parent, config) {
             }
         }
     };
-
-
-    
-    
-
     
     
   //**************************************************************************
@@ -446,12 +441,33 @@ javaxt.dhtml.Carousel = function(parent, config) {
   //** getPanels
   //**************************************************************************
     this.getPanels = function(){
+
+        
+      //Get visible area
+        var rect = _getRect(outerDiv);
+        var minX = rect.x;
+        var maxX = minX+rect.width;
+        //var minY = rect.y;
+        //var maxY = minY+rect.height;
+        
+        
         var arr = [];
         for (var i=0; i<innerDiv.childNodes.length; i++){
-            var div = innerDiv.childNodes[i];
-            var isVisible = (div==currPanel); //Only valid if config.visiblePanels==1
+            var panel = innerDiv.childNodes[i];
+            
+            
+          //Check whether the panel is visible
+            var r1 = _getRect(panel);
+            var left = r1.x;
+            var right = left + r1.width;
+            //var top = r1.y;
+            //var bottom = top + r1.height;
+            var isVisible =(left>=minX && right<=maxX)
+
+
+          //Add panel to array
             arr.push({
-               div: div.childNodes[0].childNodes[0],
+               div: panel.childNodes[0].childNodes[0],
                isVisible: isVisible
             });
         }
@@ -687,7 +703,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
                 clearTimeout(holdStarter);
                 
               //run click-only operation here
-                console.log("Click!");
+                //console.log("Click!");
 
             }
             
