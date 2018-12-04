@@ -1,0 +1,348 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+
+<title>Bar Graph Demos</title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+
+<script type="text/javascript" src="../../src/bargraph/BarGraph.js"></script>
+
+<style>
+    /* Set body height to 100% so we can test vertical resize */
+    html, body {
+        height:100%;
+        margin:10px;
+    }
+    
+    
+    body, textarea, input, select, td, th {
+        font-family:helvetica,arial,verdana,sans-serif; font-size:14px;
+    }    
+
+
+    h2 {
+        font-size:18px;
+        font-weight: normal;
+        margin: 35px 0 5px 0;        
+    }
+
+    p {
+        margin: -5px 0 20px 0;
+        color: #555555;
+    }
+    
+   /** The following 5 styles are used by the timeseries bargraphs */
+    .timeseries-cell {
+        border-bottom: 1px solid #ccc;
+        width: 1px;
+    }
+    td.timeseries-cell:first-child {
+        border-left: 1px solid #ccc;
+    }
+    td.timeseries-cell:last-child {
+        border-right: 1px solid #ccc;
+    }
+    .timeseries-bar {
+        background-color: #7baaf7;
+        border-radius: 0;
+    }
+    .timeseries-tick {
+        border: 0;
+        height: 0;
+    }
+</style>
+
+</head>
+<body>
+
+<h1>Bar Graph Demos</h1>
+    
+<h2>Simple Bar Graph</h2>
+<p>Bar graph with simulated time series data</p>
+<div id="demo1" style="width:250px;height:125px;"></div>
+
+<script type="text/javascript">
+var demo1 = function() {
+
+
+    var barGraph = new javaxt.dhtml.BarGraph("demo1");
+    
+    var data = [3, 7, 1, 9, 2, 5];
+    //data = [0, 0, 0, 0, 0, 0];
+    var labels = ["M","T","W","T","F","S"];
+    for (var i=0; i<labels.length; i++){
+        barGraph.add(data[i], labels[i]);
+    }
+    barGraph.update();
+
+    
+    barGraph.onClick = function(val, idx, div){
+       console.log("Clicked bar " + idx + ", value=" + val );
+    };
+};
+</script>
+
+
+
+<h2>Time Series Graph</h2>
+<p>Dense bar graph with simulated time series data</p>
+<div id="demo2"  style="height:125px;width:800px;"></div>
+
+
+<script type="text/javascript">
+var demo2 = function() {
+
+    var barGraph = new javaxt.dhtml.BarGraph(document.getElementById("demo2"), {
+        animate: false,
+        style: {
+            cell: "timeseries-cell",
+            bar: "timeseries-bar",
+            tick: "timeseries-tick"
+        }
+    });
+    
+
+    for (var i=0; i<1440; i++){
+        barGraph.add(
+            Math.floor(Math.random() * 101), //value
+            function(cell){ //label
+                
+                var h = null;
+                if (i % (60*3) === 0){
+                    var h = i/60;
+                    if (h<12){
+                        if (h==0) h = 12;
+                        h += "am";
+                    }
+                    else{
+                        h = h-12;
+                        if (h==0) h = 12;
+                        h += "pm";
+                    }
+                }
+                
+                if (i === 1439){
+                    h = "12am";
+                    cell.style.left = "-25px";
+                }
+                
+                if (h) {
+                    cell.innerHTML = h;
+                }
+            }
+        );
+    }
+    barGraph.update();
+};
+</script>
+
+
+<h2>Histogram</h2>
+<p>Simple histogram highlighting upper/lower 15%</p>
+<div id="demo3" style="height:150px;"></div>
+
+
+<script type="text/javascript">
+var demo3 = function() {
+
+  //Create bar graph
+    var barGraph = new javaxt.dhtml.BarGraph(document.getElementById("demo3"), {
+        maxHorizonalLabels: 0,
+        animate: true,
+        animationSteps: 1750,
+        style: {
+            cell: {
+                borderBottom: "1px solid #ccc",
+                padding: 0,
+                width: "1px"
+            },
+            bar:{
+                backgroundColor: "#7baaf7",
+                borderRadius: 0
+            },
+            tick: {
+                borderLeft: 0,
+                borderRight: 0,
+                height: 0
+            }
+        }
+    });
+    
+    
+  //Create empty histogram
+    var histogram = [];
+    for (var i=0; i<256; i++){
+        histogram[i] = 0;
+    }
+    
+    
+  //Populate histogram with random values
+    var numPixels = 1920*1080;
+    for (var i=0; i<numPixels; i++){
+        var r = Math.floor(Math.random() * 256);
+        var g = Math.floor(Math.random() * 256);
+        var b = Math.floor(Math.random() * 256);
+        var color = Math.round((r+g+b)/3);
+        var count = histogram[color]+1;
+        histogram[color] = count;
+    }
+    
+    
+  //Add histogram data to bar graph
+    for (var i=0; i<histogram.length; i++){
+        
+      //Create label
+        var label = null;
+        if (i==0 || i==histogram.length-1) label = i;
+        
+        
+        var clipPercent = 0.15;
+        var clipLeft = Math.round(histogram.length*clipPercent);
+        var clipRight = Math.round(histogram.length*(1.0-clipPercent));
+        if (i==clipLeft || i==clipRight){
+            label = i;
+        }
+        
+        
+      //Add data
+        barGraph.add(histogram[i], label);
+        
+        
+      //Set color
+        var cell = barGraph.getCell(i);
+        if (i<=clipLeft || i>=clipRight){
+            
+            cell.childNodes[0].childNodes[0].style.background = "orange";
+        }
+        else{
+            cell.childNodes[0].childNodes[0].style.background = "#7baaf7";
+        }
+        
+    }
+    
+  //Render
+    barGraph.update();
+};
+</script>
+
+
+<h2>Animated Time Series Graph</h2>
+<p>Animated bar graph with simulated time series data</p>
+<div id="demo4"  style="height:125px;"></div>
+
+
+<script type="text/javascript">
+var demo4 = function() {
+
+    var barGraph = new javaxt.dhtml.BarGraph(document.getElementById("demo4"), {
+        style: {
+            cell: "timeseries-cell",
+            bar: "timeseries-bar",
+            tick: "timeseries-tick"
+        }
+    });
+    
+
+    for (var i=0; i<1440; i++){
+        barGraph.add(Math.floor(Math.random() * 101), {
+            label: function(cell){
+                
+                var h = null;
+                if (i % (60*3) === 0){
+                    var h = i/60;
+                    if (h<12){
+                        if (h==0) h = 12;
+                        h += "am";
+                    }
+                    else{
+                        h = h-12;
+                        if (h==0) h = 12;
+                        h += "pm";
+                    }
+                }
+                
+                if (i === 1439){
+                    h = "12am";
+                }
+                
+                if (h) {
+                    cell.innerHTML = h;
+                }
+            }
+        });
+    }
+    barGraph.update();
+    
+    
+    
+    var animate = function(barGraph, idx, callback){
+        
+        var loop = true;
+        
+        if (idx==null) idx=0;
+        var cell = barGraph.getCell(idx);
+        if (idx>1){ 
+            var prevCell = cell.previousSibling.previousSibling;
+            prevCell.style.background = "";
+        }
+        cell.style.background = "orange";
+        cell.childNodes[0].childNodes[0].style.background = "orange";
+        idx++;
+
+
+      //If the animation is complete, ensure that the panel is completely open 
+        if (idx==1440){
+            
+            if (loop){
+                
+                for (var i=0; i<1440; i++){
+                    var cell = barGraph.getCell(i);
+                    cell.childNodes[0].childNodes[0].style.background = "#7baaf7";
+                    cell.style.background = "";
+                }
+                
+                idx = 0;
+            }
+            else{
+                if (callback!=null){
+                    callback.apply(barGraph, []);
+                }            
+                return;
+            }
+        }
+
+
+
+        setTimeout(function(){
+            animate(barGraph, idx, callback);
+        }, 33);
+    };    
+    
+    
+    animate(barGraph);
+};
+</script>
+
+
+<script type="text/javascript">
+window.onload = function() {
+
+    demo1();
+    demo2();
+    demo3();
+
+    setTimeout(function(){
+        demo4();
+    }, 2000);
+
+};
+</script>
+
+
+</body>
+</html>
