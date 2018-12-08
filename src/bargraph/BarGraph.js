@@ -61,6 +61,9 @@ javaxt.dhtml.BarGraph = function (parent, config) {
                 borderTop: "1px solid #ccc",
                 opacity: 0.5,
                 zIndex: 1
+            },
+            select:{
+                backgroundColor: "orange"
             }
         }
     };
@@ -249,11 +252,23 @@ javaxt.dhtml.BarGraph = function (parent, config) {
             var col = this.parentNode.parentNode;
             for (var i=0; i<chartRow.childNodes.length; i++){
                 if (chartRow.childNodes[i]==col){
-                    me.onClick(values[i], i, col);
+                    me.onClick(values[i], i, this);
                     break;
                 }
             }
         };        
+        
+        
+        td.onclick = function(){
+            var col = this;
+            for (var i=0; i<chartRow.childNodes.length; i++){
+                if (chartRow.childNodes[i]==col){
+                    me.onCellClick(i, col);
+                    break;
+                }
+            }
+        }; 
+        
         
         chartRow.appendChild(td);
 
@@ -355,9 +370,11 @@ javaxt.dhtml.BarGraph = function (parent, config) {
         
       //Update width of the data table
         if (!isNaN(cellWidth)){
-            var width = (cellWidth*values.length) + "px";
-            dataTable.style.width = width;
-            horizontalLines.parentNode.style.width = width;
+            if (cellWidth>0){
+                var width = (cellWidth*values.length) + "px";
+                dataTable.style.width = width;
+                horizontalLines.parentNode.style.width = width;
+            }
         }
 
 
@@ -497,7 +514,12 @@ javaxt.dhtml.BarGraph = function (parent, config) {
             for (var i=0; i<values.length; i++){
                 values[i] = 0;
             }
-            //me.update(); //<-- Do not update!
+            
+          //me.update(); //<-- Do not use b/c it update labels. Instead do this:
+            for (var i=0; i<values.length; i++){
+                var div = chartRow.childNodes[i].childNodes[0].childNodes[0];
+                div.style.height = "0%";
+            }
         }
         else{
             values = [];
@@ -527,6 +549,74 @@ javaxt.dhtml.BarGraph = function (parent, config) {
     this.onClick = function(val, idx, div){};
     
     
+  //**************************************************************************
+  //** onCellClick
+  //**************************************************************************
+  /** Called whenever a cell in the graph is clicked.
+   */
+    this.onCellClick = function(idx, cell){};
+    
+    
+  //**************************************************************************
+  //** select
+  //**************************************************************************
+  /** Used to "select" a bar in the graph by adding the select style to the 
+   *  bar.
+   */
+    this.select = function(idx){
+        var td = chartRow.childNodes[idx];
+        if (td){
+            var bar = td.childNodes[0].childNodes[0];
+            addStyle(bar, "select");
+        }
+    };
+    
+    
+  //**************************************************************************
+  //** deselect
+  //**************************************************************************
+  /** Used to "deselect" a bar in the graph by removing the select style from
+   *  the bar.
+   */
+    this.deselect = function(idx){
+        var td = chartRow.childNodes[idx];
+        if (td){
+            var bar = td.childNodes[0].childNodes[0];
+            var h = bar.style.height;
+            setStyle(bar, "bar");
+            bar.style.position = "absolute";
+            bar.style.bottom = 0;
+            bar.style.width = "100%";
+            bar.style.height = h;
+        }
+    };
+    
+  //**************************************************************************
+  //** selectAll
+  //**************************************************************************
+  /** Used to "select" all the bars in the graph by adding the select style to 
+   *  the bars.
+   */
+    this.selectAll = function(){
+        for (var i=0; i<chartRow.childNodes.length; i++){
+            me.select(i);
+        }
+    };
+    
+    
+  //**************************************************************************
+  //** deselectAll
+  //**************************************************************************
+  /** Used to "deselect" all the bars in the graph by removing the select 
+   *  style from all the bars.
+   */
+    this.deselectAll = function(){
+        for (var i=0; i<chartRow.childNodes.length; i++){
+            me.deselect(i);
+        }
+    };
+
+
   //**************************************************************************
   //** createLabel
   //**************************************************************************
@@ -575,6 +665,34 @@ javaxt.dhtml.BarGraph = function (parent, config) {
   //** isNumber
   //**************************************************************************
     var isNumber = function(n) { return !isNaN(parseFloat(n)) && !isNaN(n - 0); };
+
+
+  //**************************************************************************
+  //** addStyle
+  //**************************************************************************
+  /** Used to add style to a given element. Styles are defined via a CSS class
+   *  name or inline using the config.style definitions. 
+   */
+    var addStyle = function(el, style){
+        
+        style = config.style[style];
+        if (style===null) return;
+        
+        if (typeof style === 'string' || style instanceof String){
+            if (el.className && el.className!=null) el.className += " " + style;
+            else el.className = style;
+        }
+        else{
+            for (var key in style){
+                var val = style[key];
+
+                el.style[key] = val;
+                if (key==="transform"){
+                    el.style["-webkit-" +key] = val;
+                }
+            }
+        }
+    };
 
 
   //**************************************************************************
