@@ -11,7 +11,6 @@ if(!javaxt.dhtml) javaxt.dhtml={};
  *
  ******************************************************************************/
 
-
 javaxt.dhtml.ComboBox = function(parent, config) {
     this.className = "javaxt.dhtml.ComboBox";
 
@@ -60,11 +59,20 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             },
             
             menu: {
-                backgroundColor: "#ffffff"
+                backgroundColor: "#ffffff",
+                border: "1px solid #ccc",
+                marginTop: "-1px",
+                overflow: "hidden",
+                boxShadow: "0 1px 4px 0 rgba(0, 0, 0, 0.15)"
             },
             
             option: {
-                whiteSpace: "nowrap"
+                color: "#363636",
+                whiteSpace: "nowrap",
+                height: "22px",
+                lineHeight: "22px",
+                padding: "0px 4px",
+                cursor: "default"
             }
         }
     };
@@ -214,6 +222,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         menu.style.overflowY = 'hidden';
         menu.style.width = "100%";
         menu.style.zIndex = 1;
+        menu.style.boxSizing = "border-box";
         div.appendChild(menu);
         
         
@@ -339,7 +348,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         
       //Resize menu
         if (numVisibleItems>config.maxVisibleRows){
-            menu.style.overflowY = 'scroll';
+            menu.style.overflowY = 'hidden';
         }
         else{
             menu.style.overflowY = 'hidden';
@@ -385,7 +394,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
                 
               //Resize menu
                 if (menu.childNodes.length>config.maxVisibleRows){
-                    menu.style.overflowY = 'scroll';
+                    menu.style.overflowY = 'hidden';
                     menu.style.height = (config.maxVisibleRows*h) + "px";
                 }
                 else{
@@ -526,7 +535,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         menu.appendChild(div);
         
         if (menu.childNodes.length===config.maxVisibleRows){
-            menu.style.overflowY = 'scroll';
+            menu.style.overflowY = 'hidden';
             menu.style.height = (menu.offsetHeight) + "px";
         }
         else{
@@ -658,7 +667,6 @@ javaxt.dhtml.ComboBox = function(parent, config) {
     };
 
 
-    
   //**************************************************************************
   //** setStyle
   //**************************************************************************
