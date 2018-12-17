@@ -15,16 +15,20 @@ javaxt.dhtml.ComboBox = function(parent, config) {
     this.className = "javaxt.dhtml.ComboBox";
 
     var me = this;
-    var menu, input, button;
+    var input, button;
+    var menuDiv, menuOptions, newOption;
     
     var defaultConfig = {
 
-        label: false,
+        placeholder: false,
 
         maxVisibleRows: 5, //number of menu items before overflow
-        
+        scrollbar: false, //true to show the vertical scrollbar
         showMenuOnFocus: true,
         typeAhead: true,
+        
+        addNewOption: false,
+        addNewOptionText: "Add New...",
         
         style: {
             
@@ -73,6 +77,16 @@ javaxt.dhtml.ComboBox = function(parent, config) {
                 lineHeight: "22px",
                 padding: "0px 4px",
                 cursor: "default"
+            },
+            
+            newOption: {
+                borderTop: "1px solid #ccc",
+                color: "#363636",
+                whiteSpace: "nowrap",
+                height: "24px",
+                lineHeight: "24px",
+                padding: "0px 4px",
+                cursor: "default"
             }
         }
     };
@@ -110,13 +124,9 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         
         
       //Create table with 2 columns
-        var table = document.createElement('table');
-        table.cellSpacing = 0;
-        table.cellPadding = 0;
-        table.style.borderCollapse = "collapse";
-        table.style.width="100%";
-        var tbody = document.createElement('tbody');
-        table.appendChild(tbody);        
+        var table = createTable();
+        table.style.height = "";
+        var tbody = table.firstChild;       
         var tr = document.createElement('tr');
         tbody.appendChild(tr);        
         mainDiv.appendChild(table);
@@ -141,7 +151,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         input.onkeyup = function(e){
             if (e.keyCode===9){ //tab
                 var d;
-                if (menu.style.visibility !== "hidden"){
+                if (menuDiv.style.visibility !== "hidden"){
                     d = getFirstOption();
                 }
                 if (d) select(d, true);
@@ -158,12 +168,11 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         };
         
         input.oninput = function(){
-
             
             var foundMatch = false;
             var filter = input.value.replace(/^\s*/, "").replace(/\s*$/, "").toLowerCase();
-            for (var i=0; i<menu.childNodes.length; i++){
-                var div = menu.childNodes[i];
+            for (var i=0; i<menuOptions.childNodes.length; i++){
+                var div = menuOptions.childNodes[i];
                 if (div.innerHTML.toLowerCase()===filter){
                     foundMatch = true;
                     input.data = div.value;
@@ -189,13 +198,13 @@ javaxt.dhtml.ComboBox = function(parent, config) {
 
       //Create button in the second column
         td = document.createElement('td');
-        button = document.createElement('input');
-        button.type = "button";
+        button = document.createElement('button');
+        //button.type = "button";
         setStyle(button, "button");
         td.appendChild(button);
         tr.appendChild(td);
         button.onclick = function(){
-            if (menu.style.visibility === "hidden"){
+            if (menuDiv.style.visibility === "hidden"){
                 me.showMenu(true);
                 scroll();
             }
@@ -212,18 +221,93 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         div.style.width = "100%";
         mainDiv.appendChild(div);
 
-        menu = document.createElement('div');
-        menu.setAttribute("desc", "menu");
-        setStyle(menu, "menu");
-        menu.style.position = "absolute";
-        menu.style.visibility = "hidden";
-        menu.style.display = "block"; //<--Required to get size
-        menu.style.overflowX = 'hidden';
-        menu.style.overflowY = 'hidden';
-        menu.style.width = "100%";
-        menu.style.zIndex = 1;
-        menu.style.boxSizing = "border-box";
-        div.appendChild(menu);
+        menuDiv = document.createElement('div');
+        menuDiv.setAttribute("desc", "menuDiv");
+        setStyle(menuDiv, "menu");
+        menuDiv.style.position = "absolute";
+        menuDiv.style.visibility = "hidden";
+        menuDiv.style.display = "block"; //<--Required to get size
+        menuDiv.style.width = "100%";
+        menuDiv.style.zIndex = 1;
+        menuDiv.style.boxSizing = "border-box";
+        div.appendChild(menuDiv);
+        
+
+        
+        if (config.addNewOption===true){
+            
+            var menuTable = createTable();
+            menuTable.style.height = "";
+            tr = document.createElement("tr");
+            menuTable.firstChild.appendChild(tr);
+            td = document.createElement("td");
+            td.style.width = "100%";
+            td.style.height = "100%";
+            td.style.verticalAlign = "top";
+            tr.appendChild(td);
+
+            var outerDiv = document.createElement("div");
+            outerDiv.style.position = "relative";
+            outerDiv.style.width = "100%";
+            outerDiv.style.height = "100%";
+            td.appendChild(outerDiv);
+
+            var innerDiv = outerDiv.cloneNode();
+            innerDiv.style.position = "absolute";
+            innerDiv.style.overflowX = 'hidden';
+            innerDiv.style.overflowY = 'hidden';
+            outerDiv.appendChild(innerDiv);
+            menuOptions = innerDiv;            
+            
+            tr = document.createElement("tr");
+            menuTable.firstChild.appendChild(tr);
+            td = document.createElement("td");
+            tr.appendChild(td);
+            
+            newOption = document.createElement('div');
+            setStyle(newOption, "newOption");
+            newOption.innerHTML = config.addNewOptionText;
+            newOption.tabIndex = -1; //allows the div to have focus
+            var selectNewOption = function(){
+                me.hideMenu();
+                me.onAddNewOption();
+            };
+            newOption.onclick = selectNewOption;
+            newOption.onkeydown = function(e){
+                if (e.keyCode===9){ 
+                    e.preventDefault();
+                }
+            };
+            newOption.onkeyup = function(e){
+                if (e.keyCode===9  || e.keyCode===13){ //tab or enter
+                    selectNewOption();
+                }
+                else if (e.keyCode===38){ //up arrow
+                    var previousSibling;
+                    for (var i=menuOptions.childNodes.length-1; i>-1; i--){
+                        var div = menuOptions.childNodes[i];
+                        if (div.style.display !== "none"){
+                            previousSibling = div;
+                            break;
+                        }
+                    }                     
+                    if (previousSibling) previousSibling.focus();
+                }
+            };
+
+            newOption.onselectstart = function () {return false;};
+            newOption.onmousedown = function () {return false;};
+                    
+            td.appendChild(newOption);
+            
+            menuDiv.appendChild(menuTable);
+        }
+        else{
+            menuDiv.style.overflowX = 'hidden';
+            menuDiv.style.overflowY = 'hidden';
+            menuOptions = menuDiv;
+        }
+        
         
         
 
@@ -243,27 +327,42 @@ javaxt.dhtml.ComboBox = function(parent, config) {
 
 
   //**************************************************************************
+  //** reset
+  //**************************************************************************
+    this.reset = function(){
+        me.setValue(null);
+    };
+
+
+  //**************************************************************************
   //** setValue
   //**************************************************************************
   /** Used to set the value for the input. 
    */
     this.setValue = function(val){
         
+        if (val==null || val=="") {
+            input.value = "";
+            input.data = null;
+            return;
+        };
+        
+        
       //Try to match the val to one of the menu items using the menu data
-        for (var i=0; i<menu.childNodes.length; i++){
-            var div = menu.childNodes[i];
+        for (var i=0; i<menuOptions.childNodes.length; i++){
+            var div = menuOptions.childNodes[i];
             if (div.value===val){
-                input.value = div.innerText;
+                input.value = div.innerHTML;
                 input.data = div.value;
                 return;
             }
         }
 
       //Try to match the val to one of the menu items using the menu text
-        for (var i=0; i<menu.childNodes.length; i++){
-            var div = menu.childNodes[i];
-            if (div.innerText.toLowerCase() === getText(val).toLowerCase()){
-                input.value = div.innerText;
+        for (var i=0; i<menuOptions.childNodes.length; i++){
+            var div = menuOptions.childNodes[i];
+            if (div.innerHTML.toLowerCase() === getText(val).toLowerCase()){
+                input.value = div.innerHTML;
                 input.data = div.value;
                 return;
             }
@@ -296,6 +395,24 @@ javaxt.dhtml.ComboBox = function(parent, config) {
 
 
   //**************************************************************************
+  //** getOptions
+  //**************************************************************************
+  /** Returns a list of all the options currently available in the comboxbox.
+   */
+    this.getOptions = function(){
+        var arr = [];
+        for (var i=0; i<menuOptions.childNodes.length; i++){
+            var div = menuOptions.childNodes[i];
+            arr.push({
+                text: div.innerHTML, 
+                value: div.value
+            });
+        }
+        return arr;
+    };
+
+
+  //**************************************************************************
   //** getInput
   //**************************************************************************
   /** Returns the DOM element for the input.
@@ -318,7 +435,25 @@ javaxt.dhtml.ComboBox = function(parent, config) {
   //**************************************************************************
   //** onChange
   //**************************************************************************
+  /** Called when the input value changes
+   */
     this.onChange = function(text, value){};
+
+
+  //**************************************************************************
+  //** onAddNewOption
+  //**************************************************************************
+  /** Called when a user clicks on the new menu option 
+   */
+    this.onAddNewOption = function(){};
+    
+    
+  //**************************************************************************
+  //** onAddNewOption
+  //**************************************************************************
+  /** Called when a user attempts to render the context menu on a menu option
+   */
+    this.onMenuContext = function(text, value, el){};
 
 
   //**************************************************************************
@@ -334,12 +469,14 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         
       //Filter menu items
         var numVisibleItems = 0;
-        for (var i=0; i<menu.childNodes.length; i++){
-            var div = menu.childNodes[i];
+        var h = 0;
+        for (var i=0; i<menuOptions.childNodes.length; i++){
+            var div = menuOptions.childNodes[i];
             
             if (div.innerHTML.toLowerCase().indexOf(filter) === 0) {
                 div.style.display = "";
                 numVisibleItems++;
+                h = Math.max(div.offsetHeight, h);
             } 
             else {
                 div.style.display = "none";
@@ -347,13 +484,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         }
         
       //Resize menu
-        if (numVisibleItems>config.maxVisibleRows){
-            menu.style.overflowY = 'hidden';
-        }
-        else{
-            menu.style.overflowY = 'hidden';
-            menu.style.height = '';
-        }
+        resizeMenu(numVisibleItems, h);
     };
 
 
@@ -366,9 +497,8 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         input.value = "";
         input.data = null;
         me.hideMenu();
-        menu.innerHTML = "";
-        menu.style.overflowY = 'hidden';
-        menu.style.height = '';
+        removeOverflow();
+        menuDiv.style.height = '';
     };
     
 
@@ -380,53 +510,47 @@ javaxt.dhtml.ComboBox = function(parent, config) {
    */
     this.showMenu = function(removeFilter){
         
-        if (menu.style.visibility === "hidden"){
+        if (menuDiv.style.visibility === "hidden"){
             
             
+          //Unhide all the options as needed
             if (removeFilter===true){
-                
-              //Unhide all the options
-                var h = 0;
-                for (var i=0; i<menu.childNodes.length; i++){
-                    h = Math.max(menu.childNodes[i].offsetHeight, h);
-                    menu.childNodes[i].style.display = '';
+                for (var i=0; i<menuOptions.childNodes.length; i++){
+                    menuOptions.childNodes[i].style.display = '';
                 }
-                
-              //Resize menu
-                if (menu.childNodes.length>config.maxVisibleRows){
-                    menu.style.overflowY = 'hidden';
-                    menu.style.height = (config.maxVisibleRows*h) + "px";
-                }
-                else{
-                    menu.style.overflowY = 'hidden';
-                    menu.style.height = '';
-                }
-
             }
-
             
             
           //Check to see if the menu has anything to display
-            if (menu.childNodes.length===0) return;
-            var hasVisibleItems = false;
-            for (var i=0; i<menu.childNodes.length; i++){
-                var div = menu.childNodes[i];
+            var numVisibleItems = 0;
+            var h = 0;
+            for (var i=0; i<menuOptions.childNodes.length; i++){
+                var div = menuOptions.childNodes[i];
                 if (div.style.display !== "none"){
-                    hasVisibleItems = true;
-                    break;
+                    numVisibleItems++;
+                    h = Math.max(div.offsetHeight, h);
                 }
             }
-            if (!hasVisibleItems) return;
+            if (config.addNewOption===true){ 
+                numVisibleItems++;
+                h = Math.max(newOption.offsetHeight, h);
+            }
             
+            
+            if (numVisibleItems>0){
+                
+              //Update menu size
+                resizeMenu(numVisibleItems, h);
+                
+
+              //Show the menu
+                menuDiv.style.visibility = '';
             
 
-          //Show the list of options
-            menu.style.visibility = '';
-            
-
-          //Hide bottom border
-            input.style.borderBottomColor = 
-            button.style.borderBottomColor = "rgba(0,0,0,0)";
+              //Hide bottom border
+                input.style.borderBottomColor = 
+                button.style.borderBottomColor = "rgba(0,0,0,0)";
+            }
         }
     };
 
@@ -436,14 +560,61 @@ javaxt.dhtml.ComboBox = function(parent, config) {
   //**************************************************************************
     this.hideMenu = function(){
         
-        if (menu.style.visibility !== "hidden"){
+        if (menuDiv.style.visibility !== "hidden"){
             input.style.borderBottomColor =
             button.style.borderBottomColor = '';
             setStyle(input, "input");
             setStyle(button, "button");
             input.style.width="100%";
-            menu.style.visibility = "hidden";
+            menuDiv.style.visibility = "hidden";
             input.focus();
+        }
+    };
+
+
+  //**************************************************************************
+  //** resizeMenu
+  //**************************************************************************
+    var resizeMenu = function(numVisibleItems, h){
+        if (numVisibleItems>0){
+
+            if (numVisibleItems>config.maxVisibleRows){
+                addOverflow();
+                var height = config.maxVisibleRows*h;
+                if (newOption){ 
+                    menuDiv.style.height = height + "px";
+                    height = height-newOption.offsetHeight;
+                    menuOptions.parentNode.style.height = 
+                    menuOptions.style.height = height + "px";
+                }
+                else{
+                    menuOptions.style.height =
+                    menuDiv.style.height = height + "px";
+                }
+            }
+            else{
+                removeOverflow();
+                menuOptions.parentNode.style.height = 
+                menuOptions.style.height =
+                menuDiv.style.height = '';
+            }
+        }
+    };
+    
+    var addOverflow = function(){
+        menuOptions.style.position = "absolute";
+        if (config.scrollbar===true){
+            menuOptions.style.overflowY = 'scroll';
+        }
+        else{
+            menuOptions.style.overflowY = 'hidden';
+        }
+    };
+    
+    var removeOverflow = function(){
+        if (config.addNewOption===true){ //remove overflow if we have a table menu
+            menuOptions.style.position = "relative";
+            menuOptions.style.overflowY = '';
         }
     };
 
@@ -456,10 +627,10 @@ javaxt.dhtml.ComboBox = function(parent, config) {
     var scroll = function(){
         
       //Scroll to a menu item that matches the text in the input
-        for (var i=0; i<menu.childNodes.length; i++){
-            var div = menu.childNodes[i];
+        for (var i=0; i<menuOptions.childNodes.length; i++){
+            var div = menuOptions.childNodes[i];
             if (div.innerHTML===input.value){
-                menu.scrollTop = div.offsetTop;
+                menuOptions.scrollTop = div.offsetTop;
                 div.focus();
                 return;
             }
@@ -469,8 +640,8 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         var a = input.value;
         var div = null;
         var max = 0;
-        for (var i=0; i<menu.childNodes.length; i++){
-            var b = menu.childNodes[i].innerText;
+        for (var i=0; i<menuOptions.childNodes.length; i++){
+            var b = menuOptions.childNodes[i].innerHTML;
             var x = 0;
             for (var j=0; j<Math.min(a.length, b.length); j++) {
                 if (a.charAt(j) !== b.charAt(j)){
@@ -479,13 +650,13 @@ javaxt.dhtml.ComboBox = function(parent, config) {
                 x++;
             }
             if (x>max){
-                div = menu.childNodes[i];
+                div = menuOptions.childNodes[i];
                 max = x;
             }
         }
         
         if (div){
-            menu.scrollTop = div.offsetTop;
+            menuOptions.scrollTop = div.offsetTop;
             div.focus();
             return;
         }
@@ -514,7 +685,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             }
         };
         div.onkeyup = function(e){
-            if (e.keyCode===9){ //tab
+            if (e.keyCode===9 || e.keyCode===13){ //tab or enter
                 select(this, true);
             }
             else if (e.keyCode===38){ //up arrow
@@ -524,6 +695,9 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             else if (e.keyCode===40){ //down arrow
                 var nextSibling = this.nextSibling;
                 if (nextSibling) nextSibling.focus();
+                else{
+                    if (newOption) newOption.focus();
+                }
             }
         };
         
@@ -531,21 +705,12 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         div.onselectstart = function () {return false;};
         div.onmousedown = function () {return false;};
         
+        div.oncontextmenu = function(){
+            var el = this;
+            me.onMenuContext(el.innerHTML, el.value, el);
+        };
         
-        menu.appendChild(div);
-        
-        if (menu.childNodes.length===config.maxVisibleRows){
-            menu.style.overflowY = 'hidden';
-            menu.style.height = (menu.offsetHeight) + "px";
-        }
-        else{
-            
-          //Resize the menu as needed. This condition occurs after a removeAll
-            if (menu.childNodes.length<config.maxVisibleRows){
-                menu.style.overflowY = 'hidden';
-                menu.style.height = '';
-            }
-        }
+        menuOptions.appendChild(div);
     };
 
 
@@ -556,20 +721,14 @@ javaxt.dhtml.ComboBox = function(parent, config) {
    */
     this.remove = function(name){
         var arr = [];
-        for (var i=0; i<menu.childNodes.length; i++){
-            var div = menu.childNodes[i];
-            if (div.innerText === getText(name)){
+        for (var i=0; i<menuOptions.childNodes.length; i++){
+            var div = menuOptions.childNodes[i];
+            if (div.innerHTML === getText(name)){
                 arr.push(div);
             }
         }
         for (i=0; i<arr.length; i++){
-            menu.removeChild(arr[i]);
-        }
-        
-       //Resize the menu as needed
-        if (menu.childNodes.length<config.maxVisibleRows){
-            menu.style.overflowY = 'hidden';
-            menu.style.height = '';
+            menuOptions.removeChild(arr[i]);
         }
     };
     
@@ -580,8 +739,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
   /** Removes all entries from the menu.
    */
     this.removeAll = function(){
-        menu.innerHTML = "";
-        menu.style.overflowY = 'hidden'; 
+        menuOptions.innerHTML = "";
         //Don't resize the menu div!
     };
 
@@ -657,8 +815,8 @@ javaxt.dhtml.ComboBox = function(parent, config) {
   /** Returns the first visible menu item.
    */
     var getFirstOption = function(){
-        for (var i=0; i<menu.childNodes.length; i++){
-            var div = menu.childNodes[i];
+        for (var i=0; i<menuOptions.childNodes.length; i++){
+            var div = menuOptions.childNodes[i];
             if (div.style.display !== "none"){
                 return div;
             }
@@ -696,6 +854,24 @@ javaxt.dhtml.ComboBox = function(parent, config) {
                 }
             }
         }
+    };
+
+
+  //**************************************************************************
+  //** createTable
+  //**************************************************************************
+    var createTable = function(){
+        var table = document.createElement('table');
+        table.cellSpacing = 0;
+        table.cellPadding = 0;
+        table.style.width = "100%";
+        table.style.height = "100%";
+        table.style.margin = 0;
+        table.style.padding = 0;
+        table.style.borderCollapse = "collapse";
+        var tbody = document.createElement('tbody');
+        table.appendChild(tbody);
+        return table;
     };
 
 
