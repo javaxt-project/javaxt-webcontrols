@@ -1,0 +1,309 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+
+<title>Combo Box Demos</title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+<!-- Default Stylesheet -->
+<link  href="../style.css" rel="stylesheet" type="text/css" />
+
+<!-- ComboBox Include -->
+<script type="text/javascript" src="../../src/combobox/ComboBox.js"></script>
+
+<style type="text/css">
+    
+    /* Style for menu options */
+    .combobox-option {
+        color: #363636;
+        white-space: nowrap;
+        height: 22px;
+        line-height: 22px;
+        padding: 0px 4px;
+        cursor: default;
+    }
+
+    .combobox-option:hover {
+        background-color: #d4ebff;
+    }
+    .combobox-option:focus {
+        background-color: #d4ebff;
+    }
+    .combobox-option:focused {
+        background-color: #d4ebff;
+    }
+    
+    .combobox-option-new {
+        border-top: 1px solid #ccc;
+        height: 24px;
+        line-height: 24px;
+    }
+</style>
+
+</head>
+<body>
+
+<h1>Combo Box Demos</h1>
+    
+<h2>Select Country Demo</h2>
+<p>Simple example of a combo box used to select a country from a predefined list.
+   The list of options are automatically filtered as you type in a value in the 
+   input field.
+</p>
+<div id="demo1" style="width:250px;"></div>
+
+<script type="text/javascript">
+var demo1 = function() {
+
+    var countries = new javaxt.dhtml.ComboBox("demo1",{style:{option:"combobox-option"}});
+    countries.add("Afghanistan", "AF");
+    countries.add("Albania", "AL");
+    countries.add("Algeria", "AG");
+    countries.add("Andorra", "AN");
+    countries.add("Angola", "AO");
+    countries.add("Antigua and Barbuda", "AC");
+    countries.add("Argentina", "AR");
+    countries.add("Armenia", "AM");
+    countries.add("Australia", "AS");
+    countries.add("Austria", "AU");
+    countries.add("Azerbaijan", "AJ");
+    countries.add("Bahamas", "BF");
+    countries.add("Bahrain", "BA");
+    countries.add("Bangladesh", "BG");
+    countries.add("Barbados", "BB");
+    countries.add("Belarus", "BO");
+    countries.add("Belgium", "BE");
+    countries.add("Belize", "BH");
+    countries.add("Benin", "BN");
+    countries.add("Bhutan", "BT");
+    countries.add("Bolivia", "BL");
+    countries.add("Bosnia and Herzegovina", "BK");
+    countries.add("Botswana", "BC");
+    countries.add("Brazil", "BR");
+    countries.add("Brunei", "BX");
+    countries.add("Bulgaria", "BU");
+    countries.add("Burkina Faso", "UV");
+    countries.add("Burma", "BM");
+    countries.add("Burundi", "BY");
+    countries.add("Cambodia", "CB");
+    countries.add("Cameroon", "CM");
+    countries.add("Canada", "CA");
+    countries.add("Cape Verde", "CV");
+    countries.add("Central African Republic", "CT");
+    countries.add("Chad", "CD");
+    countries.add("Chile", "CI");
+    countries.add("China", "CH");
+    countries.add("Colombia", "CO");
+    countries.add("Comoros", "CN");
+    countries.add("Congo (Brazzaville)", "CF");
+    countries.add("Congo (Kinshasa)", "CG");
+    countries.add("Costa Rica", "CS");
+    countries.add("Côte d'Ivoire", "IV");
+    countries.add("Croatia", "HR");
+    countries.add("Cuba", "CU");
+    countries.add("Cyprus", "CY");
+    countries.add("Czech Republic", "EZ");
+    countries.add("Denmark", "DA");
+    countries.add("Djibouti", "DJ");
+    countries.add("Dominica", "DO");
+    countries.add("Dominican Republic", "DR");
+    countries.add("Ecuador", "EC");
+    countries.add("Egypt", "EG");
+    countries.add("El Salvador", "ES");
+    countries.add("Equatorial Guinea", "EK");
+    countries.add("Eritrea", "ER");
+    countries.add("Estonia", "EN");
+    countries.add("Ethiopia", "ET");
+    countries.add("Federated States of Micronesia", "FM");
+    countries.add("Fiji", "FJ");
+    countries.add("Finland", "FI");
+    countries.add("France", "FR");
+    countries.add("Gabon", "GB");
+    countries.add("Gambia", "GA");
+    countries.add("Georgia", "GG");
+    countries.add("Germany", "GM");
+    countries.add("Ghana", "GH");
+    countries.add("Greece", "GR");
+    countries.add("Grenada", "GJ");
+    countries.add("Guatemala", "GT");
+    countries.add("Guinea", "GV");
+    countries.add("Guinea-Bissau", "PU");
+    countries.add("Guyana", "GY");
+    countries.add("Haiti", "HA");
+    countries.add("Honduras", "HO");
+    countries.add("Hungary", "HU");
+    countries.add("Iceland", "IC");
+    countries.add("India", "IN");
+    countries.add("Indonesia", "ID");
+    countries.add("Iran", "IR");
+    countries.add("Iraq", "IZ");
+    countries.add("Ireland", "EI");
+    countries.add("Israel", "IS");
+    countries.add("Italy", "IT");
+    countries.add("Jamaica", "JM");
+    countries.add("Japan", "JA");
+    countries.add("Jordan", "JO");
+    countries.add("Kazakhstan", "KZ");
+    countries.add("Kenya", "KE");
+    countries.add("Kiribati", "KR");
+    countries.add("Kosovo", "KV");
+    countries.add("Kuwait", "KU");
+    countries.add("Kyrgyzstan", "KG");
+    countries.add("Laos", "LA");
+    countries.add("Latvia", "LG");
+    countries.add("Lebanon", "LE");
+    countries.add("Lesotho", "LT");
+    countries.add("Liberia", "LI");
+    countries.add("Libya", "LY");
+    countries.add("Liechtenstein", "LS");
+    countries.add("Lithuania", "LH");
+    countries.add("Luxembourg", "LU");
+    countries.add("Macedonia", "MK");
+    countries.add("Madagascar", "MA");
+    countries.add("Malawi", "MI");
+    countries.add("Malaysia", "MY");
+    countries.add("Maldives", "MV");
+    countries.add("Mali", "ML");
+    countries.add("Malta", "MT");
+    countries.add("Marshall Islands", "RM");
+    countries.add("Mauritania", "MR");
+    countries.add("Mauritius", "MP");
+    countries.add("Mexico", "MX");
+    countries.add("Moldova", "MD");
+    countries.add("Monaco", "MN");
+    countries.add("Mongolia", "MG");
+    countries.add("Montenegro", "MJ");
+    countries.add("Morocco", "MO");
+    countries.add("Mozambique", "MZ");
+    countries.add("Namibia", "WA");
+    countries.add("Nauru", "NR");
+    countries.add("Nepal", "NP");
+    countries.add("Netherlands", "NL");
+    countries.add("New Zealand", "NZ");
+    countries.add("Nicaragua", "NU");
+    countries.add("Niger", "NG");
+    countries.add("Nigeria", "NI");
+    countries.add("North Korea", "KN");
+    countries.add("Norway", "NO");
+    countries.add("Oman", "MU");
+    countries.add("Pakistan", "PK");
+    countries.add("Palau", "PS");
+    countries.add("Panama", "PM");
+    countries.add("Papua New Guinea", "PP");
+    countries.add("Paraguay", "PA");
+    countries.add("Peru", "PE");
+    countries.add("Philippines", "RP");
+    countries.add("Poland", "PL");
+    countries.add("Portugal", "PO");
+    countries.add("Qatar", "QA");
+    countries.add("Romania", "RO");
+    countries.add("Russia", "RS");
+    countries.add("Rwanda", "RW");
+    countries.add("Saint Kitts and Nevis", "SC");
+    countries.add("Saint Lucia", "ST");
+    countries.add("Saint Vincent and the Grenadines", "VC");
+    countries.add("Samoa", "WS");
+    countries.add("San Marino", "SM");
+    countries.add("Sao Tome and Principe", "TP");
+    countries.add("Saudi Arabia", "SA");
+    countries.add("Senegal", "SG");
+    countries.add("Serbia", "RI");
+    countries.add("Seychelles", "SE");
+    countries.add("Sierra Leone", "SL");
+    countries.add("Singapore", "SN");
+    countries.add("Slovakia", "LO");
+    countries.add("Slovenia", "SI");
+    countries.add("Solomon Islands", "BP");
+    countries.add("Somalia", "SO");
+    countries.add("South Africa", "SF");
+    countries.add("South Korea", "KS");
+    countries.add("Spain", "SP");
+    countries.add("Sri Lanka", "CE");
+    countries.add("Sudan", "SU");
+    countries.add("Suriname", "NS");
+    countries.add("Swaziland", "WZ");
+    countries.add("Sweden", "SW");
+    countries.add("Switzerland", "SZ");
+    countries.add("Syria", "SY");
+    countries.add("Taiwan", "TW");
+    countries.add("Tajikistan", "TI");
+    countries.add("Tanzania", "TZ");
+    countries.add("Thailand", "TH");
+    countries.add("Timor-Leste", "TT");
+    countries.add("Togo", "TO");
+    countries.add("Tonga", "TN");
+    countries.add("Trinidad and Tobago", "TD");
+    countries.add("Tunisia", "TS");
+    countries.add("Turkey", "TU");
+    countries.add("Turkmenistan", "TX");
+    countries.add("Tuvalu", "TV");
+    countries.add("Uganda", "UG");
+    countries.add("Ukraine", "UP");
+    countries.add("United Arab Emirates", "AE");
+    countries.add("United Kingdom", "UK");
+    countries.add("United States", "US");
+    countries.add("Uruguay", "UY");
+    countries.add("Uzbekistan", "UZ");
+    countries.add("Vanuatu", "NH");
+    countries.add("Vatican City", "VT");
+    countries.add("Venezuela", "VE");
+    countries.add("Vietnam", "VM");
+    countries.add("Yemen", "YM");
+    countries.add("Zambia", "ZA");
+    countries.add("Zimbabwe", "ZI");
+    
+    
+    //countries.setValue("United States");
+};
+</script>
+
+
+
+
+<h2 style="margin-top:125px;">"New" Option Demo</h2>
+<p>The combobox provides an option to append a fixed menu item to the bottom of the list. This menu item can be used to trigger other actions (e.g. open an editor). 
+</p>
+<div id="demo2" style="width:250px;"></div>
+
+<script type="text/javascript">
+var demo2 = function() {
+    var contacts = new javaxt.dhtml.ComboBox("demo2",{
+        style: {
+            option: "combobox-option",
+            newOption: "combobox-option combobox-option-new"
+        },
+        addNewOption: true,
+        addNewOptionText: "Add New Contact...",
+        scrollbar: true
+    });
+    contacts.add("Jim");
+    contacts.add("Alice");
+    contacts.add("Karen");
+    contacts.add("Mike");
+    contacts.add("Amy");
+    contacts.add("Bob");
+    contacts.onAddNewOption = function(){
+        alert("Add New Contact!");
+        //This is the hook to add a new option. For example, you might want to
+        //open a dialog to create a new contact. Once you've collected all the
+        //inputs and saved the contact, you can add a new option by simply
+        //calling the add() method.
+    };
+};
+</script>
+
+<script type="text/javascript">
+window.onload = function() {
+
+    demo1();
+    demo2();
+};
+</script>
+
+
+</body>
+</html>
