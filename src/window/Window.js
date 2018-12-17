@@ -111,8 +111,9 @@ javaxt.dhtml.Window = function(parent, config) {
             },
             
             body: {
-                padding: "5px",
-                verticalAlign: "top"
+                padding: "7px",
+                verticalAlign: "top",
+                color: "#484848"
             },
             
             footer: {
@@ -258,7 +259,7 @@ javaxt.dhtml.Window = function(parent, config) {
                 body.appendChild(config.body);
             }
             else{
-                if (typeof parent === "string"){
+                if (typeof config.body === "string"){
                     body.innerHTML = config.body;
                 }
             }
@@ -797,17 +798,22 @@ javaxt.dhtml.Window = function(parent, config) {
         };
 
         for (var i=0; i<document.styleSheets.length; i++){
-            var rules = document.styleSheets[i].rules || document.styleSheets[i].cssRules;
-            if (hasRule(selector, rules)){
-                return true;
-            }
-            
-            var imports = document.styleSheets[i].imports;
-            if (imports){
-                for (var j=0; j<imports.length; j++){
-                    rules = imports[j].rules || imports[j].cssRules;
-                    if (hasRule(selector, rules)) return true;
+            try{
+                var rules = document.styleSheets[i].rules || document.styleSheets[i].cssRules;
+                if (hasRule(selector, rules)){
+                    return true;
                 }
+
+                var imports = document.styleSheets[i].imports;
+                if (imports){
+                    for (var j=0; j<imports.length; j++){
+                        rules = imports[j].rules || imports[j].cssRules;
+                        if (hasRule(selector, rules)) return true;
+                    }
+                }
+            }
+            catch(e){
+                
             }
         } 
 
