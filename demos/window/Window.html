@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+
+<title>Window Demo</title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+
+<!-- Default Stylesheet -->
+<link  href="../style.css" rel="stylesheet" type="text/css" />
+
+
+<!-- Window Include -->
+<script type="text/javascript" src="../../src/window/Window.js"></script>
+
+</head>
+<body>
+       
+<h1>Window Demos</h1>
+
+<h2>Modal Pop-up Window</h2>
+<p>Simple modal pop-up window </p>
+<input type="button" value="Open" onclick="demo1()"></input>
+
+<script type="text/javascript">
+var win;
+var demo1 = function() {
+
+    if (!win){
+        var body = document.getElementsByTagName("body")[0];
+        win = new javaxt.dhtml.Window(body, {
+            width: 400,
+            height: 100,
+            modal: true,
+            valign: "top",
+            title: "Demo 1",
+            body: "Drag me! Grab the header and move me around."
+        });
+    }
+
+    win.show();
+    
+};
+</script>
+
+<h2>Simple Pop-up Window</h2>
+<p>Simple pop-up window initialized using contents of an existing element.</p>
+<div style="height: 50px;width: 150px;background-color: aliceblue;border: 1px solid #a4d5ff;padding: 7px;margin: 15px 0;">
+    <div id="msg">Hello World!</div>
+</div>
+<input type="button" value="Open" onclick="demo2()"></input>
+
+<script type="text/javascript">
+var demo2 = function() {
+
+    var body = document.getElementsByTagName("body")[0];
+    var msg = document.getElementById("msg");
+    var msgContainer = msg.parentNode;
+    var win2 = new javaxt.dhtml.Window(body, {
+        width: 400,
+        height: 100,
+        title: "demo2",
+        body: msg
+    });
+    
+    win2.onClose = function(){
+        msgContainer.appendChild(msg);
+    };
+
+    win2.show();
+};
+</script>
+
+</body>
+</html>
