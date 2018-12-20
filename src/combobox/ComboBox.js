@@ -31,6 +31,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         addNewOptionText: "Add New...",
         
         style: {
+            width: "100%",
             
             input: {
                 color: "#363636",
@@ -118,7 +119,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
       //Create main div
         var mainDiv = document.createElement("div");
         mainDiv.setAttribute("desc", me.className);
-        mainDiv.style.width = "100%";
+        mainDiv.style.width = config.style.width;
         parent.appendChild(mainDiv);
         me.el = mainDiv;
         
