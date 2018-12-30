@@ -113,7 +113,11 @@ javaxt.dhtml.Tree = function (parent, config) {
   //** addNodes
   //**************************************************************************
     this.addNodes = function(nodes){
-        addNodes(nodes, me.el);
+        var hiddenNodes = [];
+        addNodes(nodes, me.el, hiddenNodes);
+        for (var i=0; i<hiddenNodes.length; i++){
+            hide(hiddenNodes[i]);
+        }
     };
     
 
@@ -289,7 +293,7 @@ javaxt.dhtml.Tree = function (parent, config) {
   //**************************************************************************
   //** addNodes
   //**************************************************************************
-    var addNodes = function(nodes, parent){
+    var addNodes = function(nodes, parent, hiddenNodes){
         for (var i=0; i<nodes.length; i++){
             var node = nodes[i];
             var children = node.nodes;
@@ -400,14 +404,14 @@ javaxt.dhtml.Tree = function (parent, config) {
                 
                 var expand = false;
                 if (node.expand===true) expand = true;
-                if (!expand) hide(ul);
+                if (!expand) hiddenNodes.push(ul); //hide(ul);
                 
                 
-                addNodes(children, ul);
+                addNodes(children, ul, hiddenNodes);
             }
         }
     };
-
+    
 
   //**************************************************************************
   //** showNode
@@ -542,11 +546,14 @@ javaxt.dhtml.Tree = function (parent, config) {
         var siblings = li.parentNode.childNodes;
         for (var i=0; i<siblings.length; i++){
             if (siblings[i]===li){
+                var foundSibling = false;
                 for (var j=i+1; j<siblings.length; j++){
                     if (siblings[j].tagName.toLowerCase()==="li"){
-                        return false;
+                        foundSibling = true;
+                        break;
                     }
                 }
+                if (foundSibling) return false;
             }
         }
         return true;
