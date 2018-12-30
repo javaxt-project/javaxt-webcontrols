@@ -81,10 +81,6 @@ javaxt.dhtml.PageLoader = function() {
             if (titles.length>0){
                 title = titles[0].innerHTML;
             }
-            else{
-                var h1 = div.getElementsByTagName("h1");
-                if (h1.length>0) title = h1[0].innerHTML;
-            }
 
 
           //Get scripts
