@@ -23,7 +23,7 @@ javaxt.dhtml.PageLoader = function() {
     
     
   //**************************************************************************
-  //** load
+  //** loadPage
   //**************************************************************************
   /** Used to replace the body of the current document with html from another
    *  document found at a given url. Dynamically loads any css stylesheets and 
@@ -133,8 +133,57 @@ javaxt.dhtml.PageLoader = function() {
                 
         });
     };
-    
-    
+
+
+  //**************************************************************************
+  //** loadApp
+  //**************************************************************************
+  /** Used to fetch an application xml document found at a given url. Loads 
+   *  any css stylesheets and javascripts sourced in the xml document. Returns
+   *  the name and main function used to instantiate the application.
+   */
+    this.loadApp = function(url, callback){
+        
+        if (url.indexOf("?")==-1) url += "?";
+        url += "&_=" + new Date().getTime();
+        
+        get(url, function(text, xml){
+            
+          //Parse app info
+            var appInfo = {};
+            var application = xml.getElementsByTagName("application")[0];
+            if (application){
+                appInfo.name = application.getAttribute("name");
+                appInfo.main = application.getAttribute("main");
+            }
+
+
+          //Parse includes
+            var scripts = [];
+            var css = [];
+            var includes = xml.getElementsByTagName("includes")[0].childNodes;
+            for (var i=0; i<includes.length; i++){
+                var include = includes[i];
+                if (include.nodeType==1){
+                    var type = include.getAttribute("type");
+                    if (type==="text/javascript"){
+                        scripts.push(include.getAttribute("src"));
+                    }
+                    else if (type==="text/css"){
+                        css.push(include.getAttribute("href"));
+                    }
+                }
+            }
+            
+            
+          //Load includes and call the callback
+            loadIncludes(css, scripts, function(){            
+                if (callback) callback.apply(me, [appInfo, xml]);
+            });
+        });
+    };
+
+
   //**************************************************************************
   //** loadIncludes
   //**************************************************************************
@@ -303,7 +352,7 @@ javaxt.dhtml.PageLoader = function() {
             if (request.readyState === 4) {
                 if (request.status===200){
                     
-                    if (success) success.apply(me, [request.responseText]);   
+                    if (success) success.apply(me, [request.responseText, request.responseXML]);   
                 }
             }
         };
