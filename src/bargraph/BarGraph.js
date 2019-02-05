@@ -555,8 +555,18 @@ javaxt.dhtml.BarGraph = function (parent, config) {
   /** Called whenever a cell in the graph is clicked.
    */
     this.onCellClick = function(idx, cell){};
-    
-    
+
+
+  //**************************************************************************
+  //** getCell
+  //**************************************************************************
+  /** Returns a cell in the bargraph at a given index
+   */
+    this.getCell = function(idx){
+        return chartRow.childNodes[idx];
+    };
+
+
   //**************************************************************************
   //** select
   //**************************************************************************
