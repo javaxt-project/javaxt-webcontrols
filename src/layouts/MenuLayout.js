@@ -29,6 +29,9 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
     var defaultConfig = {
         
         animationSteps: 250.0, //time in milliseconds
+        transitionEffect: "linear",
+        fx: null,
+        
         menuWidth: 250, 
 
         title: "",
@@ -105,6 +108,8 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
         title = config.title;
         
         
+
+        
         
       //Create outer table (for resize purposes)
         var table = createTable();
@@ -145,8 +150,11 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
         innerDiv.style.height="100%";
         innerDiv.style.position = "relative";
         innerDiv.style.marginLeft = -menuWidth+"px";
+        if (config.fx){
+            config.fx.setTransition(innerDiv, config.transitionEffect, config.animationSteps);
+        }
         overflowDiv.appendChild(innerDiv);
-                
+
 
         
       //Create table with 2 columns - one for the menu and one for the body
@@ -411,8 +419,18 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
   //** showMenu
   //**************************************************************************
     this.showMenu = function(){
-        slideMenu(true, new Date().getTime(), config.animationSteps, null);
-        
+        me.beforeShow();
+        if (config.fx){
+            setTimeout(function(){ 
+                innerDiv.style.marginLeft = "0px";
+                setTimeout(function(){ 
+                    me.onShow.apply(me, []);
+                }, config.animationSteps+50); 
+            }, 50);
+        }
+        else{
+            slideMenu(true, new Date().getTime(), config.animationSteps, me.onShow);
+        }
     };
     
     
@@ -420,16 +438,33 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
   //** hideMenu
   //**************************************************************************
     this.hideMenu = function(){
-        slideMenu(false, new Date().getTime(), config.animationSteps, null);
+        me.beforeHide();
+        if (config.fx){
+            setTimeout(function(){ 
+                innerDiv.style.marginLeft = -menuWidth+"px";
+                setTimeout(function(){ 
+                    me.onHide.apply(me, []);
+                }, config.animationSteps+50); 
+            }, 50);
+        }
+        else{
+            slideMenu(false, new Date().getTime(), config.animationSteps, me.onHide);
+        }
     };
     
+    
+    this.onShow = function(){};
+    this.onHide = function(){};
+    
+    this.beforeShow = function(){};
+    this.beforeHide = function(){};
     
     
   //**************************************************************************
   //** slideMenu
   //**************************************************************************
-  /**  Used to slide the menu panel open or close. */
-
+  /**  Used to slide the menu panel open or close. 
+   */
     var slideMenu = function(slideOpen, lastTick, timeLeft, callback){
         
         var curTick = new Date().getTime();
