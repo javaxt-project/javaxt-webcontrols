@@ -11,6 +11,7 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 
 javaxt.dhtml.Effects = function() {
     
+    var me = this;
     
   //**************************************************************************
   //** fadeIn
@@ -21,9 +22,7 @@ javaxt.dhtml.Effects = function() {
     this.fadeIn = function(el, transitionEffect, duration, callback){
         el.style.opacity = 0;
         el.style.display = "";
-        var points = getPoints(transitionEffect);
-        if (!duration) duration = 500;
-        setTransition(el, duration, points);
+        me.setTransition(el, transitionEffect, duration);
         setTimeout(function(){ 
             el.style.opacity = "";
             if (callback){
@@ -42,9 +41,7 @@ javaxt.dhtml.Effects = function() {
    *  longer visible. 
    */
     this.fadeOut = function(el, transitionEffect, duration, callback){
-        var points = getPoints(transitionEffect);
-        if (!duration) duration = 500;
-        setTransition(el, duration, points);
+        me.setTransition(el, transitionEffect, duration);
         setTimeout(function(){ 
             el.style.opacity = 0;
             if (callback){
@@ -56,8 +53,19 @@ javaxt.dhtml.Effects = function() {
         }, 50);
     };
 
-    
-    
+
+  //**************************************************************************
+  //** setTransition
+  //**************************************************************************
+  /** Used to set the transition style for a given element.
+   */
+    this.setTransition = function(el, transitionEffect, duration){
+        var points = getPoints(transitionEffect);
+        if (!duration) duration = 500;
+        setTransition(el, duration, points);
+    };
+
+
   //**************************************************************************
   //** getPoints
   //************************************************************************** 
