@@ -24,11 +24,15 @@ javaxt.dhtml.Tree = function (parent, config) {
             backgroundColor: "white",
             cursor: "default",
             padding: 0,
+            
+            li: "",
 
             label: {
 
             },
 
+            
+          //The following style are for icons that appear in the tree
             
             leaf: "leaf",
 
@@ -301,6 +305,7 @@ javaxt.dhtml.Tree = function (parent, config) {
             
           //Create node
             var li = document.createElement("li");
+            li.className = config.style.li;
             li.onclick = function(){
                 if (this.nextSibling){
                     var nextNode = this.nextSibling;
