@@ -508,7 +508,8 @@ javaxt.dhtml.BarGraph = function (parent, config) {
     this.clear = function(saveColumns){
         
         minValue = 0;
-        maxValue = 0;        
+        maxValue = 0;
+        me.deselectAll();
         
         if (saveColumns===true){
             for (var i=0; i<values.length; i++){
@@ -576,6 +577,7 @@ javaxt.dhtml.BarGraph = function (parent, config) {
     this.select = function(idx){
         var td = chartRow.childNodes[idx];
         if (td){
+            td.selected = true;
             var bar = td.childNodes[0].childNodes[0];
             addStyle(bar, "select");
         }
@@ -591,6 +593,7 @@ javaxt.dhtml.BarGraph = function (parent, config) {
     this.deselect = function(idx){
         var td = chartRow.childNodes[idx];
         if (td){
+            td.selected = false;
             var bar = td.childNodes[0].childNodes[0];
             var h = bar.style.height;
             setStyle(bar, "bar");
@@ -628,6 +631,25 @@ javaxt.dhtml.BarGraph = function (parent, config) {
 
 
   //**************************************************************************
+  //** getSelectedItems
+  //**************************************************************************
+  /** Returns an array of selected items. Each item in the array includes the
+   *  index, value, and cell
+   */
+    this.getSelectedItems = function(){
+        var arr = [];
+        for (var i=0; i<chartRow.childNodes.length; i++){
+            var td = chartRow.childNodes[i];
+            if (td.selected) arr.push({
+                idx: i,
+                val: values[i],
+                cell: td
+            });
+        }
+    };
+    
+
+  //**************************************************************************
   //** createLabel
   //**************************************************************************
   /** Default implementation. Users can override. 
@@ -635,17 +657,7 @@ javaxt.dhtml.BarGraph = function (parent, config) {
     this.createLabel = function(val, idx, max, div){    
         div.innerHTML = Math.round(val);
     };
-    
-
-  //**************************************************************************
-  //** getCell
-  //**************************************************************************
-  /** Returns a cell in the graph at a given index.
-   */
-    this.getCell = function(idx){
-        return chartRow.childNodes[idx];
-    };
-    
+       
     
   //**************************************************************************
   //** getValues
