@@ -24,6 +24,7 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
     var title;
     
     var menuWidth;
+    var menuIcon;
     
     
     var defaultConfig = {
@@ -219,6 +220,7 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
           //Watch for resize events
             addResizeListener(outerDiv, function(){
                 me.resize();
+                me.onResize();
             }); 
         };
 
@@ -285,7 +287,6 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
         };
         
       //Add menu icon to the left cell
-        var menuIcon;
         if (typeof config.style.menuIcon === "function") {
             menuIcon = config.style.menuIcon();
         }
@@ -363,7 +364,17 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
         
         return outerDiv;
     };
-    
+
+
+  //**************************************************************************
+  //** getMenuIcon
+  //**************************************************************************
+  /** Returns the DOM element used to render the menu icon.
+   */
+    this.getMenuIcon = function(){
+        return menuIcon;
+    };
+
     
   //**************************************************************************
   //** createTitle
@@ -514,6 +525,14 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
     };
     
     
+  //**************************************************************************
+  //** onResize
+  //**************************************************************************
+  /** Function called whenever this component is resized
+   */
+    this.onResize = function(){};
+
+
   //**************************************************************************
   //** getMenu
   //**************************************************************************
