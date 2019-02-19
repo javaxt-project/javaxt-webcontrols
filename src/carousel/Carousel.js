@@ -23,6 +23,9 @@ javaxt.dhtml.Carousel = function(parent, config) {
         
         animate: true,
         animationSteps: 250.0, //time in milliseconds
+        transitionEffect: "linear",
+        fx: null,
+        
         loop: false,
         visiblePanels: 1,
         drag: true,
@@ -279,38 +282,65 @@ javaxt.dhtml.Carousel = function(parent, config) {
   //**************************************************************************
     var slide = function(start, end, lastTick, timeLeft, callback){
 
-        var curTick = new Date().getTime();
-        var elapsedTicks = curTick - lastTick;
+        if (config.fx){
+            
+            
+            setTimeout(function(){ 
 
-
-      //If the animation is complete, ensure that the panel is completely visible 
-        if (timeLeft <= elapsedTicks){
-            innerDiv.style.left = end+"px";
-            if (callback) callback.apply(me, []);
-            return;
+                config.fx.setTransition(innerDiv, config.transitionEffect, config.animationSteps);
+                innerDiv.style.left = end+"px";
+                setTimeout(function(){
+                    
+                    
+                    innerDiv.style.WebkitTransition =
+                    innerDiv.style.MozTransition =
+                    innerDiv.style.MsTransition =
+                    innerDiv.style.OTransition =
+                    innerDiv.style.transition = "";
+                    
+                    if (callback) callback.apply(me, []);
+                    
+                }, config.animationSteps+50); 
+            }, 50);
+            
         }
+        else{
+
+
+            var curTick = new Date().getTime();
+            var elapsedTicks = curTick - lastTick;
+
+
+          //If the animation is complete, ensure that the panel is completely visible 
+            if (timeLeft <= elapsedTicks){
+                innerDiv.style.left = end+"px";
+                if (callback) callback.apply(me, []);
+                return;
+            }
 
 
 
-        timeLeft -= elapsedTicks;
-        
-        
-        var d = start-end;
-        var percentComplete = 1-(timeLeft/config.animationSteps);
-        var offset = Math.round(percentComplete * d);
-        innerDiv.style.left = start-offset + "px";
+            timeLeft -= elapsedTicks;
 
-        setTimeout(function(){
-            slide(start, end, curTick, timeLeft, callback);
-        }, 33);
+
+            var d = start-end;
+            var percentComplete = 1-(timeLeft/config.animationSteps);
+            var offset = Math.round(percentComplete * d);
+            innerDiv.style.left = start-offset + "px";
+
+            setTimeout(function(){
+                slide(start, end, curTick, timeLeft, callback);
+            }, 33);
+        }
     };
 
 
   //**************************************************************************
   //** next
   //**************************************************************************
-  /** Used to make the next panel visible. */
-  
+  /** Used to make the next panel visible. In a horizontal configuration, the 
+   *  active panel will slide left.
+   */
     this.next = function(){
 
         if (sliding) return;
@@ -374,8 +404,9 @@ javaxt.dhtml.Carousel = function(parent, config) {
   //**************************************************************************
   //** back
   //**************************************************************************
-  /** Used to make the previous panel visible. */
-  
+  /** Used to make the previous panel visible. In a horizontal configuration,  
+   *  the active panel will slide right.
+   */
     this.back = function(){
         
         if (sliding) return;
@@ -479,7 +510,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
             var right = left + r1.width;
             //var top = r1.y;
             //var bottom = top + r1.height;
-            var isVisible =(left>=minX && right<=maxX)
+            var isVisible =(left>=minX && right<=maxX);
 
 
           //Add panel to array
