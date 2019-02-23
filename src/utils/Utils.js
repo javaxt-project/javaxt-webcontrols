@@ -216,8 +216,19 @@ javaxt.dhtml.utils = {
     isEmpty: function(obj){
         return JSON.stringify(obj) === "{}";
     },
-    
-    
+
+
+  //**************************************************************************
+  //** isArray
+  //**************************************************************************
+  /** Used to check whether a given object is an array. Note that this check
+   *  does not use the "instanceof Array" approach because of issues with
+   *  frames.
+   */
+    isArray: function(obj){
+        return (Object.prototype.toString.call(obj)==='[object Array]');
+    },
+
 
   //**************************************************************************
   //** setStyle
