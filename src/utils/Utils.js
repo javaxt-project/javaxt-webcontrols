@@ -31,7 +31,7 @@ javaxt.dhtml.utils = {
             payload: null
         };
         javaxt.dhtml.utils.merge(settings, config);
-        javaxt.dhtml.utils.http(url, settings);
+        return javaxt.dhtml.utils.http(url, settings);
     },
 
 
@@ -44,7 +44,7 @@ javaxt.dhtml.utils = {
             payload: payload
         };
         javaxt.dhtml.utils.merge(settings, config);
-        javaxt.dhtml.utils.http(url, settings);
+        return javaxt.dhtml.utils.http(url, settings);
     },
 
 
@@ -74,12 +74,12 @@ javaxt.dhtml.utils = {
             if (url.indexOf("?")==-1) url += "?";
             url += "&_=" + new Date().getTime();
         }
-        
+
 
         var method = config.method;
         var success = config.success;
-        var scope = config.scope;        
-        var async = true; 
+        var scope = config.scope;
+        var async = true;
         if (config.async){
             if (config.async!=false) async = true;
         }
@@ -89,31 +89,31 @@ javaxt.dhtml.utils = {
                 alert(request);
             }
         };
-        
 
-        
-        var request = new XMLHttpRequest();        
+
+
+        var request = new XMLHttpRequest();
         if (config.username && config.password){
             request.open(method, url, async, config.username, config.password);
             request.setRequestHeader("Authorization", "Basic " + btoa(config.username + ":" + config.password)); //<-- Needed to add this sometime in mid 2018...
         }
         else{
-            request.open(method, url, async); 
+            request.open(method, url, async);
         }
-        
+
         request.onreadystatechange = function(){
             if (request.readyState === 4) {
                 if (request.status===200){
-                    
+
                     if (success) success.apply(scope, [request.responseText, request.responseXML]);
-                    
+
                 }
                 else{
                     if (failure) failure.apply(scope, [request]);
                 }
             }
         };
-        
+
         if (config.payload) request.send(config.payload);
         else request.send();
         return request;
@@ -151,21 +151,21 @@ javaxt.dhtml.utils = {
         javaxt.dhtml.utils.merge(clone, obj);
         return clone;
     },
-    
-    
+
+
   //**************************************************************************
   //** isDirty
   //**************************************************************************
-  /** Returns true if the given json object differs from the original. 
+  /** Returns true if the given json object differs from the original.
    */
     isDirty: function(obj, org){
         var isEmpty = javaxt.dhtml.utils.isEmpty;
         var a = isEmpty(obj);
         var b = isEmpty(org);
         if ((a==true && b==false) || (b==true && a==false)) return true;
-        
+
         var d = javaxt.dhtml.utils.diff(obj, org);
-        return !isEmpty(d);  
+        return !isEmpty(d);
     },
 
 
@@ -176,14 +176,14 @@ javaxt.dhtml.utils = {
    *  Credit: https://stackoverflow.com/a/13389935/
    */
     diff: function(obj1, obj2){
-        
+
         var isEmpty = javaxt.dhtml.utils.isEmpty;
-        var merge = javaxt.dhtml.utils.merge;        
-        
+        var merge = javaxt.dhtml.utils.merge;
+
         var diff = function(obj1, obj2){
-            var ret = {},rett; 
+            var ret = {},rett;
             for (var i in obj2) {
-                rett = {};  
+                rett = {};
                 if (typeof obj2[i] === 'object'){
                     rett = diff(obj1[i], obj2[i]);
                     if (!isEmpty(rett) ){
@@ -191,20 +191,20 @@ javaxt.dhtml.utils = {
                     }
                 }
                 else{
-                    if (!obj1 || !obj1.hasOwnProperty(i) || obj2[i] !== obj1[i]) { 
-                        ret[i] = obj2[i]; 
+                    if (!obj1 || !obj1.hasOwnProperty(i) || obj2[i] !== obj1[i]) {
+                        ret[i] = obj2[i];
                     }
                 }
             }
-            return ret; 
+            return ret;
         };
-        
+
         var d1 = diff(obj1, obj2);
         var d2 = diff(obj2, obj1);
-        
+
         return merge(d1,d2);
-        
-        
+
+
     },
 
 
@@ -265,12 +265,12 @@ javaxt.dhtml.utils = {
   //** addStyle
   //**************************************************************************
   /** Used to add style to a given element. Styles are defined via a CSS class
-   *  name or inline using the config.style definitions. 
+   *  name or inline using the config.style definitions.
    */
     addStyle: function(el, style){
         if (el===null || el===0) return;
         if (style===null) return;
-        
+
         if (typeof style === 'string' || style instanceof String){
             if (el.className && el.className!=null) el.className += " " + style;
             else el.className = style;
@@ -307,8 +307,8 @@ javaxt.dhtml.utils = {
         table.appendChild(tbody);
         return table;
     },
-    
-    
+
+
 
   //**************************************************************************
   //** getRect
@@ -316,7 +316,7 @@ javaxt.dhtml.utils = {
   /** Returns the geometry of a given element.
    */
     getRect: function(el){
-        
+
         if (el.getBoundingClientRect){
             return el.getBoundingClientRect();
         }
@@ -424,7 +424,7 @@ javaxt.dhtml.utils = {
 //  //**************************************************************************
 //  //** alert
 //  //**************************************************************************
-//  /** Overrides the native javascript alert() method by creating a 
+//  /** Overrides the native javascript alert() method by creating a
 //   *  javaxt.dhtml.Alert window.
 //   */
 //    var alert = function(msg, callback, scope){
@@ -433,7 +433,7 @@ javaxt.dhtml.utils = {
 //
 //
 //      //Special case for ajax request
-//        if (!(typeof(msg) === 'string' || msg instanceof String)){ 
+//        if (!(typeof(msg) === 'string' || msg instanceof String)){
 //            if (msg.responseText){
 //                msg = (msg.responseText.length>0 ? msg.responseText : msg.statusText);
 //            }
@@ -445,7 +445,7 @@ javaxt.dhtml.utils = {
 //
 //            var body = document.getElementsByTagName("body")[0];
 //
-//            
+//
 //            var outerDiv = document.createElement('div');
 //            outerDiv.style.width = "100%";
 //            outerDiv.style.height = "100%";
@@ -456,9 +456,9 @@ javaxt.dhtml.utils = {
 //            innerDiv.style.height = "100%";
 //            innerDiv.style.position = "absolute";
 //            innerDiv.style.overflowX = 'hidden';
-//            innerDiv.style.cursor = "inherit";          
+//            innerDiv.style.cursor = "inherit";
 //            outerDiv.appendChild(innerDiv);
-//            
+//
 //
 //            win = javaxt.dhtml.Alert = new javaxt.dhtml.Window(body, {
 //                width: 450,
@@ -484,11 +484,11 @@ javaxt.dhtml.utils = {
 //            });
 //            win.div = innerDiv;
 //        }
-//        
-//        
+//
+//
 //        win.div.innerHTML = msg;
 //        win.show();
-//        
+//
 //    };
 //
 //    javaxt.dhtml.Alert = null;
