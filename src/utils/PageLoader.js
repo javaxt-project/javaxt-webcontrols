@@ -10,69 +10,69 @@ if(!javaxt.dhtml) javaxt.dhtml={};
  ******************************************************************************/
 
 javaxt.dhtml.PageLoader = function() {
-    
+
     var me = this;
     var head = document.getElementsByTagName("head")[0];
     var debug = true;
     var includes;
-    
-    
+
+
     var init = function(){
     };
-    
-    
-    
+
+
+
   //**************************************************************************
   //** loadPage
   //**************************************************************************
   /** Used to replace the body of the current document with html from another
-   *  document found at a given url. Dynamically loads any css stylesheets and 
+   *  document found at a given url. Dynamically loads any css stylesheets and
    *  javascripts sourced in the html document.
    */
     this.loadPage = function(url, callback){
         me.load(url, function(html, title, inlineScripts){
-            
+
             document.title = title;
-            
 
-            
+
+
             var body = document.getElementsByTagName("body")[0];
-            body.innerHTML = html;            
+            body.innerHTML = html;
 
-            
-            
+
+
           //Execute inline scripts
             for (var i=0; i<inlineScripts.length; i++){
                 var script = inlineScripts[i].firstChild.nodeValue;
                 eval(script);
             }
-            
+
             dispatchEvent("load");
-            
+
             if (callback) callback.apply(me, []);
-        });        
+        });
     };
-    
-    
+
+
   //**************************************************************************
   //** load
   //**************************************************************************
   /** Used to fetch an html document found at a given url. Loads any css
-   *  stylesheets and javascripts sourced in the html document. Returns the 
-   *  raw html, document title, and any inline scripts via the callback. It 
-   *  is up to the caller to decide what to do with the html (e.g. replace 
+   *  stylesheets and javascripts sourced in the html document. Returns the
+   *  raw html, document title, and any inline scripts via the callback. It
+   *  is up to the caller to decide what to do with the html (e.g. replace
    *  element) and when to execute the inline scripts.
    */
     this.load = function(url, callback){
-        
-        
+
+
         if (url.indexOf("?")==-1) url += "?";
         url += "&_=" + new Date().getTime();
-        
+
         get(url, function(html){
-                
+
             var div = document.createElement("div");
-            div.innerHTML = html;                
+            div.innerHTML = html;
 
 
           //Get title
@@ -108,14 +108,14 @@ javaxt.dhtml.PageLoader = function() {
                         cssNodes.push(links[i]);
                     }
                 }
-            }                
+            }
 
 
           //Remove unused/unwanted nodes
             removeNodes(titles);
             removeNodes(div.getElementsByTagName("description"));
-            removeNodes(div.getElementsByTagName("keywords")); 
-            removeNodes(div.getElementsByTagName("meta")); 
+            removeNodes(div.getElementsByTagName("keywords"));
+            removeNodes(div.getElementsByTagName("meta"));
             removeNodes(scripts);
             removeNodes(links);
             removeNodes(cssNodes);
@@ -130,7 +130,7 @@ javaxt.dhtml.PageLoader = function() {
             loadIncludes(css, externalScripts, function(){
                 if (callback) callback.apply(me, [html, title, inlineScripts]);
             });
-                
+
         });
     };
 
@@ -138,17 +138,17 @@ javaxt.dhtml.PageLoader = function() {
   //**************************************************************************
   //** loadApp
   //**************************************************************************
-  /** Used to fetch an application xml document found at a given url. Loads 
+  /** Used to fetch an application xml document found at a given url. Loads
    *  any css stylesheets and javascripts sourced in the xml document. Returns
    *  the name and main function used to instantiate the application.
    */
     this.loadApp = function(url, callback){
-        
+
         if (url.indexOf("?")==-1) url += "?";
         url += "&_=" + new Date().getTime();
-        
+
         get(url, function(text, xml){
-            
+
           //Parse app info
             var appInfo = {};
             var application = xml.getElementsByTagName("application")[0];
@@ -174,10 +174,10 @@ javaxt.dhtml.PageLoader = function() {
                     }
                 }
             }
-            
-            
+
+
           //Load includes and call the callback
-            loadIncludes(css, scripts, function(){            
+            loadIncludes(css, scripts, function(){
                 if (callback) callback.apply(me, [appInfo, xml]);
             });
         });
@@ -194,6 +194,7 @@ javaxt.dhtml.PageLoader = function() {
         parseIncludes();
 
         var addInclude = function(category, key){
+            if (category=="css") return true; //css order is important. skipping css files might mess up the order
             var obj = includes[category];
             for (var k in obj){
                 if (obj.hasOwnProperty(k)){
@@ -204,8 +205,8 @@ javaxt.dhtml.PageLoader = function() {
         };
 
         var arr = [];
-        
-        
+
+
       //Generate list of stylesheets to include
         for (var i=0; i<css.length; i++){
             if (addInclude("css", css[i])){
@@ -213,16 +214,16 @@ javaxt.dhtml.PageLoader = function() {
                 link.setAttribute("rel", "stylesheet");
                 link.setAttribute("type", "text/css");
                 link.setAttribute("href", css[i]);
-                arr.push(link);                
-                
+                arr.push(link);
+
                 includes.css[css[i]] = true;
             }
             else{
                 log("Skipping " + css[i] + "...");
             }
         }
-        
-        
+
+
       //Generate list of javascripts to include
         for (var i=0; i<scripts.length; i++){
             if (addInclude("scripts", scripts[i])){
@@ -230,7 +231,7 @@ javaxt.dhtml.PageLoader = function() {
                 script.setAttribute("type", "text/javascript");
                 script.setAttribute("src", scripts[i]);
                 arr.push(script);
-                                
+
                 includes.scripts[scripts[i]] = true;
             }
             else{
@@ -245,10 +246,10 @@ javaxt.dhtml.PageLoader = function() {
             var t = arr.length;
             var loadResource = function(obj){
                 obj.onload = function() {
-                    log( 
+                    log(
                         Math.round((1-(arr.length/t))*100) + "%"
                     );
-                    
+
                     if (arr.length>0) loadResource(arr.shift());
                     else {
                         if (callback!=null) callback.apply(me, []);
@@ -256,36 +257,36 @@ javaxt.dhtml.PageLoader = function() {
                 };
                 head.appendChild(obj);
             };
-            
+
             loadResource(arr.shift());
         }
         else{
             if (callback!=null) callback.apply(me, []);
         }
-        
+
     };
-    
-    
+
+
   //**************************************************************************
   //** parseIncludes
   //**************************************************************************
     var parseIncludes = function(){
         if (includes) return;
-        
+
         includes = {
             css: {},
             scripts: {}
         };
-        
-        
+
+
         var scripts = document.getElementsByTagName("script");
         for (var i=0; i<scripts.length; i++){
             if (scripts[i].src.length>0){
                 includes.scripts[scripts[i].src] = true;
             }
         }
-        
-        
+
+
         var css = document.getElementsByTagName("link");
         for (var i=0; i<css.length; i++){
             if (css[i].rel=="stylesheet"){
@@ -320,8 +321,8 @@ javaxt.dhtml.PageLoader = function() {
             evt = new Event(name);
         }
         catch(e){ //e.g. IE
-            evt = document.createEvent('Event');  
-            evt.initEvent(name, false, false);  
+            evt = document.createEvent('Event');
+            evt.initEvent(name, false, false);
         }
         window.dispatchEvent(evt);
     };
@@ -332,13 +333,13 @@ javaxt.dhtml.PageLoader = function() {
     var log = function(str){
         if (debug) console.log(str);
     };
-    
-    
+
+
   //**************************************************************************
   //** get
   //**************************************************************************
     var get = function(url, success){
-        
+
         var request = null;
         if (window.XMLHttpRequest) {
             request = new XMLHttpRequest();
@@ -351,14 +352,14 @@ javaxt.dhtml.PageLoader = function() {
         request.onreadystatechange = function(){
             if (request.readyState === 4) {
                 if (request.status===200){
-                    
-                    if (success) success.apply(me, [request.responseText, request.responseXML]);   
+
+                    if (success) success.apply(me, [request.responseText, request.responseXML]);
                 }
             }
         };
-        
-        request.send(); 
+
+        request.send();
     };
-    
+
     init();
 };
