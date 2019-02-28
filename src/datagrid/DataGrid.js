@@ -37,14 +37,14 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         count: false,
         autoload: false,
         localSort: false,
-        
+
       /** Default method used to get responses from the server. Typically, you
        *  do not need to override this method.
        */
         getResponse: function(url, payload, callback){
             var request = new XMLHttpRequest();
             var method = payload ? "POST" : "GET";
-            request.open(method, url, false);
+            request.open(method, url);
             request.onreadystatechange = function(){
                 if (request.readyState === 4) {
                     callback.apply(me, [request]);
@@ -57,7 +57,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                 request.send();
             }
         },
-        
+
       /** Default method used to parse responses from the server. Should return
        *  an array of rows with an array of values in each row. Example:
        *  [["Bob","12/30","$5.25"],["Jim","10/28","$7.33"]]
@@ -65,10 +65,10 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         parseResponse: function(request){
             return [];
         },
-        
-      /** Default method used to update a row with values. This method can be 
+
+      /** Default method used to update a row with values. This method can be
        *  overridden to render values in a variety of different ways (e.g.
-       *  different fonts, links, icons, etc). The row.set() method accepts 
+       *  different fonts, links, icons, etc). The row.set() method accepts
        *  strings, numbers, and DOM elements.
        */
         update: function(row, record){
@@ -818,7 +818,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
 
 
-      //Execute service request and process response        
+      //Execute service request and process response
         config.getResponse(url, config.payload, function(request){
             if (request.status===200){
 
@@ -1090,6 +1090,6 @@ javaxt.dhtml.DataGrid = function(parent, config) {
     var merge = javaxt.dhtml.utils.merge;
     var _getRect = javaxt.dhtml.utils.getRect;
     var isArray = javaxt.dhtml.utils.isArray;
-    
+
     init();
 };
