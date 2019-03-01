@@ -9,15 +9,18 @@ if(!javaxt.dhtml) javaxt.dhtml={};
  *
  ******************************************************************************/
 
-javaxt.dhtml.PageLoader = function() {
+javaxt.dhtml.PageLoader = function(config) {
 
     var me = this;
     var head = document.getElementsByTagName("head")[0];
-    var debug = true;
+    var debug = false;
     var includes;
 
 
     var init = function(){
+        if (config){
+            if (config.debug===true) debug = true;
+        }
     };
 
 
