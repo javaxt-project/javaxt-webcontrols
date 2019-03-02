@@ -289,6 +289,93 @@ javaxt.dhtml.utils = {
 
 
   //**************************************************************************
+  //** hasStyleRule
+  //**************************************************************************
+  /** Returns true if there is a style rule defined for a given selector.
+   *  @param selector CSS selector (e.g. ".deleteIcon", "h2", "#mid")
+   */
+    hasStyleRule: function(selector) {
+
+        var hasRule = function(selector, rules){
+            if (!rules) return false;
+            for (var i=0; i<rules.length; i++) {
+                var rule = rules[i];
+                if (rule.selectorText){
+                    var arr = rule.selectorText.split(',');
+                    for (var j=0; j<arr.length; j++){
+                        if (arr[j].indexOf(selector) !== -1){
+                            var txt = trim(arr[j]);
+                            if (txt===selector){
+                                return true;
+                            }
+                            else{
+                                var colIdx = txt.indexOf(":");
+                                if (colIdx !== -1){
+                                    txt = trim(txt.substring(0, colIdx));
+                                    if (txt===selector){
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        };
+
+        var trim = function(str){
+            return str.replace(/^\s*/, "").replace(/\s*$/, "");
+        };
+
+        for (var i=0; i<document.styleSheets.length; i++){
+            var rules;
+            try{
+                rules = document.styleSheets[i].rules || document.styleSheets[i].cssRules;
+                if (hasRule(selector, rules)){
+                    return true;
+                }
+            }
+            catch(e){
+                //Security error, typically occurs when running on the local file system (vs web server)
+            }
+
+            var imports = document.styleSheets[i].imports;
+            if (imports){
+                for (var j=0; j<imports.length; j++){
+                    rules = imports[j].rules || imports[j].cssRules;
+                    if (hasRule(selector, rules)) return true;
+                }
+            }
+        }
+
+        return false;
+    },
+
+
+  //**************************************************************************
+  //** addNoSelectRule
+  //**************************************************************************
+  /** Inserts the "javaxt-noselect" class into the document if it is not
+   *  present.
+   */
+    addNoSelectRule: function(){
+        var hasStyleRule = javaxt.dhtml.utils.hasStyleRule;
+        if (!hasStyleRule(".javaxt-noselect")){
+            var head = document.head || document.getElementsByTagName('head')[0];
+            var sheet = document.createElement('style');
+            sheet.innerHTML = ".javaxt-noselect {\n";
+            var arr = ["-webkit-","-moz-","-o-","-ms-","-khtml-",""];
+            for (var i=0; i<arr.length; i++){
+                sheet.innerHTML += arr[i] + "user-select: none;\n";
+            }
+            sheet.innerHTML += "}";
+            head.appendChild(sheet);
+        }
+    },
+
+
+  //**************************************************************************
   //** createTable
   //**************************************************************************
     createTable: function(){
@@ -360,6 +447,19 @@ javaxt.dhtml.utils = {
 
 
   //**************************************************************************
+  //** intersects
+  //**************************************************************************
+  /** Used to test whether two rectangles intersect.
+   */
+    intersects: function(r1, r2) {
+      return !(r2.left > r1.right ||
+               r2.right < r1.left ||
+               r2.top > r1.bottom ||
+               r2.bottom < r1.top);
+    },
+
+
+  //**************************************************************************
   //** addResizeListener
   //**************************************************************************
   /** Used to watch for resize events for a given element. Credit:
@@ -415,6 +515,26 @@ javaxt.dhtml.utils = {
             if (!isIE) element.appendChild(obj);
         }
 
+    },
+
+
+  //**************************************************************************
+  //** getNextHighestZindex
+  //**************************************************************************
+    getNextHighestZindex: function(obj){
+        var highestIndex = 0;
+        var currentIndex = 0;
+        var elArray = Array();
+        if(obj){elArray = obj.getElementsByTagName('*');}else{elArray = document.getElementsByTagName('*');}
+        for(var i=0; i < elArray.length; i++){
+            if (elArray[i].currentStyle){
+                currentIndex = parseFloat(elArray[i].currentStyle['zIndex']);
+            }else if(window.getComputedStyle){
+                currentIndex = parseFloat(document.defaultView.getComputedStyle(elArray[i],null).getPropertyValue('z-index'));
+            }
+            if(!isNaN(currentIndex) && currentIndex > highestIndex){highestIndex = currentIndex;}
+        }
+        return(highestIndex+1);
     }
 
 
