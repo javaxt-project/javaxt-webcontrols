@@ -1,41 +1,19 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-
-<title>Carousel</title>
+<title>Carousel Demo</title>
 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<link  href="../style.css" rel="stylesheet" type="text/css" />
 
 
-
+<!-- JavaXT Includes -->
 <script type="text/javascript" src="../../src/carousel/Carousel.js"></script>
-
+<script type="text/javascript" src="../../src/utils/Utils.js"></script>
 
 <style>
-    html, body {
-        margin: 0px;
-        padding: 10px;
-    }
-    
-    body, textarea, input, select, td, th {
-        font-family:helvetica,arial,verdana,sans-serif; font-size:14px;
-    }    
-    
-    
-    h2 {
-        font-size:18px;
-        font-weight: normal;
-        margin: 35px 0 5px 0;        
-    }
-
-    p {
-        margin: -5px 0 20px 0;
-        color: #555555;
-    }
-    
     .panelID {
         font-size:50px;
         color:  #757575;
@@ -48,22 +26,12 @@
         top: 50%;
         transform: translateY(-50%);
     }
-
-    
-.javaxt-noselect {
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -o-user-select: none;
-    -ms-user-select: none;
-    -khtml-user-select: none;     
-    user-select: none;
-}
 </style>
 </head>
 <body>
 
 <h1>Carousel Demos</h1>
-    
+
 <h2>Demo 1</h2>
 <p>Basic looping carousel initiated using existing DOM elements</p>
 <table style="width:500px;">
@@ -92,16 +60,16 @@
     </td>
   </tr>
 </table>
-    
-    
+
+
 <script type="text/javascript">
 var demo1 = function() {
-    
+
     var carousel = new javaxt.dhtml.Carousel(document.getElementById("carousel"),{
         loop: true,
         animate: true
     });
-    
+
     document.getElementById("Back").onclick = function(){
         carousel.back();
     };
@@ -113,7 +81,7 @@ var demo1 = function() {
 
 
 <h2>Demo 2</h2>
-<p>Looping carousel with incrementing/decrementing panel IDs. 
+<p>Looping carousel with incrementing/decrementing panel IDs.
    The carousel consists of only 3 panels but the content is updated to appear
    as though it is made up of many panels.
 </p>
@@ -131,30 +99,30 @@ var demo1 = function() {
     </td>
   </tr>
 </table>
-    
-    
-    
+
+
+
 <script type="text/javascript">
 var demo2 = function() {
-    
+
     var carouselDiv = document.getElementById("carousel2");
     var carousel = new javaxt.dhtml.Carousel(carouselDiv,{
         loop: true,
         animate: true
-    });    
-    
-    
+    });
+
+
   //Create 3 panels
     var currPanel = document.createElement('div');
     currPanel.style.background = "#f0f8ff";
     currPanel.style.height = "100%";
     currPanel.setAttribute("panelID", "currPanel");
-    
+
     var nextPanel = document.createElement('div');
     nextPanel.style.background = "#96a5b2";
     nextPanel.style.height = "100%";
     nextPanel.setAttribute("panelID", "nextPanel");
-    
+
     var prevPanel = document.createElement('div');
     prevPanel.style.background = "#ffd8d6";
     prevPanel.style.height = "100%";
@@ -167,22 +135,22 @@ var demo2 = function() {
     panelID.className = "panelID";
     panelID.innerHTML = currID;
     currPanel.appendChild(panelID);
-    
-    
+
+
   //Add panels to the carousel
     carousel.add(currPanel);
     carousel.add(nextPanel);
     carousel.add(prevPanel);
-    
+
 
   //Catch for onChange events
     carousel.onChange = function(currPanel, prevPanel){
-        
+
         if (currPanel.getAttribute("panelID")=="nextPanel"){
             currID++;
             currPanel.setAttribute("panelID", "currPanel");
             prevPanel.setAttribute("panelID", "prevPanel");
-            
+
             var panels = carousel.getPanels();
             for (var i=0; i<panels.length; i++){
                 var panel = panels[i];
@@ -190,15 +158,15 @@ var demo2 = function() {
                 if (div!=currPanel && div!=prevPanel){
                     div.setAttribute("panelID", "nextPanel");
                 }
-            }     
-            
+            }
+
         }
         else if (currPanel.getAttribute("panelID")=="prevPanel"){
             currID--;
-            
+
             currPanel.setAttribute("panelID", "currPanel");
             prevPanel.setAttribute("panelID", "nextPanel");
-            
+
             var panels = carousel.getPanels();
             for (var i=0; i<panels.length; i++){
                 var panel = panels[i];
@@ -206,32 +174,32 @@ var demo2 = function() {
                 if (div!=currPanel && div!=prevPanel){
                     div.setAttribute("panelID", "prevPanel");
                 }
-            } 
-            
+            }
+
         }
-        
-        
+
+
         var div = panelID.cloneNode();
         div.innerHTML = currID;
         currPanel.innerHTML = "";
         currPanel.appendChild(div);
     };
-    
-    
-    
+
+
+
     document.getElementById("Back2").onclick = function(){
         carousel.back();
     };
     document.getElementById("Next2").onclick = function(){
         carousel.next();
-    };    
-    
+    };
+
 };
 </script>
 
 
 <script type="text/javascript">
-window.onload = function() {    
+window.onload = function() {
     demo1();
     demo2();
 };

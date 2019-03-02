@@ -1,33 +1,24 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-
-<title>Accordion Demo</title>
+<title>Accordion Demo 2</title>
 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<link  href="../style.css" rel="stylesheet" type="text/css" />
 
 
-<!--<link type="text/css" rel="stylesheet" href="Accordion.css"/>-->
+<!-- JavaXT Includes -->
 <script type="text/javascript" src="../../src/accordion/Accordion.js"></script>
-
+<script type="text/javascript" src="../../src/utils/Utils.js"></script>
 
 <style>
-    /* Set body height to 100% so we can test vertical resize */
-    html, body {
-        height:100%;
-        margin: 0;
-        
+    body {
+        padding: 0;
     }
-    
-    
-    body, textarea, input, select, td, th {
-        font-family:helvetica,arial,verdana,sans-serif; font-size:14px;
-    }    
 
-    
+
     .accordionHeader {
         padding: 7px 0 6px 7px;
         cursor: pointer;
@@ -38,9 +29,9 @@
         color: #003366;
         white-space: nowrap;
     }
-    
+
     .accordionContent {
-        border: 0px; 
+        border: 0px;
         border-top: 1px solid #99bce8;
         padding: 5px 0 0 7px;
     }
@@ -57,51 +48,51 @@ window.onload = function() {
         default: 1,
         activeOnTop: true,
         style: {
-            
+
             accordion: {
                 width: "100%",
                 height: "100%",
                 border: "1px solid #969696",
                 borderWidth: "0px 1px"
             },
-            
+
             tabHeader: "accordionHeader",
             tabContent: "accordionContent"
         }
     });
-    
+
 
     accordion.onHeaderClick = function(title, header, panel, event){
         //document.getElementById("main-panel").innerHTML = title;
     };
-    
+
     accordion.beforeChange = function(){
         document.getElementById("main-panel").innerHTML = "Loading...";
     };
-    
+
     accordion.afterChange = function(){
         var tab = accordion.getCurrentTab();
         document.getElementById("main-panel").innerHTML = tab.title;
     };
 
     //accordion.open(1);
-    
+
 };
 </script>
 
 
 </head>
 <body>
-       
-    
+
+
     <table style="border-collapse:collapse;width:100%;height:100%;" cellpadding="0">
       <tr>
           <td id="facet-panel" style="width:250px;height:100%;vertical-align:top;">
-              
+
               <div title="Calendar">
                   Calendar Panel
               </div>
-              
+
               <div title="Cases">
                   Cases Panel
               </div>
@@ -109,34 +100,34 @@ window.onload = function() {
               <div title="Contacts">
                   Contacts Panel
               </div>
-              
+
               <div title="Email">
                   Email Panel
               </div>
-              
+
               <div title="Reports">
                   Reports Panel
               </div>
-              
+
               <div title="Billing">
                   Billing Panel
               </div>
-              
+
               <div title="Admin">
                   Admin Panel
               </div>
-              
+
           </td>
-          
-          
+
+
           <td id="main-panel" style="height:100%;vertical-align:top;padding:7px;">
-              
+
               Accordion demo with activeOnTop=true. Click on a tab to switch views. The active panel will always display at the top.
 
-          </td>          
-          
+          </td>
+
       </tr>
     </table>
-    
+
 </body>
 </html>

@@ -1,39 +1,29 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-
 <title>Button Demo</title>
 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<link  href="../style.css" rel="stylesheet" type="text/css" />
 
 
+<!-- JavaXT Includes -->
 <script type="text/javascript" src="../../src/button/Button.js"></script>
-
+<script type="text/javascript" src="../../src/utils/Utils.js"></script>
 
 <style>
-    /* Set body height to 100% so we can test vertical resize */
-    html, body {
-        height:100%;
-        margin:10px;
-    }
-    
-    
-    body, textarea, input, select, td, th {
-        font-family:helvetica,arial,verdana,sans-serif; font-size:14px;
-    }    
 
 
     h2 {
         font-size:18px;
         font-weight: normal;
-        margin: 20px 0 5px 0;        
+        margin: 20px 0 5px 0;
     }
-    
-    
-    
+
+
+
    /**************************************************************************/
    /** Delete Icon
    /**************************************************************************/
@@ -68,16 +58,16 @@
         left: 4px;
         top: 1px;
     }
-    
+
     .deleteIcon-hover {
         border-color: #FF0000;
     }
-    
+
     .deleteIcon-select {
         border-color: #FFFFFF;
     }
-    
-    
+
+
    /**************************************************************************/
    /** New Icon
    /**************************************************************************/
@@ -110,18 +100,18 @@
         left: 4px;
         top: 3px;
     }
-    
+
 
     .newIcon-select {
         border-color: #FFFFFF;
     }
-    
-    
-    
+
+
+
    /**************************************************************************/
    /** Next Icon
    /**************************************************************************/
-   
+
     .nextIcon {
         float: right;
         border-color: #000000;
@@ -134,7 +124,7 @@
         margin: 0px 3px 0px 10px;
         cursor: pointer;
     }
-    
+
     .nextIcon:after{
         content:"";
         position:absolute;
@@ -147,20 +137,20 @@
         -webkit-transform-origin: 0% 0%;
         margin-top: -1px;
     }
-    
+
     .nextIcon-hover {
         border-color: #003EFF;
     }
-    
+
     .nextIcon-select {
         border-color: #FFFFFF;
-    }    
-    
-    
+    }
+
+
    /**************************************************************************/
    /** Menu Buttons
    /**************************************************************************/
-   
+
     .menuButton {
         border: 1px solid #F6F6F6;
         border-radius: 3px;
@@ -170,12 +160,12 @@
         margin: 0px;
         color: #2b2b2b;
     }
-    
+
     .menuButton-hover {
         border-color: #cccccc;
         background: #f0f8ff;
     }
-    
+
 </style>
 
 
@@ -187,7 +177,7 @@ window.onload = function() {
   //**************************************************************************
   //** Simple Button Demo
   //**************************************************************************
-  
+
     new javaxt.dhtml.Button("plainButton", {
         label: "Submit"
     }).onClick = function(){
@@ -198,7 +188,7 @@ window.onload = function() {
   //**************************************************************************
   //** Button with Icon Demo
   //**************************************************************************
-  
+
     new javaxt.dhtml.Button("iconButton", {
         label: "Delete",
         style: {
@@ -214,7 +204,7 @@ window.onload = function() {
   //**************************************************************************
   //** Button with Icon Demo #2
   //**************************************************************************
-  
+
     new javaxt.dhtml.Button("iconButton2", {
         label: "Next",
         style: {
@@ -226,12 +216,12 @@ window.onload = function() {
     }).onClick = function(){
         console.log(this.getText());
     };
-    
-    
+
+
   //**************************************************************************
   //** Disabled Button Demo
   //**************************************************************************
-  
+
     new javaxt.dhtml.Button("disabledButton", {
         label: "Add...",
         disabled: true,
@@ -244,7 +234,7 @@ window.onload = function() {
         console.log(this.getText());
     };
 
-    
+
 
   //**************************************************************************
   //** Toggle Button Demo
@@ -308,26 +298,26 @@ window.onload = function() {
     dayButton.onClick = weekButton.onClick = monthButton.onClick = function(){
         var button = this;
         selectedButton.toggle();
-        if (button!==selectedButton){   
+        if (button!==selectedButton){
             console.log("Selection change! " + button.getText() + " is now selected.");
             selectedButton = button;
         }
     };
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
   //**************************************************************************
   //** Menu Button Demo
   //**************************************************************************
-  
+
     var menuButton = new javaxt.dhtml.Button("menuButton", {
         label: "New",
         menu: true
     });
-    
+
     var menuPanel = menuButton.getMenuPanel();
     new javaxt.dhtml.Button(menuPanel, {
         label: "New Contact...",
@@ -353,17 +343,17 @@ window.onload = function() {
             hover: "menuButton-hover"
         }
     });
-    
-    
+
+
 };
 </script>
 
 
 </head>
 <body>
-       
+
 <h1>Button Demos</h1>
-    
+
 
 <h2>Plain text button:</h2>
 <div id="plainButton"></div>

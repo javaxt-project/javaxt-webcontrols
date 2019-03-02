@@ -1,25 +1,21 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-
 <title>Window Demo</title>
 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-
-
-<!-- Default Stylesheet -->
 <link  href="../style.css" rel="stylesheet" type="text/css" />
 
 
-<!-- Window Include -->
+<!-- JavaXT Includes -->
 <script type="text/javascript" src="../../src/window/Window.js"></script>
+<script type="text/javascript" src="../../src/utils/Utils.js"></script>
 
 </head>
 <body>
-       
+
 <h1>Window Demos</h1>
 
 <h2>Modal Pop-up Window</h2>
@@ -43,7 +39,7 @@ var demo1 = function() {
     }
 
     win.show();
-    
+
 };
 </script>
 
@@ -66,7 +62,7 @@ var demo2 = function() {
         title: "demo2",
         body: msg
     });
-    
+
     win2.onClose = function(){
         msgContainer.appendChild(msg);
     };

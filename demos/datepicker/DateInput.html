@@ -1,86 +1,62 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-
 <title>Date Input Demo</title>
 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-
+<link  href="../style.css" rel="stylesheet" type="text/css" />
 
 
 <script type="text/javascript" src="../../src/datepicker/DatePicker.js"></script>
 <script type="text/javascript" src="../../src/datepicker/DateInput.js"></script>
+<script type="text/javascript" src="../../src/utils/Utils.js"></script>
 
 <style>
-    /* Set body height to 100% so we can test vertical resize */
-    html, body {
-        height:100%;
-        margin: 10px;
-        
-    }
-    
-    
-    body, textarea, input, select, td, th {
-        font-family:helvetica,arial,verdana,sans-serif; font-size:14px;
-    }    
 
-
-    h2 {
-        font-size:18px;
-        font-weight: normal;
-        margin: 30px 0 5px 0;        
-    }
-    
-    p {
-        margin: 5px 0 15px 0;
-        color: #555555;
-    }
-    
-    
     #demo1, #demo2 {
         display: inline-block;
         width: 184px;
     }
-    
-    input, select, textarea { /* Allows overriding native style of form elements on mobile safari */
-        -webkit-appearance: none; 
-        -webkit-border-radius:0; 
-        border-radius: 0; 
-    }
-    
 
-    
-    
+    input, select, textarea { /* Allows overriding native style of form elements on mobile safari */
+        -webkit-appearance: none;
+        -webkit-border-radius:0;
+        border-radius: 0;
+    }
+
+
+
+
     .form-input {
-        
+
         border-radius: 3px 0 0 3px;
         -moz-border-radius: 3px 0 0 3px;
         -webkit-border-radius: 3px 0 0 3px;
-        
+
         color: #363636;
         font-size: 14px;
-        height: 26px;
-        line-height: 26px;
+        height: 28px;
+        line-height: 28px;
         padding: 0px 6px;
         vertical-align: middle;
         transition: border 0.2s linear 0s, box-shadow 0.2s linear 0s;
         background-color: #fff;
         border: 1px solid #ccc;
+        border-right: 0 none;
         box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
     }
-    
 
-    
+
+
     .form-input-button {
-        
+
         border-radius: 0 3px 3px 0;
         -moz-border-radius: 0 3px 3px 0;
         -webkit-border-radius: 0 3px 3px 0;
 
-        
+
         color: #363636;
         height: 28px;
         width: 26px;
@@ -91,14 +67,14 @@
         background-repeat: no-repeat;
         background-color: #e4e4e4;
     }
-    
-    
+
+
     .form-input:focus {
         border-color: rgba(82, 168, 236, 0.8);
         box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6);
         outline: 0 none;
     }
-    
+
     .form-input-button:hover {
         border-color: rgba(82, 168, 236, 0.8);
         box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6);
@@ -115,14 +91,14 @@
 
 <script type="text/javascript">
 window.onload = function() {
-  
+
 
   //Demo 1
     new javaxt.dhtml.DateInput(
         document.getElementById("demo1")
     );
 
-    
+
   //Demo 2
     new javaxt.dhtml.DateInput(
         document.getElementById("demo2"),
@@ -139,14 +115,14 @@ window.onload = function() {
             }
         }
     );
-    
+
 };
 </script>
 
 
 </head>
 <body>
-       
+
 <h1>Date Input Demos</h1>
 
 

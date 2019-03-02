@@ -1,56 +1,33 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-
 <title>Date Picker Demo</title>
 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<link  href="../style.css" rel="stylesheet" type="text/css" />
 
+<!-- Google Font for the Gray Date Picker -->
+<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
 
-<!-- Google Font for the Grey Date Picker -->
-<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" /> 
-
+<!-- JavaXT Includes -->
 <script type="text/javascript" src="../../src/datepicker/DatePicker.js"></script>
-
+<script type="text/javascript" src="../../src/utils/Utils.js"></script>
 
 <style>
-    /* Set body height to 100% so we can test vertical resize */
-    html, body {
-        height:100%;
-        margin: 10px;
-        
-    }
-    
-    
-    body, textarea, input, select, td, th {
-        font-family:helvetica,arial,verdana,sans-serif; font-size:14px;
-    }    
 
 
-    h2 {
-        font-size:18px;
-        font-weight: normal;
-        margin: 20px 0 5px 0;        
-    }
-    
-    p {
-        margin: 5px 0 15px 0;
-        color: #555555;
-    }
-    
   /**************************************************************************/
   /** Default style
   /**************************************************************************/
-    
+
    .default-panel {
         font-family: helvetica,arial,verdana,sans-serif;
         background: #ffffff;
         border: 1px solid #b4cbdd;
     }
-    
+
     .default-title {
         text-align: center;
         white-space: nowrap;
@@ -61,7 +38,7 @@
         height: 25px;
         line-height: 25px;
     }
-    
+
     .default-cell {
         width: 18px;
         height: 18px;
@@ -74,11 +51,11 @@
         border: 1px solid #ffffff;
         margin: 1px;
     }
-    
+
     .default-cell-prev {
         color: #aaaaaa;
     }
-    
+
     .default-cell-today {
         width: 22px;
         height: 21px;
@@ -86,14 +63,14 @@
         top: -1px;
         left: -1px;
     }
-    
+
     .default-cell-selected {
         color: #000000;
         font-weight: bold;
         background: #fff4bf;
         border: 1px solid #bfa52f;
     }
-    
+
     .default-cell-header {
         color: #233d6d;
         font-size: 10px;
@@ -104,12 +81,12 @@
         border-top: 1px solid #bbccff;
         border-bottom: 1px solid #bbccff;
     }
-    
-    
+
+
   /**************************************************************************/
   /** Blue style
   /**************************************************************************/
-    
+
     .blue-panel {
         font-family: 'Open Sans',helvetica,arial,verdana,sans-serif;
         background: #ffffff;
@@ -117,12 +94,12 @@
         padding-bottom: 3px;
         display: inline-block;
     }
-    
+
     .blue-header {
         background: #b4cbdd;
         height: 34px;
     }
-    
+
     .blue-title {
         position: absolute;
         width: 100%;
@@ -136,8 +113,8 @@
         color: #23436e;
         cursor: pointer;
     }
-    
-    
+
+
     .blue-next {
         float: right;
         border-right: 2px solid #23436e;
@@ -149,7 +126,7 @@
         margin: 12px 10px 0px 0px;
         cursor: pointer;
     }
-    
+
     .blue-next:after{
         content:"";
         position:absolute;
@@ -161,7 +138,7 @@
         -webkit-transform-origin: 0% 0%;
         margin-top: -1px;
     }
-    
+
     .blue-back {
         float: left;
         border-right: 2px solid #23436e;
@@ -173,7 +150,7 @@
         margin: 12px 0px 0px 10px;
         cursor: pointer;
     }
-    
+
     .blue-back:after{
         content:"";
         position:absolute;
@@ -185,7 +162,7 @@
         -webkit-transform-origin: 0% 0%;
         margin-top: -1px;
     }
-    
+
     .blue-cell {
         width: 24px;
         height: 24px;
@@ -196,11 +173,11 @@
         color: #757575;
         cursor: pointer;
     }
-    
+
     .blue-cell-prev {
         color: #bcbcbc;
     }
-    
+
     .blue-cell-today {
         width: 24px;
         height: 24px;
@@ -209,12 +186,12 @@
         top: 1px;
         left: 3px;
     }
-    
+
     .blue-cell-selected {
         color: black;
         background: #FFF581;
     }
-    
+
     .blue-cell-header {
         color: #4fa4b3;
         font-size: 8px;
@@ -222,28 +199,28 @@
         padding-bottom: 0px;
         padding-top: 0px;
     }
-    
-    
+
+
   /**************************************************************************/
-  /** Grey style
+  /** Gray style
   /**************************************************************************/
 
-    .grey-panel {
+    .gray-panel {
         font-family: 'Open Sans',helvetica,arial,verdana,sans-serif;
         background: #4a4f65;
         color: #ffffff;
         padding: 2px 8px 5px 6px;
         display: inline-block;
     }
-    
-    .grey-header {
+
+    .gray-header {
         height: 25px;
         padding: 6px 0px 0px 1px;
         border-bottom: 1px solid #5c6175;
         margin-left: 5px;
-    }    
-    
-    .grey-title {
+    }
+
+    .gray-title {
         position: absolute;
         white-space: nowrap;
         text-transform: uppercase;
@@ -251,7 +228,7 @@
         cursor: pointer;
     }
 
-    .grey-next {
+    .gray-next {
         float: right;
         border-right: 1px solid #ffffff;
         border-bottom: 1px solid #ffffff;
@@ -262,8 +239,8 @@
         margin: 7px 0px 0px 0px;
         cursor: pointer;
     }
-    
-    .grey-next:after{
+
+    .gray-next:after{
         content:"";
         position:absolute;
         border-top: 1px solid #ffffff;
@@ -274,8 +251,8 @@
         -webkit-transform-origin: 0% 0%;
         margin-top: -1px;
     }
-    
-    .grey-back {
+
+    .gray-back {
         float: right;
         border-right: 1px solid #ffffff;
         border-bottom: 1px solid #ffffff;
@@ -286,8 +263,8 @@
         margin: 7px 12px 0px 0px;
         cursor: pointer;
     }
-    
-    .grey-back:after{
+
+    .gray-back:after{
         content:"";
         position:absolute;
         border-top: 1px solid #ffffff;
@@ -298,8 +275,8 @@
         -webkit-transform-origin: 0% 0%;
         margin-top: -1px;
     }
-    
-    .grey-cell {
+
+    .gray-cell {
         width: 18px;
         height: 18px;
         line-height: 18px;
@@ -309,12 +286,12 @@
         color: #bcbcbc;
         cursor: pointer;
     }
-    
-    .grey-cell-prev {
+
+    .gray-cell-prev {
         color: #757575;
     }
-    
-    .grey-cell-today {
+
+    .gray-cell-today {
         width: 16px;
         height: 16px;
         border: 1px solid #FF7373;
@@ -322,17 +299,17 @@
         top: 2px;
         left: 5px;
     }
-    
-    .grey-cell-selected {
+
+    .gray-cell-selected {
         color: black;
         background: #c99400;
     }
-    
-    .grey-cell-header {
+
+    .gray-cell-header {
         color: #4fa4b3;
         font-size: 8px;
     }
-    
+
 </style>
 
 
@@ -343,7 +320,7 @@ window.onload = function() {
 
   //**************************************************************************
   //** Simple Date Picker
-  //************************************************************************** 
+  //**************************************************************************
     new javaxt.dhtml.DatePicker("datePicker1").onClick = function(date){
         document.getElementById("output1").innerHTML = "You selected: " +  formatDate(date);
     };
@@ -370,51 +347,51 @@ window.onload = function() {
             selected: "blue-cell-selected"
         }
     }).onClick = function(date, dateRange){
-        
+
         var startDate = dateRange[0];
         var endDate = dateRange.length>1 ? dateRange[1] : null;
-        
-        document.getElementById("output2").innerHTML = "You selected: " +  formatDate(startDate) + 
+
+        document.getElementById("output2").innerHTML = "You selected: " +  formatDate(startDate) +
         (endDate ? " - " + formatDate(endDate) : "");
     };
 
-  
+
   //**************************************************************************
   //** Grey Date Picker
   //**************************************************************************
-  
+
     var datePicker = new javaxt.dhtml.DatePicker("datePicker3", {
         selectionMode: "week",
         allowDeselect: false,
         daysOfWeek: ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],
         style: {
-            panel: "grey-panel",
-            header: "grey-header",
-            title: "grey-title",
-            back: "grey-next",
-            next: "grey-back",
-            cell: "grey-cell",
-            cellHeader: "grey-cell-header",
-            previousMonth: "grey-cell-prev",
-            nextMonth: "grey-cell-prev",
-            today: "grey-cell-today",
-            selected: "grey-cell-selected"
+            panel: "gray-panel",
+            header: "gray-header",
+            title: "gray-title",
+            back: "gray-next",
+            next: "gray-back",
+            cell: "gray-cell",
+            cellHeader: "gray-cell-header",
+            previousMonth: "gray-cell-prev",
+            nextMonth: "gray-cell-prev",
+            today: "gray-cell-today",
+            selected: "gray-cell-selected"
         }
     });
-    
-  //Swap next and back buttons (back and next buttons are reversed in the grey style definition)
+
+  //Swap next and back buttons (back and next buttons are reversed in the gray style definition)
     var _next = datePicker.next;
     var _back = datePicker.back;
     datePicker.next = _back;
     datePicker.back = _next;
-  
+
   //Process on click events
     datePicker.onClick = function(date, dateRange){
-        
+
         var startDate = dateRange[0];
-        var endDate = dateRange.length>1 ? dateRange[1] : null;        
-        
-        document.getElementById("output3").innerHTML = "You selected: " +  formatDate(startDate) + 
+        var endDate = dateRange.length>1 ? dateRange[1] : null;
+
+        document.getElementById("output3").innerHTML = "You selected: " +  formatDate(startDate) +
         (endDate ? " - " + formatDate(endDate) : "");
     };
 
@@ -431,15 +408,15 @@ window.onload = function() {
 
 </head>
 <body>
-       
+
 <h1>Date Picker Demos</h1>
-    
+
 
 <h2>Default Date Picker</h2>
 <p>Simple date picker with default style and default settings</p>
   <div style="height:230px">
     <div id="datePicker1"></div>
-    <div id="output1" style="padding-top:5px"></div> 
+    <div id="output1" style="padding-top:5px"></div>
   </div>
 
 
@@ -447,15 +424,15 @@ window.onload = function() {
 <p>Date picker with custom blue style</p>
   <div style="height:260px">
     <div id="datePicker2"></div>
-    <div id="output2" style="padding-top:5px"></div> 
+    <div id="output2" style="padding-top:5px"></div>
   </div>
 
 
 <h2>Custom Style #2</h2>
-<p>Date picker with custom grey style and selectionMode set to 'week'</p>
+<p>Date picker with custom gray style and selectionMode set to 'week'</p>
   <div style="height:210px">
     <div id="datePicker3"></div>
-    <div id="output3" style="padding-top:5px"></div> 
+    <div id="output3" style="padding-top:5px"></div>
   </div>
 
 </body>

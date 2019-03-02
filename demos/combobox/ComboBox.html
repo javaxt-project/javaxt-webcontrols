@@ -1,22 +1,19 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-
 <title>Combo Box Demos</title>
 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-
-<!-- Default Stylesheet -->
 <link  href="../style.css" rel="stylesheet" type="text/css" />
 
-<!-- ComboBox Include -->
+<!-- JavaXT Includes -->
 <script type="text/javascript" src="../../src/combobox/ComboBox.js"></script>
+<script type="text/javascript" src="../../src/utils/Utils.js"></script>
 
 <style type="text/css">
-    
+
     /* Style for menu options */
     .combobox-option {
         color: #363636;
@@ -36,7 +33,7 @@
     .combobox-option:focused {
         background-color: #d4ebff;
     }
-    
+
     .combobox-option-new {
         border-top: 1px solid #ccc;
         height: 24px;
@@ -48,10 +45,10 @@
 <body>
 
 <h1>Combo Box Demos</h1>
-    
+
 <h2>Select Country Demo</h2>
 <p>Simple example of a combo box used to select a country from a predefined list.
-   The list of options are automatically filtered as you type in a value in the 
+   The list of options are automatically filtered as you type in a value in the
    input field.
 </p>
 <div id="demo1" style="width:250px;"></div>
@@ -255,8 +252,8 @@ var demo1 = function() {
     countries.add("Yemen", "YM");
     countries.add("Zambia", "ZA");
     countries.add("Zimbabwe", "ZI");
-    
-    
+
+
     //countries.setValue("United States");
 };
 </script>
@@ -265,7 +262,7 @@ var demo1 = function() {
 
 
 <h2 style="margin-top:125px;">"New" Option Demo</h2>
-<p>The combobox provides an option to append a fixed menu item to the bottom of the list. This menu item can be used to trigger other actions (e.g. open an editor). 
+<p>The combobox provides an option to append a fixed menu item to the bottom of the list. This menu item can be used to trigger other actions (e.g. open an editor).
 </p>
 <div id="demo2" style="width:250px;"></div>
 

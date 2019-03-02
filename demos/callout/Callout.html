@@ -1,43 +1,30 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-
 <title>Callout Demo</title>
 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<link  href="../style.css" rel="stylesheet" type="text/css" />
 
 
+<!-- JavaXT Includes -->
 <script type="text/javascript" src="../../src/callout/Callout.js"></script>
-
+<script type="text/javascript" src="../../src/utils/Utils.js"></script>
 
 <style>
-
-    html, body {
-        height:100%;
-        margin:0;
-    }
-    
-    body {
-        padding: 20px;
-    }
-    
-    body, textarea, input, select, td, th {
-        font-family:helvetica,arial,verdana,sans-serif; font-size:14px;
-    }    
 
     h1 {
         margin-top: 0px;
     }
-    
+
     h2 {
         font-size:18px;
         font-weight: normal;
-        margin: 20px 0 5px 0;        
+        margin: 20px 0 5px 0;
     }
-    
+
     p {
         margin: 5px 0 15px 0;
         color: #555555;
@@ -47,7 +34,7 @@
         width: 72px;
         height: 26px;
     }
-    
+
     #demo2 {
         border: 2px dashed #bbb;
         -moz-border-radius: 5px;
@@ -59,12 +46,12 @@
         font-weight: bold;
         color: #bbb;
         cursor: pointer;
-        
+
         -webkit-user-select: none;
         -moz-user-select: none;
         -o-user-select: none;
         -ms-user-select: none;
-        -khtml-user-select: none;     
+        -khtml-user-select: none;
         user-select: none;
     }
 </style>
@@ -72,17 +59,17 @@
 
 
 <script type="text/javascript">
-   
+
 window.onload = function() {
 
   //Create callout for Demo #1
     var body = document.getElementsByTagName("body")[0];
     var callout1 = new javaxt.dhtml.Callout(body);
-    
+
 
   //Populate callout for Demo #1
     var innerDiv = callout1.getInnerDiv();
-    innerDiv.style.width = "165px";        
+    innerDiv.style.width = "165px";
     innerDiv.style.height = "165px";
     var contentDiv = document.createElement("div");
     contentDiv.style.padding = "5px";
@@ -98,8 +85,8 @@ window.onload = function() {
         var y = rect.y + (rect.height/2);
         callout1.showAt(x, y, "right", "top");
     };
-    
-    
+
+
   //Simple function to get coordinates and dimensions of a DOM element
     var getRect = function(el){
 
@@ -148,13 +135,13 @@ window.onload = function() {
             height: h
         };
     };
-    
-    
-    
+
+
+
   //Demo #2
     var callout2 = new javaxt.dhtml.Callout(body);
     innerDiv = callout2.getInnerDiv();
-    innerDiv.style.width = "165px";        
+    innerDiv.style.width = "165px";
     innerDiv.style.height = "165px";
     var contentDiv = document.createElement("div");
     contentDiv.style.padding = "5px";
@@ -171,9 +158,9 @@ window.onload = function() {
 
 </head>
 <body>
-       
+
 <h1>Callout Demo</h1>
-    
+
 
 
 <h2>Demo 1</h2>
