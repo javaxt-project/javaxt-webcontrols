@@ -11,43 +11,43 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 
 javaxt.dhtml.Tree = function (parent, config) {
     this.className = "javaxt.dhtml.Tree";
-    
-    var me = this;
-    
 
-    var defaultConfig = {    
-        
+    var me = this;
+
+
+    var defaultConfig = {
+
         style:{
-            
+
             rowHeight: "20px",
             colWidth: "21px",
             backgroundColor: "white",
             cursor: "default",
             padding: 0,
-            
+
             li: "",
 
             label: {
 
             },
 
-            
+
           //The following style are for icons that appear in the tree
-            
+
             leaf: "leaf",
 
             node: {
                 open: "node_open",
                 closed: "node"
             },
-            
+
             root: {
                 open: "root",
                 closed: "root"
-            },            
-                        
+            },
+
             path: {
-                
+
                 node: {
 
                     open: {
@@ -59,31 +59,31 @@ javaxt.dhtml.Tree = function (parent, config) {
                         last: "join_node_bottom"
                     }
                 },
-                
+
                 leaf: {
                     middle: "join_leaf_middle",
                     last: "join_leaf_bottom"
                 },
-                
+
                 line: "join_line"
-                
+
             }
         }
     };
-    
+
 
   //**************************************************************************
   //** Constructor
   //**************************************************************************
     var init = function(){
-        
-        
+
+
         if (typeof parent === "string"){
             parent = document.getElementById(parent);
         }
         if (!parent) return;
-        
-        
+
+
       //Clone the config so we don't modify the original config object
         var clone = {};
         merge(clone, config);
@@ -92,9 +92,9 @@ javaxt.dhtml.Tree = function (parent, config) {
       //Merge clone with default config
         merge(clone, defaultConfig);
         config = clone;
-        
 
-        
+
+
       //Create main ul
         var ul = createUL();
         ul.style.cursor = config.style.cursor;
@@ -123,7 +123,7 @@ javaxt.dhtml.Tree = function (parent, config) {
             hide(hiddenNodes[i]);
         }
     };
-    
+
 
   //**************************************************************************
   //** Events
@@ -140,7 +140,7 @@ javaxt.dhtml.Tree = function (parent, config) {
   /** Returns an item in a given path.
    */
     this.getItem = function(path){
-        
+
         if (!isArray(path)){
             if (typeof path === "string"){
                 path = path.split("/");
@@ -149,7 +149,7 @@ javaxt.dhtml.Tree = function (parent, config) {
                 return null;
             }
         }
-        
+
         var findNode = function(key, nodes){
             if (nodes){
                 for (var i=0; i<nodes.length; i++){
@@ -163,7 +163,7 @@ javaxt.dhtml.Tree = function (parent, config) {
             }
             return null;
         };
-        
+
         var target;
         var nodes = me.el.childNodes;
         for (var i=0; i<path.length; i++){
@@ -182,7 +182,7 @@ javaxt.dhtml.Tree = function (parent, config) {
                 return null;
             }
         }
-        
+
         if (target){
             return getItem(target);
         }
@@ -198,13 +198,13 @@ javaxt.dhtml.Tree = function (parent, config) {
   /** Used to expand a given item in the tree. If no item is specified, then
    *  the
    */
-    this.show = function(item){    
+    this.show = function(item){
         if (item){
             var li = item.el;
             var ul = li.parentNode;
             show(ul);
-            
-            
+
+
           //If the item is a node, expand children
             if (getNodeType(li)!="leaf"){
                 var nextNode = li.nextSibling;
@@ -212,11 +212,11 @@ javaxt.dhtml.Tree = function (parent, config) {
                     show(nextNode);
                 }
             }
-            
-            
+
+
           //Check if the node is visible
             if (li.offsetParent===null && ul!==me.el){
-                
+
               //Move up the tree
                 while (li.offsetParent===null){
                     ul = ul.parentNode;
@@ -228,24 +228,24 @@ javaxt.dhtml.Tree = function (parent, config) {
             }
         }
         else{
-            
+
           //Show the tree if it is hidden
             me.el.style.visibility = "";
             me.el.style.display = "";
         }
     };
-    
-    
+
+
   //**************************************************************************
   //** hide
   //**************************************************************************
     this.hide = function(item){
         if (item){
-            
+
         }
         else{
-            
-          //Hide the tree 
+
+          //Hide the tree
             me.el.style.visibility = "hidden";
             me.el.style.display = "node";
         }
@@ -255,7 +255,7 @@ javaxt.dhtml.Tree = function (parent, config) {
   //**************************************************************************
   //** getPath
   //**************************************************************************
-  /** Returns an array of parent nodes that form a path to the given item. 
+  /** Returns an array of parent nodes that form a path to the given item.
    */
     this.getPath = function(item){
         var arr = [];
@@ -263,7 +263,7 @@ javaxt.dhtml.Tree = function (parent, config) {
             var li = item.el;
             if (li){
                 var ul = li.parentNode;
-                
+
                 while (ul!==me.el){
                     li = ul.previousSibling;
                     if (li){
@@ -302,7 +302,7 @@ javaxt.dhtml.Tree = function (parent, config) {
             var node = nodes[i];
             var children = node.nodes;
 
-            
+
           //Create node
             var li = document.createElement("li");
             li.className = config.style.li;
@@ -323,9 +323,9 @@ javaxt.dhtml.Tree = function (parent, config) {
                 me.onClick(getItem(this));
             };
             parent.appendChild(li);
-            
-            
-            
+
+
+
           //Create container for child nodes as needed. Do this before calling
           //the getNodeType() method.
             if (children){
@@ -333,7 +333,7 @@ javaxt.dhtml.Tree = function (parent, config) {
                 ul.style.width = "100%";
                 ul.style.height = "100%";
                 parent.appendChild(ul);
-                
+
               //Add "join_line" to previous ul
                 var previousSibling = ul.previousSibling;
                 while (previousSibling){
@@ -345,22 +345,22 @@ javaxt.dhtml.Tree = function (parent, config) {
                 }
             }
 
-            
-            
+
+
           //Determine nodeType (for style purposes)
             var nodeType = getNodeType(li);
-            
-            
 
-            
+
+
+
           //Set join icon style
             if (nodeType!=="root"){
                 var style = getJoinStyle(nodeType, true, (i===nodes.length-1));
-                if (style){ 
-                    
+                if (style){
+
                   //Set className to display the join icon
                     li.className = style;
-                
+
                   //Set padding to make the join icon visible
                     li.style.paddingLeft = config.style.colWidth;
                 }
@@ -370,10 +370,10 @@ javaxt.dhtml.Tree = function (parent, config) {
                 li.style.padding = 0;
                 li.style.background = "none";
             }
-            
 
-            
-            
+
+
+
           //Select icon to use in the label
             var icon;
             if (nodeType=="leaf"){
@@ -382,10 +382,10 @@ javaxt.dhtml.Tree = function (parent, config) {
             else{
                 icon = config.style[nodeType].open;
             }
-            
-            
-            
-            
+
+
+
+
           //Add icon and label
             li.style.width = "100%"; //<-- For label
             if (typeof node === "string"){
@@ -394,42 +394,42 @@ javaxt.dhtml.Tree = function (parent, config) {
             else{
                 var name = node.name;
                 createLabel(name, icon, li);
-            }                
-            
-            
-            
+            }
+
+
+
           //Add children
             if (children){
                 var ul = li.nextSibling;
 
-                if (nodeType!=="root"){    
+                if (nodeType!=="root"){
                     ul.style.paddingLeft = config.style.colWidth;
                 }
-                
-                
+
+
                 var expand = false;
                 if (node.expand===true) expand = true;
                 if (!expand) hiddenNodes.push(ul); //hide(ul);
-                
-                
+
+
                 addNodes(children, ul, hiddenNodes);
             }
         }
     };
-    
+
 
   //**************************************************************************
   //** showNode
   //**************************************************************************
-  /** Used to expand a node and make its contents visible. 
+  /** Used to expand a node and make its contents visible.
    */
     var show = function(ul){
-        
+
         if (ul===me.el) return;
-        
+
         ul.style.visibility = "";
         ul.style.display = "";
-        
+
       //Update icons
         var li = ul.previousSibling;
         if (li){
@@ -445,16 +445,16 @@ javaxt.dhtml.Tree = function (parent, config) {
   //**************************************************************************
   //** hideNode
   //**************************************************************************
-  /** Used to collapse a node and hide its contents. 
+  /** Used to collapse a node and hide its contents.
    */
     var hide = function(ul){
 
         if (ul===me.el) return;
-        
+
         ul.style.visibility = "hidden";
         ul.style.display = "none";
-        
-        
+
+
       //Update icons
         var li = ul.previousSibling;
         if (li){
@@ -465,8 +465,8 @@ javaxt.dhtml.Tree = function (parent, config) {
             me.onCollapse(getItem(li));
         }
     };
-    
-    
+
+
 
 
   //**************************************************************************
@@ -476,7 +476,7 @@ javaxt.dhtml.Tree = function (parent, config) {
 
         var outerDiv = document.createElement("div");
         outerDiv.style.width = "100%";
-        outerDiv.style.backgroundColor = config.style.backgroundColor; 
+        outerDiv.style.backgroundColor = config.style.backgroundColor;
         outerDiv.style.position = "relative";
         outerDiv.style.overflow = "hidden";
         outerDiv.style.height = config.style.rowHeight;
@@ -502,13 +502,13 @@ javaxt.dhtml.Tree = function (parent, config) {
             labelDiv.innerHTML = label.replace(/^\s*/, "").replace(/\s*$/, ""); //trim()
             outerDiv.appendChild(labelDiv);
         }
-        
-        
+
+
         li.setIcon = function(icon){
             if (iconDiv) iconDiv.className = icon;
         };
-        
-        
+
+
         li.getText = function(){
             return labelDiv.innerText;
         };
@@ -523,25 +523,25 @@ javaxt.dhtml.Tree = function (parent, config) {
    *  leaf).
    */
     var getNodeType = function(li){
-        
+
         if (li.parentNode===me.el){
             return "root";
         }
         else{
-            
+
             var hasChildren = false;
             if (li.nextSibling){
                 if (li.nextSibling.tagName.toLowerCase()==="ul"){
                     hasChildren = true;
-                }   
+                }
             }
-            
+
             if (hasChildren) return "node";
             else return "leaf";
         }
     };
-    
-    
+
+
   //**************************************************************************
   //** isLast
   //**************************************************************************
@@ -571,7 +571,7 @@ javaxt.dhtml.Tree = function (parent, config) {
   /** Returns the join icon style/class for a given nodeType.
    */
     var getJoinStyle = function(nodeType, isOpen, isLast){
-        
+
         if (nodeType!=="root"){
             var joinStyle = isLast ? "last" : "middle";
 
@@ -582,9 +582,9 @@ javaxt.dhtml.Tree = function (parent, config) {
                 else style = style.closed;
             }
             style = style[joinStyle];
-            
 
-            if (typeof style === "string"){                
+
+            if (typeof style === "string"){
                 return style;
             }
             else{
@@ -593,11 +593,11 @@ javaxt.dhtml.Tree = function (parent, config) {
             }
 
         }
-        
+
         return null;
     };
 
-    
+
   //**************************************************************************
   //** createUL
   //**************************************************************************
@@ -610,63 +610,13 @@ javaxt.dhtml.Tree = function (parent, config) {
         return ul;
     };
 
- 
-  //**************************************************************************
-  //** addStyle
-  //**************************************************************************
-  /** Used to add style to a given element. Styles are defined via a CSS class
-   *  name or inline using the config.style definitions. 
-   */
-    var addStyle = function(el, style){
-        
-        if (style===null) return;
-        
-        if (typeof style === 'string' || style instanceof String){
-            if (el.className && el.className!=null) el.className += " " + style;
-            else el.className = style;
-        }
-        else{
-            for (var key in style){
-                var val = style[key];
-
-                el.style[key] = val;
-                if (key==="transform"){
-                    el.style["-webkit-" +key] = val;
-                }
-            }
-        }
-    };
 
   //**************************************************************************
-  //** isArray
+  //** Utils
   //**************************************************************************
-  /** Used to check whether a given object is an array. Note that this check
-   *  does not use the "instanceof Array" approach because of issues with
-   *  frames.
-   */
-    var isArray = function(obj){
-        return (Object.prototype.toString.call(obj)==='[object Array]');
-    };
-    
-
-  //**************************************************************************
-  //** merge
-  //**************************************************************************
-  /** Used to merge properties from one json object into another. Credit:
-   *  https://github.com/stevenleadbeater/JSONT/blob/master/JSONT.js
-   */
-    var merge = function(settings, defaults) {
-        for (var p in defaults) {
-            if ( defaults.hasOwnProperty(p) && typeof settings[p] !== "undefined" ) {
-                if (p!=0) //<--Added this as a bug fix
-                merge(settings[p], defaults[p]);
-            }
-            else {
-                settings[p] = defaults[p];
-            }
-        }
-    };
-
+    var merge = javaxt.dhtml.utils.merge;
+    var addStyle = javaxt.dhtml.utils.addStyle;
+    var isArray = javaxt.dhtml.utils.isArray;
 
     init();
 };
