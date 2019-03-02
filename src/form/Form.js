@@ -11,46 +11,46 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 
 javaxt.dhtml.Form = function (parent, config) {
     this.className = "javaxt.dhtml.Form";
-    
+
     var me = this;
-    
+
     var form;
     var formTable, buttonRow;
     var verticalSpacing;
 
-    
+
     var inputs = [];
     var groups = [];
     var buttons = [];
-    
 
 
-    var defaultConfig = {    
+
+    var defaultConfig = {
         onsubmit: null,
         items: [],
-        
+
         style:{
-            
+
             spacing: "8px", //vertical spacing btw form inputs
-            
+
             form: {
                 padding: "5px 5px 0 5px"
             },
-            
-            
+
+
             label: {
                 color: "#363636",
                 whiteSpace: "nowrap",
                 cursor: "default",
                 paddingRight: "8px"
             },
-            
+
             addColon: true, //indicate whether
-            
+
             icon: {
 
             },
-            
+
             input: {
                 borderRadius: "4px",
                 color: "#363636",
@@ -68,23 +68,23 @@ javaxt.dhtml.Form = function (parent, config) {
                 backgroundColor: "#fff",
                 border: "1px solid #ccc",
                 boxShadow: "0 1px 1px rgba(0, 0, 0, 0.075) inset",
-                
-                
+
+
                 boxSizing: "border-box" //important for inputs with 100% width
             },
-            
+
             radio: {
                 margin: 0,
                 padding: 0
             },
-            
+
           //Container for buttons (footer)
             buttons: {
                 padding: "0px 5px 3px 5px",
                 textAlign: "right" //<-- sets button alignment
             },
-            
-            
+
+
           //Style for individual buttons in the button bar (footer)
             button: {
                 borderRadius: "3px",
@@ -103,14 +103,14 @@ javaxt.dhtml.Form = function (parent, config) {
                 cursor: "pointer",
                 marginLeft: "7px"
             },
-            
-            
+
+
             groupbox: {
                 border: "1px solid #ccc",
                 borderRadius: "4px",
                 padding: "16px 8px 12px 13px"
             },
-            
+
             grouplabel: {
                 margin: "8px 0 0 7px",
                 backgroundColor: "white",
@@ -127,14 +127,14 @@ javaxt.dhtml.Form = function (parent, config) {
   /** Creates a new instance of the Form control. */
 
     var init = function(){
-        
-        
+
+
         if (typeof parent === "string"){
             parent = document.getElementById(parent);
         }
         if (!parent) return;
-        
-        
+
+
       //Clone the config so we don't modify the original config object
         var clone = {};
         merge(clone, config);
@@ -143,13 +143,13 @@ javaxt.dhtml.Form = function (parent, config) {
       //Merge clone with default config
         merge(clone, defaultConfig);
         config = clone;
-        
-        
+
+
       //Get cell padding
         verticalSpacing = config.style.spacing;
-        
-        
-        
+
+
+
       //Create form
         form = document.createElement('form');
         form.style.padding = 0;
@@ -158,8 +158,8 @@ javaxt.dhtml.Form = function (parent, config) {
         form.setAttribute("desc", me.className);
         if (config.onsubmit) form.onsubmit = config.onsubmit;
         me.el = form;
-        
-        
+
+
 
       //Create table to store the form and buttons (2 rows, 1 column)
         var outerTable = createTable("100%", "100%", me.className);
@@ -169,10 +169,10 @@ javaxt.dhtml.Form = function (parent, config) {
         formCell = document.createElement('td');
         buttonRow = document.createElement('tr');  //buttonRow is a global variable and is redefined below...
         buttonCell = document.createElement('td');
-        
+
         formRow.setAttribute("desc", "formRow");
         buttonRow.setAttribute("desc", "buttonRow");
-        
+
         formRow.appendChild(formCell);
         outerTable.appendChild(formRow);
         buttonRow.appendChild(buttonCell);
@@ -182,19 +182,19 @@ javaxt.dhtml.Form = function (parent, config) {
         formCell.style.width = "100%";
         formCell.style.height = "100%";
         formCell.style.verticalAlign = "top";
-                
+
         setStyle(buttonCell, "buttons");
 
 
-        
-        
+
+
       //Create table for the form inputs
         formTable = createTable("100%");
         formCell.appendChild(formTable.parentNode);
 
-        
 
-      //Create table for the buttons  
+
+      //Create table for the buttons
         var buttonTable = createTable();
         var buttonDiv = document.createElement('div');
         buttonDiv.style.display = "inline-block";
@@ -204,7 +204,7 @@ javaxt.dhtml.Form = function (parent, config) {
         var align = config.style.buttons.textAlign;
         if (align===null) align = "right";
         else align = align.toLowerCase();
-        
+
         if (align==="fit"){
             buttonTable.parentNode.style.width = "100%";
         }
@@ -217,8 +217,8 @@ javaxt.dhtml.Form = function (parent, config) {
 
         buttonRow = document.createElement("tr");
         buttonTable.appendChild(buttonRow);
-        
-        
+
+
       //Add inputs defined in the config
         if (config.items){
             for (var i=0; i<config.items.length; i++){
@@ -231,33 +231,47 @@ javaxt.dhtml.Form = function (parent, config) {
                 }
             }
         }
-        
-        
-        
+
+
+
       //Add buttons defined in the config
         if (config.buttons){
             for (var i=0; i<config.buttons.length; i++){
-                
+
                 var button = config.buttons[i];
                 var name = button.name;
                 var enabled = true;
                 var onclick = button.onclick;
-                
+
                 me.addButton(name, enabled, onclick);
             }
         }
-        
-        
+
+
+
+      //Watch for resize events
+        addResizeListener(parent, function(){
+            me.resize();
+        });
+
+
         parent.appendChild(form);
     };
 
 
-
+  //**************************************************************************
+  //** resize
+  //**************************************************************************
+    this.resize = function(){
+        for (var i=0; i<groups.length; i++){
+            updateGroup(groups[i]);
+        }
+    };
 
 
   //**************************************************************************
   //** getForm
-  //**************************************************************************  
+  //**************************************************************************
     this.getForm = function(){
         return form;
     };
@@ -284,7 +298,7 @@ javaxt.dhtml.Form = function (parent, config) {
         for (var i=0; i<form.elements.length; i++){
             var input = form.elements[i];
             var type = input.type;
-            
+
             switch (type) {
                 case 'text':
                 case 'textarea':
@@ -306,27 +320,27 @@ javaxt.dhtml.Form = function (parent, config) {
                     break;
             }
         }
-        
-        
+
+
       //Clear any custom form inputs (e.g. javaxt components)
         for (var i=0; i<inputs.length; i++){
             var input = inputs[i];
             if (input.clear) input.clear();
         }
     };
-    
+
 
 
   //**************************************************************************
   //** getData
   //**************************************************************************
-  /** Returns the values for all the form inputs in JSON notation. Note that 
-   *  if the form has multiple inputs with the same name, the associated value 
-   *  will be an array. You can test whether the value is an array using the 
+  /** Returns the values for all the form inputs in JSON notation. Note that
+   *  if the form has multiple inputs with the same name, the associated value
+   *  will be an array. You can test whether the value is an array using the
    *  "instanceof Array" operator.
    */
     this.getData = function(){
-        
+
         var values = {};
 
 
@@ -352,10 +366,10 @@ javaxt.dhtml.Form = function (parent, config) {
             }
 
         }
-        
+
         return values;
     };
-    
+
 
   //**************************************************************************
   //** getFormData
@@ -363,10 +377,10 @@ javaxt.dhtml.Form = function (parent, config) {
   /** Returns the values for all the form inputs as a FormData object
    */
     this.getFormData = function(){
-        
+
         var formData = new FormData();
         var data = me.getData();
-        
+
         for (var key in data) {
             if (data.hasOwnProperty(key)){
                 var val = data[key];
@@ -381,16 +395,16 @@ javaxt.dhtml.Form = function (parent, config) {
                 }
             }
         }
-        
+
         return formData;
     };
-    
+
 
   //**************************************************************************
   //** addButton
   //**************************************************************************
     this.addButton = function (name, enabled, onclick){
-        
+
         var td = document.createElement('td');
         if (name.toLowerCase()==="spacer"){
             td.style.width="100%";
@@ -403,14 +417,14 @@ javaxt.dhtml.Form = function (parent, config) {
             input.value = name;
             input.onclick = onclick;
             setStyle(input, "button");
-            
+
             buttons.push(input);
             td.appendChild(input);
         }
 
         buttonRow.appendChild(td);
     };
-    
+
 
 
 
@@ -436,7 +450,7 @@ javaxt.dhtml.Form = function (parent, config) {
         input.style.width = "100%";
 
 
-        
+
         var getValue = function(){
             return input.value;
         };
@@ -447,8 +461,8 @@ javaxt.dhtml.Form = function (parent, config) {
 
         addInput(name, label, input, getValue, setValue, icon);
     };
-    
-    
+
+
   //**************************************************************************
   //** createHiddenInput
   //**************************************************************************
@@ -457,7 +471,7 @@ javaxt.dhtml.Form = function (parent, config) {
         input.type = "hidden";
         input.name = name;
         if (value!=null) input.value = value;
-        
+
         var getValue = function(){
             return input.value;
         };
@@ -465,9 +479,9 @@ javaxt.dhtml.Form = function (parent, config) {
             if (typeof value === "undefined") value = "";
             input.value = value;
         };
-        
+
         //addInput(name, null, input, getValue, setValue);
-        
+
         inputs.push({
             name: name,
             label: null,
@@ -477,27 +491,40 @@ javaxt.dhtml.Form = function (parent, config) {
         });
         form.appendChild(input);
     };
-    
-    
+
+
   //**************************************************************************
   //** createRadioInput
   //**************************************************************************
-  /** Used to add radio inputs to the form. The inputs are aligned 
-   *  horizontally. 
+  /** Used to add radio inputs to the form. By default, the inputs are aligned
+   *  horizontally. This can be changed by specifying alignment: "vertical".
    */
-    var createRadioInput = function(label, name, options, icon){
-        
+    var createRadioInput = function(label, name, item){
+        var formInput;
+        var options = item.options;
+        var alignment = item.alignment;
+
         var tbody = createTable("100%");
         var table = tbody.parentNode;
-        var tr = document.createElement('tr');
-        tbody.appendChild(tr);
-        
+        var tr;
+
         var arr = [];
         for (var i=0; i<options.length; i++){
 
+            if (alignment=="vertical"){
+                tr = document.createElement('tr');
+                tbody.appendChild(tr);
+            }
+            else{ //horizontal
+                if (i==0){
+                    tr = document.createElement('tr');
+                    tbody.appendChild(tr);
+                }
+            }
+
             var td = document.createElement('td');
             tr.appendChild(td);
-            
+
             var t = createTable();
             var r = document.createElement('tr');
             t.appendChild(r);
@@ -506,17 +533,24 @@ javaxt.dhtml.Form = function (parent, config) {
             var c2 = document.createElement('td');
             r.appendChild(c2);
             td.appendChild(t.parentNode);
-            
-            
+
+
             var input = document.createElement('input');
             setStyle(input, "radio");
             input.type = "radio";
             input.name = name;
             input.value = options[i].value;
+            if (options[i].checked===true || options[i].selected==true){
+                input.checked = true;
+            }
+            input.onchange = function(){
+                me.onChange(formInput, getValue());
+            };
+
             arr.push(input);
             c1.appendChild(input);
-            
-            
+
+
             var span = document.createElement('span');
             setStyle(span, "label");
             span.innerHTML = options[i].label;
@@ -524,21 +558,12 @@ javaxt.dhtml.Form = function (parent, config) {
             span.onclick = function(){
                 this.input.checked = true;
                 this.input.focus();
-                
-              //Fire onchange event
-                if ("createEvent" in document) {
-                    var evt = document.createEvent("HTMLEvents");
-                    evt.initEvent("change", false, true);
-                    this.input.dispatchEvent(evt);
-                }
-                else{
-                    this.input.fireEvent("onchange");
-                }
+                dispatchEvent(this.input, "change");
             };
             c2.appendChild(span);
         }
-        
-        
+
+
 
 
         var getValue = function(){
@@ -547,24 +572,28 @@ javaxt.dhtml.Form = function (parent, config) {
             }
             return null;
         };
-        
+
         var setValue = function(value){
+            var numChanges = 0;
             for (var i=0; i<arr.length; i++){
                 if ((arr[i].value+"")==(value+"")){
+                    if (arr[i].checked!==true) numChanges++;
                     arr[i].checked = true;
                 }
                 else{
                     arr[i].checked = false;
+                    if (arr[i].checked===true) numChanges++;
                 }
             }
+            if (numChanges>0) me.onChange(formInput, getValue());
         };
-        
-        addInput(name, label, table, getValue, setValue, icon);
+
+        formInput = addInput(name, label, table, getValue, setValue, item.icon);
     };
-    
 
 
-    
+
+
   //**************************************************************************
   //** addGroup
   //**************************************************************************
@@ -572,13 +601,13 @@ javaxt.dhtml.Form = function (parent, config) {
    *  box.
    */
     var addGroup = function(name, items, hidden){
-        
+
       //Create new row for the groupbox
         var row = document.createElement('tr');
         row.setAttribute("desc", "-- Group Start --");
         formTable.appendChild(row);
-        
-        
+
+
       //Calculate padding and border width for the group box
         var paddingLeft,paddingRight,paddingTop,paddingBottom,borderWidth,borderHeight;
         var style = getGroupboxStyle();
@@ -598,22 +627,22 @@ javaxt.dhtml.Form = function (parent, config) {
             borderWidth = 2; //assumes border is 1 pixel on each side
             borderHeight = borderWidth;
         }
-        
-        
-        
+
+
+
       //Add row for groupbox
         var td = document.createElement('td');
         td.style.padding = (parseInt(verticalSpacing)*2) + "px " + borderWidth + "px " + paddingTop + "px 0";
         td.colSpan = 3;
         row.appendChild(td);
-        var div = document.createElement('div'); 
+        var div = document.createElement('div');
         div.style.position = "relative";
         div.style.width = "100%";
         div.style.visibility = 'hidden';
         div.style.display = 'block';
         td.appendChild(div);
-        
-        
+
+
       //Create groupbox
         var groupbox = document.createElement('div');
         setStyle(groupbox, "groupbox");
@@ -634,14 +663,14 @@ javaxt.dhtml.Form = function (parent, config) {
         label.style.zIndex = -1;
         div.appendChild(label);
 
-        
+
       //Add items to the form
         for (var i=0; i<items.length; i++){
             if (hidden===true) items[i].hidden = true;
             addItem(items[i]);
         }
-        
-        
+
+
       //Generate list of rows associated with the groupbox
         var rows = [];
         for (var i=0; i<formTable.childNodes.length; i++){
@@ -659,19 +688,19 @@ javaxt.dhtml.Form = function (parent, config) {
 
       //Set groupbox height
         var setHeight = function(h){
-            
+
           //substract padding of last input
             h = h-parseInt(verticalSpacing);
-            
+
           //add vertical padding for the groupbox
             h += (paddingTop + paddingBottom);
-            
+
             groupbox.style.height = h + "px";
             div.style.visibility = '';
         };
         getHeight(rows, setHeight);
-        
-        
+
+
 
       //Add padding to the inputs
         for (var i=0; i<rows.length; i++){
@@ -690,9 +719,9 @@ javaxt.dhtml.Form = function (parent, config) {
         td.style.padding = (parseInt(verticalSpacing) + paddingBottom) + "px 0 0 0";
         td.colSpan = 3;
         row.appendChild(td);
-        
-        
-        
+
+
+
       //Update groups variable
         var arr = [];
         for (var i=0; i<rows.length; i++){
@@ -706,8 +735,8 @@ javaxt.dhtml.Form = function (parent, config) {
             rows: arr,
             setHeight: setHeight
         });
-      
-        
+
+
         showHideGroup(name, hidden);
     };
 
@@ -730,8 +759,8 @@ javaxt.dhtml.Form = function (parent, config) {
     this.hideGroup = function(name){
         showHideGroup(name, true);
     };
-    
-    
+
+
   //**************************************************************************
   //** showHideGroup
   //**************************************************************************
@@ -777,14 +806,14 @@ javaxt.dhtml.Form = function (parent, config) {
                 createTextInput(label, name, value, type, icon);
             }
             else if (type==="radio"){
-                createRadioInput(label, name, item.options);
+                createRadioInput(label, name, item);
             }
             else if (type==="hidden"){
                 createHiddenInput(name, value);
             }
         }
         else{
-            
+
             var el;
             var getValue, setValue;
             var input = type;
@@ -810,8 +839,8 @@ javaxt.dhtml.Form = function (parent, config) {
                     };
                 }
             }
-            
-            
+
+
             if (el){
                 addInput(name, label, el, getValue, setValue, icon);
             }
@@ -829,8 +858,8 @@ javaxt.dhtml.Form = function (parent, config) {
       //Create new row
         var row = document.createElement('tr');
         formTable.appendChild(row);
-        
-        
+
+
       //Icon
         var td = document.createElement('td');
         if (icon){
@@ -840,8 +869,8 @@ javaxt.dhtml.Form = function (parent, config) {
             td.appendChild(iconDiv);
         }
         row.appendChild(td);
-        
-        
+
+
       //Label
         row.appendChild(createLabel(label));
 
@@ -852,18 +881,19 @@ javaxt.dhtml.Form = function (parent, config) {
         td.style.paddingBottom=verticalSpacing;
         row.appendChild(td);
         td.appendChild(el);
-        
-        
-        
-        inputs.push({
+
+
+        var input = {
             name: name,
             label: label,
             row: row,
             getValue: getValue,
             setValue: setValue
-        });
+        };
+        inputs.push(input);
+        return input;
     };
-    
+
 
   //**************************************************************************
   //** createLabel
@@ -882,8 +912,10 @@ javaxt.dhtml.Form = function (parent, config) {
 
         if (label!=null){
             label = label.replace(/^\s*/, "").replace(/\s*$/, ""); //trim
-            if (label.indexOf(":")!=label.length && config.style.addColon===true) label+=": ";
-            else label+=" ";
+            if (label.length>0){
+                if (label.indexOf(":")!=label.length && config.style.addColon===true) label+=": ";
+                else label+=" ";
+            }
         }
         if (label!=null) td.innerHTML = label;
         return td;
@@ -936,22 +968,22 @@ javaxt.dhtml.Form = function (parent, config) {
   //**************************************************************************
   //** hideField
   //**************************************************************************
-  /** Used to hide a form input. Returns true if the field was found and 
+  /** Used to hide a form input. Returns true if the field was found and
    *  hidden from view.
    */
     this.hideField = function(name){
         var field = me.findField(name);
         if (field){
             var row = field.row;
-            
+
           //Update visibility
             row.style.visibility = 'hidden';
             row.style.display = 'none';
-            
+
           //Check if the row is part of a group and update height as needed
             var group = findGroup(row);
             if (group) updateGroup(group);
-            
+
             return true;
         }
         return false;
@@ -961,22 +993,22 @@ javaxt.dhtml.Form = function (parent, config) {
   //**************************************************************************
   //** showField
   //**************************************************************************
-  /** Used to unhide a form input. Returns true if the field was found and 
+  /** Used to unhide a form input. Returns true if the field was found and
    *  is visible.
    */
     this.showField = function(name){
         var field = me.findField(name);
         if (field){
             var row = field.row;
-            
+
           //Update visibility
             row.style.visibility = '';
             row.style.display = '';
-            
+
           //Check if the row is part of a group and update height as needed
             var group = findGroup(row);
             if (group) updateGroup(group);
-            
+
             return true;
         }
         return false;
@@ -1008,6 +1040,8 @@ javaxt.dhtml.Form = function (parent, config) {
 //        }
 //    };
 
+
+    this.onChange = function(formField){};
 
 
   //**************************************************************************
@@ -1114,7 +1148,7 @@ javaxt.dhtml.Form = function (parent, config) {
                 return style[prop];
             }
         };
-    
+
         config.groupbox = {
             paddingTop: parseInt(getStyle("paddingTop")),
             paddingBottom: parseInt(getStyle("paddingBottom")),
@@ -1125,10 +1159,10 @@ javaxt.dhtml.Form = function (parent, config) {
             borderTop: parseInt(getStyle("borderTopWidth")),
             borderBottom: parseInt(getStyle("borderBottomWidth"))
         };
-    
+
         body.removeChild(temp);
         temp = null;
-        
+
         return config.groupbox;
     };
 
@@ -1136,10 +1170,10 @@ javaxt.dhtml.Form = function (parent, config) {
   //**************************************************************************
   //** getHeight
   //**************************************************************************
-  /** Used to calculate the total height of a given list of rows. If the 
-   *  height is not immediately available, then the form's parent has not been 
-   *  added to the document. In this case, we will periodically check to see 
-   *  if the form's status changes so that we can set the height of the 
+  /** Used to calculate the total height of a given list of rows. If the
+   *  height is not immediately available, then the form's parent has not been
+   *  added to the document. In this case, we will periodically check to see
+   *  if the form's status changes so that we can set the height of the
    *  groupbox.
    */
     var getHeight = function(rows, callback){
@@ -1159,7 +1193,7 @@ javaxt.dhtml.Form = function (parent, config) {
 
             var timer;
 
-            var checkHeight = function(){ 
+            var checkHeight = function(){
                 var h = _getHeight();
                 if (h===0 || isNaN(h)){
                     timer = setTimeout(checkHeight, 100);
@@ -1201,22 +1235,30 @@ javaxt.dhtml.Form = function (parent, config) {
 
 
   //**************************************************************************
+  //** dispatchEvent
+  //**************************************************************************
+    var dispatchEvent = function(el, event){
+        if ("createEvent" in document) {
+            var evt = document.createEvent("HTMLEvents");
+            evt.initEvent(event, false, true);
+            el.dispatchEvent(evt);
+        }
+        else{
+            el.fireEvent("on"+event);
+        }
+    };
+
+
+  //**************************************************************************
   //** createTable
   //**************************************************************************
     var createTable = function(width, height, desc){
-        var table = document.createElement('table');
-        var tbody = document.createElement('tbody');
-        table.appendChild(tbody);
-        table.removeAttribute("style");
-        table.style.borderCollapse = "collapse";
-        table.style.margin = "0px";
-        table.style.padding = "0px";
-        table.cellSpacing = 0;
-        table.cellPadding = 0;
-        table.style.border = "0";
-        table.border = 0;
+        var table = javaxt.dhtml.utils.createTable();
+        var tbody = table.firstChild;
         if (width) table.style.width = width;
+        else table.style.width = '';
         if (height) table.style.height = height;
+        else table.style.height = '';
         if (desc) table.setAttribute("desc", desc);
         return tbody;
     };
@@ -1225,53 +1267,14 @@ javaxt.dhtml.Form = function (parent, config) {
   //**************************************************************************
   //** setStyle
   //**************************************************************************
-  /** Used to set the style for a given element. Styles are defined via a CSS 
-   *  class name or inline using the config.style definitions. 
-   */
     var setStyle = function(el, style){
-        
-        style = config.style[style];
-        if (style===null) return;
-        
-        el.style = '';
-        el.removeAttribute("style");
-        
-        
-        if (typeof style === 'string' || style instanceof String){
-            el.className = style;
-        }
-        else{    
-            for (var key in style){
-                var val = style[key];
-                if (key==="content"){
-                    el.innerHTML = val;
-                }
-                else{
-                    el.style[key] = val;
-                }
-            }
-        }
+        javaxt.dhtml.utils.setStyle(el, config.style[style]);
     };
 
 
-  //**************************************************************************
-  //** merge
-  //**************************************************************************
-  /** Used to merge properties from one json object into another. Credit:
-   *  https://github.com/stevenleadbeater/JSONT/blob/master/JSONT.js
-   */
-    var merge = function(settings, defaults) {
-        for (var p in defaults) {
-            if ( defaults.hasOwnProperty(p) && typeof settings[p] !== "undefined" ) {
-                if (p!=0) //<--Added this as a bug fix
-                merge(settings[p], defaults[p]);
-            }
-            else {
-                settings[p] = defaults[p];
-            }
-        }
-    };
 
+    var merge = javaxt.dhtml.utils.merge;
+    var addResizeListener = javaxt.dhtml.utils.addResizeListener;
 
     init();
 };
