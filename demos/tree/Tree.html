@@ -1,4 +1,3 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 
@@ -8,84 +7,69 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-
+<link  href="../style.css" rel="stylesheet" type="text/css" />
 
 <script type="text/javascript" src="../../src/tree/Tree.js"></script>
-
+<script type="text/javascript" src="../../src/utils/Utils.js"></script>
 
 <style>
-    /* Set body height to 100% so we can test vertical resize */
-    html, body {
-        height:100%;
-        margin:10px;
-    }
-    
-    
-    body, textarea, input, select, td, th {
-        font-family:helvetica,arial,verdana,sans-serif; font-size:14px;
-    }    
 
 
-    h2 {
-        font-size:18px;
-        font-weight: normal;
-        margin: 20px 0 5px 0;        
-    }
-    
-    
     #demo1 {
         font-size: 12px;
         color: #363636;
+        display: inline-block;
+        width: 500px;
     }
-    
-    
-  
-.join_leaf_bottom, .join_leaf_middle, .join_line, 
-.join_node_bottom, .join_node_bottom_open, 
-.join_node_middle, .join_node_middle_open, 
-.leaf, .node, .node_open, .root, .spacer
-{
-    background: white url('tree.png');
-    background-repeat: no-repeat;
-    width: 19px;
-    height: 20px;
-}
-.join_leaf_bottom {
-    background-position: -2px 0px;
-}
-.join_leaf_middle {
-    background-position: -25px 0px;
-}
-.join_line {
-    background-position: -48px 0px;
-    background-repeat: repeat-y;
-}
-.join_node_bottom {
-    background-position: -71px 0px;
-}
-.join_node_bottom_open {
-    background-position: -94px 0px;
-}
-.join_node_middle {
-    background-position: -117px 0px;
-}
-.join_node_middle_open {
-    background-position: -140px 0px;
-}
-.leaf {
-    background-position: -163px 0px;
-}
-.node {
-    background-position: -186px 0px;
-}
-.node_open {
-    background-position: -209px 0px;
-}
-.root {
-    background-position: -232px 0px;
-}
 
-        
+
+
+    .join_leaf_bottom, .join_leaf_middle, .join_line,
+    .join_node_bottom, .join_node_bottom_open,
+    .join_node_middle, .join_node_middle_open,
+    .leaf, .node, .node_open, .root, .spacer
+    {
+        background: white url('tree.png');
+        background-repeat: no-repeat;
+        width: 19px;
+        height: 20px;
+    }
+    .join_leaf_bottom {
+        background-position: -2px 0px;
+    }
+    .join_leaf_middle {
+        background-position: -25px 0px;
+    }
+    .join_line {
+        background-position: -48px 0px;
+        background-repeat: repeat-y;
+    }
+    .join_node_bottom {
+        background-position: -71px 0px;
+    }
+    .join_node_bottom_open {
+        background-position: -94px 0px;
+    }
+    .join_node_middle {
+        background-position: -117px 0px;
+    }
+    .join_node_middle_open {
+        background-position: -140px 0px;
+    }
+    .leaf {
+        background-position: -163px 0px;
+    }
+    .node {
+        background-position: -186px 0px;
+    }
+    .node_open {
+        background-position: -209px 0px;
+    }
+    .root {
+        background-position: -232px 0px;
+    }
+
+
 </style>
 
 
@@ -112,11 +96,11 @@ window.onload = function() {
         {
             name: "javaxt-server",
             nodes: [
-                
+
             ]
         }
     ];
-    
+
     var tree = new javaxt.dhtml.Tree(document.getElementById("demo1"), {
         nodes: nodes,
         style:{
@@ -127,14 +111,14 @@ window.onload = function() {
                 open: "node_open",
                 closed: "node"
             },
-            
+
             root: {
                 open: "root",
                 closed: "root"
-            },            
-                        
+            },
+
             path: {
-                
+
                 node: {
 
                     open: {
@@ -146,33 +130,33 @@ window.onload = function() {
                         last: "join_node_bottom"
                     }
                 },
-                
+
                 leaf: {
                     middle: "join_leaf_middle",
                     last: "join_leaf_bottom"
                 },
-                
+
                 line: "join_line"
-                
+
             }
         }
     });
-    
-    
-    
+
+
+
     var path = ["javaxt-core", "javaxt.sql", "Connection"];
     var item = tree.getItem(path);
     tree.show(item);
-    
-    
+
+
     tree.onExpand = function(node){
-       console.log("Expanded " + node.name); 
+       console.log("Expanded " + node.name);
     };
-    
+
     tree.onCollapse = function(node){
-       console.log("Collapsed " + node.name); 
+       console.log("Collapsed " + node.name);
     };
-    
+
     tree.onClick = function(item){
        console.log("Clicked " + item.name);
        console.log(tree.getPath(item));
@@ -184,9 +168,9 @@ window.onload = function() {
 
 </head>
 <body>
-       
+
 <h1>Tree Demo</h1>
-    
+
 
 
 <div id="demo1"></div>
