@@ -983,16 +983,6 @@ javaxt.dhtml.Table = function(parent, config) {
     };
 
 
-  //**************************************************************************
-  //** isArray
-  //**************************************************************************
-  /** Used to check whether a given object is an array. Note that this check
-   *  does not use the "instanceof Array" approach because of issues with
-   *  frames.
-   */
-    var isArray = function(obj){
-        return (Object.prototype.toString.call(obj)==='[object Array]');
-    };
 
 
   //**************************************************************************
@@ -1021,21 +1011,16 @@ javaxt.dhtml.Table = function(parent, config) {
 
 
   //**************************************************************************
-  //** setStyle
+  //** Utils
   //**************************************************************************
-  /** Used to set the style for a given element. Styles are defined via a CSS
-   *  class name or inline using the config.style definitions.
-   */
+    var merge = javaxt.dhtml.utils.merge;
+    var addResizeListener = javaxt.dhtml.utils.addResizeListener;
+    var isArray = javaxt.dhtml.utils.isArray;
     var setStyle = function(el, style){
         style = config.style[style];
         if (style===null) return;
         javaxt.dhtml.utils.setStyle(el, style);
     };
-
-
-
-    var merge = javaxt.dhtml.utils.merge;
-    var addResizeListener = javaxt.dhtml.utils.addResizeListener;
 
     init();
 };
