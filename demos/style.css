@@ -11,19 +11,19 @@ html {
 
 body {
     display:table-cell;
-    padding: 10px;
+    padding: 20px;
 }
 
 
 body, textarea, input, select, td, th {
     font-family:helvetica,arial,verdana,sans-serif; font-size:14px;
-}    
+}
 
 
 h2 {
     font-size:18px;
     font-weight: normal;
-    margin: 35px 0 0 0;        
+    margin: 35px 0 0 0;
 }
 
 p {
