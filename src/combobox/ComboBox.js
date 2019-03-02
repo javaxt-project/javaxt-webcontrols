@@ -5,9 +5,9 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 //**  ComboBox Class
 //******************************************************************************
 /**
- *   Form input with a pulldown list of options. By default, the options are 
- *   accessed via a button or a "down arrow" key press. The list of options  
- *   are automatically filtered as a user types in a value in the input field. 
+ *   Form input with a pulldown list of options. By default, the options are
+ *   accessed via a button or a "down arrow" key press. The list of options
+ *   are automatically filtered as a user types in a value in the input field.
  *
  ******************************************************************************/
 
@@ -17,7 +17,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
     var me = this;
     var input, button;
     var menuDiv, menuOptions, newOption;
-    
+
     var defaultConfig = {
 
         placeholder: false,
@@ -26,13 +26,13 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         scrollbar: false, //true to show the vertical scrollbar
         showMenuOnFocus: true,
         typeAhead: true,
-        
+
         addNewOption: false,
         addNewOptionText: "Add New...",
-        
+
         style: {
             width: "100%",
-            
+
             input: {
                 color: "#363636",
                 fontSize: "14px",
@@ -45,14 +45,14 @@ javaxt.dhtml.ComboBox = function(parent, config) {
                 border: "1px solid #ccc",
                 boxShadow: "0 1px 1px rgba(0, 0, 0, 0.075) inset"
             },
-            
+
             button: {
                 color: "#363636",
                 height: "24px",
                 width: "24px",
                 border: "1px solid #b4b4b4",
                 cursor: "pointer",
-                
+
                 backgroundImage: "url(data:image/png;base64,iVBORw0KGgoAAAANSUh"+
                 "EUgAAABAAAAAQCAYAAAAf8/9hAAAAlklEQVQ4jWNgGAUowNvbW9PBwUEAjxJGHx"+
                 "8f/dDQUB4MGV9f3+TAwMD/AQEB97y8vOSxafb392+BqrlkbGzMhSLr7++/MTAw8"+
@@ -62,7 +62,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
                 backgroundRepeat: "no-repeat",
                 backgroundColor: "#e4e4e4"
             },
-            
+
             menu: {
                 backgroundColor: "#ffffff",
                 border: "1px solid #ccc",
@@ -70,7 +70,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
                 overflow: "hidden",
                 boxShadow: "0 1px 4px 0 rgba(0, 0, 0, 0.15)"
             },
-            
+
             option: {
                 color: "#363636",
                 whiteSpace: "nowrap",
@@ -79,7 +79,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
                 padding: "0px 4px",
                 cursor: "default"
             },
-            
+
             newOption: {
                 borderTop: "1px solid #ccc",
                 color: "#363636",
@@ -91,21 +91,21 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             }
         }
     };
-    
-    
+
+
   //**************************************************************************
   //** Constructor
   //**************************************************************************
   /** Creates a new instance of this class. */
 
     var init = function(){
-        
+
         if (typeof parent === "string"){
             parent = document.getElementById(parent);
         }
         if (!parent) return;
-        
-        
+
+
       //Clone the config so we don't modify the original config object
         var clone = {};
         merge(clone, config);
@@ -113,7 +113,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
 
       //Merge clone with default config
         merge(clone, defaultConfig);
-        config = clone;     
+        config = clone;
 
 
       //Create main div
@@ -122,17 +122,17 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         mainDiv.style.width = config.style.width;
         parent.appendChild(mainDiv);
         me.el = mainDiv;
-        
-        
+
+
       //Create table with 2 columns
         var table = createTable();
         table.style.height = "";
-        var tbody = table.firstChild;       
+        var tbody = table.firstChild;
         var tr = document.createElement('tr');
-        tbody.appendChild(tr);        
+        tbody.appendChild(tr);
         mainDiv.appendChild(table);
-        
-        
+
+
       //Create input in the first column
         var td = document.createElement('td');
         td.style.width="100%";
@@ -142,13 +142,13 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         input.style.width="100%";
         td.appendChild(input);
         tr.appendChild(td);
-        
+
         input.onkeydown = function(e){
-            if (e.keyCode===9){ 
+            if (e.keyCode===9){
                 e.preventDefault();
             }
         };
-        
+
         input.onkeyup = function(e){
             if (e.keyCode===9){ //tab
                 var d;
@@ -167,9 +167,9 @@ javaxt.dhtml.ComboBox = function(parent, config) {
                 me.filter();
             }
         };
-        
+
         input.oninput = function(){
-            
+
             var foundMatch = false;
             var filter = input.value.replace(/^\s*/, "").replace(/\s*$/, "").toLowerCase();
             for (var i=0; i<menuOptions.childNodes.length; i++){
@@ -186,7 +186,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         };
         input.onpaste = input.oninput;
         input.onpropertychange = input.oninput;
-        
+
         if (config.showMenuOnFocus){
             input.onclick = function(){
                 me.showMenu(true);
@@ -214,7 +214,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             }
         };
 
-        
+
 
       //Create menu
         var div = document.createElement('div');
@@ -232,11 +232,11 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         menuDiv.style.zIndex = 1;
         menuDiv.style.boxSizing = "border-box";
         div.appendChild(menuDiv);
-        
 
-        
+
+
         if (config.addNewOption===true){
-            
+
             var menuTable = createTable();
             menuTable.style.height = "";
             tr = document.createElement("tr");
@@ -258,13 +258,13 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             innerDiv.style.overflowX = 'hidden';
             innerDiv.style.overflowY = 'hidden';
             outerDiv.appendChild(innerDiv);
-            menuOptions = innerDiv;            
-            
+            menuOptions = innerDiv;
+
             tr = document.createElement("tr");
             menuTable.firstChild.appendChild(tr);
             td = document.createElement("td");
             tr.appendChild(td);
-            
+
             newOption = document.createElement('div');
             setStyle(newOption, "newOption");
             newOption.innerHTML = config.addNewOptionText;
@@ -275,7 +275,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             };
             newOption.onclick = selectNewOption;
             newOption.onkeydown = function(e){
-                if (e.keyCode===9){ 
+                if (e.keyCode===9){
                     e.preventDefault();
                 }
             };
@@ -291,16 +291,16 @@ javaxt.dhtml.ComboBox = function(parent, config) {
                             previousSibling = div;
                             break;
                         }
-                    }                     
+                    }
                     if (previousSibling) previousSibling.focus();
                 }
             };
 
             newOption.onselectstart = function () {return false;};
             newOption.onmousedown = function () {return false;};
-                    
+
             td.appendChild(newOption);
-            
+
             menuDiv.appendChild(menuTable);
         }
         else{
@@ -308,9 +308,9 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             menuDiv.style.overflowY = 'hidden';
             menuOptions = menuDiv;
         }
-        
-        
-        
+
+
+
 
       //Add event listener to hide menu if the client clicks outside of the menu div
         var hideMenu = function(e){
@@ -320,7 +320,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         };
         if (document.addEventListener) { // For all major browsers, except IE 8 and earlier
             document.addEventListener("click", hideMenu);
-        } 
+        }
         else if (document.attachEvent) { // For IE 8 and earlier versions
             document.attachEvent("onclick", hideMenu);
         }
@@ -338,17 +338,17 @@ javaxt.dhtml.ComboBox = function(parent, config) {
   //**************************************************************************
   //** setValue
   //**************************************************************************
-  /** Used to set the value for the input. 
+  /** Used to set the value for the input.
    */
     this.setValue = function(val){
-        
+
         if (val==null || val=="") {
             input.value = "";
             input.data = null;
             return;
         };
-        
-        
+
+
       //Try to match the val to one of the menu items using the menu data
         for (var i=0; i<menuOptions.childNodes.length; i++){
             var div = menuOptions.childNodes[i];
@@ -369,7 +369,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             }
         }
 
-        
+
         //input.value = getText(val);
         //input.data = val;
     };
@@ -405,7 +405,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         for (var i=0; i<menuOptions.childNodes.length; i++){
             var div = menuOptions.childNodes[i];
             arr.push({
-                text: div.innerHTML, 
+                text: div.innerHTML,
                 value: div.value
             });
         }
@@ -444,11 +444,11 @@ javaxt.dhtml.ComboBox = function(parent, config) {
   //**************************************************************************
   //** onAddNewOption
   //**************************************************************************
-  /** Called when a user clicks on the new menu option 
+  /** Called when a user clicks on the new menu option
    */
     this.onAddNewOption = function(){};
-    
-    
+
+
   //**************************************************************************
   //** onAddNewOption
   //**************************************************************************
@@ -461,29 +461,29 @@ javaxt.dhtml.ComboBox = function(parent, config) {
   //** filter
   //**************************************************************************
     this.filter = function(){
-        
+
       //Show menu
         me.showMenu();
 
       //Get input value
         var filter = input.value.replace(/^\s*/, "").replace(/\s*$/, "").toLowerCase();
-        
+
       //Filter menu items
         var numVisibleItems = 0;
         var h = 0;
         for (var i=0; i<menuOptions.childNodes.length; i++){
             var div = menuOptions.childNodes[i];
-            
+
             if (div.innerHTML.toLowerCase().indexOf(filter) === 0) {
                 div.style.display = "";
                 numVisibleItems++;
                 h = Math.max(div.offsetHeight, h);
-            } 
+            }
             else {
                 div.style.display = "none";
             }
         }
-        
+
       //Resize menu
         resizeMenu(numVisibleItems, h);
     };
@@ -501,7 +501,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         removeOverflow();
         menuDiv.style.height = '';
     };
-    
+
 
   //**************************************************************************
   //** showMenu
@@ -510,18 +510,18 @@ javaxt.dhtml.ComboBox = function(parent, config) {
    *  @param removeFilter If true, expand the list and view all the options.
    */
     this.showMenu = function(removeFilter){
-        
+
         if (menuDiv.style.visibility === "hidden"){
-            
-            
+
+
           //Unhide all the options as needed
             if (removeFilter===true){
                 for (var i=0; i<menuOptions.childNodes.length; i++){
                     menuOptions.childNodes[i].style.display = '';
                 }
             }
-            
-            
+
+
           //Check to see if the menu has anything to display
             var numVisibleItems = 0;
             var h = 0;
@@ -532,24 +532,24 @@ javaxt.dhtml.ComboBox = function(parent, config) {
                     h = Math.max(div.offsetHeight, h);
                 }
             }
-            if (config.addNewOption===true){ 
+            if (config.addNewOption===true){
                 numVisibleItems++;
                 h = Math.max(newOption.offsetHeight, h);
             }
-            
-            
+
+
             if (numVisibleItems>0){
-                
+
               //Update menu size
                 resizeMenu(numVisibleItems, h);
-                
+
 
               //Show the menu
                 menuDiv.style.visibility = '';
-            
+
 
               //Hide bottom border
-                input.style.borderBottomColor = 
+                input.style.borderBottomColor =
                 button.style.borderBottomColor = "rgba(0,0,0,0)";
             }
         }
@@ -560,7 +560,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
   //** hideMenu
   //**************************************************************************
     this.hideMenu = function(){
-        
+
         if (menuDiv.style.visibility !== "hidden"){
             input.style.borderBottomColor =
             button.style.borderBottomColor = '';
@@ -582,10 +582,10 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             if (numVisibleItems>config.maxVisibleRows){
                 addOverflow();
                 var height = config.maxVisibleRows*h;
-                if (newOption){ 
+                if (newOption){
                     menuDiv.style.height = height + "px";
                     height = height-newOption.offsetHeight;
-                    menuOptions.parentNode.style.height = 
+                    menuOptions.parentNode.style.height =
                     menuOptions.style.height = height + "px";
                 }
                 else{
@@ -595,13 +595,13 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             }
             else{
                 removeOverflow();
-                menuOptions.parentNode.style.height = 
+                menuOptions.parentNode.style.height =
                 menuOptions.style.height =
                 menuDiv.style.height = '';
             }
         }
     };
-    
+
     var addOverflow = function(){
         menuOptions.style.position = "absolute";
         if (config.scrollbar===true){
@@ -611,7 +611,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             menuOptions.style.overflowY = 'hidden';
         }
     };
-    
+
     var removeOverflow = function(){
         if (config.addNewOption===true){ //remove overflow if we have a table menu
             menuOptions.style.position = "relative";
@@ -626,7 +626,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
   /** Scrolls menu to the input value
    */
     var scroll = function(){
-        
+
       //Scroll to a menu item that matches the text in the input
         for (var i=0; i<menuOptions.childNodes.length; i++){
             var div = menuOptions.childNodes[i];
@@ -636,7 +636,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
                 return;
             }
         }
-        
+
       //If we're still here, we didn't find an exact match so we'll do a fuzzy search
         var a = input.value;
         var div = null;
@@ -655,15 +655,15 @@ javaxt.dhtml.ComboBox = function(parent, config) {
                 max = x;
             }
         }
-        
+
         if (div){
             menuOptions.scrollTop = div.offsetTop;
             div.focus();
             return;
         }
     };
-    
-    
+
+
   //**************************************************************************
   //** add
   //**************************************************************************
@@ -681,7 +681,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             select(this);
         };
         div.onkeydown = function(e){
-            if (e.keyCode===9){ 
+            if (e.keyCode===9){
                 e.preventDefault();
             }
         };
@@ -701,16 +701,16 @@ javaxt.dhtml.ComboBox = function(parent, config) {
                 }
             }
         };
-        
-        
+
+
         div.onselectstart = function () {return false;};
         div.onmousedown = function () {return false;};
-        
+
         div.oncontextmenu = function(){
             var el = this;
             me.onMenuContext(el.innerHTML, el.value, el);
         };
-        
+
         menuOptions.appendChild(div);
     };
 
@@ -732,8 +732,8 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             menuOptions.removeChild(arr[i]);
         }
     };
-    
-    
+
+
   //**************************************************************************
   //** removeAll
   //**************************************************************************
@@ -748,7 +748,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
   //**************************************************************************
   //** getText
   //**************************************************************************
-  /** Formats a given item into a string that can be rendered in the input or 
+  /** Formats a given item into a string that can be rendered in the input or
    *  as an entry in the menu.
    */
     var getText = function(name){
@@ -773,25 +773,25 @@ javaxt.dhtml.ComboBox = function(parent, config) {
   /** Used to select a given div in the menu.
    */
     var select = function(div, _focusNext){
-        
+
         if (div){
-            
+
           //Set input value and hide menu
             input.value = div.innerHTML;
             input.data = div.value;
             me.hideMenu();
             me.onChange(input.value, input.data);
-            
-            
+
+
           //Focus on the next input in the form
             if (_focusNext){
                 focusNext();
             }
-            
+
         }
     };
-    
-    
+
+
   //**************************************************************************
   //** focusNext
   //**************************************************************************
@@ -827,74 +827,16 @@ javaxt.dhtml.ComboBox = function(parent, config) {
 
 
   //**************************************************************************
-  //** setStyle
+  //** Utils
   //**************************************************************************
-  /** Used to set the style for a given element. Styles are defined via a CSS 
-   *  class name or inline using the config.style definitions. 
-   */
+    var merge = javaxt.dhtml.utils.merge;
+    var createTable = javaxt.dhtml.utils.createTable;
     var setStyle = function(el, style){
-        
         style = config.style[style];
         if (style===null) return;
-        
-        el.style = '';
-        el.removeAttribute("style");
-        
-        
-        if (typeof style === 'string' || style instanceof String){
-            el.className = style;
-        }
-        else{    
-            for (var key in style){
-                var val = style[key];
-                if (key==="content"){
-                    el.innerHTML = val;
-                }
-                else{
-                    el.style[key] = val;
-                }
-            }
-        }
+        javaxt.dhtml.utils.setStyle(el, style);
     };
 
 
-  //**************************************************************************
-  //** createTable
-  //**************************************************************************
-    var createTable = function(){
-        var table = document.createElement('table');
-        table.cellSpacing = 0;
-        table.cellPadding = 0;
-        table.style.width = "100%";
-        table.style.height = "100%";
-        table.style.margin = 0;
-        table.style.padding = 0;
-        table.style.borderCollapse = "collapse";
-        var tbody = document.createElement('tbody');
-        table.appendChild(tbody);
-        return table;
-    };
-
-
-  //**************************************************************************
-  //** merge
-  //**************************************************************************
-  /** Used to merge properties from one json object into another. Credit:
-   *  https://github.com/stevenleadbeater/JSONT/blob/master/JSONT.js
-   */
-    var merge = function(settings, defaults) {
-        for (var p in defaults) {
-            if ( defaults.hasOwnProperty(p) && typeof settings[p] !== "undefined" ) {
-                if (p!=0) //<--Added this as a bug fix
-                merge(settings[p], defaults[p]);
-            }
-            else {
-                settings[p] = defaults[p];
-            }
-        }
-    };
-    
-
-    
     init();
 };

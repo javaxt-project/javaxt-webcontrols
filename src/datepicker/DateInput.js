@@ -23,29 +23,30 @@ javaxt.dhtml.DateInput = function(parent, config) {
         label: false,
         date: null,
         showMenuOnFocus: false,
-        
+
         style: {
-            
+
             input: {
                 color: "#363636",
                 fontSize: "14px",
-                height: "22px",
-                lineHeight: "22px",
+                height: "24px",
+                lineHeight: "24px",
                 padding: "0px 4px",
                 verticalAlign: "middle",
                 transition: "border 0.2s linear 0s, box-shadow 0.2s linear 0s",
                 backgroundColor: "#fff",
                 border: "1px solid #ccc",
+                borderRight: "0 none",
                 boxShadow: "0 1px 1px rgba(0, 0, 0, 0.075) inset"
             },
-            
+
             button: {
                 color: "#363636",
                 height: "24px",
                 width: "24px",
                 border: "1px solid #b4b4b4",
                 cursor: "pointer",
-                
+
                 backgroundImage: "url(data:image/png;base64,iVBORw0KGgoAAAANSUh"+
                 "EUgAAABAAAAAQCAYAAAAf8/9hAAAAlklEQVQ4jWNgGAUowNvbW9PBwUEAjxJGHx"+
                 "8f/dDQUB4MGV9f3+TAwMD/AQEB97y8vOSxafb392+BqrlkbGzMhSLr7++/MTAw8"+
@@ -55,31 +56,31 @@ javaxt.dhtml.DateInput = function(parent, config) {
                 backgroundRepeat: "no-repeat",
                 backgroundColor: "#e4e4e4"
             },
-            
+
             datePicker: {
-                
+
             }
         },
-        
+
         formatDate: function(date){
             return (date.getMonth()+1) + "/" + date.getDate() + "/" + date.getFullYear();
         }
     };
-    
-    
+
+
   //**************************************************************************
   //** Constructor
   //**************************************************************************
   /** Creates a new instance of this class. */
 
     var init = function(){
-        
+
         if (typeof parent === "string"){
             parent = document.getElementById(parent);
         }
         if (!parent) return;
-        
-        
+
+
       //Clone the config so we don't modify the original config object
         var clone = {};
         merge(clone, config);
@@ -87,29 +88,24 @@ javaxt.dhtml.DateInput = function(parent, config) {
 
       //Merge clone with default config
         merge(clone, defaultConfig);
-        config = clone;     
-        
-        
+        config = clone;
+
+
         formatDate = config.formatDate;
-        
+
 
       //Create main div
         var mainDiv = document.createElement("div");
         mainDiv.setAttribute("desc", me.className);
-        
-        
+
+
       //Create table with 2 columns
-        var table = document.createElement('table');
-        table.cellSpacing = 0;
-        table.cellPadding = 0;
-        table.style.borderCollapse = "collapse";
-        table.style.width="100%";
-        var tbody = document.createElement('tbody');
-        table.appendChild(tbody);        
+        var table = createTable();
+        var tbody = table.firstChild;
         var tr = document.createElement('tr');
-        tbody.appendChild(tr);        
-        
-        
+        tbody.appendChild(tr);
+
+
       //Create input in the first column
         var td = document.createElement('td');
         td.style.width="100%";
@@ -120,10 +116,10 @@ javaxt.dhtml.DateInput = function(parent, config) {
         input.style.width="100%";
         td.appendChild(input);
         tr.appendChild(td);
-        
+
         input.onkeydown = function(e){
-            if (e.keyCode===9){ 
-                e.preventDefault(); 
+            if (e.keyCode===9){
+                e.preventDefault();
             }
         };
         input.onkeyup = function(e){
@@ -135,13 +131,13 @@ javaxt.dhtml.DateInput = function(parent, config) {
                 me.showMenu();
             }
         };
-        
+
         if (config.showMenuOnFocus){
             input.onfocus = function(){
                 me.showMenu();
             };
         }
-        
+
 
 
 
@@ -152,10 +148,10 @@ javaxt.dhtml.DateInput = function(parent, config) {
         setStyle(button, "button");
         td.appendChild(button);
         tr.appendChild(td);
-        
+
 
         button.onclick = function(){
-            
+
             if (menu){
                 if (menu.style.visibility === "hidden"){
                     me.showMenu();
@@ -168,9 +164,9 @@ javaxt.dhtml.DateInput = function(parent, config) {
                 me.showMenu();
             }
         };
-        
-        
-        
+
+
+
         mainDiv.appendChild(table);
         parent.appendChild(mainDiv);
         me.el = mainDiv;
@@ -212,7 +208,7 @@ javaxt.dhtml.DateInput = function(parent, config) {
             };
             if (document.addEventListener) { // For all major browsers, except IE 8 and earlier
                 document.addEventListener("click", hideMenu);
-            } 
+            }
             else if (document.attachEvent) { // For IE 8 and earlier versions
                 document.attachEvent("onclick", hideMenu);
             }
@@ -262,8 +258,8 @@ javaxt.dhtml.DateInput = function(parent, config) {
 
         if (date) input.value = formatDate(date);
     };
-    
-    
+
+
   //**************************************************************************
   //** getDate
   //**************************************************************************
@@ -273,8 +269,8 @@ javaxt.dhtml.DateInput = function(parent, config) {
         return date;
     };
 
-    
-    
+
+
   //**************************************************************************
   //** focusNext
   //**************************************************************************
@@ -291,59 +287,19 @@ javaxt.dhtml.DateInput = function(parent, config) {
             }
         }
     };
-    
-    
+
+
   //**************************************************************************
-  //** setStyle
+  //** Utils
   //**************************************************************************
-  /** Used to set the style for a given element. Styles are defined via a CSS 
-   *  class name or inline using the config.style definitions. 
-   */
+    var merge = javaxt.dhtml.utils.merge;
+    var createTable = javaxt.dhtml.utils.createTable;
     var setStyle = function(el, style){
-        
         style = config.style[style];
         if (style===null) return;
-        
-        el.style = '';
-        el.removeAttribute("style");
-        
-        
-        if (typeof style === 'string' || style instanceof String){
-            el.className = style;
-        }
-        else{    
-            for (var key in style){
-                var val = style[key];
-                if (key==="content"){
-                    el.innerHTML = val;
-                }
-                else{
-                    el.style[key] = val;
-                }
-            }
-        }
+        javaxt.dhtml.utils.setStyle(el, style);
     };
-    
 
-  //**************************************************************************
-  //** merge
-  //**************************************************************************
-  /** Used to merge properties from one json object into another. Credit:
-   *  https://github.com/stevenleadbeater/JSONT/blob/master/JSONT.js
-   */
-    var merge = function(settings, defaults) {
-        for (var p in defaults) {
-            if ( defaults.hasOwnProperty(p) && typeof settings[p] !== "undefined" ) {
-                if (p!=0) //<--Added this as a bug fix
-                merge(settings[p], defaults[p]);
-            }
-            else {
-                settings[p] = defaults[p];
-            }
-        }
-    };
-    
 
-    
     init();
 };

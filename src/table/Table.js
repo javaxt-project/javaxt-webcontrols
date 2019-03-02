@@ -78,7 +78,7 @@ javaxt.dhtml.Table = function(parent, config) {
             }
         }
     };
-   
+
 
   //**************************************************************************
   //** Constructor
@@ -947,8 +947,8 @@ javaxt.dhtml.Table = function(parent, config) {
             cols[idx].style.display = "";
         }
     };
-    
-    
+
+
   //**************************************************************************
   //** hideColumn
   //**************************************************************************
@@ -962,13 +962,13 @@ javaxt.dhtml.Table = function(parent, config) {
         rows = rows.concat(nodeListToArray(body.childNodes));
         for (var i=0; i<rows.length; i++){
             var cols = rows[i].childNodes;
-            
+
             cols[idx].style.visibility = "hidden";
             cols[idx].style.display = "none";
         }
     };
-    
-    
+
+
   //**************************************************************************
   //** nodeListToArray
   //**************************************************************************
@@ -1015,17 +1015,8 @@ javaxt.dhtml.Table = function(parent, config) {
   //** createTable
   //**************************************************************************
     var createTable = function(){
-        var table = document.createElement('table');
-        table.style.width = "100%";
-        table.style.height = "100%";
-        table.style.margin = 0;
-        table.style.padding = 0;
-        table.cellSpacing = 0;
-        table.cellPadding = 0;
-        table.style.borderCollapse = "collapse";
-        var tbody = document.createElement('tbody');
-        table.appendChild(tbody);
-        return tbody;
+        var table = javaxt.dhtml.utils.createTable();
+        return table.firstChild;
     };
 
 
@@ -1036,107 +1027,15 @@ javaxt.dhtml.Table = function(parent, config) {
    *  class name or inline using the config.style definitions.
    */
     var setStyle = function(el, style){
-
         style = config.style[style];
         if (style===null) return;
-
-        el.style = '';
-        el.removeAttribute("style");
-
-
-        if (typeof style === 'string' || style instanceof String){
-            el.className = style;
-        }
-        else{
-            for (var key in style){
-                var val = style[key];
-                if (key==="content"){
-                    el.innerHTML = val;
-                }
-                else{
-                    el.style[key] = val;
-                }
-            }
-        }
+        javaxt.dhtml.utils.setStyle(el, style);
     };
 
 
-  //**************************************************************************
-  //** addResizeListener
-  //**************************************************************************
-  /** Used to watch for resize events for a given element. Credit:
-   *  http://www.backalleycoder.com/2013/03/18/cross-browser-event-based-element-resize-detection/
-   */
-    var addResizeListener = function(element, fn){
 
-        var attachEvent = document.attachEvent;
-        var isIE = navigator.userAgent.match(/Trident/);
-
-        var requestFrame = (function(){
-            var raf = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame ||
-            function(fn){ return window.setTimeout(fn, 20); };
-            return function(fn){ return raf(fn); };
-        })();
-
-        var cancelFrame = (function(){
-            var cancel = window.cancelAnimationFrame || window.mozCancelAnimationFrame || window.webkitCancelAnimationFrame ||
-            window.clearTimeout;
-            return function(id){ return cancel(id); };
-        })();
-
-        function resizeListener(e, fn){
-            var win = e.target || e.srcElement;
-            if (win.__resizeRAF__) cancelFrame(win.__resizeRAF__);
-            win.__resizeRAF__ = requestFrame(function(){
-                var trigger = win.__resizeTrigger__;
-                fn.call(trigger, e);
-            });
-        };
-
-
-        if (attachEvent) {
-            element.__resizeTrigger__ = element;
-            element.attachEvent('onresize', function(e){
-                resizeListener(e, fn);
-            });
-        }
-        else {
-            if (getComputedStyle(element).position == 'static') element.style.position = 'relative';
-            var obj = element.__resizeTrigger__ = document.createElement('object');
-            obj.setAttribute('style', 'display: block; position: absolute; top: 0; left: 0; height: 100%; width: 100%; overflow: hidden; pointer-events: none; z-index: -1;');
-            obj.__resizeElement__ = element;
-            obj.onload = function(e){
-                this.contentDocument.defaultView.__resizeTrigger__ = this.__resizeElement__;
-                this.contentDocument.defaultView.addEventListener('resize', function(e){
-                    resizeListener(e, fn);
-                });
-            };
-            obj.type = 'text/html';
-            if (isIE) element.appendChild(obj);
-            obj.data = 'about:blank';
-            if (!isIE) element.appendChild(obj);
-        }
-
-    };
-
-
-  //**************************************************************************
-  //** merge
-  //**************************************************************************
-  /** Used to merge properties from one json object into another. Credit:
-   *  https://github.com/stevenleadbeater/JSONT/blob/master/JSONT.js
-   */
-    var merge = function(settings, defaults) {
-        for (var p in defaults) {
-            if ( defaults.hasOwnProperty(p) && typeof settings[p] !== "undefined" ) {
-                if (p!=0) //<--Added this as a bug fix
-                merge(settings[p], defaults[p]);
-            }
-            else {
-                settings[p] = defaults[p];
-            }
-        }
-    };
+    var merge = javaxt.dhtml.utils.merge;
+    var addResizeListener = javaxt.dhtml.utils.addResizeListener;
 
     init();
 };

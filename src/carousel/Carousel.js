@@ -11,16 +11,16 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 
 javaxt.dhtml.Carousel = function(parent, config) {
     this.className = "javaxt.dhtml.Carousel";
-    
+
     var me = this;
     var outerDiv, innerDiv;
     var currPanel;
     var sliding = false;
     var noselect;
-    
-    
+
+
     var defaultConfig = {
-        
+
         animate: true,
         animationSteps: 250.0, //time in milliseconds
         transitionEffect: "linear",
@@ -30,22 +30,22 @@ javaxt.dhtml.Carousel = function(parent, config) {
         drag: true,
         padding: 0
     };
-    
-    
-    
+
+
+
   //**************************************************************************
   //** Constructor
   //**************************************************************************
   /** Creates a new instance of this class. */
-    
+
     var init = function(){
-        
+
         if (typeof parent === "string"){
             parent = document.getElementById(parent);
         }
         if (!parent) return;
-        
-        
+
+
       //Clone the config so we don't modify the original config object
         var clone = {};
         merge(clone, config);
@@ -53,9 +53,9 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
       //Merge clone with default config
         merge(clone, defaultConfig);
-        config = clone;  
-        
-        
+        config = clone;
+
+
       //Remove anything found inside the parent
         var items = [];
         if (config.items){
@@ -73,8 +73,8 @@ javaxt.dhtml.Carousel = function(parent, config) {
             }
             parent.innerHTML = "";
         }
-        
-        
+
+
       //Create overflow divs
         outerDiv = document.createElement("div");
         outerDiv.setAttribute("desc", me.className);
@@ -83,8 +83,8 @@ javaxt.dhtml.Carousel = function(parent, config) {
         outerDiv.style.height = "100%";
         parent.appendChild(outerDiv);
         me.el = outerDiv;
-        
-        
+
+
         var overflowDiv = document.createElement("div");
         overflowDiv.style.position = "absolute";
         overflowDiv.style.overflow = "hidden";
@@ -96,21 +96,21 @@ javaxt.dhtml.Carousel = function(parent, config) {
             overflowDiv.style.left = -padding + "px";
         }
         outerDiv.appendChild(overflowDiv);
-        
-        
+
+
       //Create main div used to store panels. This div will move horizontally
         innerDiv = document.createElement("div");
         innerDiv.style.position = "absolute";
         innerDiv.style.left = "0px";
         innerDiv.style.height = "100%";
         overflowDiv.appendChild(innerDiv);
-        
-        
+
+
         if (config.drag===true){
             addNoSelectRule();
             initDrag(innerDiv);
         }
-        
+
         /*
 
       //Create logic to process touch events
@@ -151,19 +151,19 @@ javaxt.dhtml.Carousel = function(parent, config) {
             }
         };
         */
-        
-        
+
+
         for (var i=0; i<items.length; i++){
             me.add(items[i]);
         }
-        
-        
+
+
       //Watch for resize events
         addResizeListener(parent, function(){
             me.resize();
         });
-        
-        
+
+
 
       //Check whether the carousel has been added to the DOM
         var w = outerDiv.offsetWidth;
@@ -187,9 +187,9 @@ javaxt.dhtml.Carousel = function(parent, config) {
             onRender();
         }
 
-        
+
     };
-    
+
 
   //**************************************************************************
   //** onRender
@@ -197,7 +197,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
     var onRender = function(){
         me.resize();
     };
-    
+
 
   //**************************************************************************
   //** show
@@ -215,15 +215,15 @@ javaxt.dhtml.Carousel = function(parent, config) {
         me.el.style.visibility = 'hidden';
         me.el.style.display = 'none';
     };
-    
-    
+
+
   //**************************************************************************
   //** add
   //**************************************************************************
-  /**  Used to add a panel to the carousel. 
+  /**  Used to add a panel to the carousel.
    */
     this.add = function(el){
-        
+
       //Get width of the innerDiv before adding a new panel
         var w = parseInt(innerDiv.style.width);
         if (isNaN(w)) w = 0;
@@ -252,18 +252,18 @@ javaxt.dhtml.Carousel = function(parent, config) {
             overflowDiv.style.width=outerDiv.offsetWidth+"px";
         }
         div.appendChild(overflowDiv);
-        
-        
+
+
       //Add element to the overflow div
         overflowDiv.appendChild(el);
-        
-        
+
+
       //Update width
         innerDiv.style.width = (w+div.offsetWidth)+"px";
-        
+
         if (!currPanel) currPanel = div;
-        
-        
+
+
       //Resize all the divs (bug fix for Chrome)
         me.resize();
     };
@@ -281,12 +281,12 @@ javaxt.dhtml.Carousel = function(parent, config) {
             width += (padding*2);
         }
 
-        
+
       //Update panel container
         var numPanels = innerDiv.childNodes.length;
         innerDiv.style.width = (width*numPanels) + "px";
-        
-        
+
+
       //Update individual panels
         var currPanelIdx = 0;
         for (var i=0; i<numPanels; i++){
@@ -296,17 +296,17 @@ javaxt.dhtml.Carousel = function(parent, config) {
                 var overflowDiv = innerDiv.childNodes[i].childNodes[0];
                 overflowDiv.style.width=outerDiv.offsetWidth+"px";
             }
-            
+
             if (innerDiv.childNodes[i]==currPanel){
                 currPanelIdx = i;
             }
         }
-        
-        
+
+
       //Update position
         innerDiv.style.left = -(currPanelIdx*width)+"px";
     };
-    
+
 
   //**************************************************************************
   //** slide
@@ -314,26 +314,26 @@ javaxt.dhtml.Carousel = function(parent, config) {
     var slide = function(start, end, lastTick, timeLeft, callback){
 
         if (config.fx){
-            
-            
-            setTimeout(function(){ 
+
+
+            setTimeout(function(){
 
                 config.fx.setTransition(innerDiv, config.transitionEffect, config.animationSteps);
                 innerDiv.style.left = end+"px";
                 setTimeout(function(){
-                    
-                    
+
+
                     innerDiv.style.WebkitTransition =
                     innerDiv.style.MozTransition =
                     innerDiv.style.MsTransition =
                     innerDiv.style.OTransition =
                     innerDiv.style.transition = "";
-                    
+
                     if (callback) callback.apply(me, []);
-                    
-                }, config.animationSteps+50); 
+
+                }, config.animationSteps+50);
             }, 50);
-            
+
         }
         else{
 
@@ -342,7 +342,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
             var elapsedTicks = curTick - lastTick;
 
 
-          //If the animation is complete, ensure that the panel is completely visible 
+          //If the animation is complete, ensure that the panel is completely visible
             if (timeLeft <= elapsedTicks){
                 innerDiv.style.left = end+"px";
                 if (callback) callback.apply(me, []);
@@ -369,7 +369,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
   //**************************************************************************
   //** next
   //**************************************************************************
-  /** Used to make the next panel visible. In a horizontal configuration, the 
+  /** Used to make the next panel visible. In a horizontal configuration, the
    *  active panel will slide left.
    */
     this.next = function(){
@@ -382,9 +382,9 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
 
         var next = function(callback){
-            
+
             var end = start-w;
-            
+
             if (config.animate===true){
                 slide(start, end, new Date().getTime(), config.animationSteps, callback);
             }
@@ -397,9 +397,9 @@ javaxt.dhtml.Carousel = function(parent, config) {
         var nextDiv = currPanel.nextSibling;
         if (nextDiv) {
             me.beforeChange(currPanel.childNodes[0].childNodes[0], nextDiv.childNodes[0].childNodes[0]);
-            
+
             w = nextDiv.offsetWidth;
-            
+
             next(function(){
                 me.onChange(nextDiv.childNodes[0].childNodes[0], currPanel.childNodes[0].childNodes[0]);
                 currPanel = nextDiv;
@@ -408,20 +408,20 @@ javaxt.dhtml.Carousel = function(parent, config) {
         }
         else{
             if (config.loop===true){
- 
+
                 var firstDiv = innerDiv.childNodes[0];
                 w = firstDiv.offsetWidth;
                 var clone = firstDiv.cloneNode(true);
                 innerDiv.style.width = (innerDiv.offsetWidth+w)+"px";
                 innerDiv.appendChild(clone);
                 me.beforeChange(currPanel.childNodes[0].childNodes[0], clone.childNodes[0].childNodes[0]);
-                
+
                 next(function(){
 
                     innerDiv.style.left = start + "px";
                     innerDiv.removeChild(firstDiv);
                     innerDiv.style.width = (innerDiv.offsetWidth-w)+"px";
-                    
+
                     me.onChange(clone.childNodes[0].childNodes[0], currPanel.childNodes[0].childNodes[0]);
                     currPanel = clone;
                     sliding = false;
@@ -430,24 +430,24 @@ javaxt.dhtml.Carousel = function(parent, config) {
             }
         }
     };
-    
-    
+
+
   //**************************************************************************
   //** back
   //**************************************************************************
-  /** Used to make the previous panel visible. In a horizontal configuration,  
+  /** Used to make the previous panel visible. In a horizontal configuration,
    *  the active panel will slide right.
    */
     this.back = function(){
-        
+
         if (sliding) return;
         sliding = true;
 
         var start, end, w;
 
-        
+
         var back = function(callback){
-            
+
             if (config.animate===true){
                 slide(start, end, new Date().getTime(), config.animationSteps, callback);
             }
@@ -456,16 +456,16 @@ javaxt.dhtml.Carousel = function(parent, config) {
                 if (callback) callback.apply(me, []);
             }
         };
-        
-        
+
+
         var previousDiv = currPanel.previousSibling;
         if (previousDiv){
             me.beforeChange(currPanel.childNodes[0].childNodes[0], previousDiv.childNodes[0].childNodes[0]);
-            
+
             w = previousDiv.offsetWidth;
             start = parseFloat(innerDiv.style.left);
             end = start + w;
-            
+
             back(function(){
                 me.onChange(previousDiv.childNodes[0].childNodes[0], currPanel.childNodes[0].childNodes[0]);
                 currPanel = previousDiv;
@@ -474,36 +474,36 @@ javaxt.dhtml.Carousel = function(parent, config) {
         }
         else{
             if (config.loop===true){
-                
+
                 var lastDiv = innerDiv.childNodes[innerDiv.childNodes.length-1];
                 w = lastDiv.offsetWidth;
                 var clone = lastDiv.cloneNode(true);
                 innerDiv.style.width = (innerDiv.offsetWidth+w)+"px";
                 innerDiv.insertBefore(clone, innerDiv.firstChild);
                 me.beforeChange(currPanel.childNodes[0].childNodes[0], clone.childNodes[0].childNodes[0]);
-                
+
                 start = -w;
                 end = 0;
 
-                
+
                 innerDiv.style.left = start + "px";
-                
+
                 back(function(){
-                    
+
                     innerDiv.removeChild(lastDiv);
                     innerDiv.style.width = (innerDiv.offsetWidth-w)+"px";
-                    
+
                     me.onChange(clone.childNodes[0].childNodes[0], currPanel.childNodes[0].childNodes[0]);
                     currPanel = clone;
                     sliding = false;
-                    
+
                 });
-                
+
             }
         }
     };
-    
-    
+
+
   //**************************************************************************
   //** onChange
   //**************************************************************************
@@ -522,12 +522,12 @@ javaxt.dhtml.Carousel = function(parent, config) {
    *  @param prevPanel Content of the next active panel
    */
     this.beforeChange = function(currPanel, nextPanel){};
-    
-    
+
+
   //**************************************************************************
   //** getPanels
   //**************************************************************************
-  /** Returns an array with information for each panel in the carousel 
+  /** Returns an array with information for each panel in the carousel
    *  including whether the panel is visible and the panel content.
    */
     this.getPanels = function(){
@@ -543,18 +543,18 @@ javaxt.dhtml.Carousel = function(parent, config) {
         }
         return arr;
     };
-        
-    
-    
+
+
+
   //**************************************************************************
   //** initDrag
   //**************************************************************************
     var initDrag = function(){
 
-        
+
       //This is how many milliseconds to wait before recognizing a hold
         var holdDelay = 50;
-        
+
         var startX, offsetX;
         var prevPanel;
 
@@ -563,41 +563,41 @@ javaxt.dhtml.Carousel = function(parent, config) {
             startX = e.clientX;
             offsetX = parseInt(innerDiv.style.left);
 
-                   
-            
+
+
           //Disable text selection in the entire document - very important!
             var body = document.getElementsByTagName('body')[0];
             if (!body.className.match(/(?:^|\s)javaxt-noselect(?!\S)/) ){
                 body.className += (body.className.length==0 ? "" : " ") + "javaxt-noselect";
-            } 
-            
-            
+            }
+
+
             prevPanel = currPanel;
             innerDiv.style.cursor = 'move';
         };
-        
-        
 
-      //Function called while the div is being dragged 
+
+
+      //Function called while the div is being dragged
         var onDrag = function(e){
             var x = e.clientX;
-            var d = startX-x; //If d is positive, client is sliding to the right. 
+            var d = startX-x; //If d is positive, client is sliding to the right.
                               //Otherwise, client is sliding to the left.
-            
-            
+
+
             var left = offsetX-d;
             innerDiv.style.left = left + 'px';
-            
-            if (left>0){ //dragged to the left beyond the first div 
-                
+
+            if (left>0){ //dragged to the left beyond the first div
+
                 if (config.loop===true){
-                    
+
                     var previousDiv = currPanel.previousSibling;
                     if (previousDiv){
-                        
+
                     }
                     else{
-                    
+
                       //Clone the last div and insert it to the left
                         var lastDiv = innerDiv.childNodes[innerDiv.childNodes.length-1];
                         var w = lastDiv.offsetWidth;
@@ -608,17 +608,17 @@ javaxt.dhtml.Carousel = function(parent, config) {
                         startX+=w;
                         currPanel = clone;
                     }
-                    
+
                 }
                 else{
                     //Prevent dragging any further to the right
                 }
-                
-                
+
+
             }
             else{
-                
-                
+
+
               //Compute max offset
                 var x = 0;
                 var lastDivWidth = 0;
@@ -627,16 +627,16 @@ javaxt.dhtml.Carousel = function(parent, config) {
                     x = x-w;
                     lastDivWidth = w;
                 }
-                
-                
+
+
                 //console.log(d + "   " + left);
                 //console.log(x);
-                
-                if ((left-lastDivWidth)<x){ //dragged to the right beyond the last div 
-                    
-                    
+
+                if ((left-lastDivWidth)<x){ //dragged to the right beyond the last div
+
+
                     if (config.loop===true){
-                     
+
                         var firstDiv = innerDiv.childNodes[0];
                         var w = firstDiv.offsetWidth;
                         var clone = firstDiv.cloneNode(true);
@@ -650,30 +650,30 @@ javaxt.dhtml.Carousel = function(parent, config) {
                         //Prevent dragging any further to the left
                     }
                 }
-                
-                
+
+
 
             }
         };
-        
-        
+
+
       //Function called when the user stops dragging the div
         var onDragEnd = function(){
-            
+
             var rect = _getRect(outerDiv);
             var minX = rect.x;
             var maxX = minX+rect.width;
             var minY = rect.y;
             var maxY = minY+rect.height;
-            
+
             var maxArea = 0;
             var visiblePanel = 0;
-            
+
             for (var i=0; i<innerDiv.childNodes.length; i++){
-                
+
                 var panel = innerDiv.childNodes[i];
                 var r1 = _getRect(panel);
-                
+
                 var left = r1.x;
                 var right = left + r1.width;
                 var top = r1.y;
@@ -687,17 +687,17 @@ javaxt.dhtml.Carousel = function(parent, config) {
                 var w = right-left;
                 var h = bottom-top;
                 var area = w*h;
-                
+
                 if (area>maxArea){
                     maxArea = area;
                     visiblePanel = i;
                 }
             }
-            
+
             var debug = "Snap to panel " + innerDiv.childNodes[visiblePanel].innerText;
             if (debug.length>60) debug = debug.substring(0, 60);
             //console.log(debug + " idx=" + visiblePanel);
-            
+
             var start = parseInt(innerDiv.style.left);
             var end = 0;
             for (var i=0; i<visiblePanel; i++){
@@ -705,20 +705,20 @@ javaxt.dhtml.Carousel = function(parent, config) {
             }
             end = -end;
             //innerDiv.style.left = end + "px";
-            
+
             var animationSteps = ((start-end)/config.animationSteps);
             if (animationSteps<0) animationSteps = -animationSteps;
             //console.log(start + "/" + end + " --> move " + (start-end) + "px in " + animationSteps + "ms");
-            
+
             slide(start, end, new Date().getTime(), 100, function(){
                 currPanel = innerDiv.childNodes[visiblePanel];
                 if (currPanel!=prevPanel){
                     me.onChange(currPanel.childNodes[0].childNodes[0], prevPanel.childNodes[0].childNodes[0]);
                 }
             });
-            
+
         };
-        
+
 
       //This timeout, started on mousedown, triggers the beginning of a hold
         var holdStarter = null;
@@ -736,7 +736,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
       //MouseDown
         innerDiv.onmousedown = function(e){
             if (sliding) return;
-            
+
             // Do not take any immediate action - just set the holdStarter
             // to wait for the predetermined delay, and then begin a hold
             holdStarter = setTimeout(function() {
@@ -745,19 +745,19 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
               //begin hold-only operation here, if desired
                 //console.log("Init Drag!");
-                
+
                 onDragStart(e);
                 if (document.addEventListener) { // For all major browsers, except IE 8 and earlier
                     document.addEventListener("mousemove", onDrag);
                     document.addEventListener("mouseup", onMouseUp);
-                } 
+                }
                 else if (document.attachEvent) { // For IE 8 and earlier versions
                     document.attachEvent("onmousemove", onDrag);
                     document.addEventListener("onmouseup", onMouseUp);
-                }             
+                }
 
             }, holdDelay);
-            
+
         };
 
 
@@ -771,12 +771,12 @@ javaxt.dhtml.Carousel = function(parent, config) {
           //holdStarter runs, then cancel the holdStarter and do the click
             if (holdStarter) {
                 clearTimeout(holdStarter);
-                
+
               //run click-only operation here
                 //console.log("Click!");
 
             }
-            
+
           //Otherwise, if the mouse was being held, end the hold
             else if (holdActive) {
                 holdActive = false;
@@ -792,7 +792,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
                 }
                 innerDiv.style.cursor = 'pointer';
                 onDragEnd();
-                
+
               //Remove the "javaxt-noselect" class
                 var body = document.getElementsByTagName('body')[0];
                 body.className = body.className.replace( /(?:^|\s)javaxt-noselect(?!\S)/g , '' );
@@ -807,228 +807,16 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
 
 
-  //**************************************************************************
-  //** addNoSelectRule
-  //**************************************************************************
-  /** Inserts the "javaxt-noselect" class into the document if it is not 
-   *  present.
-   */
+
+    var _getRect = javaxt.dhtml.utils.getRect;
+    var intersects = javaxt.dhtml.utils.intersects;
+    var merge = javaxt.dhtml.utils.merge;
+    var addResizeListener = javaxt.dhtml.utils.addResizeListener;
     var addNoSelectRule = function(){
         if (noselect===true) return;
-        noselect = hasStyleRule(".javaxt-noselect");
-        if (!noselect){
-            var head = document.head || document.getElementsByTagName('head')[0];
-            var sheet = document.createElement('style');
-            sheet.innerHTML = ".javaxt-noselect {\n";
-            var arr = ["-webkit-","-moz-","-o-","-ms-","-khtml-",""];
-            for (var i=0; i<arr.length; i++){
-                sheet.innerHTML += arr[i] + "user-select: none;\n";
-            }                    
-            sheet.innerHTML += "}";
-            head.appendChild(sheet);
-            noselect = true;
-        }
+        javaxt.dhtml.utils.addNoSelectRule();
+        noselect = true;
     };
-
-
-  //**************************************************************************
-  //** hasStyleRule
-  //**************************************************************************
-  /** Returns true if there is a style rule defined for a given selector.
-   *  @param selector CSS selector (e.g. ".deleteIcon", "h2", "#mid")
-   */
-    var hasStyleRule = function(selector) {
-
-        var hasRule = function(selector, rules){
-            if (!rules) return false;
-            for (var i=0; i<rules.length; i++) {
-                var rule = rules[i];
-                if (rule.selectorText){ 
-                    var arr = rule.selectorText.split(',');
-                    for (var j=0; j<arr.length; j++){
-                        if (arr[j].indexOf(selector) !== -1){
-                            var txt = trim(arr[j]);
-                            if (txt===selector){
-                                return true;
-                            }
-                            else{
-                                var colIdx = txt.indexOf(":");
-                                if (colIdx !== -1){
-                                    txt = trim(txt.substring(0, colIdx));
-                                    if (txt===selector){
-                                        return true;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return false;
-        };
-
-        var trim = function(str){
-            return str.replace(/^\s*/, "").replace(/\s*$/, "");
-        };
-
-        for (var i=0; i<document.styleSheets.length; i++){
-            var rules = document.styleSheets[i].rules || document.styleSheets[i].cssRules;
-            if (hasRule(selector, rules)){
-                return true;
-            }
-            
-            var imports = document.styleSheets[i].imports;
-            if (imports){
-                for (var j=0; j<imports.length; j++){
-                    rules = imports[j].rules || imports[j].cssRules;
-                    if (hasRule(selector, rules)) return true;
-                }
-            }
-        } 
-
-        return false;
-    };
-
-
-  //**************************************************************************
-  //** getRect
-  //**************************************************************************
-  /** Returns the geometry of a given element.
-   */
-    var _getRect = function(el){
-        
-        if (el.getBoundingClientRect){
-            return el.getBoundingClientRect();
-        }
-        else{
-            var x = 0;
-            var y = 0;
-            var w = el.offsetWidth;
-            var h = el.offsetHeight;
-
-            function isNumber(n){
-               return n === parseFloat(n);
-            }
-
-            var org = el;
-
-            do{
-                x += el.offsetLeft - el.scrollLeft;
-                y += el.offsetTop - el.scrollTop;
-            } while ( el = el.offsetParent );
-
-
-            el = org;
-            do{
-                if (isNumber(el.scrollLeft)) x -= el.scrollLeft;
-                if (isNumber(el.scrollTop)) y -= el.scrollTop;
-            } while ( el = el.parentNode );
-
-
-            return{
-                x: x,
-                y: y,
-                left: x,
-                right: x+w,
-                top: y,
-                bottom: y+h,
-                width: w,
-                height: h
-            };
-        }
-    };
-    
-
-  //**************************************************************************
-  //** intersects
-  //**************************************************************************
-  /** Used to test whether two rectangles intersect.
-   */
-    var intersects = function(r1, r2) {
-      return !(r2.left > r1.right || 
-               r2.right < r1.left || 
-               r2.top > r1.bottom ||
-               r2.bottom < r1.top);
-    };
-
-
-  //**************************************************************************
-  //** merge
-  //**************************************************************************
-  /** Used to merge properties from one json object into another. Credit:
-   *  https://github.com/stevenleadbeater/JSONT/blob/master/JSONT.js
-   */
-    var merge = function(settings, defaults) {
-        for (var p in defaults) {
-            if ( defaults.hasOwnProperty(p) && typeof settings[p] !== "undefined" ) {
-                if (p!=0) //<--Added this as a bug fix
-                merge(settings[p], defaults[p]);
-            }
-            else {
-                settings[p] = defaults[p];
-            }
-        }
-    };
-
-
-  //**************************************************************************
-  //** addResizeListener
-  //**************************************************************************
-  /** Used to watch for resize events for a given element. Credit:
-   *  http://www.backalleycoder.com/2013/03/18/cross-browser-event-based-element-resize-detection/
-   */
-    var addResizeListener = function(element, fn){
-        
-        var attachEvent = document.attachEvent;
-        var isIE = navigator.userAgent.match(/Trident/);
-        
-        var requestFrame = (function(){
-            var raf = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame ||
-            function(fn){ return window.setTimeout(fn, 20); };
-            return function(fn){ return raf(fn); };
-        })();
-
-        var cancelFrame = (function(){
-            var cancel = window.cancelAnimationFrame || window.mozCancelAnimationFrame || window.webkitCancelAnimationFrame ||
-            window.clearTimeout;
-            return function(id){ return cancel(id); };
-        })();
-
-        function resizeListener(e, fn){
-            var win = e.target || e.srcElement;
-            if (win.__resizeRAF__) cancelFrame(win.__resizeRAF__);
-            win.__resizeRAF__ = requestFrame(function(){
-                var trigger = win.__resizeTrigger__;
-                fn.call(trigger, e);
-            });
-        };        
-        
-
-        if (attachEvent) {
-            element.__resizeTrigger__ = element;
-            element.attachEvent('onresize', function(e){
-                resizeListener(e, fn);
-            });
-        }
-        else {
-            if (getComputedStyle(element).position == 'static') element.style.position = 'relative';
-            var obj = element.__resizeTrigger__ = document.createElement('object'); 
-            obj.setAttribute('style', 'display: block; position: absolute; top: 0; left: 0; height: 100%; width: 100%; overflow: hidden; pointer-events: none; z-index: -1;');
-            obj.__resizeElement__ = element;
-            obj.onload = function(e){
-                this.contentDocument.defaultView.__resizeTrigger__ = this.__resizeElement__;
-                this.contentDocument.defaultView.addEventListener('resize', function(e){
-                    resizeListener(e, fn);
-                });
-            };
-            obj.type = 'text/html';
-            if (isIE) element.appendChild(obj);
-            obj.data = 'about:blank';
-            if (!isIE) element.appendChild(obj);
-        }
-
-    };
-
 
 
     init();

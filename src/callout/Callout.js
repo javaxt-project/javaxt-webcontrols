@@ -496,83 +496,20 @@ javaxt.dhtml.Callout = function(parent, config) {
 
     this.onShow = function(){};
     this.onHide = function(){};
-    
+
+
+
 
   //**************************************************************************
-  //** setStyle
+  //** Utils
   //**************************************************************************
-  /** Used to set the style for a given element. Styles are defined via a CSS
-   *  class name or inline using the config.style definitions.
-   */
+    var merge = javaxt.dhtml.utils.merge;
+    var getNextHighestZindex = javaxt.dhtml.utils.getNextHighestZindex;
     var setStyle = function(el, style){
-
         style = config.style[style];
         if (style===null) return;
-
-        el.style = '';
-        el.removeAttribute("style");
-
-
-        if (typeof style === 'string' || style instanceof String){
-            el.className = style;
-        }
-        else{
-            for (var key in style){
-                var val = style[key];
-                if (key==="content"){
-                    el.innerHTML = val;
-                }
-                else{
-                    el.style[key] = val;
-                }
-            }
-        }
+        javaxt.dhtml.utils.setStyle(el, style);
     };
-
-
-  //**************************************************************************
-  //** getNextHighestZindex
-  //**************************************************************************
-  /**  Private method used to get the next highest z index. May need to be
-   *   tweaked for Safari.
-   *   http://greengeckodesign.com/blog/2007/07/get-highest-z-index-in-javascript.html
-   */
-    var getNextHighestZindex = function(obj){
-        var highestIndex = 0;
-        var currentIndex = 0;
-        var elArray = Array();
-        if (obj) {elArray = obj.getElementsByTagName('*');}else{elArray = document.getElementsByTagName('*');}
-        for (var i=0; i < elArray.length; i++){
-            if (elArray[i].currentStyle){
-                currentIndex = parseFloat(elArray[i].currentStyle['zIndex']);
-            }
-            else if(window.getComputedStyle){
-                currentIndex = parseFloat(document.defaultView.getComputedStyle(elArray[i],null).getPropertyValue('z-index'));
-            }
-            if(!isNaN(currentIndex) && currentIndex > highestIndex){highestIndex = currentIndex;}
-        }
-        return(highestIndex+1);
-    };
-
-
-  //**************************************************************************
-  //** merge
-  //**************************************************************************
-  /** Used to merge properties from one json object into another. Credit:
-   *  https://github.com/stevenleadbeater/JSONT/blob/master/JSONT.js
-   */
-    var merge = function(settings, defaults) {
-        for (var p in defaults) {
-            if ( defaults.hasOwnProperty(p) && typeof settings[p] !== "undefined" ) {
-                if (p!=0) //<--Added this as a bug fix
-                merge(settings[p], defaults[p]);
-            }
-            else {
-                settings[p] = defaults[p];
-            }
-        }
-    };
-
 
 
     init();

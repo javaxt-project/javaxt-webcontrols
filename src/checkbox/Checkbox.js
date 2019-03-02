@@ -5,7 +5,7 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 //**  Checkbox Class
 //******************************************************************************
 /**
- *   Custom checkbox control. 
+ *   Custom checkbox control.
  *
  ******************************************************************************/
 
@@ -16,26 +16,26 @@ javaxt.dhtml.Checkbox = function(parent, config) {
     var me = this;
     var outerDiv;
     var box, check, mask, label;
-    
-    
+
+
     var defaultConfig = {
 
-        label: null, //Text to display 
+        label: null, //Text to display
         value: null,
-        
-        
-        
+
+
+
       //Checkbox state
         checked: false,
         disabled: false,
-        
-        
+
+
         display: "inline-block",
-        
-        
+
+
       //Default styles for the checkbox
         style:{
-            
+
             box: {
                 width: "13px",
                 height: "13px",
@@ -46,7 +46,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
                 margin: "0px",
                 color: "#2b2b2b"
             },
-            
+
             label: {
                 fontFamily: "helvetica,arial,verdana,sans-serif",
                 fontSize: "14px",
@@ -54,7 +54,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
                 cursor: "pointer",
                 padding: "1px 0 0 5px"
             },
-            
+
             check: {
                 content: "",
                 display: "block",
@@ -65,13 +65,13 @@ javaxt.dhtml.Checkbox = function(parent, config) {
                 transform: "rotate(45deg)",
                 margin: "1px 0 0 4px"
             },
-            
+
             select: {
                 background: "#007FFF",
                 border: "1px solid #003EFF",
                 color: "#FFFFFF"
             },
-            
+
             disable: {
                 background: "#ffffff",
                 border: "1px solid #ffffff",
@@ -79,29 +79,29 @@ javaxt.dhtml.Checkbox = function(parent, config) {
                 cursor: "pointer",
                 opacity: "0.5"
             },
-            
+
             hover: {
                 background: "#ededed"
             }
 
         }
     };
-    
-    
-    
+
+
+
   //**************************************************************************
   //** Constructor
   //**************************************************************************
   /** Creates a new instance of this class. */
 
     var init = function(){
-        
+
         if (typeof parent === "string"){
             parent = document.getElementById(parent);
         }
         if (!parent) return;
-        
-        
+
+
       //Clone the config so we don't modify the original config object
         var clone = {};
         merge(clone, config);
@@ -109,41 +109,35 @@ javaxt.dhtml.Checkbox = function(parent, config) {
 
       //Merge clone with default config
         merge(clone, defaultConfig);
-        config = clone;     
-        
-        
+        config = clone;
+
+
       //Create container
         outerDiv = document.createElement('div');
         outerDiv.style.display = config.display;
         outerDiv.style.position = "relative";
         parent.appendChild(outerDiv);
         me.el = outerDiv;
-        
 
-        
+
+
       //Create checkbox
         if (config.label){
-        
-          //Create table with 2 columns - one for the checkbox   
+
+          //Create table with 2 columns - one for the checkbox
           //and a column for the checkbox label.
-            var table = document.createElement('table');
-            table.cellSpacing = 0;
-            table.cellPadding = 0;
-            table.style.margin = 0;
-            table.style.padding = 0;
+            var table = createTable();
             table.style.fontFamily = "inherit";
             table.style.textAlign = "inherit";
             table.style.color = "inherit";
-            table.style.borderCollapse = "collapse";
-            var tbody = document.createElement('tbody');
-            table.appendChild(tbody);
+            var tbody = table.firstChild;
             var tr = document.createElement('tr');
             tbody.appendChild(tr);
             var td;
 
 
             td = document.createElement('td');
-            tr.appendChild(td); 
+            tr.appendChild(td);
             box = document.createElement('div');
             setStyle(box, "box");
             td.appendChild(box);
@@ -154,27 +148,27 @@ javaxt.dhtml.Checkbox = function(parent, config) {
             label = document.createElement("div");
             setStyle(label, "label");
             label.innerHTML = config.label;
-            td.appendChild(label);       
+            td.appendChild(label);
 
 
             outerDiv.appendChild(table);
             addEventHandlers(table);
         }
         else{
-            
+
           //Create checkbox with no label
             box = document.createElement('div');
             setStyle(box, "box");
             outerDiv.appendChild(box);
             addEventHandlers(box);
         }
-        
+
 
       //Set button state
         if (config.disabled===true) me.disable();
         if (config.checked===true) me.select();
     };
-    
+
 
   //**************************************************************************
   //** addEventHandlers
@@ -184,13 +178,13 @@ javaxt.dhtml.Checkbox = function(parent, config) {
       //Disable text selection
         div.unselectable="on";
         div.onselectstart=function(){return false;};
-        
-        
+
+
         div.onmousedown=function(){
             addStyle(box, "select");
             return false;
         };
-        
+
 
       //Create onclick function
         var onclick = function(){
@@ -214,7 +208,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
             y1 = e.changedTouches[0].pageY;
             touchStartTime = new Date().getTime();
             touchEndTime = null;
-            
+
             if (box.checked!==true){
                 addStyle(box, "hover");
             }
@@ -243,7 +237,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
             if (!isTouch) onclick();
         };
         div.onmouseover = function(){
-            
+
             if (box.checked!==true){
                 addStyle(box, "hover");
             }
@@ -254,34 +248,34 @@ javaxt.dhtml.Checkbox = function(parent, config) {
             if (box.checked!==true){
                 setStyle(box, "box");
             }
-            
+
         };
     };
 
-    
+
   //**************************************************************************
   //** show
   //**************************************************************************
     this.show = function(){
         outerDiv.style.display = '';
     };
-    
-    
+
+
   //**************************************************************************
   //** hide
   //**************************************************************************
     this.hide = function(){
         outerDiv.style.display = "none";
     };
-    
-    
+
+
   //**************************************************************************
   //** onClick
   //**************************************************************************
   /** Called whenever the checkbox is clicked.
    */
     this.onClick = function(checked){};
-    
+
 
 
   //**************************************************************************
@@ -298,12 +292,12 @@ javaxt.dhtml.Checkbox = function(parent, config) {
   //** disable
   //**************************************************************************
     this.disable = function(){
-        
+
         if (mask){
             mask.style.visibility = "visible";
         }
         else{
-            
+
             mask = document.createElement('div');
             setStyle(mask, "disable");
             mask.style.position = "absolute";
@@ -315,8 +309,8 @@ javaxt.dhtml.Checkbox = function(parent, config) {
             outerDiv.insertBefore(mask, outerDiv.firstChild);
         }
     };
-    
-    
+
+
   //**************************************************************************
   //** select
   //**************************************************************************
@@ -324,7 +318,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
         if (box.checked===true) return;
         box.checked = true;
         addStyle(box,"select");
-        
+
         if (check){
             check.style.visibility = "visible";
         }
@@ -346,7 +340,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
             check.style.visibility = "hidden";
         }
     };
-    
+
 
   //**************************************************************************
   //** toggle
@@ -366,14 +360,14 @@ javaxt.dhtml.Checkbox = function(parent, config) {
   //**************************************************************************
   //** getValue
   //**************************************************************************
-  /** Returns the value associated with the checkbox. The value is defined in 
+  /** Returns the value associated with the checkbox. The value is defined in
    *  the config used to instantiate this class.
    */
     this.getValue = function(){
         return config.value;
     };
-    
-    
+
+
   //**************************************************************************
   //** isChecked
   //**************************************************************************
@@ -385,84 +379,21 @@ javaxt.dhtml.Checkbox = function(parent, config) {
 
 
   //**************************************************************************
-  //** addStyle
+  //** Utils
   //**************************************************************************
-  /** Used to add style to a given element. Styles are defined via a CSS class
-   *  name or inline using the config.style definitions. 
-   */
-    var addStyle = function(el, style){
-        
-        style = config.style[style];
-        if (style===null) return;
-        
-        if (typeof style === 'string' || style instanceof String){
-            if (el.className && el.className!=null) el.className += " " + style;
-            else el.className = style;
-        }
-        else{
-            for (var key in style){
-                var val = style[key];
-
-                el.style[key] = val;
-                if (key==="transform"){
-                    el.style["-webkit-" +key] = val;
-                }
-            }
-        }
-    };
-
-
-  //**************************************************************************
-  //** setStyle
-  //**************************************************************************
-  /** Used to set the style for a given element. Styles are defined via a CSS 
-   *  class name or inline using the config.style definitions. 
-   */
+    var merge = javaxt.dhtml.utils.merge;
+    var createTable = javaxt.dhtml.utils.createTable;
     var setStyle = function(el, style){
-        
         style = config.style[style];
         if (style===null) return;
-        
-        
-        el.style = null;
-        el.removeAttribute("style");
-        
-        
-        if (typeof style === 'string' || style instanceof String){
-            el.className = style;
-        }
-        else{    
-            for (var key in style){
-                var val = style[key];
-
-                el.style[key] = val;
-                if (key==="transform"){
-                    el.style["-webkit-" +key] = val;
-                }
-            }
-        }
+        javaxt.dhtml.utils.setStyle(el, style);
+    };
+    var addStyle = function(el, style){
+        style = config.style[style];
+        if (style===null) return;
+        javaxt.dhtml.utils.addStyle(el, style);
     };
 
 
-  //**************************************************************************
-  //** merge
-  //**************************************************************************
-  /** Used to merge properties from one json object into another. Credit:
-   *  https://github.com/stevenleadbeater/JSONT/blob/master/JSONT.js
-   */
-    var merge = function(settings, defaults) {
-        for (var p in defaults) {
-            if ( defaults.hasOwnProperty(p) && typeof settings[p] !== "undefined" ) {
-                if (p!=0) //<--Added this as a bug fix
-                merge(settings[p], defaults[p]);
-            }
-            else {
-                settings[p] = defaults[p];
-            }
-        }
-    };
-    
-
-    
     init();
 };
