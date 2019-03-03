@@ -1,5 +1,6 @@
 if(!javaxt) var javaxt={};
 if(!javaxt.dhtml) javaxt.dhtml={};
+if(!javaxt.dhtml.calendar) javaxt.dhtml.calendar={};
 
 //******************************************************************************
 //**  Day View
@@ -13,16 +14,16 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
     this.className = "javaxt.dhtml.calendar.Day";
 
     var me = this;
-    
-    
+
+
   //DOM elements
     var el;
     var bodyDiv;
     var footerRow;
     var multidayRow, multidayEventsTable;
     var currTimeDiv, getCurrentDate;
-    
-    
+
+
   //Class variables
     var rendered;
     var startDate, endDate;
@@ -31,8 +32,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
     var rowHeights = [];
     var scrollWidth;
     var scrollable = true;
-    
-    
+
+
   //Config options
     var days = 1;
     var date;
@@ -70,33 +71,33 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         function isNumeric(n){ return !isNaN(parseFloat(n)) && isFinite(n); }
         if (isNumeric(config.eventHeight)) eventHeight = parseInt(config.eventHeight);
         if (isNumeric(config.eventPadding)) eventPadding = parseInt(config.eventPadding);
-        
-        
+
+
       //Specify function used to get current date
-        getCurrentDate = config.getCurrentDate==null ? 
+        getCurrentDate = config.getCurrentDate==null ?
         getCurrentDate = function(){return new Date();} : config.getCurrentDate;
 
-        
-        
+
+
       //Configure renderers
         if (config.renderers){
             for (var rendererName in config.renderers) {
                 if (config.renderers.hasOwnProperty(rendererName)) {
                     if (me[rendererName]){
-                        
+
                       //Override the default renderer
                         (function(rendererName) {
                             me[rendererName] = function(){
                                 var renderer = config.renderers[rendererName];
                                 return renderer.apply(me, arguments);
                             };
-                            
+
                         })(rendererName);
                     }
                 }
             }
         }
-        
+
 
       //Call the beforerender callback
         rendered = false;
@@ -110,10 +111,10 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         listener = me.getListener('afterrender');
         if (listener!=null) listener.callback.apply(listener.scope, [me]);
         rendered = true;
-        
+
       //Call the update callback
         listener = me.getListener('update');
-        if (listener!=null) listener.callback.apply(listener.scope, [me]);        
+        if (listener!=null) listener.callback.apply(listener.scope, [me]);
     };
 
 
@@ -123,7 +124,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
     this.hasHours = function(){
         return true;
     };
-    
+
 
   //**************************************************************************
   //** show
@@ -147,8 +148,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
     this.showFooter = function(){
         footerRow.style.display = '';
     };
-    
-    
+
+
   //**************************************************************************
   //** hideFooter
   //**************************************************************************
@@ -163,15 +164,15 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
     this.enableTouch = function(){
         scrollable = true;
     };
-    
-    
+
+
   //**************************************************************************
   //** disableTouch
   //**************************************************************************
     this.disableTouch = function(){
         scrollable = false;
     };
-    
+
 
   //**************************************************************************
   //** renderTable
@@ -179,8 +180,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   /** Used to render a new table for the current date. */
 
     var renderTable = function(){
-        
-        
+
+
       //Remove any previously rendered table
         if (el!=null){
             for (var i=0; i<parent.childNodes.length; i++){
@@ -190,14 +191,14 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                 }
             }
         }
-        
-        
+
+
       //Reset variables
         cells = {};
         widths = {};
         rowHeights = [];
-        
-        
+
+
 
       //Create main table
         var div, tbody, tr, td;
@@ -206,7 +207,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         table.className = "javaxt-noselect";
         table.style.cursor = "default";
         parent.appendChild(table);
-        
+
 
       //Create header row
         tr = document.createElement("tr");
@@ -225,21 +226,21 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         tr = document.createElement("tr");
         tr.setAttribute("desc", "multiday events");
         tr.className = "javaxt-cal-multiday-header";
-        tr.style.display = "none"; 
+        tr.style.display = "none";
         tr.style.visibility = "hidden"; //visible
         multidayRow = tr;
         tbody.appendChild(tr);
         td = document.createElement("td");
         td.style.width = "100%";
         td.style.height = "inherit";
-        tr.appendChild(td);            
+        tr.appendChild(td);
         var multidayDiv = document.createElement('div');
-        multidayDiv.setAttribute("desc", "multiday-div"); 
+        multidayDiv.setAttribute("desc", "multiday-div");
         multidayDiv.style.width = "100%";
         multidayDiv.style.height = "inherit";
         multidayDiv.style.position = "relative";
         td.appendChild(multidayDiv);
-      
+
 
 
       //Create body row
@@ -250,10 +251,10 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         td = document.createElement("td");
         td.style.width = "100%";
         td.style.height = "100%";
-        tr.appendChild(td);  
-        
+        tr.appendChild(td);
+
         bodyDiv = document.createElement('div');
-        bodyDiv.setAttribute("desc", "body-div"); 
+        bodyDiv.setAttribute("desc", "body-div");
         bodyDiv.style.width = "100%";
         bodyDiv.style.height = "100%";
         bodyDiv.style.position = "relative";
@@ -266,7 +267,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         div.style.overflowX = 'hidden';
         bodyDiv.appendChild(div);
         bodyDiv = div;
-        
+
       //Add logic to enable/disable scroll. This is important for touch devices.
         bodyDiv.addEventListener('touchstart', function(e) {
             if (!scrollable) e.preventDefault();
@@ -274,8 +275,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         bodyDiv.addEventListener('touchmove', function(e) {
             if (!scrollable) e.preventDefault();
         }, false);
-        
-        
+
+
       //Add scroll listener
         var listener = me.getListener('scroll');
         if (listener){
@@ -283,8 +284,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                 listener.callback.apply(listener.scope, [me]);
             }, false);
         }
-        
-        
+
+
       //Create footer row
         tr = document.createElement("tr");
         tr.setAttribute("desc", "footer");
@@ -296,7 +297,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         tr.appendChild(td);
         footerRow = tr;
         var footer = td;
-        
+
 
       //Create current time indicator
         currTimeDiv = document.createElement("div");
@@ -316,7 +317,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         tr.appendChild(td);
         var spacerUL = document.createElement('div');
         td.appendChild(spacerUL);
-        
+
         var d = new Date(startDate);
         for (var i=0; i<days; i++){
             td = document.createElement('td');
@@ -327,7 +328,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
             tr.appendChild(td);
             d.setDate(d.getDate()+1);
         }
-        
+
         td = document.createElement("td");
         tr.appendChild(td);
         var spacerUR = document.createElement('div');
@@ -343,7 +344,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         tr.appendChild(td);
         var spacerLL = document.createElement('div');
         td.appendChild(spacerLL);
-        
+
         var d = new Date(startDate);
         for (var i=0; i<days; i++){
             td = document.createElement('td');
@@ -354,17 +355,17 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
             tr.appendChild(td);
             d.setDate(d.getDate()+1);
         }
-        
+
         td = document.createElement("td");
         tr.appendChild(td);
         var spacerLR = document.createElement('div');
         td.appendChild(spacerLR);
-        
 
-        
+
+
       //Populate multiday div
         var multidayContent = document.createElement('div');
-        multidayContent.setAttribute("desc", "multiday-content"); 
+        multidayContent.setAttribute("desc", "multiday-content");
         multidayContent.style.width = "100%";
         multidayContent.style.height = "100%";
         multidayContent.style.position = "relative";
@@ -392,7 +393,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
             tr.appendChild(td);
         }
         multidayEventsTable = tbody;
-        
+
 
 
 
@@ -439,7 +440,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
             td.style.verticalAlign = "top";
             td.valign="top";
             row.appendChild(td);
-            
+
 
           //Create div used to store events and the table grid
             var outerDiv = document.createElement('div');
@@ -455,14 +456,14 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
             innerDiv.style.overflow = 'hidden';
             innerDiv.style.cursor = "inherit";
             outerDiv.appendChild(innerDiv);
-            
-            
+
+
             var cell = innerDiv;
             var cellID = (d.getMonth()+1) + "-" + d.getDate() + "-" + d.getFullYear();
             cell.date = new Date(d);
             cells[cellID] = cell;
-            td.appendChild(outerDiv);            
-            
+            td.appendChild(outerDiv);
+
 
           //Create table
             var innerTable = document.createElement('table');
@@ -473,20 +474,20 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
             tbody = document.createElement('tbody');
             innerTable.appendChild(tbody);
             cell.appendChild(innerTable);
-            
+
 
 
           //Add 1 row for every 30 minutes
             for (var j=0; j<24*2; j++){
                 var tr = document.createElement('tr');
                 tbody.appendChild(tr);
-                
+
                 var col = document.createElement('td');
                 col.className = "javaxt-cal-half-hour" + (j % 2 == 0 ? "" : " javaxt-cal-half-hour-sep") + (j==47 ? " javaxt-cal-hour-last" : "");
                 if (j==0) col.style.borderTop = "0px";
-                
+
                 tr.appendChild(col);
-                addListeners(tr, holdDelay);                
+                addListeners(tr, holdDelay);
             }
 
 
@@ -497,24 +498,24 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
       //Update the spacer in the left column of the header
         var lt = _getRect(leftCol.childNodes[0]).width;
-        spacerUL.style.width = 
-        spacerML.style.width = 
+        spacerUL.style.width =
+        spacerML.style.width =
         spacerLL.style.width = lt + 'px';
-        
-        
+
+
       //Update the spacer in the right column of the header
         var bodyWidth = _getRect(bodyDiv).width;
         var tableWidth = _getRect(leftCol.parentNode.parentNode.parentNode).width;
         scrollWidth = Math.abs(bodyWidth-tableWidth);
-        spacerUR.style.width = 
+        spacerUR.style.width =
         spacerLR.style.width = scrollWidth + 'px';
 
 
       //Update position of the current time indicator
         currTimeDiv.style.left = lt + 'px';
         updateCurrTime();
-        
-        
+
+
       //Kick off scheduled task to periodically update the current time indicator
         var epoch = getCurrentDate().getTime() / 1000;
         var secondsSinceLastTimerTrigger = epoch % 60;
@@ -523,8 +524,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
             setInterval(updateCurrTime, 60*1000);
             updateCurrTime();
         }, secondsUntilNextTimerTrigger*1000);
-        
-        
+
+
 
       //Scroll to start of workday
         me.scrollTo(6.5);
@@ -542,27 +543,27 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   //** addListeners
   //**************************************************************************
   /** Used to initialize a cell for click and hold events. */
-  
+
     var addListeners = function(cell, holdDelay){
 
-        
+
       //This timeout, started on mousedown, triggers the beginning of a hold
         var holdStarter = null;
 
-        
+
       //This flag indicates the user is currently holding the mouse down
         var holdActive = false;
 
-       
+
       //OnClick
         //cell.onclick = NOTHING!! not using onclick at all - onmousedown and onmouseup take care of everything
 
-   
+
       //MouseDown
         var onMouseDown = function(e){
 
             var tr = this;
-            
+
           //Set the holdStarter and wait for the predetermined delay, and then begin a hold
             holdStarter = setTimeout(function() {
                 holdStarter = null;
@@ -576,40 +577,40 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                     var scope = listener.scope;
                     var date = getDate();
                     callback.apply(scope, [date, tr, me, e]);
-                } 
+                }
 
             }, holdDelay);
-            
+
         };
 
-        
+
 
       //MouseUp
         var onMouseUp = function(e){
-            
+
             var tr = this;
-            
+
 
           //Get date associated with the selected cell
             var date = getDate();
-            
-            
-            
+
+
+
           //If the mouse is released immediately (i.e., a click), before the
           //holdStarter runs, then cancel the holdStarter and do the click
             if (holdStarter) {
                 clearTimeout(holdStarter);
-                
-                
+
+
                 var listener = me.getListener('cellclick');
                 if (listener){
                     var callback = listener.callback;
                     var scope = listener.scope;
                     callback.apply(scope, [date, tr, me, e]);
-                }           
-                
+                }
+
             }
-            
+
           //Otherwise, if the mouse was being held, end the hold
             else if (holdActive) {
                 holdActive = false;
@@ -620,7 +621,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                     var callback = listener.callback;
                     var scope = listener.scope;
                     callback.apply(scope, [date, tr, me, e]);
-                }   
+                }
             }
         };
 
@@ -628,7 +629,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         cell.onmousedown = onMouseDown;
         cell.onmouseup = onMouseUp;
         cell.ontouchstart = function(e) {
-            
+
             var touch = e.touches[0];
             var x = touch.pageX;
             var y = touch.pageY;
@@ -651,13 +652,13 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
       //Get date associated with the selected cell
         var getDate = function(){
-          
+
             var tbody = cell.parentNode;
             var _cell = tbody.parentNode.parentNode;
             var date = new Date(_cell.date);
 
             var hour = 0;
-            for (var i=0; i<tbody.childNodes.length; i++){            
+            for (var i=0; i<tbody.childNodes.length; i++){
                 var tr = tbody.childNodes[i];
                 if (tr===cell){
                     hour = (i/2);
@@ -673,8 +674,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   //**************************************************************************
   //** createColumnHeader
   //**************************************************************************
-  /** Returns a div used to indicate the day of the week. The div is inserted 
-   *  into a column header that corresponds to a given date. This method can 
+  /** Returns a div used to indicate the day of the week. The div is inserted
+   *  into a column header that corresponds to a given date. This method can
    *  be safely overridden to generate custom headers.
    */
     this.createColumnHeader = function(i){
@@ -701,15 +702,15 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         outerDiv.appendChild(innerDiv);
         return outerDiv;
     };
-    
-    
-    
+
+
+
     this.createColumnFooter = function(i){
         return document.createElement('div');
     };
-    
-    
-    
+
+
+
   //**************************************************************************
   //** createHourLabel
   //**************************************************************************
@@ -747,11 +748,11 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         td = document.createElement('td');
         td.className = "javaxt-cal-label-meridian";
         td.innerHTML = meridian;
-        tr.appendChild(td); 
-        
+        tr.appendChild(td);
+
         return div;
     };
-    
+
 
   //**************************************************************************
   //** updateCurrTime
@@ -764,14 +765,14 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         var cellID = (date.getMonth()+1) + "-" + date.getDate() + "-" + date.getFullYear();
         var cell = cells[cellID];
         if (cell){
-            
+
             var hours = date.getHours();
             var h1 = getVerticalOffset(hours, cell);
             var h2 = getVerticalOffset(hours+1, cell);
-            
+
             var pixelsPerMinute = (h2-h1)/60;
             var h = h1+(date.getMinutes()*pixelsPerMinute);
-            
+
             currTimeDiv.style.display = '';
             currTimeDiv.style.top = h + "px";
         }
@@ -784,7 +785,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   //**************************************************************************
   //** scrollTo
   //**************************************************************************
-  /** Used to scroll to a specific time of day. 
+  /** Used to scroll to a specific time of day.
    *  @param hour Time of day, specified as a decimal (e.g. 6.5 for 6:30 AM)
    */
     this.scrollTo = function(hour){
@@ -806,13 +807,13 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   //**************************************************************************
   //** getVerticalOffset
   //**************************************************************************
-  /** Returns the relative, vertical offset of a row in a cell. 
+  /** Returns the relative, vertical offset of a row in a cell.
    */
     var getVerticalOffset = function(hour, cell){
 
-      //Compute row heights and cache the values for subsequent use. Caching 
-      //the row heights improves load times by approx 500ms in IE and 1000ms 
-      //in FF. Caching assumes that row heights are the same accross all cells 
+      //Compute row heights and cache the values for subsequent use. Caching
+      //the row heights improves load times by approx 500ms in IE and 1000ms
+      //in FF. Caching assumes that row heights are the same accross all cells
       //and that the row  heights do not change.
         if (rowHeights.length==0){
             var tbody = cell.childNodes[0].childNodes[0];
@@ -836,8 +837,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         }
         return 0;
     };
-    
-    
+
+
   //**************************************************************************
   //** getEventStore
   //**************************************************************************
@@ -857,16 +858,16 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   //**************************************************************************
   //** addEvent
   //**************************************************************************
-  /** Private method used to add an event to the view. 
-   *  @param deferUpdates Option to postpone or defer updating the event 
+  /** Private method used to add an event to the view.
+   *  @param deferUpdates Option to postpone or defer updating the event
    *  width and position when there are overlapping events. This option is
    *  provided for optimization.
    */
     var addEvent = function(event, deferUpdates){
-        
+
         log("Adding " + event.getSubject() + "...");
         var numDays = event.numDays();
-        
+
 
       //Check if we've already rendered the given event
         if (numDays>=1){
@@ -882,7 +883,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                     }
                 }
             }
-            
+
         }
         else{
             var divs = getDivs(event.getStartDate());
@@ -904,7 +905,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
             addSingleDayEvent(event, deferUpdates);
         }
 
-        
+
       //Update the event store
         store.add(event);
     };
@@ -914,19 +915,19 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   //** addEvents
   //**************************************************************************
   /** Used to add multiple events to the view. This method is recommended for
-   *  bulk loading and is significantly faster than calling addEvent multiple 
-   *  times. 
+   *  bulk loading and is significantly faster than calling addEvent multiple
+   *  times.
    */
     this.addEvents = function(events){
-        
+
 
       //Add events but defer updating position and widths of overlapping events
         for (var i=0; i<events.length; i++){
             addEvent(events[i], true);
         }
-        
-        
-        
+
+
+
       //Generate list of all single-day events in the view
         var singleDayEvents = [];
         events = me.getEvents();
@@ -937,8 +938,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                 if (div!=null) singleDayEvents.push(event);
             }
         }
-        
-        
+
+
       //Local variables
         var processedEvents = [];
         var isProcessed = function(event){
@@ -949,24 +950,24 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
             }
             return false;
         };
-        
-        
-        
+
+
+
       //Iterate through single-day events and update widths
         for (var i=0; i<singleDayEvents.length; i++){
             var event = singleDayEvents[i];
-            
+
             var updateWidth = !isProcessed(event);
 
-            
+
             if (updateWidth){
                 var overlappingEvents = getOverlappingEvents(event);
                 if (overlappingEvents.length>0){
 
-                  //Compute number of columns 
+                  //Compute number of columns
                     var numColumns = 2;
                     if (overlappingEvents.length>1){
-                        
+
                       //The following logic is somewhat flawed and may yeild
                       //a column count slightly higher than expected...
                         for (var j=0; j<overlappingEvents.length; j++){
@@ -1013,58 +1014,58 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                     }
                 }
             }
-            
+
             processedEvents.push(event);
         }
 
 
-        
+
       //Iterate through single-day events and update position of overlapping events
         processedEvents = [];
         for (var i=0; i<singleDayEvents.length; i++){
             var event = singleDayEvents[i];
             if (!isProcessed(event)){
-                
+
                 var overlappingEvents = getOverlappingEvents(event);
                 if (overlappingEvents.length>0){
-                    
+
                     for (var j=0; j<overlappingEvents.length; j++){
                         var _event = overlappingEvents[j];
                         var _outerDiv = getDiv(_event);
                         var _width = parseInt(_outerDiv.style.width);
-                        if (widths["_"+_width]!=null) _width = widths["_"+_width];                        
-                        
+                        if (widths["_"+_width]!=null) _width = widths["_"+_width];
+
                         updatePosition(_outerDiv, _event, _width);
                         processedEvents.push(_event);
-                    }                    
-                    
+                    }
+
                 }
             }
             processedEvents.push(event);
         }
         processedEvents = null;
-        
-        
-        
-        
+
+
+
+
       //Fill any gaps
         for (var i=0; i<singleDayEvents.length; i++){
             var event = singleDayEvents[i];
             var outerDiv = getDiv(event);
-            
+
 
             var width = parseInt(outerDiv.style.width);
-            if (widths["_"+width]!=null) width = widths["_"+width];            
+            if (widths["_"+width]!=null) width = widths["_"+width];
             var numColumns = Math.floor(100/width);
-            
+
             if (numColumns>1){
 
                 var left = parseInt(outerDiv.style.left);
                 var colIndex = Math.floor(left/width)+1;
 
-                
+
                 log(event.getSubject() + " is in column " + colIndex + "/" + numColumns);
-                
+
                 if (colIndex===(numColumns-1)){
                     var overlappingEvents = getOverlappingEvents(event);
                     var nextEvent = overlappingEvents[overlappingEvents.length-1];
@@ -1076,23 +1077,23 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                         outerDiv.style.width = newWidth + "%";
                     }
                 }
-                
+
             }
         }
-        
+
     };
 
 
   //**************************************************************************
   //** removeEvent
   //**************************************************************************
-  
+
     this.removeEvent = function(event){
-        
+
       //Update event store
         store.remove(event);
-        
-        
+
+
       //Remove div
         if (event.numDays()>=1){
 
@@ -1103,11 +1104,11 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                     if (td.childNodes.length>0){
                         var div = td.childNodes[0];
                         if (div.event.equals(event)){
-                            
+
                           //Remove event div
                             td.removeChild(div);
-                            
-                            
+
+
                           //Remove colspan
                             var colSpan = td.colSpan;
                             if (colSpan>=2){
@@ -1124,8 +1125,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                                     }
                                 }
                             }
-                            
-                            
+
+
                           //Delete the row if we can
                             if (multidayEventsTable.childNodes.length>1){
                                 var hasEvents = false;
@@ -1134,34 +1135,34 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                                         hasEvents = true;
                                         break;
                                     }
-                                }                              
-                                
+                                }
+
                                 if (!hasEvents){
                                     multidayEventsTable.removeChild(tr);
                                 }
                             }
-  
-                            
+
+
                           //Update table height
                             var maxHeight = (multidayEventsTable.childNodes.length-1)*(eventHeight+eventPadding);
                             if (maxHeight==0){
-                                multidayRow.style.display = "none"; 
+                                multidayRow.style.display = "none";
                                 multidayRow.style.visibility = "hidden";
                             }
                             else{
                                 multidayEventsTable.parentNode.parentNode.parentNode.style.height = (maxHeight+(eventPadding)) + "px";
                             }
 
-                            
+
                             return;
                         }
                     }
                 }
             }
-            
+
         }
         else{
-            
+
           //Remove event div
             var divs = getDivs(event.getStartDate());
             for (var i=0; i<divs.length; i++){
@@ -1172,8 +1173,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                     break;
                 }
             }
-            
-            
+
+
           //Update overlapping events as needed
             var overlappingEvents = getOverlappingEvents(event);
             if (overlappingEvents.length>0){
@@ -1189,23 +1190,23 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                         }
                     }
                 }
-                
+
               //Add overlapping events
                 me.addEvents(overlappingEvents);
             }
         }
     };
-    
-    
+
+
   //**************************************************************************
   //** getEvents
   //**************************************************************************
   /** Returns an array of all the events rendered in the view.
    */
     this.getEvents = function(){
-        
+
         var events = [];
-        
+
       //Find events that occur with a single day
         var d = new Date(date);
         if (days>1 && d.getDay()>0) d.setDate(d.getDate()-d.getDay());
@@ -1217,10 +1218,10 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                 var event = div.event;
                 events.push(event);
             }
-            
+
             d.setDate(d.getDate()+1);
         }
-        
+
 
 
       //Find multi-day events events
@@ -1244,18 +1245,18 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                 }
             }
         }
-        
+
         return events;
     };
-    
-    
+
+
   //**************************************************************************
   //** clear
   //**************************************************************************
   /** Used to remove all the events from the view.
    */
     this.clear = function(){
-        
+
       //Remove events that occur with a single day
         var d = new Date(date);
         if (days>1 && d.getDay()>0) d.setDate(d.getDate()-d.getDay());
@@ -1269,17 +1270,17 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                 var parentNode = div.parentNode;
                 parentNode.removeChild(div);
             }
-            
+
             d.setDate(d.getDate()+1);
         }
-        
+
 
 
       //Remove any multi-day events
         var row = multidayEventsTable.childNodes[0];
         while (row.nextSibling){
             var tr = row.nextSibling;
-            
+
             for (var j=1; j<tr.childNodes.length; j++){
                 var td = tr.childNodes[j];
                 if (td.childNodes.length>0){
@@ -1288,14 +1289,14 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                     store.remove(event);
                 }
             }
-            
+
             multidayEventsTable.removeChild(tr);
-        }    
-        multidayRow.style.display = "none"; 
+        }
+        multidayRow.style.display = "none";
         multidayRow.style.visibility = "hidden";
     };
-    
-    
+
+
   //**************************************************************************
   //** refresh
   //**************************************************************************
@@ -1323,17 +1324,17 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         var cellID = (d.getMonth()+1) + "-" + d.getDate() + "-" + d.getFullYear();
         var cell = cells[cellID];
         if (cell==null) return;
-        
 
-        
+
+
         var width = 100;
         var overlappingEvents, rects, leftCoords;
-        
-        
-        
+
+
+
       //Update position and width of any overlapping events
         if (!deferUpdates){
-            
+
           //Get bounding rectangles of the overlapping events
             rects = [];
             var overlappingEvents = getOverlappingEvents(event);
@@ -1366,7 +1367,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
 
           //Compute width for new event. Note that the current logic for calculating
-          //the number of columns is flawed because it relies on overlapping events. 
+          //the number of columns is flawed because it relies on overlapping events.
           //The logic in the for loop is a hacky workaround.
             var numColumns = leftCoords.length;
             width = (Math.floor((1/(numColumns+1))*100));
@@ -1393,7 +1394,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                     if (width<_width) _width = width;
 
                     log(event.getSubject()  + " intersects " + _event.getSubject());
-                    log("   Moving " + _event.getSubject() + " to 0 and setting width to " + _width + "% (was " + _outerDiv.style.width + ")");                
+                    log("   Moving " + _event.getSubject() + " to 0 and setting width to " + _width + "% (was " + _outerDiv.style.width + ")");
 
                     _outerDiv.style.width = _width + "%";
                     _outerDiv.style.left = "0px";
@@ -1419,7 +1420,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         outerDiv.style.height = h + 'px';
         outerDiv.event = event;
         cell.appendChild(outerDiv);
-        
+
 
       //Create div used to render the event
         var div = event.createDiv();
@@ -1437,13 +1438,13 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         td.style.height = "100%";
         td.style.padding = ((eventPadding/2)+1) + "px " + eventPadding + "px " + (eventPadding/2) + "px"; //+1 for half-hour border
         td.appendChild(div);
-        
-        
+
+
       //Update vertical padding. Each browser pads tables differently. Chrome
       //doesn't apply any padding so the table fits perfectly in the div. IE
       //puts the 1px table below where we expect and adds 1px to the bottom.
       //FF adds 1 px to the bottom. This might have something to do with how
-      //browsers interpret the cellpadding and cellspacing attributes. 
+      //browsers interpret the cellpadding and cellspacing attributes.
         if (isIE) {
             td.style.paddingTop = (eventPadding/2) + "px";
             td.style.paddingBottom = (eventPadding+1) + "px";
@@ -1465,12 +1466,12 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                     var scope = listener.scope;
                     callback.apply(scope, [this.event, this, me, e]);
                 }
-            };         
+            };
         }
-        
-        
-        
-      //Update position and width of the new div 
+
+
+
+      //Update position and width of the new div
         if (!deferUpdates){
             if (overlappingEvents.length>0){
 
@@ -1479,7 +1480,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                 updatePosition(outerDiv, event, width);
 
 
-              //If there are any divs to the right, ensure that the width spans 
+              //If there are any divs to the right, ensure that the width spans
               //to the closest div
                 var rightDiv;
                 var r1 = _getRect(outerDiv);
@@ -1506,7 +1507,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                     var newWidth = parseInt(rightDiv.style.left) - _left;
                     log("   ++ Updating " + event.getSubject() + " width to " + newWidth + "% (was " + width + "%)");
                     outerDiv.style.width = newWidth + "%";
-                }    
+                }
 
             }
         }
@@ -1518,40 +1519,40 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   //**************************************************************************
   /** Used to render multi-day events
    */
-    var addMultiDayEvent = function(event){       
-        
+    var addMultiDayEvent = function(event){
+
       //Check whether the event is in range
         if (event.getEndDate()<startDate || event.getStartDate()>endDate) return;
-        
-        
+
+
         var startColID, endColID;
         var continueLeft = false;
         var continueRight = false;
         var a = javaxt.dhtml.calendar.Utils.getDaysBetween(startDate, event.getStartDate());
         var b = javaxt.dhtml.calendar.Utils.getDaysBetween(startDate, event.getEndDate());
         //console.log(event.getSubject() + " " + a + " --> " + b);
-        
+
         startColID = a;
-        if (a<0){ 
+        if (a<0){
             startColID = 0;
             continueLeft = true;
         }
         startColID = Math.floor(startColID);
-        
-        
-        
+
+
+
         endColID = startColID+b;
-        if (endColID>days-1){ 
+        if (endColID>days-1){
             endColID = days-1;
             continueRight = true;
         }
         endColID = Math.floor(endColID);
-        
-        
+
+
         //console.log("use cols " + startColID + " - " + endColID);
-        
-        
-        
+
+
+
       //Find start/end columns in the multiday events table
         var startCol, endCol;
         for (var i=1; i<multidayEventsTable.childNodes.length; i++){ //skip first row
@@ -1559,7 +1560,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
             var idx = 0;
             for (var j=1; j<tr.childNodes.length; j++){ //skip first column
                 var td = tr.childNodes[j];
-                
+
                 if (idx==startColID){
                     if (td.childNodes.length==0){
                         //console.log("Found start!");
@@ -1571,14 +1572,14 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                         break;
                     }
                 }
-                
+
                 if (idx==endColID){
                     if (td.childNodes.length==0){
                         //console.log("Found end!");
                         //console.log(td);
                         endCol = td;
-                        
-                        
+
+
                       //check if any cells between the startCol and endCol are occupied
                         if (startCol!=endCol){
                             var previousCol = td.previousSibling;
@@ -1592,21 +1593,21 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                             }
                         }
                     }
-                    
-                    
+
+
                     i = multidayEventsTable.childNodes.length;
                     break;
                 }
-                
-                
+
+
                 var colSpan = td.colSpan;
                 if (colSpan>=2) idx+=colSpan;
                 else idx++;
             }
         }
 
-        
-        
+
+
       //Add new row to the multidayEventsTable as needed
         if (!startCol || !endCol){
             var tr = document.createElement("tr");
@@ -1617,32 +1618,32 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
 
           //Remove height from spacer col of previous row and set current col height
-            if (multidayEventsTable.childNodes.length>1){ 
+            if (multidayEventsTable.childNodes.length>1){
                 tr.previousSibling.childNodes[0].style.height = '';
             }
             td.style.height = "100%";
-            
-            
-            
+
+
+
           //Add days
             for (var i=0; i<days; i++){
                 td = document.createElement('td');
                 td.className = "javaxt-cal-multiday-col";
                 tr.appendChild(td);
-                
+
                 if (i==startColID) startCol = td;
                 if (i==endColID) endCol = td;
             }
         }
-        
+
 
       //Add colspan as needed
         var colSpan = (endColID-startColID)+1;
         if (colSpan>=2){
             javaxt.dhtml.calendar.Utils.addColSpan(startCol, colSpan);
         }
-        
-        
+
+
       //Add event to the startCol
         var outerDiv = document.createElement('div');
         outerDiv.style.width = "100%";
@@ -1660,8 +1661,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         var div = event.createDiv(continueLeft, continueRight);
         div.style.height = "100%";
         innerDiv.appendChild(div);
-        
-        
+
+
       //Wrap the outerdiv to ensure proper overflow
         var wrapper = document.createElement('div');
         wrapper.style.width = "100%";
@@ -1676,17 +1677,17 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                 var callback = listener.callback;
                 var scope = listener.scope;
                 callback.apply(scope, [this.event, this, me, e]);
-            }  
+            }
         };
-        
+
         startCol.appendChild(wrapper);
-        
-        
+
+
       //Update the visibility of the multiday row
         multidayRow.style.display = '';
         multidayRow.style.visibility = "visible";
-        
-        
+
+
       //Update table height
         var numMultiDayEvents = multidayEventsTable.childNodes.length-1;
         var h = numMultiDayEvents*(eventHeight+eventPadding);
@@ -1694,12 +1695,12 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         var multidayEventsDiv = multidayEventsTable.parentNode.parentNode.parentNode;
         multidayEventsDiv.style.height =  h + "px";
 
-        
+
 
 
       //Check whether the columns are aligned. For some browsers (e.g. Firefox),
-      //the vertical scroll bar doesn't show up until the overflow container 
-      //reaches a certain height. Without the scroll bar, the multiday event 
+      //the vertical scroll bar doesn't show up until the overflow container
+      //reaches a certain height. Without the scroll bar, the multiday event
       //columns become misaligned with the cells.
         var h1 = multidayEventsTable.childNodes[0].childNodes[1];
         var c1;
@@ -1709,15 +1710,15 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                 break;
             }
         }
-        
-      //Update the height of the vertical scroll bar until it becomes visible. 
+
+      //Update the height of the vertical scroll bar until it becomes visible.
       //This should work assuming the multidayEventsTable and the header
        var orgHeight = h;
         while (h1.offsetWidth>c1.offsetWidth){
             if (h<scrollWidth*2) h = scrollWidth*2;
             else h++;
             multidayEventsDiv.style.height =  h + "px";
-            
+
           //If the widths don't align after growing to 100px in height, then
           //there's something wrong - possibly a css style issue with borders.
             if (h===100){
@@ -1765,7 +1766,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
 
         if (date!=null){
-            if (d.getFullYear()==date.getFullYear() && d.getMonth()==date.getMonth() && d.getDate()==date.getDate()){ 
+            if (d.getFullYear()==date.getFullYear() && d.getMonth()==date.getMonth() && d.getDate()==date.getDate()){
                 date = d;
                 return;
             }
@@ -1775,11 +1776,11 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         date = d;
         startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
         if (days>1 && startDate.getDay()>0) startDate.setDate(startDate.getDate()-startDate.getDay());
-        
+
         endDate = new Date(startDate);
         endDate.setDate(endDate.getDate()+days);
 
-        
+
         renderTable();
         loadEvents();
     };
@@ -1805,12 +1806,12 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         };
     };
 
-  
+
   //**************************************************************************
   //** getTitle
   //**************************************************************************
   /** Returns a title for the current view. */
-  
+
     this.getTitle = function(){
         if (days==1){
             var month = javaxt.dhtml.calendar.Utils.monthNames[date.getMonth()];
@@ -1821,10 +1822,10 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
             var startDate = range.startDate;
             var endDate = range.endDate;
             endDate.setDate(endDate.getDate()-1);
-            
+
             var startMonth = javaxt.dhtml.calendar.Utils.monthNames[startDate.getMonth()];
             var endMonth = javaxt.dhtml.calendar.Utils.monthNames[endDate.getMonth()];
-            
+
             var a = startMonth + " " + startDate.getDate();
             var b = endDate.getDate() + ", " + endDate.getFullYear();
             if (startDate.getMonth()==endDate.getMonth() && startDate.getFullYear()==endDate.getFullYear()){
@@ -1846,22 +1847,22 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   //** loadEvents
   //**************************************************************************
     var loadEvents = function(){
-        
+
         var events = store.getEvents();
         for (var i=0; i<events.length; i++){
-            
-            if (events[i].getStartDate().getTime()<endDate.getTime() && 
+
+            if (events[i].getStartDate().getTime()<endDate.getTime() &&
                 events[i].getEndDate().getTime()>=startDate.getTime()){
                 me.addEvent(events[i]);
             }
         }
     };
-    
+
 
   //**************************************************************************
   //** updatePosition
   //**************************************************************************
-  /** Function used to move a div from left to right until we find an area 
+  /** Function used to move a div from left to right until we find an area
    *  that doesn't intersect another div.
    */
     var updatePosition = function(div, _event, width){
@@ -1877,7 +1878,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
 
       //Check whether the div intersect any other divs. Shift div
-      //to the right until we find a 
+      //to the right until we find a
         var divs = getDivs(_event.getStartDate());
         var x = 0;
         while (x<=100){
@@ -1925,13 +1926,13 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
             else{
                 break;
             }
-        }                
+        }
 
         log("   -- " + _event.getSubject() + " is in column " + (x+1) + "/" + Math.floor(100/width));
 
         var _colIndex = x+1;
         var _numColumns = Math.floor(100/width);
-        var _left = (x*width); 
+        var _left = (x*width);
         if (_colIndex==_numColumns){
 
           //If the div is in the right column, ensure that the width
@@ -1949,10 +1950,10 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   //**************************************************************************
   //** updatePadding
   //**************************************************************************
-  /** Used to add/remove left padding to an event div 
+  /** Used to add/remove left padding to an event div
    */
     var updatePadding = function(outerDiv){
-        
+
         var td;
         var el = outerDiv;
         while (el.childNodes.length>0){
@@ -1962,13 +1963,13 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                 break;
             }
         }
-        
+
         if (td){
             var left = parseInt(outerDiv.style.left);
-            if (left===0){ 
+            if (left===0){
                 td.style.paddingLeft = eventPadding+"px";
             }
-            else{ 
+            else{
                 td.style.paddingLeft = "0px";
             }
         }
@@ -1978,16 +1979,16 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   //**************************************************************************
   //** sortEvents
   //**************************************************************************
-  /** Used to sort events by order of appearance in the cell - left to right, 
+  /** Used to sort events by order of appearance in the cell - left to right,
    *  top to bottom.
    */
     var sortEvents = function(events){
-        
+
         var _events = [];
         for (var i=0; i<events.length; i++){
             _events.push(events[i]);
         }
-        
+
         var divs = [];
         for (var id in cells) {
             if (cells.hasOwnProperty(id)) {
@@ -1999,15 +2000,15 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                 }
             }
         }
-        
-        
+
+
         var getRow = function(event){
             var startRow = event.getStartDate().getHours()*2;
             if (event.getStartDate().getMinutes()>=30) startRow+=1;
             return startRow;
         };
-    
-        
+
+
         events.sort(function(event1, event2){
             var y1 = getRow(event1);
             var y2 = getRow(event2);
@@ -2020,7 +2021,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                 if (_events[i].equals(event2)){
                     div2 = divs[i];
                 }
-                
+
                 if (div1!=null && div2!=null) break;
             }
             var x1 = parseInt(div1.style.left);
@@ -2030,7 +2031,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
             var b = x2 + (y2*1000);
             return a-b;
         });
-        
+
         return events;
     };
 
@@ -2042,7 +2043,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
    *  multi-day events and events that are not in the current view.
    */
     var getOverlappingEvents = function(event){
-        
+
         var arr = [];
         var overlappingEvents = store.getOverlappingEvents(event);
         for (var i=0; i<overlappingEvents.length; i++){
@@ -2085,7 +2086,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   /** Returns the div associated with a given event.
    */
     var getDiv = function(event){
-        
+
         if (event.numDays()>=1){
             //TODO: Find multiday event div...
         }
@@ -2103,8 +2104,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   //**************************************************************************
   //** getCells
   //**************************************************************************
-  /** Returns an array of cells - one for each day in the view. A cell is 
-   *  defined by a date/id and a bounding rectangle. These cells are used 
+  /** Returns an array of cells - one for each day in the view. A cell is
+   *  defined by a date/id and a bounding rectangle. These cells are used
    *  when dragging events.
    */
     this.getCells = function(){
@@ -2129,8 +2130,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   /** Used to test whether two rectangles intersect.
    */
     var intersects = function(r1, r2) {
-      return !(r2.left > r1.right || 
-               r2.right < r1.left || 
+      return !(r2.left > r1.right ||
+               r2.right < r1.left ||
                r2.top > r1.bottom ||
                r2.bottom < r1.top);
     };
@@ -2140,7 +2141,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   //** createTable
   //**************************************************************************
     var createTable = function(){
-        var table = document.createElement('table');        
+        var table = document.createElement('table');
         table.style.width = "100%";
         table.style.height = "100%";
         table.cellSpacing = 0;
@@ -2150,12 +2151,12 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         table.appendChild(tbody);
         return tbody;
     };
-    
+
 
     var _getRect = javaxt.dhtml.calendar.Utils.getRect;
     var initDrag = javaxt.dhtml.calendar.Utils.initDrag;
     var log = function(str){if(debug)console.log(str);};
-    
-    
+
+
     init();
 };

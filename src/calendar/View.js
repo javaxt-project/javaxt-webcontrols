@@ -1,5 +1,6 @@
 if(!javaxt) var javaxt={};
 if(!javaxt.dhtml) javaxt.dhtml={};
+if(!javaxt.dhtml.calendar) javaxt.dhtml.calendar={};
 
 //******************************************************************************
 //**  View
@@ -26,7 +27,7 @@ javaxt.dhtml.calendar.View = function(view, config) {
     this.removeEvent = function(event){};
     this.getEvents = function(){};
     this.getEventStore = function(){};
-    
+
     this.refresh = function(){};
     this.clear = function(){};
 
@@ -40,7 +41,7 @@ javaxt.dhtml.calendar.View = function(view, config) {
     this.enableTouch = function(){};
     this.disableTouch = function(){};
     this.getScrollDiv = function(){};
-    
+
 
   //**************************************************************************
   //** addEvents
@@ -88,8 +89,8 @@ javaxt.dhtml.calendar.View = function(view, config) {
 
         return null;
     };
-    
-    
+
+
   //**************************************************************************
   //** addListener
   //**************************************************************************
@@ -101,8 +102,8 @@ javaxt.dhtml.calendar.View = function(view, config) {
             scope: scope==null ? view : scope
         };
     };
-    
-    
+
+
   //**************************************************************************
   //** removeListener
   //**************************************************************************
@@ -112,8 +113,8 @@ javaxt.dhtml.calendar.View = function(view, config) {
             delete listeners[name];
         }
     };
-    
-  
+
+
 
 
   //Extend the view

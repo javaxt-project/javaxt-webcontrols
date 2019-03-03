@@ -1,5 +1,6 @@
 if(!javaxt) var javaxt={};
 if(!javaxt.dhtml) javaxt.dhtml={};
+if(!javaxt.dhtml.calendar) javaxt.dhtml.calendar={};
 
 //******************************************************************************
 //**  Week View
@@ -46,10 +47,10 @@ javaxt.dhtml.calendar.Week = function(parent, config) {
                 config[key] = initialConfig[key];
             }
         }
-        
+
       //Add days to config
         config.days = 7;
-        
+
 
 
 
@@ -78,22 +79,22 @@ javaxt.dhtml.calendar.Week = function(parent, config) {
 
             for (var listenerName in listeners) {
                 if (listeners.hasOwnProperty(listenerName)) {
-                    
+
                     if (listenerName!='beforerender'){
                         (function(listenerName) {
-                            
+
                             config.listeners[listenerName] = function(){
                                 var listener = me.getListener(listenerName);
                                 if (listener!=null) listener.callback.apply(listener.scope, arguments);
                             }
-                            
+
                         })(listenerName);
                     }
-                    
+
                 }
             }
         }
-        
+
 
       //Instantiate the day view
         var view = new javaxt.dhtml.calendar.Day(parent, config);
@@ -104,8 +105,8 @@ javaxt.dhtml.calendar.Week = function(parent, config) {
   //**************************************************************************
   //** getListener
   //**************************************************************************
-  /** Overrides the native getListener method by replacing arguments in the 
-   *  callback. Any arguments that refer to the day view are replaced with 
+  /** Overrides the native getListener method by replacing arguments in the
+   *  callback. Any arguments that refer to the day view are replaced with
    *  this view.
    */
     this.getListener = function(name){
@@ -124,7 +125,7 @@ javaxt.dhtml.calendar.Week = function(parent, config) {
                             arguments[i] = me;
                         }
                     }
-                    callback.apply(scope, arguments);                    
+                    callback.apply(scope, arguments);
                 },
                 scope: scope
             };
