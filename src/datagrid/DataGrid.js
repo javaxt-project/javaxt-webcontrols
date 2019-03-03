@@ -24,14 +24,15 @@ javaxt.dhtml.DataGrid = function(parent, config) {
     var rowHeight; //<-- Assumes all the rows are the same height!
 
 
-  //Required config parameters
-    var preferences, filterName, filter, query, params;
+  //Legacy config parameters
+    var preferences, filterName, filter;
 
 
   //Optional config parameters
     var defaultConfig = {
         //style: javaxt.dhtml.style.table
-        baseURL: "",
+        url: "",
+        params: null,
         payload: null,
         limit: 50,
         count: false,
@@ -94,8 +95,6 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         preferences = config.preferences;
         filterName = config.filterName;
         filter = config.filter;
-        query = config.query;
-        params = config.params;
         if (config.sort==="local") config.localSort = true;
 
 
@@ -384,7 +383,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
 
   //**************************************************************************
-  //** setPage
+  //** getCurrPage
   //**************************************************************************
   /** Returns the current page number
    */
@@ -394,19 +393,35 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
 
   //**************************************************************************
-  //** Public Methods
+  //** getScrollInfo
   //**************************************************************************
     this.getScrollInfo = function(){
         return table.getScrollInfo();
     };
+
+
+  //**************************************************************************
+  //** Events
+  //**************************************************************************
     this.onScroll = function(){};
     this.onPageChange = function(currPage, prevPage){};
     this.onSelectionChange = function(){};
     this.beforeLoad = function(){};
-    this.afterLoad = function(){};
+    this.onLoad = function(){};
+    this.onError = function(request){};
+
+
+  //**************************************************************************
+  //** clear
+  //**************************************************************************
     this.clear = function(){
         table.clear();
     };
+
+
+  //**************************************************************************
+  //** refresh
+  //**************************************************************************
     this.refresh = function(){
         savePreferences = false;
         //eof = false;
@@ -438,7 +453,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                 if (arguments.length>1) page = arguments[1];
                 setPage(page);
 
-                me.afterLoad();
+                me.onLoad();
             }
         }
         else{
@@ -592,12 +607,13 @@ javaxt.dhtml.DataGrid = function(parent, config) {
           //Build URL
             var fieldName = config.columns[key].field;
 
-            var url = config.baseURL + query;
+            var url = config.url;
             if (url.indexOf("?")==-1) url+= "?";
             url += "fields=" + fieldName + "&count=false&offset=" + (currPage*config.limit);
 
 
           //Add query params
+            var params = config.params;
             if (params){
                 for (var key in params) {
                     if (params.hasOwnProperty(key)) {
@@ -635,7 +651,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                     }
                 }
                 else{
-                    console.log(request);
+                    me.onError(request);
                 }
             });
         }
@@ -773,7 +789,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
 
       //Build URL
-        var url = config.baseURL + query;
+        var url = config.url;
         if (url.indexOf("?")==-1) url+= "?";
         url += "&page=" + page + "&limit=" + config.limit + "&fields=" + fields;
 
@@ -784,6 +800,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
 
       //Add query params
+        var params = config.params;
         if (params){
             for (var key in params) {
                 if (params.hasOwnProperty(key)) {
@@ -849,11 +866,10 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
                 if (callback) callback.apply(me, []);
 
-                me.afterLoad();
+                me.onLoad();
             }
             else{
-                console.log(request);
-                me.afterLoad();
+                me.onError(request);
             }
         });
     };
@@ -1086,7 +1102,9 @@ javaxt.dhtml.DataGrid = function(parent, config) {
     };
 
 
-
+  //**************************************************************************
+  //** Utils
+  //**************************************************************************
     var merge = javaxt.dhtml.utils.merge;
     var _getRect = javaxt.dhtml.utils.getRect;
     var isArray = javaxt.dhtml.utils.isArray;
