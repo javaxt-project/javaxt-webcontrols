@@ -727,42 +727,13 @@ javaxt.dhtml.Window = function(parent, config) {
             }
 
         };
-
-
     };
 
 
 
-
-
   //**************************************************************************
-  //** addStyle
+  //** Utils
   //**************************************************************************
-  /** Used to add style to a given element. Styles are defined via a CSS class
-   *  name or inline using the config.style definitions.
-   */
-    var addStyle = function(el, style){
-        style = config.style[style];
-        if (style===null) return;
-        javaxt.dhtml.utils.addStyle(el, style);
-    };
-
-
-  //**************************************************************************
-  //** setStyle
-  //**************************************************************************
-  /** Used to set the style for a given element. Styles are defined via a CSS
-   *  class name or inline using the config.style definitions.
-   */
-    var setStyle = function(el, style){
-        style = config.style[style];
-        if (style===null) return;
-        javaxt.dhtml.utils.setStyle(el, style);
-    };
-
-
-
-
     var _getRect = javaxt.dhtml.utils.getRect;
     var merge = javaxt.dhtml.utils.merge;
     var getNextHighestZindex = javaxt.dhtml.utils.getNextHighestZindex;
@@ -772,6 +743,13 @@ javaxt.dhtml.Window = function(parent, config) {
         javaxt.dhtml.utils.addNoSelectRule();
         noselect = true;
     };
+    var setStyle = function(el, style){
+        javaxt.dhtml.utils.setStyle(el, config.style[style]);
+    };
+    var addStyle = function(el, style){
+        javaxt.dhtml.utils.addStyle(el, config.style[style]);
+    };
+
 
     init();
 };

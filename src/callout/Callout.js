@@ -506,9 +506,7 @@ javaxt.dhtml.Callout = function(parent, config) {
     var merge = javaxt.dhtml.utils.merge;
     var getNextHighestZindex = javaxt.dhtml.utils.getNextHighestZindex;
     var setStyle = function(el, style){
-        style = config.style[style];
-        if (style===null) return;
-        javaxt.dhtml.utils.setStyle(el, style);
+        javaxt.dhtml.utils.setStyle(el, config.style[style]);
     };
 
 

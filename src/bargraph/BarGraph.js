@@ -724,23 +724,19 @@ javaxt.dhtml.BarGraph = function (parent, config) {
     };
 
 
-    var addStyle = function(el, style){
-        style = config.style[style];
-        if (style===null) return;
-        javaxt.dhtml.utils.addStyle(el, style);
-    };
 
-    var setStyle = function(el, style){
-        if (el===null || el===0) return;
-        style = config.style[style];
-        if (style===null) return;
-        javaxt.dhtml.utils.setStyle(el, style);
-    };
-
-
+  //**************************************************************************
+  //** Utils
+  //**************************************************************************
     var merge = javaxt.dhtml.utils.merge;
     var createTable = javaxt.dhtml.utils.createTable;
+    var setStyle = function(el, style){
+        javaxt.dhtml.utils.setStyle(el, config.style[style]);
+    };
+    var addStyle = function(el, style){
+        javaxt.dhtml.utils.addStyle(el, config.style[style]);
+    };
 
-
+    
     init();
 };

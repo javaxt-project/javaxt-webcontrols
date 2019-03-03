@@ -1017,10 +1017,9 @@ javaxt.dhtml.Table = function(parent, config) {
     var addResizeListener = javaxt.dhtml.utils.addResizeListener;
     var isArray = javaxt.dhtml.utils.isArray;
     var setStyle = function(el, style){
-        style = config.style[style];
-        if (style===null) return;
-        javaxt.dhtml.utils.setStyle(el, style);
+        javaxt.dhtml.utils.setStyle(el, config.style[style]);
     };
+
 
     init();
 };

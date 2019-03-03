@@ -832,9 +832,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
     var merge = javaxt.dhtml.utils.merge;
     var createTable = javaxt.dhtml.utils.createTable;
     var setStyle = function(el, style){
-        style = config.style[style];
-        if (style===null) return;
-        javaxt.dhtml.utils.setStyle(el, style);
+        javaxt.dhtml.utils.setStyle(el, config.style[style]);
     };
 
 
