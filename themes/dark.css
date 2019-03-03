@@ -1,0 +1,488 @@
+/******************************************************************************
+*  Dark Theme Stylesheet
+*******************************************************************************
+*
+*  Common style definitions for JavaXT components and applications. This
+*  stylesheet renders components in a dark-gray theme with dark-blue accents.
+*
+******************************************************************************/
+
+html, body {
+    height:100%;
+    margin:0;
+}
+
+body {
+    background: #272a31; /*Gray*/
+    color: #bfc0c3;
+}
+
+body, textarea, input, select, td, th {
+    font-family:helvetica,arial,verdana,sans-serif;
+    font-size:14px;
+}
+
+input, select, textarea { /* Allows overriding native style of form elements on iPad */
+    -webkit-appearance: none;
+    -webkit-border-radius:0;
+    border-radius: 0;
+}
+
+select:focus, textarea:focus, input:focus{
+    outline:0;
+}
+
+.middle {
+    position: relative;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+}
+
+.center {
+    margin: 0 auto;
+}
+
+
+/**************************************************************************/
+/** Triangles
+/**************************************************************************/
+/** Used in menus and grids */
+
+.triangleDown, .descendingSortIcon {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #272727;
+}
+
+.triangleUp, .ascendingSortIcon {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid #272727;
+}
+
+.triangleLeft {
+    width: 0;
+    height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-right: 5px solid #272727;
+}
+
+.triangleRight {
+    width: 0;
+    height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 5px solid #272727;
+}
+
+
+
+
+
+/**************************************************************************/
+/** Form Inputs
+/**************************************************************************/
+/** The following classes are used to define the style for form inputs
+ *  defined in the javaxt.dhtml.Form control.
+ */
+
+.form-input {
+
+    border-radius: 4px;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+
+
+    color: #97989c; /*#7e7f84;*/
+    display: inline-block;
+    font-size: 14px;
+    height: 28px;
+    line-height: 28px;
+    padding: 2px 4px;
+    vertical-align: middle;
+
+
+    transition: border 0.2s linear 0s, box-shadow 0.2s linear 0s;
+    -webkit-transition: all 0.20s ease-in-out;
+    -moz-transition: all 0.20s ease-in-out;
+    -ms-transition: all 0.20s ease-in-out;
+    -o-transition: all 0.20s ease-in-out;
+
+
+    background-color: #353a46;
+    border: 1px solid #4c5258;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
+
+    box-sizing: border-box;
+}
+
+
+.form-input:focus {
+    border-color: rgba(82, 168, 236, 0.8);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6);
+    outline: 0 none;
+}
+
+.form-label {
+    color: #bfc0c3;
+    font-size: 14px;
+    white-space: nowrap;
+    cursor: default;
+    vertical-align: top;
+    padding: 5px 10px 0 0;
+}
+
+
+/**************************************************************************/
+/** Form Radio
+/**************************************************************************/
+/** The following classes are used to define the style for radio inputs
+ */
+.form-radio {
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    padding: 0px;
+    margin: 4px 5px 4px 1px;
+    width: 16px;
+    height: 16px;
+    border: 1px solid #6a7179;
+    border-radius: 100%;
+    background: #353a46;
+}
+
+.form-radio:checked:before {
+    display: block;
+    height: 8px;
+    width: 8px;
+    position: relative;
+    left: 3px;
+    top: 3px;
+    background: #2a79bf;
+    border-radius: 100%;
+    content: '';
+}
+
+.form-radio:focus {
+    border-color: rgba(82, 168, 236, 0.8);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6);
+    outline: 0 none;
+}
+
+
+/**************************************************************************/
+/** Form Buttons
+/**************************************************************************/
+/** The following classes are used to define the style for buttons in a
+ *  form (e.g. "Submit", "OK", "Cancel", etc).
+ */
+.form-button {
+    border-radius: 3px;
+    color: #97989c;
+    display: inline-block;
+    font-size: 14px;
+    width: 80px;
+    height: 26px;
+    /*line-height: 24px;*/
+    vertical-align: middle;
+    background-color: #353a46;
+    border: 1px solid #4c5258;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+    /*text-shadow: 1px 1px 0px rgb(255, 255, 255);*/
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.form-button:hover {
+    color: #d2d2d2;
+    background-color: #335177;
+    border-color: #2e588d;
+}
+
+.form-button:active {
+    box-shadow: none;
+}
+.form-button:focus {
+    outline:0;
+}
+
+
+
+/**************************************************************************/
+/** Form Input With Button
+/**************************************************************************/
+/** The following classes are used define form inputs with buttons (e.g.
+ *  DatePicker, ComboBox, etc.)
+ */
+.form-input-with-button { /* used in conjunction with form-input */
+    border-radius: 5px 0 0 5px;
+    -moz-border-radius: 5px 0 0 5px;
+    -webkit-border-radius: 5px 0 0 5px;
+    border-right: 0 none;
+}
+
+.form-input-button {  /* used in conjunction with form-button */
+    border-radius: 0 3px 3px 0;
+    -moz-border-radius: 0 3px 3px 0;
+    -webkit-border-radius: 0 3px 3px 0;
+    box-shadow: none;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    margin: 0;
+    background: #335177; /* Dark blue */
+    border: 1px solid #525252; /* Light gray */
+    border-left: 0;
+
+
+    /*Add 5px inner glow to mask neighbors in the sprite*/
+    -webkit-box-shadow: inset -5px 5px 5px 0px #335177, inset 5px -5px 5px 0px #335177;
+    -moz-box-shadow: inset -5px 5px 5px 0px #335177, inset 5px -5px 5px 0px #335177;
+    box-shadow: inset -5px 5px 5px 0px #335177, inset 5px -5px 5px 0px #335177;
+}
+
+/* Preserve 5px inner glow */
+.form-input-button:hover, .form-input-button:focus {
+    background-color: #2e588d;
+    box-shadow: inset -5px 5px 5px 0px #2e588d, inset 5px -5px 5px 0px #2e588d /*5px inner mask*/
+                /*,0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6); /*blue outer glow*/
+}
+
+
+
+/**************************************************************************/
+/** Form Menu
+/**************************************************************************/
+/** The following classes are used to define the style for menus in a
+ *  javaxt.dhtml.ComboBox.
+ */
+.form-input-menu {
+    /*border-radius: 0 0 4px 4px;
+    -moz-border-radius: 0 0 4px 4px;
+    -webkit-border-radius: 0 0 4px 4px;*/
+    background-color: #3e4453;
+    /*border: 1px solid #4d5361;*/
+    /*box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);*/
+    box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.3);
+    margin-top: -1px;
+    overflow: hidden;
+}
+
+.form-input-menu-item {
+    color: #b3b3b3;
+    font-size: 14px;
+    height: 28px;
+    line-height: 28px;
+    padding: 0px 6px;
+    vertical-align: middle;
+    white-space: nowrap;
+    cursor: default;
+}
+
+.form-input-menu-item:hover {
+    background-color: #415175;
+    color: #d2d2d2;
+}
+.form-input-menu-item:focus {
+    background-color: #415175;
+}
+.form-input-menu-item:focused {
+    background-color: #415175;
+}
+
+.form-input-menu-item-new { /* For a "new" menu option in a combobox menu. Used in conjuction  */
+    border-top: 1px solid #4d5361;
+}
+
+
+
+
+
+/**************************************************************************/
+/** Window
+/**************************************************************************/
+
+.window {
+    background: #3e4453; /*#36373e*/
+    border-radius: 5px;
+    display: inline-block;
+    box-shadow: 0 12px 14px 0 rgba(0, 0, 0, 0.2), 0 13px 20px 0 rgba(0, 0, 0, 0.2);
+}
+
+.window-header {
+
+    background: #335177;
+    height: 36px;
+    cursor: default;
+
+
+    position: relative;
+    border-radius: 4px 4px 0px 0px;
+    border: 1px solid #2e588d;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 4px 0px;
+    cursor: default;
+}
+
+.window-title {
+
+    color: #bdbdbd;
+    text-align: center;
+    white-space: nowrap;
+    text-transform: uppercase;
+    line-height: 36px; /*Should match window-header height*/
+
+    position: absolute;
+    font-size: 14px;
+    text-align: left;
+    cursor: default;
+    padding-left: 9px;
+}
+
+.window-header-button {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    border: 0;
+    color: #bdbdbd;
+    cursor: pointer;
+}
+
+.window-body {
+    padding: 7px;
+    vertical-align: top;
+}
+
+.alert-header { /* used in conjunction with window-header */
+    background-color: #6f6235;
+    border: 1px solid #6f6235;
+    border-bottom: 1px solid #a28317;
+}
+
+.alert { /* used in conjunction with window */
+    background-color: #383727;
+}
+
+
+/**************************************************************************/
+/** Callout
+/**************************************************************************/
+
+.callout-panel, .callout-arrow {
+    border: 1px solid #383b41;
+    background: #3e4453; /*same as window*/
+}
+.callout-panel {
+    border-radius: 4px;
+    box-shadow: 0 12px 14px 0 rgba(0, 0, 0, 0.2), 0 13px 20px 0 rgba(0, 0, 0, 0.2)
+}
+.callout-arrow {
+    width: 10px;
+    height: 10px;
+    padding: 10px;
+}
+
+
+/**************************************************************************/
+/** Table
+/**************************************************************************/
+/** Default style for grid controls
+ */
+.table-header {
+    border-bottom: 1px solid #383b41;
+    /*background: #3e414a; /*#33363f;  #353a46 */
+    background: #3e414a;
+    /*
+    background-image: none;
+    background-image: linear-gradient(to bottom, #f9f9f9, #e4e5e7);
+    */
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);
+}
+
+
+.table-row, .table-row-selected {
+    border-bottom: 1px solid #383b41;
+    background-color: #23252b;
+    color: #97989c;
+}
+
+/*
+.table-row:nth-child(odd) {background: #272a31}
+*/
+
+.table-row:hover{
+    background-color:#212939;
+}
+
+.table-row-selected{
+    /*border-bottom-style:dotted;*/
+    /*border-color:#a3bae9;*/
+    background-color:#25334f;
+    color: #e2e3e7;
+    transition: 0.2s;
+}
+
+.table-col, .table-header-col {
+    font-family: helvetica,arial,verdana,sans-serif;
+    font-size: 14px;
+    white-space: nowrap;
+
+    height: 35px;
+    line-height: 35px;
+
+
+    border-left: 1px solid #383b41;
+    border-right: 1px solid #383b41;
+    padding: 0 5px;
+
+
+    /*
+    text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
+    -webkit-text-overflow: ellipsis;
+    */
+}
+
+.table-header-col {
+    cursor: pointer;
+    color: #bfc0c3;
+}
+
+.table-header-col:hover{
+    color: #d2d2d2;
+    background-color: #335177;
+    border-color: #2e588d;
+    transition: 0.2s;
+}
+
+.table-col {
+    border-left: 0;
+    border-right: 0;
+    color: inherit;
+}
+
+.table-resizeHandle {
+    width: 5px;
+    height: 100%;
+    cursor: col-resize;
+    margin: 0 -7px 0 0px;
+}
+
+
+/**************************************************************************/
+/** Tree
+/**************************************************************************/
+
+.tree-node {
+    color: #97989c;
+    cursor: pointer;
+}
+
+.tree-node:hover {
+    background-color:#364156 !important;
+}
