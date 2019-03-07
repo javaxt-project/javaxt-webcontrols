@@ -240,6 +240,39 @@ javaxt.dhtml.utils = {
         if (el===null || el===0) return;
         if (style===null) return;
 
+
+      //Special case for iScroll
+        if (typeof IScroll !== 'undefined'){
+            if (el instanceof IScroll){
+
+                var indicators = el.indicators;
+                if (indicators){
+                    var indicatorClass = "iScrollIndicator";
+                    if (style.indicator) indicatorClass = style.indicator;
+
+                    for (var i=0; i<indicators.length; i++){
+                        var indicator = indicators[i].indicator;
+                        indicator.className = indicatorClass;
+                        var scrollbar = indicator.parentNode;
+
+                        if (scrollbar.className.indexOf("iScrollVerticalScrollbar")){
+                            if (style.verticalScrollbar){
+                                scrollbar.className = scrollbar.className.replace("iScrollVerticalScrollbar", style.verticalScrollbar);
+                            }
+                        }
+                        else{
+                            if (style.horizontalScrollbar){
+                                scrollbar.className = scrollbar.className.replace("iScrollHorizontalScrollbar", style.horizontalScrollbar);
+                            }
+                        }
+                    }
+                }
+                return;
+            }
+        }
+
+
+
         el.style = '';
         el.removeAttribute("style");
 
