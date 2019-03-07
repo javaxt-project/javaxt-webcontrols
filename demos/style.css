@@ -30,3 +30,7 @@ p {
     margin: 0 0 20px 0;
     color: #555555;
 }
+
+select:focus, textarea:focus, input:focus{ /* Remove default glow around form inputs (e.g. Chrome) */
+    outline:0;
+}
