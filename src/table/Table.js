@@ -75,7 +75,20 @@ javaxt.dhtml.Table = function(parent, config) {
                 width: "5px",
                 cursor: "col-resize",
                 marginRight: "-2px"
+            },
+
+
+            iscroll: null //If null or false, uses inline style. If "custom",
+            //uses, "iScrollHorizontalScrollbar", "iScrollVerticalScrollbar",
+            //and "iScrollIndicator" classes. You can also define custom class
+            //names by providing a style map like this:
+            /*
+            iscroll: {
+                horizontalScrollbar: "my-iScrollHorizontalScrollbar",
+                verticalScrollbar: "my-iScrollVerticalScrollbar",
+                indicator: "my-iScrollIndicator"
             }
+            */
         }
     };
 
@@ -225,27 +238,32 @@ javaxt.dhtml.Table = function(parent, config) {
       //Function called after the table has been added to the DOM
         var onRender = function(){
 
+            var onScroll = function(scrollTop){
+                var maxScrollPosition = bodyDiv.scrollHeight - bodyDiv.clientHeight;
+                me.onScroll(scrollTop, maxScrollPosition, bodyDiv.offsetHeight);
+            };
+
 
           //Configure iScroll as needed and watch for scroll events
             if (typeof IScroll !== 'undefined'){
                 bodyDiv.style.overflowY = 'hidden';
                 me.iScroll = new IScroll(bodyDiv, {
-
-                    scrollbars: true,
+                    scrollbars: config.style.iscroll ? "custom" : true,
+                    mouseWheel: true, //enable scrolling with mouse wheel
                     fadeScrollbars: false,
-                    hideScrollbars: false,
+                    hideScrollbars: false
+                });
+                if (config.style.iscroll) setStyle(me.iScroll, "iscroll");
 
-                    onScrollStart : function(e) {
-                        //document.onselectstart = new Function ("return false");
-                        //document.onmousedown = function(e){return false;};
-                        //me.body.onselectstart='return false;'
-                    }
+
+
+                me.iScroll.on('scrollEnd', function(){
+                    onScroll(-me.iScroll.y);
                 });
             }
             else{
                 bodyDiv.onscroll = function(){
-                    var maxScrollPosition = bodyDiv.scrollHeight - bodyDiv.clientHeight;
-                    me.onScroll(bodyDiv.scrollTop, maxScrollPosition, bodyDiv.offsetHeight);
+                    onScroll(bodyDiv.scrollTop);
                 };
             }
 
