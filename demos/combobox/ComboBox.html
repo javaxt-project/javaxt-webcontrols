@@ -56,7 +56,13 @@
 <script type="text/javascript">
 var demo1 = function() {
 
-    var countries = new javaxt.dhtml.ComboBox("demo1",{style:{option:"combobox-option"}});
+    var countries = new javaxt.dhtml.ComboBox("demo1", {
+        scrollbar: false,
+        placeholder: "Select Country",
+        style:{
+            option:"combobox-option"
+        }
+    });
     countries.add("Afghanistan", "AF");
     countries.add("Albania", "AL");
     countries.add("Algeria", "AG");
