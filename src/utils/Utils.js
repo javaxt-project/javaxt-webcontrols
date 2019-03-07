@@ -493,6 +493,34 @@ javaxt.dhtml.utils = {
 
 
   //**************************************************************************
+  //** getAreaOfIntersection
+  //**************************************************************************
+  /** Returns the area of intersection between 2 rectangles.
+   */
+    getAreaOfIntersection: function(r1, r2){
+
+        var minX = r2.left;
+        var maxX = r2.right;
+        var minY = r2.top;
+        var maxY = r2.bottom;
+
+        var left = r1.left;
+        var right = r1.right;
+        var top = r1.top;
+        var bottom = r1.bottom;
+
+        if (left<minX) left=minX;
+        if (right>maxX) right=maxX;
+        if (top<minY) top=minY;
+        if (bottom>maxY) bottom=maxY;
+
+        var w = right-left;
+        var h = bottom-top;
+        return w*h;
+    },
+
+
+  //**************************************************************************
   //** addResizeListener
   //**************************************************************************
   /** Used to watch for resize events for a given element. Credit:
