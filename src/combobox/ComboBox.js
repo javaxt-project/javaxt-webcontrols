@@ -17,15 +17,17 @@ javaxt.dhtml.ComboBox = function(parent, config) {
     var me = this;
     var input, button;
     var menuDiv, menuOptions, newOption;
+    var overflowDiv, overflowContainer;
 
     var defaultConfig = {
 
-        placeholder: false,
-
-        maxVisibleRows: 5, //number of menu items before overflow
-        scrollbar: false, //true to show the vertical scrollbar
+        placeholder: false, //Replace with placeholder text is needed
+        spellcheck: false,  //Disable spellcheck on the input by default
+        maxVisibleRows: 5,  //number of menu items before overflow
+        scrollbar: true,    //true to show the vertical scrollbar
         showMenuOnFocus: true,
         typeAhead: true,
+
 
         addNewOption: false,
         addNewOptionText: "Add New...",
@@ -36,13 +38,14 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             input: {
                 color: "#363636",
                 fontSize: "14px",
-                height: "22px",
-                lineHeight: "22px",
+                height: "24px",
+                lineHeight: "24px",
                 padding: "0px 4px",
                 verticalAlign: "middle",
                 transition: "border 0.2s linear 0s, box-shadow 0.2s linear 0s",
                 backgroundColor: "#fff",
                 border: "1px solid #ccc",
+                borderRight: "0 none",
                 boxShadow: "0 1px 1px rgba(0, 0, 0, 0.075) inset"
             },
 
@@ -88,7 +91,19 @@ javaxt.dhtml.ComboBox = function(parent, config) {
                 lineHeight: "24px",
                 padding: "0px 4px",
                 cursor: "default"
+            },
+
+            iscroll: null //If null or false, uses inline style. If "custom",
+            //uses, "iScrollHorizontalScrollbar", "iScrollVerticalScrollbar",
+            //and "iScrollIndicator" classes. You can also define custom class
+            //names by providing a style map like this:
+            /*
+            iscroll: {
+                horizontalScrollbar: "my-iScrollHorizontalScrollbar",
+                verticalScrollbar: "my-iScrollVerticalScrollbar",
+                indicator: "my-iScrollIndicator"
             }
+            */
         }
     };
 
@@ -140,6 +155,8 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         input.type = "text";
         setStyle(input, "input");
         input.style.width="100%";
+        if (config.spellcheck===true){} else input.setAttribute("spellcheck", "false");
+        if (config.placeholder) input.setAttribute("placeholder", config.placeholder);
         td.appendChild(input);
         tr.appendChild(td);
 
@@ -234,6 +251,24 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         div.appendChild(menuDiv);
 
 
+      //Create overflow divs
+        overflowContainer = document.createElement("div");
+        overflowContainer.style.position = "relative";
+        overflowContainer.style.width = "100%";
+        overflowContainer.style.height = "100%";
+
+        overflowDiv = overflowContainer.cloneNode();
+        overflowDiv.style.position = "absolute";
+        overflowDiv.style.overflow = "hidden";
+        overflowContainer.appendChild(overflowDiv);
+
+
+      //Create menu options
+        menuOptions = document.createElement("div");
+        menuOptions.style.position = "relative";
+        overflowDiv.appendChild(menuOptions);
+
+
 
         if (config.addNewOption===true){
 
@@ -246,19 +281,8 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             td.style.height = "100%";
             td.style.verticalAlign = "top";
             tr.appendChild(td);
+            td.appendChild(overflowContainer);
 
-            var outerDiv = document.createElement("div");
-            outerDiv.style.position = "relative";
-            outerDiv.style.width = "100%";
-            outerDiv.style.height = "100%";
-            td.appendChild(outerDiv);
-
-            var innerDiv = outerDiv.cloneNode();
-            innerDiv.style.position = "absolute";
-            innerDiv.style.overflowX = 'hidden';
-            innerDiv.style.overflowY = 'hidden';
-            outerDiv.appendChild(innerDiv);
-            menuOptions = innerDiv;
 
             tr = document.createElement("tr");
             menuTable.firstChild.appendChild(tr);
@@ -304,9 +328,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             menuDiv.appendChild(menuTable);
         }
         else{
-            menuDiv.style.overflowX = 'hidden';
-            menuDiv.style.overflowY = 'hidden';
-            menuOptions = menuDiv;
+            menuDiv.appendChild(overflowContainer);
         }
 
 
@@ -368,10 +390,6 @@ javaxt.dhtml.ComboBox = function(parent, config) {
                 return;
             }
         }
-
-
-        //input.value = getText(val);
-        //input.data = val;
     };
 
 
@@ -551,6 +569,11 @@ javaxt.dhtml.ComboBox = function(parent, config) {
               //Hide bottom border
                 input.style.borderBottomColor =
                 button.style.borderBottomColor = "rgba(0,0,0,0)";
+
+
+              //Scroll to top
+                if (me.iScroll) me.iScroll.scrollTo(0,0);
+                else overflowDiv.scrollTop = 0;
             }
         }
     };
@@ -585,37 +608,73 @@ javaxt.dhtml.ComboBox = function(parent, config) {
                 if (newOption){
                     menuDiv.style.height = height + "px";
                     height = height-newOption.offsetHeight;
-                    menuOptions.parentNode.style.height =
-                    menuOptions.style.height = height + "px";
+                    overflowContainer.style.height =
+                    //menuOptions.style.height =
+                    height + "px";
                 }
                 else{
-                    menuOptions.style.height =
+                    //menuOptions.style.height =
                     menuDiv.style.height = height + "px";
                 }
             }
             else{
                 removeOverflow();
-                menuOptions.parentNode.style.height =
-                menuOptions.style.height =
+                overflowContainer.style.height = "100%"; //?
+                //menuOptions.style.height =
                 menuDiv.style.height = '';
             }
-        }
-    };
 
-    var addOverflow = function(){
-        menuOptions.style.position = "absolute";
-        if (config.scrollbar===true){
-            menuOptions.style.overflowY = 'scroll';
         }
         else{
-            menuOptions.style.overflowY = 'hidden';
+
+            removeOverflow();
+            overflowContainer.style.height = "100%"; //?
+            //menuOptions.style.height =
+            menuDiv.style.height = '';
         }
+        if (me.iScroll) me.iScroll.refresh();
     };
 
+
+  //**************************************************************************
+  //** addOverflow
+  //**************************************************************************
+    var addOverflow = function(){
+
+        overflowDiv.style.position = "absolute";
+        if (config.scrollbar===true){
+            if (typeof IScroll !== 'undefined'){
+                if (!me.iScroll){
+                    overflowDiv.style.overflowY = 'hidden';
+                    me.iScroll = new IScroll(overflowDiv, {
+                        scrollbars: config.style.iscroll ? "custom" : true,
+                        mouseWheel: true,
+                        fadeScrollbars: false,
+                        hideScrollbars: false
+                    });
+                    if (config.style.iscroll) setStyle(me.iScroll, "iscroll");
+                }
+                if (me.iScroll) me.iScroll.refresh();
+            }
+            else{
+                overflowDiv.style.overflowY = 'scroll';
+            }
+        }
+        else{
+            overflowDiv.style.overflowY = 'hidden';
+        }
+
+    };
+
+
+  //**************************************************************************
+  //** removeOverflow
+  //**************************************************************************
     var removeOverflow = function(){
-        if (config.addNewOption===true){ //remove overflow if we have a table menu
-            menuOptions.style.position = "relative";
-            menuOptions.style.overflowY = '';
+        overflowDiv.style.position = "relative";
+
+        if (config.addNewOption===true){
+            overflowDiv.style.overflowY = '';
         }
     };
 
@@ -631,7 +690,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         for (var i=0; i<menuOptions.childNodes.length; i++){
             var div = menuOptions.childNodes[i];
             if (div.innerHTML===input.value){
-                menuOptions.scrollTop = div.offsetTop;
+                overflowDiv.scrollTop = div.offsetTop;
                 div.focus();
                 return;
             }
@@ -657,7 +716,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         }
 
         if (div){
-            menuOptions.scrollTop = div.offsetTop;
+            overflowDiv.scrollTop = div.offsetTop;
             div.focus();
             return;
         }
