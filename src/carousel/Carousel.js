@@ -533,12 +533,21 @@ javaxt.dhtml.Carousel = function(parent, config) {
     this.getPanels = function(){
         var arr = [];
         var r1 = _getRect(outerDiv);
+
+
+
         for (var i=0; i<innerDiv.childNodes.length; i++){
             var panel = innerDiv.childNodes[i];
             var r2 = _getRect(panel);
+            var isVisible = intersects(r1, r2);
+            if (isVisible){
+                var visibleArea = getAreaOfIntersection(r1, r2);
+                if (visibleArea<=config.padding) isVisible = false;
+            }
+
             arr.push({
                div: panel.childNodes[0].childNodes[0],
-               isVisible: intersects(r1, r2)
+               isVisible: isVisible
             });
         }
         return arr;
@@ -810,6 +819,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
     var _getRect = javaxt.dhtml.utils.getRect;
     var intersects = javaxt.dhtml.utils.intersects;
+    var getAreaOfIntersection = javaxt.dhtml.utils.getAreaOfIntersection;
     var merge = javaxt.dhtml.utils.merge;
     var addResizeListener = javaxt.dhtml.utils.addResizeListener;
     var addNoSelectRule = function(){
