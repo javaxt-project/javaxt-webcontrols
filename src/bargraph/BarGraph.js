@@ -211,7 +211,7 @@ javaxt.dhtml.BarGraph = function (parent, config) {
   /** Used to add a value to the graph. Label is optional.
    */
     this.add = function(value, label){
-        if (value==null) value=0;
+        if (!isNumber(value)) value=0;
 
         values.push(value);
         if (value>maxValue) maxValue = value;
@@ -737,6 +737,6 @@ javaxt.dhtml.BarGraph = function (parent, config) {
         javaxt.dhtml.utils.addStyle(el, config.style[style]);
     };
 
-    
+
     init();
 };
