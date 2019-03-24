@@ -172,7 +172,7 @@ javaxt.dhtml.BarGraph = function (parent, config) {
         outerDiv.appendChild(div2);
         dataTable = createTable();
         dataTable.setAttribute("desc", "dataTable");
-        var tbody = dataTable.firstChild;
+        tbody = dataTable.firstChild;
         chartRow = document.createElement('tr');
         tbody.appendChild(chartRow);
         tickRow = document.createElement('tr');
@@ -186,6 +186,34 @@ javaxt.dhtml.BarGraph = function (parent, config) {
         if (config.animate===true){
             innerTable.style.height = 0;
         }
+
+
+      //Check whether the bargraph has been added to the DOM
+        var w = outerDiv.offsetWidth;
+        if (w===0 || isNaN(w)){
+            var timer;
+
+            var checkWidth = function(){
+                var w = outerDiv.offsetWidth;
+                if (w===0 || isNaN(w)){
+                    timer = setTimeout(checkWidth, 100);
+                }
+                else{
+                    clearTimeout(timer);
+                    onRender();
+                }
+            };
+
+            timer = setTimeout(checkWidth, 100);
+        }
+        else{
+            onRender();
+        }
+
+    };
+
+    var onRender = function(){
+        me.update();
     };
 
 
