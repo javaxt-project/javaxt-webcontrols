@@ -35,21 +35,33 @@ javaxt.dhtml.PageLoader = function(config) {
     this.loadPage = function(url, callback){
         me.load(url, function(html, title, inlineScripts){
 
+          //Set title
             document.title = title;
 
 
-
+          //Update body
             var body = document.getElementsByTagName("body")[0];
             body.innerHTML = html;
 
 
-
-          //Execute inline scripts
+          //Add inline scripts
             for (var i=0; i<inlineScripts.length; i++){
                 var script = inlineScripts[i].firstChild.nodeValue;
-                eval(script);
+                var type = inlineScripts[i].getAttribute("type");
+                if (type=="module"){
+                    script = script.replace("//<![CDATA[","").replace("//]]>","");
+                    var s = document.createElement("script");
+                    s.setAttribute("type", type);
+                    s.innerHTML = script;
+                    body.appendChild(s);
+                }
+                else{
+                    eval(script);
+                }
             }
 
+
+          //Dispatch onload event. Warning: ES6 modules with imports may not be ready...
             dispatchEvent("load");
 
             if (callback) callback.apply(me, []);
@@ -122,6 +134,21 @@ javaxt.dhtml.PageLoader = function(config) {
             removeNodes(scripts);
             removeNodes(links);
             removeNodes(cssNodes);
+
+
+          //Remove comments
+            var comments = [];
+            for (var i=0; i<div.childNodes.length; i++){
+                var node = div.childNodes[i];
+                if (node.nodeType==8){
+                    comments.push(node);
+                }
+            }
+            while (comments.length>0){
+                div.removeChild(comments[0]);
+                comments.shift();
+            }
+
 
 
           //Get html and delete div
