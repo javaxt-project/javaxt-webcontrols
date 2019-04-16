@@ -431,7 +431,13 @@ javaxt.dhtml.Form = function (parent, config) {
   //**************************************************************************
   //** createTextInput
   //**************************************************************************
-    var createTextInput = function(label, name, value, type, icon){
+    var createTextInput = function(config){
+
+        var type = config.type;
+        var name = config.name;
+        var label = config.label;
+        var icon = config.icon;
+        var value = config.value;
 
         var input;
         if (type=="textarea"){
@@ -443,6 +449,7 @@ javaxt.dhtml.Form = function (parent, config) {
         else{
             input = document.createElement('input');
             input.type = type;
+            if (config.placeholder) input.setAttribute("placeholder", config.placeholder);
             setStyle(input, "input");
         }
         input.name = name;
@@ -803,7 +810,7 @@ javaxt.dhtml.Form = function (parent, config) {
 
         if (typeof type === "string"){
             if (type==="text" || type==="password" || type==="textarea"){
-                createTextInput(label, name, value, type, icon);
+                createTextInput(item);
             }
             else if (type==="radio"){
                 createRadioInput(label, name, item);
@@ -826,23 +833,20 @@ javaxt.dhtml.Form = function (parent, config) {
                     setValue = function(value){
                         input.value = value;
                     };
+                    addInput(name, label, el, getValue, setValue, icon);
                 }
             }
             else{
-                if (input.el && input.getValue){ //hook for javaxt components
-                    el = input.el;
-                    getValue = function(){
-                        return input.getValue();
-                    };
-                    setValue = function(value){
-                        input.setValue(value);
-                    };
+                if (input.el && input.getValue){ //hook for javaxt components (e.g. combobox)
+                    var obj = addInput(name, label, input.el, input.getValue, input.setValue, icon);
+                    for (var key in input) {
+                        if (input.hasOwnProperty(key)){
+                            if (typeof input[key] === "function"){
+                                obj[key] = input[key];
+                            }
+                        }
+                    }
                 }
-            }
-
-
-            if (el){
-                addInput(name, label, el, getValue, setValue, icon);
             }
         }
     };
