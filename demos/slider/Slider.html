@@ -1,0 +1,43 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>Slider Demo</title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<link  href="../style.css" rel="stylesheet" type="text/css" />
+
+
+<!-- JavaXT Includes -->
+<script type="text/javascript" src="../../src/slider/Slider.js"></script>
+<script type="text/javascript" src="../../src/utils/Utils.js"></script>
+
+
+<link type="text/css" rel="stylesheet" href="Slider.css"/>
+
+<script type="text/javascript">
+window.onload = function() {
+
+    var value = document.getElementById("value");
+
+    var slider = new javaxt.dhtml.Slider(document.getElementById("slider"));
+    slider.onChange = function(val){
+        var percentage = Math.round(slider.getValue(true)*100) + "%";
+        value.innerHTML = val + "/" + slider.getWidth() + " " + percentage;
+    };
+
+
+    slider.setValue(100);
+
+};
+</script>
+</head>
+
+<body>
+
+    <div id="value"></div>
+    <div id="slider" style="margin:20px 0px 20px 20px;width:600px;"></div>
+
+</body>
+</html>
