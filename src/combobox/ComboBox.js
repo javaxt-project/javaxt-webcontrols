@@ -221,7 +221,8 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         setStyle(button, "button");
         td.appendChild(button);
         tr.appendChild(td);
-        button.onclick = function(){
+        button.onclick = function(e){
+            e.preventDefault();
             if (menuDiv.style.visibility === "hidden"){
                 me.showMenu(true);
                 scroll();
