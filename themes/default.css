@@ -105,7 +105,7 @@ select:focus, textarea:focus, input:focus{
     border-radius: 3px;
     cursor: pointer;
     padding: 0px 7px;
-    margin: 0px;
+    margin: 3px 0 0 0;
     color: #272727;
     /*background: #208ec9; /* Same as toolbar background */
     /*border: 1px solid #208ec9; /* Same as toolbar background */
@@ -327,6 +327,58 @@ select:focus, textarea:focus, input:focus{
     box-shadow: inset -5px 5px 5px 0px #e4e4e4, inset 5px -5px 5px 0px #e4e4e4, /*5px inner mask*/
                 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6); /*blue glow*/
 }
+
+
+/**************************************************************************/
+/** Form Menu
+/**************************************************************************/
+/** The following classes are used to define the style for menus in a
+ *  javaxt.dhtml.ComboBox.
+ */
+.form-input-menu {
+    border-radius: 0 0 4px 4px;
+    -moz-border-radius: 0 0 4px 4px;
+    -webkit-border-radius: 0 0 4px 4px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+    margin-top: -1px;
+}
+
+.form-input-menu-item {
+    color: #363636;
+    font-size: 14px;
+    height: 28px;
+    line-height: 28px;
+    padding: 0px 6px;
+    vertical-align: middle;
+    white-space: nowrap;
+    cursor: default;
+}
+
+.form-input-menu-item:hover {
+    background-color: aliceblue;
+}
+.form-input-menu-item:focus {
+    background-color: aliceblue;
+}
+.form-input-menu-item:focused {
+    background-color: aliceblue;
+}
+
+
+
+/**************************************************************************/
+/** Pulldown Button Icon
+/**************************************************************************/
+.pulldown-button-icon { /*form-button form-input-button pulldown-button-icon*/
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAlklEQVQ4jWNgGAUowNvbW9PBwUEAjxJGHx8f/dDQUB4MGV9f3+TAwMD/AQEB97y8vOSxafb392+BqrlkbGzMhSLr7++/MTAw8D8OQ+CaYdjb21sT3flKAQEBj7AYgqHZz8+vBqsHPT09ldENCQgImIysOSAgoBZPGGEaQpJmfIYQrRmbITj9TAg4ODgIeHp6apGleegAAME5Y+rCcN+AAAAAAElFTkSuQmCC);
+    background-position: 5px 5px;
+    background-repeat: no-repeat;
+    background-color: #e4e4e4;
+}
+
+
 
 
 
