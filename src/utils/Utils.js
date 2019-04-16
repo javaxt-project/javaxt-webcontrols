@@ -185,9 +185,15 @@ javaxt.dhtml.utils = {
             for (var i in obj2) {
                 rett = {};
                 if (typeof obj2[i] === 'object'){
-                    rett = diff(obj1[i], obj2[i]);
-                    if (!isEmpty(rett) ){
-                        ret[i]= rett;
+
+                    if (obj1.hasOwnProperty(i)){
+                        rett = diff(obj1[i], obj2[i]);
+                        if (!isEmpty(rett) ){
+                            ret[i]= rett;
+                        }
+                    }
+                    else{
+                        ret[i] = obj2[i];
                     }
                 }
                 else{
