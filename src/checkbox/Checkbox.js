@@ -277,6 +277,13 @@ javaxt.dhtml.Checkbox = function(parent, config) {
     this.onClick = function(checked){};
 
 
+  //**************************************************************************
+  //** onChange
+  //**************************************************************************
+  /** Called whenever the checkbox is clicked.
+   */
+    this.onChange = function(){};
+
 
   //**************************************************************************
   //** enable
@@ -350,9 +357,11 @@ javaxt.dhtml.Checkbox = function(parent, config) {
     this.toggle = function(){
         if (box.checked===true){
             me.deselect();
+            me.onChange(false, true);
         }
         else{
             me.select();
+            me.onChange(true, false);
         }
     };
 
@@ -364,6 +373,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
    *  the config used to instantiate this class.
    */
     this.getValue = function(){
+        if (config.value==null) return me.isChecked();
         return config.value;
     };
 
