@@ -222,6 +222,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         td.appendChild(button);
         tr.appendChild(td);
         button.onclick = function(e){
+            button.blur();
             e.preventDefault();
             if (menuDiv.style.visibility === "hidden"){
                 me.showMenu(true);
@@ -365,7 +366,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
    */
     this.setValue = function(val){
 
-        if (val==null || val=="") {
+        if (val==null || val==="") {
             input.value = "";
             input.data = null;
             return;
@@ -518,7 +519,8 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         input.data = null;
         me.hideMenu();
         removeOverflow();
-        menuDiv.style.height = '';
+        menuDiv.style.height = "";
+        menuOptions.innerHTML = "";
     };
 
 
