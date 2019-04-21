@@ -157,6 +157,11 @@ javaxt.dhtml.Form = function (parent, config) {
         form.style.height = "100%";
         form.setAttribute("desc", me.className);
         if (config.onsubmit) form.onsubmit = config.onsubmit;
+        else{
+            form.onsubmit = function(e){
+                e.preventDefault();
+            };
+        }
         me.el = form;
 
 
@@ -445,16 +450,19 @@ javaxt.dhtml.Form = function (parent, config) {
             setStyle(input, "input");
             input.style.resize = "none";
             input.style.height = "100px";
+            if (config.spellcheck===false) input.setAttribute("spellcheck", "false"); //<-- enable spellcheck by default
         }
         else{
             input = document.createElement('input');
             input.type = type;
             if (config.placeholder) input.setAttribute("placeholder", config.placeholder);
             setStyle(input, "input");
+            if (config.spellcheck===true){} else input.setAttribute("spellcheck", "false"); //<-- disable spellcheck by default
         }
         input.name = name;
         if (value!=null) input.value = value;
         input.style.width = "100%";
+        input.setAttribute("autocomplete", "off");
 
 
 
@@ -466,7 +474,13 @@ javaxt.dhtml.Form = function (parent, config) {
             input.value = value;
         };
 
-        addInput(name, label, input, getValue, setValue, icon);
+        var formInput = addInput(name, label, input, getValue, setValue, icon);
+
+        input.oninput = function(){
+            me.onChange(formInput, input.value);
+        };
+        input.onpaste = input.oninput;
+        input.onpropertychange = input.oninput;
     };
 
 
@@ -838,14 +852,17 @@ javaxt.dhtml.Form = function (parent, config) {
             }
             else{
                 if (input.el && input.getValue){ //hook for javaxt components (e.g. combobox)
-                    var obj = addInput(name, label, input.el, input.getValue, input.setValue, icon);
+                    var formInput = addInput(name, label, input.el, input.getValue, input.setValue, icon);
                     for (var key in input) {
                         if (input.hasOwnProperty(key)){
                             if (typeof input[key] === "function"){
-                                obj[key] = input[key];
+                                formInput[key] = input[key];
                             }
                         }
                     }
+                    input.onChange = function(){
+                        me.onChange(formInput, input.getValue());
+                    };
                 }
             }
         }
