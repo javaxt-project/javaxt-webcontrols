@@ -218,8 +218,10 @@ select:focus, textarea:focus, input:focus{
     font-size: 14px;
     white-space: nowrap;
     cursor: default;
-    padding-right: 10px;
+    padding: 7px 10px 0 0;
+    vertical-align: top;
 }
+
 
 /**************************************************************************/
 /** Form Radio
@@ -280,6 +282,11 @@ select:focus, textarea:focus, input:focus{
     margin-left: 10px;
 }
 
+.form-button:hover {
+    background-color: #d2e3ed;
+    border-color: rgba(82, 168, 236, 0.8);
+}
+
 .form-button:active {
     box-shadow: none;
 }
@@ -295,8 +302,8 @@ select:focus, textarea:focus, input:focus{
 /**************************************************************************/
 /** Form Input With Button
 /**************************************************************************/
-/** The following classes are used define form inputs with buttons (e.g.
- *  DatePicker, ComboBox, etc.)
+/** The following classes are used define the style for custom form inputs
+ *  with buttons (e.g. DatePicker, ComboBox, etc.)
  */
 .form-input-with-button { /* used in conjunction with form-input */
     border-radius: 4px 0 0 4px;
@@ -324,7 +331,8 @@ select:focus, textarea:focus, input:focus{
 
 /* Preserve 5px inner glow */
 .form-input-button:hover, .form-input-button:focus {
-    box-shadow: inset -5px 5px 5px 0px #e4e4e4, inset 5px -5px 5px 0px #e4e4e4, /*5px inner mask*/
+    background-color: #d2e3ed;
+    box-shadow: inset -5px 5px 5px 0px #d2e3ed, inset 5px -5px 5px 0px #d2e3ed, /*5px inner mask*/
                 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6); /*blue glow*/
 }
 
@@ -380,11 +388,37 @@ select:focus, textarea:focus, input:focus{
 
 
 
+/**************************************************************************/
+/** Callout Panel
+/**************************************************************************/
+/** The following classes are used to define the style for pop-up callouts
+ *  generated using the javaxt.dhtml.Callout class.
+ */
+
+.callout-panel, .callout-arrow {
+    border: 1px solid #adadad;
+    background: #f8f8f8;
+    cursor: pointer;
+}
+
+.callout-panel {
+    border-radius: 3px;
+    box-shadow: 0 12px 14px 0 rgba(0, 0, 0, 0.2), 0 13px 20px 0 rgba(0, 0, 0, 0.2);
+}
+
+.callout-arrow {
+    width: 7px;
+    height: 7px;
+    padding: 12px;
+}
 
 
 /**************************************************************************/
 /** Window
 /**************************************************************************/
+/** The following classes are used to define the style for windows and
+ *  dialogs generated using the javaxt.dhtml.Window class.
+ */
 
 .window {
     background: #ffffff;
