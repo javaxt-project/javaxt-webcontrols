@@ -26,6 +26,13 @@ javaxt.dhtml.utils = {
     });
    */
     get: function(url, config){
+
+        if (config.payload!=null){ //convert to post request
+            var payload = config.payload;
+            delete config.payload;
+            return javaxt.dhtml.utils.post(url, payload, config);
+        }
+
         var settings = {
             method: "GET",
             payload: null
@@ -128,8 +135,9 @@ javaxt.dhtml.utils = {
    */
     merge: function(settings, defaults) {
         var merge = function(settings, defaults) {
+            if (settings==null) return;
             for (var p in defaults) {
-                if ( defaults.hasOwnProperty(p) && typeof settings[p] !== "undefined" ) {
+                if (defaults.hasOwnProperty(p) && typeof settings[p] !== "undefined") {
                     if (p!=0) //<--Added this as a bug fix
                     merge(settings[p], defaults[p]);
                 }
