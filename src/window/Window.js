@@ -386,13 +386,13 @@ javaxt.dhtml.Window = function(parent, config) {
         mainDiv.style.display = '';
         mainDiv.style.visibility = '';
 
-        if (x & y){
+        if (x!=null & y!=null){
             mainDiv.style.left = x + "px";
             mainDiv.style.top = y + "px";
             recenter = false;
         }
         else{
-           me.center();
+           if (recenter) me.center();
         }
 
 
