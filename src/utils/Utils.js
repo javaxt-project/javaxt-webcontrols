@@ -245,6 +245,16 @@ javaxt.dhtml.utils = {
 
 
   //**************************************************************************
+  //** isNumber
+  //**************************************************************************
+  /** Returns true if the given object can be converted to a number.
+   */
+    isNumber: function(n) {
+        return !isNaN(parseFloat(n)) && !isNaN(n - 0);
+    },
+
+
+  //**************************************************************************
   //** setStyle
   //**************************************************************************
   /** Used to set the style for a given element. Styles are defined via a CSS
