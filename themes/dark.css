@@ -175,6 +175,39 @@ select:focus, textarea:focus, input:focus{
     outline: 0 none;
 }
 
+/**************************************************************************/
+/** Form Checkbox
+/**************************************************************************/
+/** The following classes are used to define the style for checkbox inputs
+ */
+.form-checkbox {
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    padding: 0px;
+    margin: 4px 5px 4px 1px;
+    width: 18px;
+    height: 18px;
+    border: 1px solid #4c5258;
+    background: #353a46;
+}
+
+.form-checkbox:checked:before {
+    content: '';
+    display: block;
+    width: 3px;
+    height: 9px;
+    border: solid #2a79bf;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    margin: 2px 0px 0px 6px;
+}
+
+.form-checkbox:focus {
+    border-color: rgba(82, 168, 236, 0.8);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6);
+    outline: 0 none;
+}
+
 
 /**************************************************************************/
 /** Form Buttons
@@ -301,7 +334,25 @@ select:focus, textarea:focus, input:focus{
 }
 
 
+/**************************************************************************/
+/** Form Group
+/**************************************************************************/
+/** The following classes are used to define the style for group boxes in
+ *  forms.
+ */
 
+.form-groupbox {
+    border: 1px solid #626a71;
+    border-radius: 3px;
+    padding: 16px 8px 12px 13px;
+}
+
+.form-grouplabel {
+    margin: 8px 0 0 7px;
+    background-color: #3e4453;
+    padding: 0 5px 0 5px;
+    color: #eaeaea;
+}
 
 
 /**************************************************************************/
