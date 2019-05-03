@@ -78,6 +78,11 @@ javaxt.dhtml.Form = function (parent, config) {
                 padding: 0
             },
 
+            checkbox: {
+                margin: 0,
+                padding: 0
+            },
+
           //Container for buttons (footer)
             buttons: {
                 padding: "0px 5px 3px 5px",
@@ -613,6 +618,108 @@ javaxt.dhtml.Form = function (parent, config) {
     };
 
 
+  //**************************************************************************
+  //** createCheckboxInput
+  //**************************************************************************
+  /** Used to add checkbox inputs to the form. By default, the inputs are
+   *  aligned vertically. This can be changed by specifying "horizontal"
+   *  alignment
+   */
+    var createCheckboxInput = function(label, name, item){
+        var formInput;
+        var options = item.options;
+        var alignment = item.alignment;
+
+        var tbody = createTable("100%");
+        var table = tbody.parentNode;
+        var tr;
+
+        var arr = [];
+        for (var i=0; i<options.length; i++){
+
+            if (alignment=="horizontal"){
+                if (i==0){
+                    tr = document.createElement('tr');
+                    tbody.appendChild(tr);
+                }
+            }
+            else{ //vertical
+                tr = document.createElement('tr');
+                tbody.appendChild(tr);
+            }
+
+            var td = document.createElement('td');
+            tr.appendChild(td);
+
+            var t = createTable();
+            var r = document.createElement('tr');
+            t.appendChild(r);
+            var c1 = document.createElement('td');
+            r.appendChild(c1);
+            var c2 = document.createElement('td');
+            r.appendChild(c2);
+            td.appendChild(t.parentNode);
+
+
+            var input = document.createElement('input');
+            setStyle(input, "checkbox");
+            input.type = "checkbox";
+            input.name = name;
+            input.value = options[i].value;
+            if (options[i].checked===true || options[i].selected==true){
+                input.checked = true;
+            }
+            input.onchange = function(){
+                me.onChange(formInput, getValue());
+            };
+
+            arr.push(input);
+            c1.appendChild(input);
+
+
+            var span = document.createElement('span');
+            setStyle(span, "label");
+            span.innerHTML = options[i].label;
+            span.input = input;
+            span.onclick = function(){
+                this.input.checked = !this.input.checked;
+                //this.input.focus();
+                dispatchEvent(this.input, "change");
+            };
+            c2.appendChild(span);
+        }
+
+
+
+
+        var getValue = function(){
+            var values = "";
+            for (var i=0; i<arr.length; i++){
+                if (arr[i].checked){
+                    if (values.length>0) values+=",";
+                    values += arr[i].value;
+                }
+            }
+            return values.length==0 ? null : values;
+        };
+
+        var setValue = function(value){
+            var numChanges = 0;
+            for (var i=0; i<arr.length; i++){
+                if ((arr[i].value+"")==(value+"")){
+                    if (arr[i].checked!==true) numChanges++;
+                    arr[i].checked = true;
+                }
+                else{
+                    arr[i].checked = false;
+                    if (arr[i].checked===true) numChanges++;
+                }
+            }
+            if (numChanges>0) me.onChange(formInput, getValue());
+        };
+
+        formInput = addInput(name, label, table, getValue, setValue, item.icon);
+    };
 
 
   //**************************************************************************
@@ -828,6 +935,9 @@ javaxt.dhtml.Form = function (parent, config) {
             }
             else if (type==="radio"){
                 createRadioInput(label, name, item);
+            }
+            else if (type==="checkbox"){
+                createCheckboxInput(label, name, item);
             }
             else if (type==="hidden"){
                 createHiddenInput(name, value);
