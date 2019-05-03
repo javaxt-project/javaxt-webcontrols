@@ -72,6 +72,22 @@ javaxt.dhtml.PlayControl = function(parent, config) {
     };
 
 
+  //**************************************************************************
+  //** setRunTime
+  //**************************************************************************
+  /** @param runTime in seconds
+   */
+    this.setRunTime = function(runTime){
+        if (runTime===config.totalTime) return;
+        var resume = false;
+        if (playing){
+            me.pause();
+            resume = true;
+        }
+        config.totalTime = runTime;
+        if (resume) me.play();
+    };
+
 
   //**************************************************************************
   //** play
@@ -85,21 +101,27 @@ javaxt.dhtml.PlayControl = function(parent, config) {
 
 
         playing = true;
+        var startDate = new Date().getTime();
+        var currVal = slider.getValue();
+        if (currVal>0){
+            startDate = startDate - ((currVal/slider.getWidth()) * config.totalTime)*1000;
+        }
+
         timerId = setInterval(function(){
-
             var w = slider.getWidth();
-            var pixelsPerSecond = w/config.totalTime;
-            var currVal = slider.getValue();
-            var nextVal = Math.ceil(currVal + (pixelsPerSecond*config.speed));
+            var elapsedTime = (new Date().getTime()-startDate)/1000;
+            var percentComplete = elapsedTime/config.totalTime;
+            var nextVal = w*percentComplete; //Math.ceil
 
-            if (nextVal>w){
 
-                slider.setValue(w);
+            if (nextVal>=w){
                 if (loop===true){
                     me.onEnd();
                     slider.setValue(0);
+                    startDate = new Date().getTime();
                 }
                 else{
+                    slider.setValue(w);
                     me.pause();
                     me.onEnd();
                 }
