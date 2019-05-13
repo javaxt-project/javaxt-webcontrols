@@ -340,7 +340,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
             setPage(Math.ceil(endRow/config.limit));
 
-            console.log(startRow + "/" + endRow + " (Page: " + currPage + ")");
+            //console.log(startRow + "/" + endRow + " (Page: " + currPage + ")");
 
 
             if (y===maxY){
