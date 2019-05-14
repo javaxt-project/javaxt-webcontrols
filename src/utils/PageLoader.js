@@ -208,7 +208,13 @@ javaxt.dhtml.PageLoader = function(config) {
 
           //Load includes and call the callback
             loadIncludes(css, scripts, function(){
-                if (callback) callback.apply(me, [appInfo, xml]);
+                if (callback){
+                    appInfo.init = function(){
+                        var cls = stringToFunction(this.main);
+                        return newInstance(cls).apply(arguments);
+                    };
+                    callback.apply(me, [appInfo, xml]);
+                }
             });
         });
     };
@@ -337,6 +343,50 @@ javaxt.dhtml.PageLoader = function(config) {
             if (!parent) break;
             parent.removeChild(node);
         }
+    };
+
+
+  //**************************************************************************
+  //** stringToFunction
+  //**************************************************************************
+  /** Converts a string to a function or class. Example:
+   *  var DateInput = stringToFunction("javaxt.dhtml.DateInput");
+   *  var dateInput = new DateInput(...);
+   */
+    var stringToFunction = function(str) {
+      var arr = str.split(".");
+
+      var fn = (window || this);
+      for (var i = 0, len = arr.length; i < len; i++) {
+        fn = fn[arr[i]];
+      }
+
+      if (typeof fn !== "function") {
+        throw new Error("function not found");
+      }
+
+      return  fn;
+    };
+
+
+  //**************************************************************************
+  //** newInstance
+  //**************************************************************************
+  /** Used to instantiate a new instance of a given class. Example:
+   *  var app = newInstance(cls).apply(arguments);
+   */
+    var newInstance = function(cls){
+
+        var fn = (new Function("return function () { };"))();
+        fn.prototype = cls.prototype;
+        var self = new fn();
+
+        return {
+            apply: function(args) {
+                cls.apply(self, args);
+                return self;
+            }
+        };
     };
 
 
