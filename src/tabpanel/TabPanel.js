@@ -116,6 +116,7 @@ javaxt.dhtml.TabPanel = function(parent, config) {
 
 
         parent.appendChild(table);
+        me.el = table;
     };
 
 
