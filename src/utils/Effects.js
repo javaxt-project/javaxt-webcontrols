@@ -10,9 +10,9 @@ if(!javaxt.dhtml) javaxt.dhtml={};
  ******************************************************************************/
 
 javaxt.dhtml.Effects = function() {
-    
+
     var me = this;
-    
+
   //**************************************************************************
   //** fadeIn
   //**************************************************************************
@@ -23,32 +23,32 @@ javaxt.dhtml.Effects = function() {
         el.style.opacity = 0;
         el.style.display = "";
         me.setTransition(el, transitionEffect, duration);
-        setTimeout(function(){ 
+        setTimeout(function(){
             el.style.opacity = "";
             if (callback){
-                setTimeout(function(){ 
+                setTimeout(function(){
                     callback.apply(el, []);
-                }, duration+50); 
+                }, duration+50);
             }
         }, 50);
     };
-    
-    
+
+
   //**************************************************************************
   //** fadeOut
   //**************************************************************************
   /** Used to gradually update the opacity of a given element until it is no
-   *  longer visible. 
+   *  longer visible.
    */
     this.fadeOut = function(el, transitionEffect, duration, callback){
         me.setTransition(el, transitionEffect, duration);
-        setTimeout(function(){ 
+        setTimeout(function(){
             el.style.opacity = 0;
             if (callback){
-                setTimeout(function(){ 
+                setTimeout(function(){
                     el.style.display = "none";
                     callback.apply(el, []);
-                }, duration+50); 
+                }, duration+50);
             }
         }, 50);
     };
@@ -60,15 +60,16 @@ javaxt.dhtml.Effects = function() {
   /** Used to set the transition style for a given element.
    */
     this.setTransition = function(el, transitionEffect, duration){
+        if (isNaN(duration) || duration<=0) return;
         var points = getPoints(transitionEffect);
-        if (!duration) duration = 500;
+        if (duration) duration = 500;
         setTransition(el, duration, points);
     };
 
 
   //**************************************************************************
   //** getPoints
-  //************************************************************************** 
+  //**************************************************************************
     var getPoints = function(transitionEffect){
         if (isArray(transitionEffect)){
             return transitionEffect;
@@ -79,21 +80,21 @@ javaxt.dhtml.Effects = function() {
             return points;
         }
     };
-    
-    
+
+
   //**************************************************************************
   //** isArray
   //**************************************************************************
     var isArray = function(obj){
         return (Object.prototype.toString.call(obj)==='[object Array]');
     };
-    
-    
+
+
   //**************************************************************************
   //** setTransition
   //**************************************************************************
   /** Used to set or update the transition style for a the given element.
-   *  all 500ms cubic-bezier(0.52, 0.075, 0.47, 0.895) 
+   *  all 500ms cubic-bezier(0.52, 0.075, 0.47, 0.895)
    */
     var setTransition = function(el, t, arr) {
 
@@ -103,7 +104,7 @@ javaxt.dhtml.Effects = function() {
         var x2 = arr[2];
         var y2 = arr[3];
 
-        
+
 
         // set all transition types. ugly ugly vendor prefixes
         el.style.WebkitTransition =
@@ -111,7 +112,7 @@ javaxt.dhtml.Effects = function() {
         el.style.MsTransition =
         el.style.OTransition =
         el.style.transition =
-            'all ' + t + 'ms cubic-bezier' + 
+            'all ' + t + 'ms cubic-bezier' +
             '(' + x1 + ', ' + y1 + ', ' + x2 + ', ' + y2 + ')';
 
 
@@ -128,8 +129,8 @@ javaxt.dhtml.Effects = function() {
         }
 
     };
-    
-    
+
+
   //**************************************************************************
   //** supportsBezierRange
   //**************************************************************************
