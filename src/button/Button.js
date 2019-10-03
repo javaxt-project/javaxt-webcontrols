@@ -566,6 +566,16 @@ javaxt.dhtml.Button = function(parent, config) {
 
 
   //**************************************************************************
+  //** isSelected
+  //**************************************************************************
+  /** Returns true if the button is selected (e.g. depressed)
+   */
+    this.isSelected = function(){
+        return (mainDiv.selected===true);
+    };
+
+
+  //**************************************************************************
   //** toggle
   //**************************************************************************
   /** Used to toggle the button's selection state.
