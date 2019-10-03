@@ -495,7 +495,8 @@ javaxt.dhtml.Form = function (parent, config) {
   //**************************************************************************
     var createHiddenInput = function(name, value){
         var input = document.createElement('input');
-        input.type = "hidden";
+        input.type = "textarea"; //"hidden";
+        input.style.display = "none";
         input.name = name;
         if (value!=null) input.value = value;
 
@@ -504,18 +505,25 @@ javaxt.dhtml.Form = function (parent, config) {
         };
         var setValue = function(value){
             if (typeof value === "undefined") value = "";
-            input.value = value;
+            if (input.value!=value){
+                input.value = value;
+                input.onchange(); //fire onchange event
+            }
         };
 
-        //addInput(name, null, input, getValue, setValue);
-
-        inputs.push({
+        var formInput = {
             name: name,
             label: null,
             row: null,
             getValue: getValue,
             setValue: setValue
-        });
+        };
+
+        input.onchange = function(){
+            me.onChange(formInput, input.value);
+        };
+
+        inputs.push(formInput);
         form.appendChild(input);
     };
 
