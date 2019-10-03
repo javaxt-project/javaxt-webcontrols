@@ -298,6 +298,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                 rows[i].update();
             }
 
+            if (!append) table.update();
         };
 
 
@@ -355,10 +356,6 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         table.onHeaderClick = sort;
 
 
-      //Expose the forEachRow method of the table as a public method of this class
-        me.forEachRow = table.forEachRow;
-
-
       //Load records
         if (config.autoload===true) load();
 
@@ -412,8 +409,57 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
 
   //**************************************************************************
+  //** forEachRow
+  //**************************************************************************
+  /** Used to traverse all the rows in the table and extract contents of each
+   *  cell. Example:
+   *  grid.forEachRow(function (row, content) {
+   *      console.log(content);
+   *  });
+   *
+   *  Optional: return true in the callback function if you wish to stop
+   *  processing rows.
+   */
+    this.forEachRow = function(callback){
+        table.forEachRow(callback);
+    };
+
+
+  //**************************************************************************
+  //** select
+  //**************************************************************************
+  /** Used to select a given row in the grid
+   */
+    this.select = function(row){
+        table.select(row);
+    };
+
+
+  //**************************************************************************
+  //** selectAll
+  //**************************************************************************
+  /** Selects all the rows in the grid
+   */
+    this.selectAll = function(){
+        table.selectAll();
+    };
+
+
+  //**************************************************************************
+  //** deselectAll
+  //**************************************************************************
+  /** Deselects all the rows in the grid
+   */
+    this.deselectAll = function(){
+        table.deselectAll();
+    };
+
+
+  //**************************************************************************
   //** clear
   //**************************************************************************
+  /** Removes all the rows from the grid
+   */
     this.clear = function(){
         table.clear();
     };
@@ -888,6 +934,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
             if (sort=="DESC") sort = "";
             else sort = "DESC";
             colConfig.sort = sort;
+            if (!filter) filter = {};
             filter.orderby = (colConfig.field + " " + sort).trim();
 
 
