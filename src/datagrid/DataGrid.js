@@ -17,7 +17,6 @@ javaxt.dhtml.DataGrid = function(parent, config) {
     var table;
     var currPage;
     var savePreferences = false;
-    var fields = "";
     var eof = false;
     var checkboxHeader;
 
@@ -34,10 +33,29 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         url: "",
         params: null,
         payload: null,
+
+      /** Used to specify the page size (i.e. the maximum number records to
+       *  fetch from the server at a time.
+       */
         limit: 50,
+
+      /** If true, the server will be asked to return a total record count.
+       *  This is a legacy feature and is NOT required for pagination.
+       */
         count: false,
+
+      /** If true, the grid will automatically fetch records from the server
+       *  on start-up
+       */
         autoload: false,
         localSort: false,
+
+      /** Optional list of field names used to specify which database fields
+       *  should be returned from the server. If not provided, uses the "field"
+       *  attributes in the column definition. If both are provides, the list
+       *  of fields are merges into a unique list.
+       */
+        fields: [],
 
       /** Default method used to get responses from the server. Typically, you
        *  do not need to override this method.
@@ -96,7 +114,14 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         filterName = config.filterName;
         filter = config.filter;
         if (config.sort==="local") config.localSort = true;
-
+        if (config.fields){
+            if (!isArray(config.fields)){
+                config.fields = config.fields.split(",");
+            }
+        }
+        else{
+            config.fields = [];
+        }
 
 
       //Parse column config
@@ -108,8 +133,17 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
           //Set "fields" class variable
             if (column.field){
-                if (fields.length>0) fields += ",";
-                fields += column.field;
+                var addField = true;
+                for (var j=0; j<config.fields.length; j++){
+                    if (config.fields[j]==column.field){
+                        addField = false;
+                        break;
+                    }
+                }
+                if (addField) config.fields.push(column.field);
+            }
+            else{
+                column.sortable = false;
             }
 
 
@@ -482,22 +516,21 @@ javaxt.dhtml.DataGrid = function(parent, config) {
   //**************************************************************************
   /** Used to load records from the remote store. Optionally, you can pass an
    *  array of records, along with a page count, to append rows to the table.
-   *  Example: [["Bob","12/30","$5.25"],["Jim","10/28","$7.33"]]
    */
     this.load = function(){
 
         if (arguments.length>0){
 
             var records = arguments[0];
+            var page = 1;
+            if (arguments.length>1) page = arguments[1];
+
             if (isArray(records)){
                 me.beforeLoad();
-                table.addRows(records);
+                table.load(records, page>1);
+                setPage(page);
                 calculateRowHeight();
                 if (records.length<config.limit) eof = true;
-
-                var page = 1;
-                if (arguments.length>1) page = arguments[1];
-                setPage(page);
 
                 me.onLoad();
             }
@@ -572,7 +605,9 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
 
 
-
+  //**************************************************************************
+  //** calculateRowHeight
+  //**************************************************************************
     var calculateRowHeight = function(){
         if (!rowHeight){
             table.forEachRow(function (row, content) {
@@ -586,38 +621,51 @@ javaxt.dhtml.DataGrid = function(parent, config) {
   //**************************************************************************
   //** getSelectedRecords
   //**************************************************************************
-    this.getSelectedRecords = function(key){
+  /** Returns an array of selected records from the grid.
+   *  @param key Optional field name or index (e.g. 'id' or 0). If given, the
+   *  output array will only contain values for the given key. This can be
+   *  useful for limiting the amount of data returned in the array. For
+   *  example, you might only need selected IDs instead of a full record.
+   *  @param callback Callback function. If the table has a checkbox header,
+   *  and the check box is checked, then the user expects to get back ALL
+   *  "selected" records, even those that have yet to load. In this case, we
+   *  will fetch records from the server and invoke the callback with
+   *  additional data.
+   */
+    this.getSelectedRecords = function(key, callback){
 
 
-      //Update key to id as needed
+      //Map key to a column id as needed
+        var colID;
         if (key){
             if (typeof key === "string"){
-                for (var i=0; i<config.columns.length; i++){
-                    var column = config.columns[i];
-                    if (key === column.field){
-                        key = i;
+                for (var i=0; i<config.fields.length; i++){
+                    if (key === config.fields[i]){
+                        colID = i;
                         break;
                     }
                 }
-                for (var i=0; i<config.columns.length; i++){
-                    var column = config.columns[i];
-                    if (key === column.header){
-                        key = i;
-                        break;
+                if (!colID){
+                    for (var i=0; i<config.columns.length; i++){
+                        var column = config.columns[i];
+                        if (key === column.header){
+                            colID = i;
+                            break;
+                        }
                     }
                 }
             }
         }
-        else{
-            key = 0;
-        }
+        if (!colID) colID = 0;
 
 
-      //Special case for tables with checkbox headers
+
+      //Special case for tables with checkbox headers. Check whether the
+      //checkbox in the header is selected
         var useCheckbox = false;
         var selectAll = false;
         if (checkboxHeader){
-            if (checkboxHeader.idx === key){
+            if (checkboxHeader.idx === colID){
                 useCheckbox = true;
                 if (checkboxHeader.isChecked()){
                     selectAll = true;
@@ -626,36 +674,48 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         }
 
 
-      //Get selected records
+      //Get selected records from the table
         var arr = [];
         table.forEachRow(function (row, content) {
-
-            if (useCheckbox){
-                var checkboxDiv = content[key];
-                var checkbox = checkboxDiv.checkbox;
-                if (checkbox.isChecked()) arr.push(checkbox.getValue());
-            }
-            else{
-                if (row.selected){
-                    arr.push(content[key]);
+            if (key){
+                if (useCheckbox){
+                    var checkboxDiv = content[colID];
+                    var checkbox = checkboxDiv.checkbox;
+                    if (checkbox.isChecked()) arr.push(checkbox.getValue());
+                }
+                else{
+                    if (row.selected) arr.push(row.record[key]);
                 }
             }
-
+            else{
+                if (row.selected) arr.push(row.record);
+            }
         });
 
 
-      //If the table has a checkbox header, and the check box is checked, then
-      //the user expects to get back ALL "selected" records, even those that
-      //have yet to load. In this case, we need to fetch records from the server
-        if (selectAll && !eof){
+      //Fetch additional records from the server as needed
+        if (callback && selectAll && !eof){
 
 
           //Build URL
-            var fieldName = config.columns[key].field;
-
             var url = config.url;
             if (url.indexOf("?")==-1) url+= "?";
-            url += "fields=" + fieldName + "&count=false&offset=" + (currPage*config.limit);
+
+
+          //Generate list of fields
+            var fieldNames = "";
+            if (key){
+                fieldNames = config.columns[colID].field;
+            }
+            else{
+                for (var i=0; i<config.fields.length; i++){
+                    if (i>0) fieldNames += ",";
+                    fieldNames += config.fields[i];
+                }
+            }
+
+
+            url += "fields=" + fieldNames + "&count=false&offset=" + (currPage*config.limit);
 
 
           //Add query params
@@ -687,14 +747,17 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                 }
             }
 
+
           //Execute service request and process response
             config.getResponse(url, config.payload, function(request){
                 if (request.status===200){
+                    var arr = [];
                     var records = config.parseResponse.apply(me, [request]);
                     for (var i=0; i<records.length; i++){
                         var val = records[i][fieldName];
                         if (val) arr.push(val);
                     }
+                    if (callback) callback.apply(me, arr);
                 }
                 else{
                     me.onError(request);
@@ -827,7 +890,12 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         if (page==1) eof = false;
 
 
-
+      //Generate list of fields
+        var fieldNames = "";
+        for (var i=0; i<config.fields.length; i++){
+            if (i>0) fieldNames += ",";
+            fieldNames += config.fields[i];
+        }
 
 
       //Fire "beforeLoad" event
@@ -837,7 +905,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
       //Build URL
         var url = config.url;
         if (url.indexOf("?")==-1) url+= "?";
-        url += "&page=" + page + "&limit=" + config.limit + "&fields=" + fields;
+        url += "&page=" + page + "&limit=" + config.limit + "&fields=" + fieldNames;
 
       //Request count
         if (config.count==true && page==1) url += "&count=true";
@@ -864,7 +932,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                 if (filter.hasOwnProperty(key)) {
                     if (key==='orderby'){
                         orderby = filter[key];
-                        orderby = (orderby!=null && orderby!="" ? "&orderby=" + orderby : "");
+                        orderby = ((orderby!=null && orderby!="") ? "&orderby=" + orderby : "");
                     }
                     else{
                         var str = filter[key];
@@ -928,7 +996,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
   /** Called whenever a client clicks on a header.
    */
     var sort = function(idx, colConfig, cell, event){
-        if (colConfig.sortable!==false){
+        if (colConfig.field!=null && colConfig.sortable!==false){
             table.clear();
             var sort = colConfig.sort;
             if (sort=="DESC") sort = "";
