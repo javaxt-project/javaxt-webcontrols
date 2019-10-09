@@ -202,10 +202,12 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
 
                         for (var j=0; j<columns.length; j++){
-                            if (columns[j].field.toUpperCase() === fieldName){
-                                columns[j].sort = sortDirection;
-                                columns[j].header.setSortIndicator(sortDirection);
-                                break;
+                            if (columns[j].field){
+                                if (columns[j].field.toUpperCase() === fieldName){
+                                    columns[j].sort = sortDirection;
+                                    columns[j].header.setSortIndicator(sortDirection);
+                                    break;
+                                }
                             }
                         }
 
