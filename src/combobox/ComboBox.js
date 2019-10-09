@@ -366,9 +366,14 @@ javaxt.dhtml.ComboBox = function(parent, config) {
    */
     this.setValue = function(val){
 
+        var setValue = function(value, data){
+            input.value = value;
+            input.data = data;
+            input.oninput();
+        };
+
         if (val==null || val==="") {
-            input.value = "";
-            input.data = null;
+            setValue("", null);
             return;
         };
 
@@ -377,8 +382,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         for (var i=0; i<menuOptions.childNodes.length; i++){
             var div = menuOptions.childNodes[i];
             if (div.value===val){
-                input.value = div.innerHTML;
-                input.data = div.value;
+                setValue(div.innerHTML, div.value);
                 return;
             }
         }
@@ -387,8 +391,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         for (var i=0; i<menuOptions.childNodes.length; i++){
             var div = menuOptions.childNodes[i];
             if (div.innerHTML.toLowerCase() === getText(val).toLowerCase()){
-                input.value = div.innerHTML;
-                input.data = div.value;
+                setValue(div.innerHTML, div.value);
                 return;
             }
         }
