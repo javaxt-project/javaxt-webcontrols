@@ -478,7 +478,10 @@ javaxt.dhtml.Form = function (parent, config) {
         };
         var setValue = function(value){
             if (typeof value === "undefined") value = "";
-            input.value = value;
+            if (input.value!=value){
+                input.value = value;
+                input.oninput(); //fire onchange event
+            }
         };
 
         var formInput = addInput(name, label, input, getValue, setValue, icon);
