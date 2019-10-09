@@ -456,6 +456,7 @@ javaxt.dhtml.Form = function (parent, config) {
             input.style.lineHeight = "normal"; //overrides input style - maybe we need a different style config for textareas?
             input.style.resize = "none";
             input.style.height = "100px";
+            if (config.height) input.style.height = config.height;
             if (config.spellcheck===false) input.setAttribute("spellcheck", "false"); //<-- enable spellcheck by default
         }
         else{
