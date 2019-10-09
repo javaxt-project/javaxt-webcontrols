@@ -731,13 +731,14 @@ javaxt.dhtml.ComboBox = function(parent, config) {
   //**************************************************************************
   /** Used to add an entry to the menu.
    *  @param text Text to display in the input when selected.
-   *  @param value Value associated with the input.
+   *  @param value Value associated with the input. If undefined, the text
+   *  value is used instead.
    */
     this.add = function(text, value){
         var div = document.createElement('div');
         setStyle(div, "option");
         div.innerHTML = getText(text);
-        div.value = value;
+        div.value = (typeof value === "undefined") ? div.innerHTML : value;
         div.tabIndex = -1; //allows the div to have focus
         div.onclick = function(){
             select(this);
