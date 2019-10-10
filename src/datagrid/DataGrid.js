@@ -777,20 +777,16 @@ javaxt.dhtml.DataGrid = function(parent, config) {
     var createHeader = function(label, sortable){
         var div = document.createElement("div");
         if (sortable===false){
-            //div.style.cursor = "not-allowed";
             div.style.cursor = "default";
         }
 
-        var span = document.createElement("div");
+        var span = document.createElement("span");
         span.innerHTML = label;
         div.appendChild(span);
 
         var iconDiv = document.createElement("div");
-        iconDiv.style.position = "absolute";
-        iconDiv.style.width = "7px";
-        iconDiv.style.height = "7px";
-        iconDiv.style.top = "7px";
-        iconDiv.style.right = "0px";
+        iconDiv.style.position = "relative";
+        iconDiv.style.display = "inline-block";
         div.appendChild(iconDiv);
 
         var icon = document.createElement("div");
@@ -803,15 +799,16 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                 if (typeof sortDirection === "string"){
                     sortDirection = sortDirection.toUpperCase().trim();
                     if (sortDirection=="ASC"){
-                        className = "ascendingSortIcon";
+                        className = config.style.ascendingSortIcon;
                     }
                     else if (sortDirection=="DESC"){
-                        className = "descendingSortIcon";
+                        className = config.style.descendingSortIcon;
                     }
                 }
             }
             this.sortIndicator.className = className;
         };
+
 
         return div;
     };
