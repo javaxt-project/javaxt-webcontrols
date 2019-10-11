@@ -355,7 +355,8 @@ javaxt.dhtml.ComboBox = function(parent, config) {
   //** reset
   //**************************************************************************
     this.reset = function(){
-        me.setValue(null);
+        input.value = "";
+        input.data = null;
     };
 
 
