@@ -498,8 +498,7 @@ javaxt.dhtml.Form = function (parent, config) {
   //** createHiddenInput
   //**************************************************************************
     var createHiddenInput = function(name, value){
-        var input = document.createElement('input');
-        input.type = "textarea"; //"hidden";
+        var input = document.createElement('textarea');
         input.style.display = "none";
         input.name = name;
         if (value!=null) input.value = value;
