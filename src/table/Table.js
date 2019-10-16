@@ -56,6 +56,7 @@ javaxt.dhtml.Table = function(parent, config) {
             },
 
             column: {
+                height: "35px",
                 lineHeight: "35px",
                 borderLeft: "1px solid #cccccc",
                 borderRight: "1px solid #cccccc",
