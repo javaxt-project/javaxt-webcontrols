@@ -32,7 +32,7 @@ javaxt.dhtml.PageLoader = function(config) {
    *  document found at a given url. Dynamically loads any css stylesheets and
    *  javascripts sourced in the html document.
    */
-    this.loadPage = function(url, callback){
+    this.loadPage = function(url, callback, onFail){
         me.load(url, function(html, title, inlineScripts){
 
           //Set title
@@ -65,7 +65,7 @@ javaxt.dhtml.PageLoader = function(config) {
             dispatchEvent("load");
 
             if (callback) callback.apply(me, []);
-        });
+        }, onFail);
     };
 
 
@@ -78,7 +78,7 @@ javaxt.dhtml.PageLoader = function(config) {
    *  is up to the caller to decide what to do with the html (e.g. replace
    *  element) and when to execute the inline scripts.
    */
-    this.load = function(url, callback){
+    this.load = function(url, callback, onFail){
 
 
         if (url.indexOf("?")==-1) url += "?";
@@ -161,7 +161,7 @@ javaxt.dhtml.PageLoader = function(config) {
                 if (callback) callback.apply(me, [html, title, inlineScripts]);
             });
 
-        });
+        }, onFail);
     };
 
 
@@ -172,7 +172,7 @@ javaxt.dhtml.PageLoader = function(config) {
    *  any css stylesheets and javascripts sourced in the xml document. Returns
    *  the name and main function used to instantiate the application.
    */
-    this.loadApp = function(url, callback){
+    this.loadApp = function(url, callback, onFail){
 
         if (url.indexOf("?")==-1) url += "?";
         url += "&_=" + new Date().getTime();
@@ -216,7 +216,7 @@ javaxt.dhtml.PageLoader = function(config) {
                     callback.apply(me, [appInfo, xml]);
                 }
             });
-        });
+        }, onFail);
     };
 
 
@@ -418,27 +418,15 @@ javaxt.dhtml.PageLoader = function(config) {
   //**************************************************************************
   //** get
   //**************************************************************************
-    var get = function(url, success){
-
-        var request = null;
-        if (window.XMLHttpRequest) {
-            request = new XMLHttpRequest();
-        }
-        else {
-            request = new ActiveXObject("Microsoft.XMLHTTP");
-        }
-
-        request.open("GET", url, true);
-        request.onreadystatechange = function(){
-            if (request.readyState === 4) {
-                if (request.status===200){
-
-                    if (success) success.apply(me, [request.responseText, request.responseXML]);
-                }
+    var get = function(url, success, onFail){
+        javaxt.dhtml.utils.get(url, {
+            success: function(text, xml, url){
+                if (success) success.apply(me, [text, xml, url]);
+            },
+            failure: function(request){
+                if (onFail) onFail.apply(me, [request]);
             }
-        };
-
-        request.send();
+        });
     };
 
     init();
