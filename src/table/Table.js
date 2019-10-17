@@ -775,8 +775,13 @@ javaxt.dhtml.Table = function(parent, config) {
             for (var i=0; i<rows.length; i++){
                 var row = rows[i];
                 if (row.selected){
-                    var col = row.getChildNodes();
-                    var col1 = col[0].getContent();
+
+                  //Get content of the first cell
+                    var cells = row.childNodes;
+                    var cell = cells[0].getContent();
+
+                  //Alternatively, get content via the row.get() method
+                    var cell = row.get(0);
                 }
                 else{
 
