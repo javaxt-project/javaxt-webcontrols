@@ -16,7 +16,6 @@ javaxt.dhtml.DataGrid = function(parent, config) {
     var me = this;
     var table;
     var currPage;
-    var savePreferences = false;
     var eof = false;
     var checkboxHeader;
 
@@ -24,7 +23,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
 
   //Legacy config parameters
-    var preferences, filterName, filter;
+    var filterName, filter;
 
 
   //Optional config parameters
@@ -110,7 +109,6 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
 
       //Extract required config variables
-        preferences = config.preferences;
         filterName = config.filterName;
         filter = config.filter;
         if (config.sort==="local") config.localSort = true;
@@ -395,9 +393,6 @@ javaxt.dhtml.DataGrid = function(parent, config) {
       //Load records
         if (config.autoload===true) load();
 
-
-      //Start saving preferences
-        savePreferences = true;
     };
 
 
@@ -505,11 +500,9 @@ javaxt.dhtml.DataGrid = function(parent, config) {
   //** refresh
   //**************************************************************************
     this.refresh = function(){
-        savePreferences = false;
         //eof = false;
         setPage(0);
         load();
-        savePreferences = true;
     };
 
 
@@ -871,8 +864,6 @@ javaxt.dhtml.DataGrid = function(parent, config) {
     };
 
 
-
-
   //**************************************************************************
   //** load
   //**************************************************************************
@@ -952,11 +943,6 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         config.getResponse(url, config.payload, function(request){
             if (request.status===200){
 
-              //Save preferences
-                if (page===1 && savePreferences){
-                    if (filterName && preferences) preferences.set(filterName, JSON.stringify(filter));
-                }
-
 
               //Parse response
                 var records = config.parseResponse.apply(me, [request]);
@@ -970,11 +956,6 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                     table.load(records, page>1);
                     setPage(page);
                     calculateRowHeight();
-
-                    if (records.length===config.limit && !table.hasOverflow()){
-                        load(page+1);
-                        return;
-                    }
                 }
 
                 if (callback) callback.apply(me, []);
