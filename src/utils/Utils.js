@@ -112,7 +112,7 @@ javaxt.dhtml.utils = {
             if (request.readyState === 4) {
                 if (request.status===200){
 
-                    if (success) success.apply(scope, [request.responseText, request.responseXML, request.responseURL]);
+                    if (success) success.apply(scope, [request.responseText, request.responseXML, request.responseURL, request]);
 
                 }
                 else{
