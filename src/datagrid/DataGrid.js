@@ -390,6 +390,12 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         table.onHeaderClick = sort;
 
 
+      //Watch for row click events
+        table.onRowClick = function(row, e){
+            me.onRowClick(row, e);
+        };
+
+
       //Load records
         if (config.autoload===true) load();
 
@@ -437,6 +443,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
     this.beforeLoad = function(){};
     this.onLoad = function(){};
     this.onError = function(request){};
+    this.onRowClick = function(row, e){};
 
 
   //**************************************************************************
