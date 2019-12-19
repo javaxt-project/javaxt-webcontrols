@@ -282,7 +282,31 @@ javaxt.dhtml.Carousel = function(parent, config) {
   //** resize
   //**************************************************************************
     this.resize = function(){
+        var w = outerDiv.offsetWidth;
+        if (w===0 || isNaN(w)){
+            var timer;
 
+            var checkWidth = function(){
+                var w = outerDiv.offsetWidth;
+                if (w===0 || isNaN(w)){
+                    timer = setTimeout(checkWidth, 100);
+                }
+                else{
+                    clearTimeout(timer);
+                    resize();
+                }
+            };
+
+            timer = setTimeout(checkWidth, 100);
+        }
+        else{
+            resize();
+        }
+    };
+
+
+    var resize = function(){
+        
       //Compute width of individual panels
         var width = outerDiv.offsetWidth;
         var padding = config.padding;
