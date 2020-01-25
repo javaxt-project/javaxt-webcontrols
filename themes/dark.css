@@ -83,7 +83,73 @@ select:focus, textarea:focus, input:focus{
 }
 
 
+/**************************************************************************/
+/** Panel
+/**************************************************************************/
+/** The following classes are used to define the style for a panel. Panels
+ *  consist of a header, toolbar, body, and footer.
+ */
+.panel-toolbar {
+    height: 36px;
+    background-color: #33363f;
+}
 
+
+/**************************************************************************/
+/** Toolbar Items
+/**************************************************************************/
+/** The following classes are used to define the style for items rendered
+ *  in a panel toolbar.
+ */
+
+.toolbar-button, .toolbar-button-hover, .toolbar-button-selected {
+    width: 72px;
+    height: 26px;
+    cursor: pointer;
+    padding: 0px 7px;
+    margin: 0 0 0 5px;
+
+    background-color: #353a46;
+    border: 1px solid #4c5258;
+    border-radius: 3px;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+
+    color: #8e8f92;
+}
+
+.toolbar-button-label {
+    font-family: helvetica, arial, verdana, sans-serif;
+    font-size: 14px;
+    white-space: nowrap;
+    color: inherit;
+}
+
+.toolbar-button-hover {
+    color: #d2d2d2;
+    background-color: #335177;
+    border-color: #2e588d;
+}
+
+.toolbar-button-selected {
+    color: #d2d2d2;
+    background-color: #335177;
+    border-color: #2e588d;
+}
+
+/* Padding for button icons */
+.toolbar-button-icon {
+    margin: 0 6px 0 0px;
+}
+
+.toolbar-spacer {
+    display: inline-block;
+    position: relative;
+    width: 0px;
+    height: 25px;
+    margin: 0 2px 1px 8px;
+    border-left: 1px solid #4c5258;
+    border-right: 1px solid #232323;
+}
 
 
 /**************************************************************************/
