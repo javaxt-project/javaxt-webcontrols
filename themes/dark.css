@@ -658,7 +658,7 @@ select:focus, textarea:focus, input:focus{
                #aaa,
                #ddd 50%,
                #ccc);
-    cursor: move;
+    cursor: pointer;
     -webkit-tap-highlight-color: transparent;
 }
 
