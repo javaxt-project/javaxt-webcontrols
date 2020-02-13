@@ -207,11 +207,7 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
 
 
 
-
-
-
-      //Function called after the table has been added to the DOM
-        var onRender = function(){
+        onRender(bodyDiv, function(){
 
           //Create header after the table has been added to the document!
             headerDiv.appendChild(createHeader());
@@ -222,46 +218,14 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
                 me.resize();
                 me.onResize();
             });
-        };
 
 
+          //Hide navbar hack. Might not work for other browsers. More info here:
+          //https://developers.google.com/web/fundamentals/native-hardware/fullscreen/
+            window.scrollTo(0,1);
 
-      //Check whether the table has been added to the DOM
-        var w = bodyDiv.offsetWidth;
-        if (w===0 || isNaN(w)){
-            var timer;
-
-            var checkWidth = function(){
-                var w = bodyDiv.offsetWidth;
-                if (w===0 || isNaN(w)){
-                    timer = setTimeout(checkWidth, 100);
-                }
-                else{
-                    clearTimeout(timer);
-                    onRender();
-                }
-            };
-
-            timer = setTimeout(checkWidth, 100);
-        }
-        else{
-            onRender();
-        }
-
-
-
-        //menuDiv.innerHTML = "Menu";
-        //bodyDiv.innerHTML = "Body";
-
-
-
-
-
-      //Hide navbar hack. More info here:
-      //https://developers.google.com/web/fundamentals/native-hardware/fullscreen/
-        window.scrollTo(0,1);
+        });
     };
-
 
 
   //**************************************************************************
@@ -558,6 +522,7 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
   //** Utils
   //**************************************************************************
     var merge = javaxt.dhtml.utils.merge;
+    var onRender = javaxt.dhtml.utils.onRender;
     var createTable = javaxt.dhtml.utils.createTable;
     var addResizeListener = javaxt.dhtml.utils.addResizeListener;
     var setStyle = function(el, style){

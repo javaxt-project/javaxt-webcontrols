@@ -188,32 +188,10 @@ javaxt.dhtml.BarGraph = function (parent, config) {
         }
 
 
-      //Check whether the bargraph has been added to the DOM
-        var w = outerDiv.offsetWidth;
-        if (w===0 || isNaN(w)){
-            var timer;
 
-            var checkWidth = function(){
-                var w = outerDiv.offsetWidth;
-                if (w===0 || isNaN(w)){
-                    timer = setTimeout(checkWidth, 100);
-                }
-                else{
-                    clearTimeout(timer);
-                    onRender();
-                }
-            };
-
-            timer = setTimeout(checkWidth, 100);
-        }
-        else{
-            onRender();
-        }
-
-    };
-
-    var onRender = function(){
-        me.update();
+        onRender(outerDiv, function(){
+            me.update();
+        });
     };
 
 
@@ -757,6 +735,7 @@ javaxt.dhtml.BarGraph = function (parent, config) {
   //** Utils
   //**************************************************************************
     var merge = javaxt.dhtml.utils.merge;
+    var onRender = javaxt.dhtml.utils.onRender;
     var createTable = javaxt.dhtml.utils.createTable;
     var setStyle = function(el, style){
         javaxt.dhtml.utils.setStyle(el, config.style[style]);

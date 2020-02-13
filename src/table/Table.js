@@ -237,7 +237,7 @@ javaxt.dhtml.Table = function(parent, config) {
 
 
       //Function called after the table has been added to the DOM
-        var onRender = function(){
+        onRender(bodyDiv, function(){
 
             var onScroll = function(scrollTop){
                 var maxScrollPosition = bodyDiv.scrollHeight - bodyDiv.clientHeight;
@@ -280,34 +280,7 @@ javaxt.dhtml.Table = function(parent, config) {
             addResizeListener(parent, function(){
                 me.update();
             });
-        };
-
-
-
-
-      //Check whether the table has been added to the DOM
-        var w = bodyDiv.offsetWidth;
-        if (w===0 || isNaN(w)){
-            var timer;
-
-            var checkWidth = function(){
-                var w = bodyDiv.offsetWidth;
-                if (w===0 || isNaN(w)){
-                    timer = setTimeout(checkWidth, 100);
-                }
-                else{
-                    clearTimeout(timer);
-                    onRender();
-                }
-            };
-
-            timer = setTimeout(checkWidth, 100);
-        }
-        else{
-            onRender();
-        }
-
-
+        });
     };
 
 
@@ -1038,6 +1011,7 @@ javaxt.dhtml.Table = function(parent, config) {
   //** Utils
   //**************************************************************************
     var merge = javaxt.dhtml.utils.merge;
+    var onRender = javaxt.dhtml.utils.onRender;
     var addResizeListener = javaxt.dhtml.utils.addResizeListener;
     var isArray = javaxt.dhtml.utils.isArray;
     var setStyle = function(el, style){

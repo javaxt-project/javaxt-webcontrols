@@ -166,37 +166,10 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
 
       //Check whether the carousel has been added to the DOM
-        var w = outerDiv.offsetWidth;
-        if (w===0 || isNaN(w)){
-            var timer;
-
-            var checkWidth = function(){
-                var w = outerDiv.offsetWidth;
-                if (w===0 || isNaN(w)){
-                    timer = setTimeout(checkWidth, 100);
-                }
-                else{
-                    clearTimeout(timer);
-                    onRender();
-                }
-            };
-
-            timer = setTimeout(checkWidth, 100);
-        }
-        else{
-            onRender();
-        }
-
-
-    };
-
-
-  //**************************************************************************
-  //** onRender
-  //**************************************************************************
-    var onRender = function(){
-        me.resize();
-        me.onRender();
+        onRender(outerDiv, function(){
+            me.resize();
+            me.onRender();
+        });
     };
 
 
@@ -306,7 +279,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
 
     var resize = function(){
-        
+
       //Compute width of individual panels
         var width = outerDiv.offsetWidth;
         var padding = config.padding;
@@ -849,11 +822,14 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
 
 
-
+  //**************************************************************************
+  //** Utils
+  //**************************************************************************
+    var merge = javaxt.dhtml.utils.merge;
+    var onRender = javaxt.dhtml.utils.onRender;
     var _getRect = javaxt.dhtml.utils.getRect;
     var intersects = javaxt.dhtml.utils.intersects;
     var getAreaOfIntersection = javaxt.dhtml.utils.getAreaOfIntersection;
-    var merge = javaxt.dhtml.utils.merge;
     var addResizeListener = javaxt.dhtml.utils.addResizeListener;
     var addNoSelectRule = function(){
         if (noselect===true) return;
