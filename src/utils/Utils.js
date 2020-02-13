@@ -453,6 +453,35 @@ javaxt.dhtml.utils = {
     },
 
 
+  //**************************************************************************
+  //** onRender
+  //**************************************************************************
+  /** Used to check whether DOM element has been added to the document. Calls
+   *  a callback if it exists or when it is added.
+   */
+    onRender: function(el, callback){
+        var w = el.offsetWidth;
+        if (w===0 || isNaN(w)){
+            var timer;
+
+            var checkWidth = function(){
+                var w = el.offsetWidth;
+                if (w===0 || isNaN(w)){
+                    timer = setTimeout(checkWidth, 100);
+                }
+                else{
+                    clearTimeout(timer);
+                    if (callback) callback.apply(el, [el]);
+                }
+            };
+
+            timer = setTimeout(checkWidth, 100);
+        }
+        else{
+            if (callback) callback.apply(el, [el]);
+        }
+    },
+
 
   //**************************************************************************
   //** getRect
