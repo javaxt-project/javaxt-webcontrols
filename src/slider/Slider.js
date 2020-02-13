@@ -69,67 +69,41 @@ javaxt.dhtml.Slider = function(parent, config) {
 
 
 
-      //Check whether the table has been added to the DOM
-        var w = slider.offsetWidth;
-        if (w===0 || isNaN(w)){
-            var timer;
+        onRender(slider, function(){
 
-            var checkWidth = function(){
-                var w = slider.offsetWidth;
-                if (w===0 || isNaN(w)){
-                    timer = setTimeout(checkWidth, 100);
-                }
-                else{
-                    clearTimeout(timer);
-                    onRender();
-                }
+            thumbWidth = parseInt(getStyle(thumb, "width"));
+            var sliderWidth = getWidth(slider);
+
+            var top = -6;
+            Drag.init(thumb, null, 0, sliderWidth-thumbWidth, top, top);
+
+
+            thumb.onDrag = function() {
+                updateSlider(Drag.x, thumbWidth, slider);
+                me.onDrag(me.getValue());
             };
 
-            timer = setTimeout(checkWidth, 100);
-        }
-        else{
-            onRender();
-        }
-    };
+            thumb.onDragEnd = function() {
+
+            };
 
 
-  //**************************************************************************
-  //** onRender
-  //**************************************************************************
-    var onRender = function(){
+          //Bind to 'touchmove' events (touch devices only)
+            thumb.addEventListener('touchmove', function(event) {
+                event.preventDefault();
+                var touch = event.touches[0];
+                var x = touch.pageX - this.parentNode.offsetLeft;
+                if (x<0) x = 0;
+                if (x>(sliderWidth-(thumbWidth))) x = (sliderWidth-(thumbWidth));
+                this.style.left = x + 'px';
 
-        thumbWidth = parseInt(getStyle(thumb, "width"));
-        var sliderWidth = getWidth(slider);
-
-        var top = -6;
-        Drag.init(thumb, null, 0, sliderWidth-thumbWidth, top, top);
-
-
-        thumb.onDrag = function() {
-            updateSlider(Drag.x, thumbWidth, slider);
-            me.onDrag(me.getValue());
-        };
-
-        thumb.onDragEnd = function() {
-
-        };
+                updateSlider(x, thumbWidth, slider);
+                me.onDrag(me.getValue());
+            }, false);
 
 
-      //Bind to 'touchmove' events (touch devices only)
-        thumb.addEventListener('touchmove', function(event) {
-            event.preventDefault();
-            var touch = event.touches[0];
-            var x = touch.pageX - this.parentNode.offsetLeft;
-            if (x<0) x = 0;
-            if (x>(sliderWidth-(thumbWidth))) x = (sliderWidth-(thumbWidth));
-            this.style.left = x + 'px';
-
-            updateSlider(x, thumbWidth, slider);
-            me.onDrag(me.getValue());
-        }, false);
-
-
-        me.onRender();
+            me.onRender();
+        });
     };
 
 
@@ -185,10 +159,12 @@ javaxt.dhtml.Slider = function(parent, config) {
   //** setValue
   //**************************************************************************
   /** Used to set the position of the slider.
+   *  @param x Number of pixels from the left
+   *  @param silent If true, will not fire the onChange event
    */
-    this.setValue = function(x){
+    this.setValue = function(x, silent){
         thumb.style.left = (x-6.5) + 'px';
-        updateSlider(x, 9, slider);
+        updateSlider(x, 9, slider, silent);
     };
 
 
@@ -206,11 +182,12 @@ javaxt.dhtml.Slider = function(parent, config) {
   //** updateSlider
   //**************************************************************************
   /** Updates the background of the slider and fires the onChange event.
+   *  @param silent If true, will not fire the onChange event
    */
-    var updateSlider = function(x, thumbWidth, slider){
+    var updateSlider = function(x, thumbWidth, slider, silent){
 
         value = x;
-        me.onChange(value);
+        if (silent===true){} else me.onChange(value);
 
         var sz = (x+(thumbWidth/2)) + "px 9px, 100% 9px";
         slider.style.MozBackgroundSize = sz; //-moz-background-size
@@ -401,7 +378,7 @@ javaxt.dhtml.Slider = function(parent, config) {
   //**************************************************************************
     var merge = javaxt.dhtml.utils.merge;
     var setStyle = javaxt.dhtml.utils.setStyle;
-
+    var onRender = javaxt.dhtml.utils.onRender;
 
     init();
 };
