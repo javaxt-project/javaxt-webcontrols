@@ -396,9 +396,11 @@ javaxt.dhtml.Window = function(parent, config) {
         }
 
 
-        visible = true;
 
-        me.onOpen();
+        if (!visible){
+            visible = true;
+            me.onOpen();
+        }
     };
 
 
@@ -408,20 +410,23 @@ javaxt.dhtml.Window = function(parent, config) {
   //**************************************************************************
     this.hide = this.close = function(){
 
-        if (mask){
-            if (overflow) mask.parentNode.style.overflow = overflow;
-            mask.style.display = "none";
-            mask.style.visibility = "hidden";
-            mask.style.zIndex = '';
+        if (visible){
+
+            if (mask){
+                if (overflow) mask.parentNode.style.overflow = overflow;
+                mask.style.display = "none";
+                mask.style.visibility = "hidden";
+                mask.style.zIndex = '';
+            }
+
+            mainDiv.style.display = "none";
+            mainDiv.style.visibility = "hidden";
+            mainDiv.style.zIndex = '';
+
+            visible = false;
+
+            me.onClose();
         }
-
-        mainDiv.style.display = "none";
-        mainDiv.style.visibility = "hidden";
-        mainDiv.style.zIndex = '';
-
-        visible = false;
-
-        me.onClose();
     };
 
 
