@@ -128,6 +128,23 @@ javaxt.dhtml.utils = {
 
 
   //**************************************************************************
+  //** getParameter
+  //**************************************************************************
+  /** Returns the value of a given parameter name in a URL querystring
+   *  @param name Parameter name
+   *  @param url URL (e.g. window.location.href)
+   */
+    getParameter: function(name, url){
+        name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+        var regexS = "[\\?&]"+name+"=([^&#]*)";
+        var regex = new RegExp( regexS );
+        var results = regex.exec(url);
+        if (results == null) return "";
+        else return results[1];
+    },
+
+
+  //**************************************************************************
   //** merge
   //**************************************************************************
   /** Used to merge properties from one json object into another. Credit:
