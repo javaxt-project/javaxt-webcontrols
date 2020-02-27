@@ -666,6 +666,22 @@ javaxt.dhtml.utils = {
             if(!isNaN(currentIndex) && currentIndex > highestIndex){highestIndex = currentIndex;}
         }
         return(highestIndex+1);
+    },
+    
+
+  //**************************************************************************
+  //** round
+  //**************************************************************************
+  /** Rounds decimal to the nearest 10ths place.
+   */
+    round : function(number, decimalPlaces){
+        if (decimalPlaces){
+            var n = Math.pow(10, decimalPlaces);
+            return Math.round( number * n ) / n;
+        }
+        else{
+            return Math.round(number);
+        }
     }
 
 
