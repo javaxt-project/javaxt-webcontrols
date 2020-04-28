@@ -131,7 +131,7 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 
 /* Padding for button icons */
 .toolbar-button-icon {
-    margin: 0 3px 0 0px;
+    margin: 0 5px 0 0px;
 }
 
 /* Menu pulldown icon (triangle) */
@@ -473,7 +473,6 @@ select:focus, textarea:focus, input:focus{
 }
 
 .window-header {
-
     background: #0f6391;
     height: 36px;
     cursor: default;
@@ -487,7 +486,6 @@ select:focus, textarea:focus, input:focus{
 }
 
 .window-title {
-
     color: white;
     text-align: center;
     white-space: nowrap;
@@ -501,13 +499,24 @@ select:focus, textarea:focus, input:focus{
     padding-left: 9px;
 }
 
+.window-header-button-bar {
+    position: absolute;
+    right: 0;
+    padding: 6px 7px 0 0;
+}
+
 .window-header-button {
-    width: 18px;
-    height: 18px;
     font-size: 18px;
     border: 0;
     color: #ffffff;
     cursor: pointer;
+    padding: 5px;
+}
+
+.window-header-button:hover {
+    background-color:#5b9bd2;
+    transition: 0.1s;
+    border-radius: 3px;
 }
 
 .window-mask {
