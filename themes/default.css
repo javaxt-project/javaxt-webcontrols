@@ -45,6 +45,16 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 }
 
 
+.noselect, .javaxt-noselect {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    -ms-user-select: none;
+    -khtml-user-select: none;
+    user-select: none;
+}
+
+
 /**************************************************************************/
 /** Panel
 /**************************************************************************/
@@ -538,6 +548,7 @@ select:focus, textarea:focus, input:focus{
 /** Default style for grid controls
  */
 .table-header {
+    height: 36px; /*table-header-col height + border */
     border-bottom: 1px solid #ababab;
     background: #eaeaea;
     background-image: linear-gradient(to bottom, #f9f9f9, #e4e5e7);
