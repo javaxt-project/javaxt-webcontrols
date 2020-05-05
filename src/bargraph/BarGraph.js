@@ -652,6 +652,7 @@ javaxt.dhtml.BarGraph = function (parent, config) {
                 cell: td
             });
         }
+        return arr;
     };
 
 
