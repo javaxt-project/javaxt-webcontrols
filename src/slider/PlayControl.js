@@ -60,7 +60,7 @@ javaxt.dhtml.PlayControl = function(parent, config) {
 
         slider.onDrag = function(){
             var resume = playing;
-            me.pause();
+            if (playing) me.pause();
             if (resume) me.play(loop);
         };
 
