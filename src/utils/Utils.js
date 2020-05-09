@@ -108,6 +108,8 @@ javaxt.dhtml.utils = {
             request.open(method, url, async);
         }
 
+        if (!cache) request.setRequestHeader("Cache-Control", "no-cache, no-transform");
+
         request.onreadystatechange = function(){
             if (request.readyState === 4) {
                 if (request.status===200){
@@ -667,7 +669,7 @@ javaxt.dhtml.utils = {
         }
         return(highestIndex+1);
     },
-    
+
 
   //**************************************************************************
   //** round
