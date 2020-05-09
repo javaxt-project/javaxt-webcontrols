@@ -109,7 +109,13 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
         title = config.title;
 
 
-
+        var mainDiv = document.createElement("div");
+        mainDiv.setAttribute("desc", me.className);
+        mainDiv.style.position = "relative";
+        mainDiv.style.width = "100%";
+        mainDiv.style.height = "100%";
+        parent.appendChild(mainDiv);
+        me.el = mainDiv;
 
 
       //Create outer table (for resize purposes)
@@ -124,8 +130,8 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
         td.style.verticalAlign = "top";
         row.appendChild(td);
         tbody.appendChild(row);
-        parent.appendChild(table);
-        me.el = table;
+        mainDiv.appendChild(table);
+
 
 
       //Create divs (for overflow purposes)
