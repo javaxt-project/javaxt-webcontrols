@@ -251,34 +251,8 @@ javaxt.dhtml.Window = function(parent, config) {
 
 
 
-      //Populate body
-        if (config.body){
-            if (config.body instanceof Element){
-                var p = config.body.parentNode;
-                if (p) p.removeChild(config.body);
-                body.appendChild(config.body);
-            }
-            else{
-                if (typeof config.body === "string"){
-                    body.innerHTML = config.body;
-                }
-            }
-        }
-
-      //Populate footer
-        if (config.footer){
-            if (config.footer instanceof Element){
-                var p = config.footer.parentNode;
-                if (p) p.removeChild(config.footer);
-                footer.appendChild(config.footer);
-            }
-            else{
-                if (typeof parent === "string"){
-                    footer.innerHTML = config.footer;
-                }
-            }
-        }
-
+        me.setContent(config.body);
+        me.setFooter(config.footer);
 
 
 
@@ -342,6 +316,7 @@ javaxt.dhtml.Window = function(parent, config) {
   //** setTitle
   //**************************************************************************
     this.setTitle = function(title){
+        if (title==null) title = "";
         titleDiv.innerHTML = title;
     };
 
@@ -352,6 +327,54 @@ javaxt.dhtml.Window = function(parent, config) {
   /** Override to capture this header click events.
    */
     this.onHeaderClick = function(){};
+
+
+  //**************************************************************************
+  //** getBody
+  //**************************************************************************
+    this.getBody = function(){
+        return body;
+    };
+
+    this.setBody = this.setContent = function(obj){
+        if (obj==null) body.innerHTML = "";
+        else{
+            if (obj instanceof Element){
+                var p = obj.parentNode;
+                if (p) p.removeChild(obj);
+                body.appendChild(obj);
+            }
+            else{
+                if (typeof obj === "string"){
+                    body.innerHTML = obj;
+                }
+            }
+        }
+    };
+
+
+  //**************************************************************************
+  //** getFooter
+  //**************************************************************************
+    this.getFooter = function(){
+        return footer;
+    };
+
+    this.setFooter = function(obj){
+        if (obj==null) footer.innerHTML = "";
+        else{
+            if (obj instanceof Element){
+                var p = obj.parentNode;
+                if (p) p.removeChild(obj);
+                footer.appendChild(obj);
+            }
+            else{
+                if (typeof obj === "string"){
+                    footer.innerHTML = obj;
+                }
+            }
+        }
+    };
 
 
   //**************************************************************************
@@ -408,7 +431,10 @@ javaxt.dhtml.Window = function(parent, config) {
   //**************************************************************************
   //** hide
   //**************************************************************************
-    this.hide = this.close = function(){
+  /** Used to close/hide the window
+   *  @param silent If true, will not fire the onClose event
+   */
+    this.hide = this.close = function(silent){
 
         if (visible){
 
@@ -425,7 +451,7 @@ javaxt.dhtml.Window = function(parent, config) {
 
             visible = false;
 
-            me.onClose();
+            if (silent!==true) me.onClose();
         }
     };
 
@@ -457,6 +483,14 @@ javaxt.dhtml.Window = function(parent, config) {
 
 
   //**************************************************************************
+  //** getWidth
+  //**************************************************************************
+    this.getWidth = function(){
+        return mainDiv.offsetWidth;
+    };
+
+
+  //**************************************************************************
   //** setWidth
   //**************************************************************************
     this.setWidth = function(width){
@@ -468,6 +502,14 @@ javaxt.dhtml.Window = function(parent, config) {
         else{
             mainDiv.style.width = width + "px";
         }
+    };
+
+
+  //**************************************************************************
+  //** getHeight
+  //**************************************************************************
+    this.getHeight = function(){
+        return mainDiv.offsetHeight;
     };
 
 
@@ -720,8 +762,9 @@ javaxt.dhtml.Window = function(parent, config) {
             var y = e.clientY;
 
             var rect = _getRect(div);
+            var rect2 = _getRect(parent);
             var xOffset = x-rect.x;
-            var yOffset = y-rect.y;
+            var yOffset = (y-rect.y)+rect2.y;
 
 
             div.xOffset = xOffset;
