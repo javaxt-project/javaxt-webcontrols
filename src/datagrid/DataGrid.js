@@ -235,11 +235,12 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                 select = checkboxHeader.isChecked();
             }
 
+            var isDataStore = (records instanceof javaxt.dhtml.DataStore);
 
             for (var i=0; i<rows.length; i++){
 
               //Assign the record to the row
-                rows[i].record = records[i];
+                rows[i].record = isDataStore ? records.get(i) : records[i];
 
 
               //Override the update method
@@ -396,6 +397,13 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         };
 
 
+      //Watch for key events
+        table.onKeyEvent = function(keyCode, modifiers){
+            me.onKeyEvent(keyCode, modifiers);
+        };
+
+
+
       //Load records
         if (config.autoload===true) load();
 
@@ -444,6 +452,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
     this.onLoad = function(){};
     this.onError = function(request){};
     this.onRowClick = function(row, e){};
+    this.onKeyEvent = function(keyCode, modifiers){};
 
 
   //**************************************************************************
@@ -504,6 +513,14 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
 
   //**************************************************************************
+  //** focus
+  //**************************************************************************
+    this.focus = function(){
+        table.focus();
+    };
+
+
+  //**************************************************************************
   //** refresh
   //**************************************************************************
     this.refresh = function(){
@@ -527,7 +544,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
             var page = 1;
             if (arguments.length>1) page = arguments[1];
 
-            if (isArray(records)){
+            if (isArray(records) || records instanceof javaxt.dhtml.DataStore){
                 me.beforeLoad();
                 table.load(records, page>1);
                 setPage(page);
