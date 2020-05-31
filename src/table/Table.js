@@ -19,6 +19,9 @@ javaxt.dhtml.Table = function(parent, config) {
     var bodyDiv; //overflow div
     var prevSelection;
     var template;
+    var cntrlIsPressed = false;
+    var shiftIsPressed = false;
+    var altIsPressed = false;
 
     var defaultConfig = {
 
@@ -156,12 +159,81 @@ javaxt.dhtml.Table = function(parent, config) {
         td.style.height = "100%";
         tr.appendChild(td);
 
+
         bodyDiv = document.createElement('div');
         bodyDiv.setAttribute("desc", "body-div");
         bodyDiv.style.width = "100%";
         bodyDiv.style.height = "100%";
         bodyDiv.style.position = "relative";
+        bodyDiv.tabIndex = -1; //allows the div to have focus
+        bodyDiv.onmouseover = function(){
+            this.focus();
+        };
+        bodyDiv.addEventListener("keydown", function(e){
+            if (e.keyCode===16){
+                shiftIsPressed = true;
+            }
+
+            if (e.keyCode===17){
+                cntrlIsPressed = true;
+            }
+
+            if (e.keyCode===18){
+                altIsPressed = true;
+            }
+        });
+        bodyDiv.addEventListener("keyup", function(e){
+            if (e.keyCode===16){
+                shiftIsPressed = false;
+            }
+
+            if (e.keyCode===17){
+                cntrlIsPressed = false;
+            }
+
+            if (e.keyCode===18){
+                altIsPressed = false;
+            }
+
+            if (e.keyCode===38 || e.keyCode===40){
+
+                var lastSelectedRow, lastRow;
+                var selectPrevious = function(){
+                    var prevRow = lastSelectedRow.previousSibling;
+                    if (prevRow) prevRow.click();
+                };
+                me.forEachRow(function (row) {
+                    if (row.selected){
+                        lastSelectedRow = row;
+                    }
+                    else{
+                        if (lastSelectedRow){
+                            if (e.keyCode===40){ //down arrow
+                                row.click();
+                            }
+                            else{ //up arrow
+                                selectPrevious();
+                            }
+                            return true;
+                        }
+                    }
+                    lastRow = row;
+                });
+
+                if (e.keyCode===38 && lastRow===lastSelectedRow){
+                    selectPrevious();
+                }
+            }
+
+            me.onKeyEvent(e.keyCode, {
+                shift: shiftIsPressed,
+                ctrl: cntrlIsPressed,
+                alt: altIsPressed
+            });
+        });
         td.appendChild(bodyDiv);
+
+
         div = document.createElement('div');
         div.style.width = "100%";
         div.style.height = "100%";
@@ -781,6 +853,20 @@ javaxt.dhtml.Table = function(parent, config) {
   /** Called whenever a header cell is clicked.
    */
     this.onHeaderClick = function(idx, colConfig, cell, event){};
+
+
+  //**************************************************************************
+  //** onKeyEvent
+  //**************************************************************************
+    this.onKeyEvent = function(keyCode, modifiers){};
+
+
+  //**************************************************************************
+  //** focus
+  //**************************************************************************
+    this.focus = function(){
+        bodyDiv.parentNode.focus();
+    };
 
 
   //**************************************************************************
