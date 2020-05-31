@@ -501,8 +501,17 @@ input, select, textarea { /* Allows overriding native style of form elements on 
     border-bottom: 1px solid #a28317;
 }
 
+.alert-header .window-header-button:hover {
+    background-color: #a28317;
+}
+
 .alert { /* used in conjunction with window */
     background-color: #383727;
+}
+
+.confirm-body {
+    padding: 10px 10px 15px 15px;
+    line-height: 18px;
 }
 
 

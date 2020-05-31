@@ -539,6 +539,9 @@ select:focus, textarea:focus, input:focus{
     background-color: #cb6400;
 }
 
+.alert-header .window-header-button:hover {
+    background-color: #ea985c;
+}
 
 
 
