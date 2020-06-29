@@ -18,7 +18,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
     var currPage;
     var eof = false;
     var checkboxHeader;
-
+    var columns;
     var rowHeight; //<-- Assumes all the rows are the same height!
 
 
@@ -110,7 +110,6 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
       //Extract required config variables
         filterName = config.filterName;
-        filter = config.filter;
         if (config.sort==="local") config.localSort = true;
         if (config.fields){
             if (!isArray(config.fields)){
@@ -124,7 +123,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
       //Parse column config
         var multiselect = config.multiselect;
-        var columns = [];
+        columns = [];
         for (var i=0; i<config.columns.length; i++){
             var column = config.columns[i];
 
@@ -178,42 +177,8 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
 
       //Update column config using the "sort" filter
-        if (filter){
-            if (filter.orderby){
-                var arr = filter.orderby.split(",");
-                for (var i=0; i<arr.length; i++){
-                    var field = arr[i].trim();
-                    if (field.length>0){
+        me.setFilter(config.filter);
 
-                        var fieldName, sortDirection;
-                        field = field.toUpperCase();
-                        if (field.endsWith(" ASC") || field.endsWith(" DESC")){
-                            var x = field.lastIndexOf(" ");
-                            fieldName = field.substring(0, x).trim();
-                            sortDirection = field.substring(x).trim();
-                        }
-                        else{
-                            fieldName = field;
-                            sortDirection = "ASC";
-                        }
-
-
-
-                        for (var j=0; j<columns.length; j++){
-                            if (columns[j].field){
-                                if (columns[j].field.toUpperCase() === fieldName){
-                                    columns[j].sort = sortDirection;
-                                    columns[j].header.setSortIndicator(sortDirection);
-                                    break;
-                                }
-                            }
-                        }
-
-                    }
-                }
-
-            }
-        }
 
 
       //Create table
@@ -407,6 +372,85 @@ javaxt.dhtml.DataGrid = function(parent, config) {
       //Load records
         if (config.autoload===true) load();
 
+    };
+
+
+  //**************************************************************************
+  //** setFilter
+  //**************************************************************************
+    this.setFilter = function(newFilter){
+        if (!filter) filter = {};
+        if (!newFilter) newFilter = {};
+
+        for (var key in newFilter) {
+            if (newFilter.hasOwnProperty(key)) {
+                filter[key] = newFilter[key];
+            }
+        }
+
+        var deletions = [];
+        for (var key in filter) {
+            if (filter.hasOwnProperty(key)) {
+                if (newFilter[key]===null || newFilter[key]==='undefined'){
+                    deletions.push(key);
+                }
+            }
+        }
+
+        for (var i=0; i<deletions.length; i++){
+            var key = deletions[i];
+            delete filter[key];
+        }
+
+
+        for (var j=0; j<columns.length; j++){
+            columns[j].sort = null;
+            columns[j].header.setSortIndicator(null);
+        }
+
+
+        if (filter.orderby){
+            var arr = filter.orderby.split(",");
+            for (var i=0; i<arr.length; i++){
+                var field = arr[i].trim();
+                if (field.length>0){
+
+                    var fieldName, sortDirection;
+                    field = field.toUpperCase();
+                    if (field.endsWith(" ASC") || field.endsWith(" DESC")){
+                        var x = field.lastIndexOf(" ");
+                        fieldName = field.substring(0, x).trim();
+                        sortDirection = field.substring(x).trim();
+                    }
+                    else{
+                        fieldName = field;
+                        sortDirection = "ASC";
+                    }
+
+
+
+                    for (var j=0; j<columns.length; j++){
+                        if (columns[j].field){
+                            if (columns[j].field.toUpperCase() === fieldName){
+                                columns[j].sort = sortDirection;
+                                columns[j].header.setSortIndicator(sortDirection);
+                                break;
+                            }
+                        }
+                    }
+
+                }
+            }
+
+        }
+    };
+
+
+  //**************************************************************************
+  //** getFilter
+  //**************************************************************************
+    this.getFilter = function(){
+        return filter;
     };
 
 
