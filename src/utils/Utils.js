@@ -503,6 +503,53 @@ javaxt.dhtml.utils = {
 
 
   //**************************************************************************
+  //** updateDOM
+  //**************************************************************************
+  /** Used to update the default befaviour of the browser to prevent things
+   *  like right mouse click, scrolling beyond a page, and drag and drop.
+   */
+    updateDOM: function(){
+
+      //Disable right-click context menu
+        document.oncontextmenu = function(e){
+            return false;
+        };
+
+
+      //Add logic to prevent touch devices like iPad from scrolling beyond the document
+      //http://stackoverflow.com/a/26853900
+        var firstMove;
+        window.addEventListener('touchstart', function (e) {
+            firstMove = true;
+        });
+        window.addEventListener('touchmove', function (e) {
+            if (firstMove) {
+                e.preventDefault();
+
+                firstMove = false;
+            }
+        });
+
+
+
+      //Watch for drag and drop events
+        if (!document.body) document.body = document.getElementsByTagName("body")[0];
+        var body = document.body;
+        body.addEventListener('dragover', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            return false;
+        }, false);
+        body.addEventListener('drop', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            return false;
+        }, false);
+
+    },
+
+
+  //**************************************************************************
   //** getRect
   //**************************************************************************
   /** Returns the geometry of a given element.
