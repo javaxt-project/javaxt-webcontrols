@@ -509,7 +509,7 @@ input, select, textarea { /* Allows overriding native style of form elements on 
     background-color: #383727;
 }
 
-.confirm-body {
+.alert-body, .confirm-body {
     padding: 10px 10px 15px 15px;
     line-height: 18px;
 }
