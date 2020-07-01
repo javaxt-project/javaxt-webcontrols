@@ -112,7 +112,7 @@ javaxt.dhtml.utils = {
 
         request.onreadystatechange = function(){
             if (request.readyState === 4) {
-                if (request.status===200){
+                if (request.status>=200 && request.status<300){
 
                     if (success) success.apply(scope, [request.responseText, request.responseXML, request.responseURL, request]);
 
