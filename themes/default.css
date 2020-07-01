@@ -296,9 +296,21 @@ input, select, textarea { /* Allows overriding native style of form elements on 
     margin-left: 10px;
 }
 
+.form-button:disabled,
+.form-button[disabled]{
+    opacity:0.75;
+    box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0.2);
+    cursor:default;
+}
+
 .form-button:hover {
     background-color: #d2e3ed;
     border-color: rgba(82, 168, 236, 0.8);
+}
+
+.form-button:disabled:hover {
+    background-color: #e4e4e4;
+    border: 1px solid #b4b4b4;
 }
 
 .form-button:active {
