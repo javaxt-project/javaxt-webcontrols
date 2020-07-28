@@ -5,8 +5,8 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 //**  Http Authentication
 //*****************************************************************************/
 /**
- *   Used to perform BASIC HTTP authentication using a technique outlined in 
- *   the following article: 
+ *   Used to perform BASIC HTTP authentication using a technique outlined in
+ *   the following article:
  *   http://www.javaxt.com/Tutorials/Javascript/Form_Based_HTTP_Authentication
  *
  ******************************************************************************/
@@ -27,6 +27,7 @@ javaxt.dhtml.Authentication = function(loginURL, logoutURL) {
       //Instantiate HTTP Request
         var request = ((window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP"));
         request.open("GET", loginURL, true, username, password);
+        request.setRequestHeader("Cache-Control", "no-cache, no-transform");
         request.onreadystatechange = function(){
             if (request.readyState === 4) {
                 if (request.status !== 200){
@@ -52,17 +53,19 @@ javaxt.dhtml.Authentication = function(loginURL, logoutURL) {
             document.execCommand("ClearAuthenticationCache");
             if (callback!=null) callback.call();
         }
-        else{ 
+        else{
 
           //Logout. Tell the server not to return the "WWW-Authenticate" header
             var request = new XMLHttpRequest();
             request.open("GET", logoutURL + "?prompt=false", true);
+            request.setRequestHeader("Cache-Control", "no-cache, no-transform");
             request.onreadystatechange = function(){
                 if (request.readyState === 4) {
 
                   //Login with dummy credentials to clear the auth cache
                     var request2 = new XMLHttpRequest();
                     request2.open("GET", loginURL, true, "logout", "logout");
+                    request2.setRequestHeader("Cache-Control", "no-cache, no-transform");
                     request2.onreadystatechange = function(){
                         if (request2.readyState === 4) {
                             if (callback!=null) callback.call();
