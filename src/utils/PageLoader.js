@@ -420,7 +420,9 @@ javaxt.dhtml.PageLoader = function(config) {
   //**************************************************************************
     var get = function(url, success, onFail){
         javaxt.dhtml.utils.get(url, {
-            success: function(text, xml, url){
+            success: function(text, xml, url, request){
+                request.abort();
+                request = null;
                 if (success) success.apply(me, [text, xml, url]);
             },
             failure: function(request){
