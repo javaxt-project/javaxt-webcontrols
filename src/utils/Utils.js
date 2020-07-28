@@ -46,11 +46,18 @@ javaxt.dhtml.utils = {
   //** post
   //**************************************************************************
     post: function(url, payload, config){
-        var settings = {
-            method: "POST",
-            payload: payload
-        };
-        javaxt.dhtml.utils.merge(settings, config);
+        var settings;
+        if (payload.payload){
+            settings = payload;
+            settings.method = "POST";
+        }
+        else{
+            var settings = {
+                method: "POST",
+                payload: payload
+            };
+            javaxt.dhtml.utils.merge(settings, config);
+        }
         return javaxt.dhtml.utils.http(url, settings);
     },
 
@@ -59,12 +66,8 @@ javaxt.dhtml.utils = {
   //** delete
   //**************************************************************************
     delete: function(url, config){
-        var settings = {
-            method: "DELETE",
-            payload: null
-        };
-        javaxt.dhtml.utils.merge(settings, config);
-        return javaxt.dhtml.utils.http(url, settings);
+        config.method = "DELETE";
+        return javaxt.dhtml.utils.http(url, config);
     },
 
 
