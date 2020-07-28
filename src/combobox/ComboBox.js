@@ -15,7 +15,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
     this.className = "javaxt.dhtml.ComboBox";
 
     var me = this;
-    var input, button;
+    var input, button, mask;
     var menuDiv, menuOptions, newOption;
     var overflowDiv, overflowContainer;
 
@@ -27,6 +27,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         scrollbar: true,    //true to show the vertical scrollbar
         showMenuOnFocus: true,
         typeAhead: true,
+        readOnly: false,
 
 
         addNewOption: false,
@@ -131,10 +132,15 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         config = clone;
 
 
+      //Add noselect css rule before creating/styling any elements
+        javaxt.dhtml.utils.addNoSelectRule();
+
+
       //Create main div
         var mainDiv = document.createElement("div");
         mainDiv.setAttribute("desc", me.className);
         mainDiv.style.width = config.style.width;
+        mainDiv.style.position = "relative";
         parent.appendChild(mainDiv);
         me.el = mainDiv;
 
@@ -154,7 +160,11 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         input = document.createElement('input');
         input.type = "text";
         setStyle(input, "input");
-        input.style.width="100%";
+        if (config.readOnly===true){
+            config.spellcheck = false;
+            config.typeAhead = false;
+            input.setAttribute("readonly", "true");
+        }
         if (config.spellcheck===true){} else input.setAttribute("spellcheck", "false");
         if (config.placeholder) input.setAttribute("placeholder", config.placeholder);
         td.appendChild(input);
@@ -167,6 +177,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         };
 
         input.onkeyup = function(e){
+            if (config.readOnly===true) return;
             if (e.keyCode===9){ //tab
                 var d;
                 if (menuDiv.style.visibility !== "hidden"){
@@ -186,7 +197,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         };
 
         input.oninput = function(){
-
+            if (config.readOnly===true) return;
             var foundMatch = false;
             var filter = input.value.replace(/^\s*/, "").replace(/\s*$/, "").toLowerCase();
             for (var i=0; i<menuOptions.childNodes.length; i++){
@@ -350,6 +361,44 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         }
     };
 
+
+  //**************************************************************************
+  //** enable
+  //**************************************************************************
+  /** Used to enable the button.
+   */
+    this.enable = function(){
+        if (mask){
+            var outerDiv = me.el;
+            outerDiv.style.opacity = "";
+            mask.style.visibility = "hidden";
+        }
+    };
+
+
+  //**************************************************************************
+  //** disable
+  //**************************************************************************
+    this.disable = function(){
+
+        var outerDiv = me.el;
+        outerDiv.style.opacity = "0.5";
+
+        if (mask){
+            mask.style.visibility = "visible";
+        }
+        else{
+
+            mask = document.createElement('div');
+            mask.setAttribute("desc", "mask");
+            mask.style.position = "absolute";
+            mask.style.zIndex = "1";
+            mask.style.width = "100%";
+            mask.style.height = "100%";
+
+            outerDiv.insertBefore(mask, outerDiv.firstChild);
+        }
+    };
 
   //**************************************************************************
   //** reset
@@ -900,6 +949,13 @@ javaxt.dhtml.ComboBox = function(parent, config) {
     var createTable = javaxt.dhtml.utils.createTable;
     var setStyle = function(el, style){
         javaxt.dhtml.utils.setStyle(el, config.style[style]);
+        if (el.type === "text"){
+            el.style.width="100%";
+            if (config.readOnly===true){
+                el.className += " javaxt-noselect";
+                el.style.cursor = "default";
+            }
+        }
     };
 
 
