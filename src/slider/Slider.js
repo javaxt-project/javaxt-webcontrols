@@ -139,8 +139,12 @@ javaxt.dhtml.Slider = function(parent, config) {
    *  Otherwise, returns the current position of the slider.
    */
     this.getValue = function(returnPercentage){
-        if (returnPercentage==true) return Math.round((value/me.getWidth()) * 100) / 100;
-        else return value;
+        var w = me.getWidth();
+        if (returnPercentage==true) return Math.round((value/w) * 100) / 100;
+
+        var val = value;
+        if (val>=(w-(thumbWidth/2))) val = w;
+        return val;
     };
 
 
@@ -151,7 +155,7 @@ javaxt.dhtml.Slider = function(parent, config) {
    *  method, can be used to compute a percentage value.
    */
     this.getWidth = function(){
-        return getWidth(slider)-thumbWidth;
+        return getWidth(slider)-(thumbWidth/2);
     };
 
 
