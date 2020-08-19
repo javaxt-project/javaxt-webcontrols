@@ -23,7 +23,7 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
     var titleDiv;
     var title;
 
-    var menuWidth;
+    var menuWidth, menuPosition;
     var menuIcon;
 
 
@@ -34,6 +34,7 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
         fx: null,
 
         menuWidth: 250,
+        menuPosition: "left",
 
         title: "",
 
@@ -106,6 +107,9 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
 
       //Process config
         menuWidth = config.menuWidth;
+        menuPosition = config.menuPosition;
+        if (menuPosition==="right"){}
+        else menuPosition = "left";
         title = config.title;
 
 
@@ -156,7 +160,7 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
         innerDiv.style.width=(outerDiv.offsetWidth+menuWidth)+"px";
         innerDiv.style.height="100%";
         innerDiv.style.position = "relative";
-        innerDiv.style.marginLeft = -menuWidth+"px";
+        innerDiv.style.marginLeft = (menuPosition==="left" ? -menuWidth : 0) +"px";
         if (config.fx){
             config.fx.setTransition(innerDiv, config.transitionEffect, config.animationSteps);
         }
@@ -169,22 +173,26 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
         tbody = table.firstChild;
         row = document.createElement('tr');
         var leftCol = document.createElement('td');
+        if (menuPosition==="right") leftCol.style.width="100%";
         leftCol.style.height="100%";
         leftCol.style.verticalAlign = "top";
         row.appendChild(leftCol);
+
+
+        var rightCol = document.createElement('td');
+        if (menuPosition==="left") rightCol.style.width="100%";
+        rightCol.style.height="100%";
+        rightCol.style.verticalAlign = "top";
+        row.appendChild(rightCol);
+
 
         menuDiv = document.createElement('div');
         setStyle(menuDiv, "menu");
         menuDiv.style.height = "100%";
         menuDiv.style.width = menuWidth + "px";
-        leftCol.appendChild(menuDiv);
+        if (menuPosition==="left") leftCol.appendChild(menuDiv);
+        else rightCol.appendChild(menuDiv);
 
-
-        var rightCol = document.createElement('td');
-        rightCol.style.width="100%";
-        rightCol.style.height="100%";
-        rightCol.style.verticalAlign = "top";
-        row.appendChild(rightCol);
 
         tbody.appendChild(row);
         innerDiv.appendChild(table);
@@ -208,7 +216,8 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
         row.appendChild(bodyDiv);
         tbody.appendChild(row);
 
-        rightCol.appendChild(table);
+        if (menuPosition==="left") rightCol.appendChild(table);
+        else leftCol.appendChild(table);
 
 
 
@@ -244,29 +253,9 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
         var row = document.createElement('tr');
 
 
-      //Create left column used to trigger the slider
+      //Create left column
         var leftCol = document.createElement('td');
-        leftCol.onclick = function(){
-            var margin = parseFloat(innerDiv.style.marginLeft);
-            if (margin<0){
-                me.showMenu();
-            }
-            else{
-                me.hideMenu();
-            }
-        };
-
-      //Add menu icon to the left cell
-        if (typeof config.style.menuIcon === "function") {
-            menuIcon = config.style.menuIcon();
-        }
-        else{
-            menuIcon = document.createElement('div');
-            setStyle(menuIcon, config.style.menuIcon);
-        }
-        leftCol.appendChild(menuIcon);
         row.appendChild(leftCol);
-
 
 
       //Create title
@@ -281,8 +270,31 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
         var rightCol = document.createElement('td');
         row.appendChild(rightCol);
 
-        tbody.appendChild(row);
 
+
+      //Add menu icon
+        var tgt = (menuPosition==="left") ? leftCol : rightCol;
+        tgt.onclick = function(){
+            var margin = parseFloat(innerDiv.style.marginLeft);
+            if (margin<0){
+                me.showMenu();
+            }
+            else{
+                me.hideMenu();
+            }
+        };
+        if (typeof config.style.menuIcon === "function") {
+            menuIcon = config.style.menuIcon();
+        }
+        else{
+            menuIcon = document.createElement('div');
+            setStyle(menuIcon, config.style.menuIcon);
+        }
+        tgt.appendChild(menuIcon);
+
+
+
+        tbody.appendChild(row);
         return table;
     };
 
@@ -400,6 +412,7 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
   //** showMenu
   //**************************************************************************
     this.showMenu = function(){
+        console.log("showMenu!");
         me.beforeShow();
         if (config.fx){
             setTimeout(function(){
