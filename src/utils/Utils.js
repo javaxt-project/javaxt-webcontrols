@@ -643,6 +643,212 @@ javaxt.dhtml.utils = {
 
 
   //**************************************************************************
+  //** initDrag
+  //**************************************************************************
+    initDrag : function(dragHandle, config){
+        javaxt.dhtml.utils.addNoSelectRule();
+
+        if (!config) config = {};
+        var holdDelay = config.holdDelay;
+        if (isNaN(holdDelay)) holdDelay = 50;
+
+        var cursor = dragHandle.style.cursor;
+        if (!cursor) cursor = "default";
+
+
+      //This timeout, started on mousedown, triggers the beginning of a hold
+        var holdStarter = null;
+
+
+      //This flag indicates the user is currently holding the mouse down
+        var holdActive = false;
+
+
+      //OnClick
+        //div.onclick = NOTHING!! not using onclick at all - onmousedown and onmouseup take care of everything
+
+
+      //MouseDown
+        dragHandle.onmousedown = function(e){
+
+
+          //Set the holdStarter and wait for the predetermined delay, and then begin a hold
+            holdStarter = setTimeout(function() {
+                holdStarter = null;
+                holdActive = true;
+
+
+              //Initiate drag
+                startDrag(e);
+
+
+              //Add event listeners
+                if (document.addEventListener) {
+                    document.addEventListener("mousemove", onMouseMove);
+                    document.addEventListener("mouseup", onMouseUp);
+                }
+                else if (document.attachEvent) {
+                    document.attachEvent("onmousemove", onMouseMove);
+                    document.attachEvent("onmouseup", onMouseUp);
+                }
+
+            }, holdDelay);
+
+        };
+
+
+
+      //MouseUp
+        var onMouseUp = function(e){
+
+
+
+          //If the mouse is released immediately (i.e., a click), before the
+          //holdStarter runs, then cancel the holdStarter and do the click
+            if (holdStarter) {
+                clearTimeout(holdStarter);
+
+
+                //simple click
+            }
+
+          //Otherwise, if the mouse was being held, end the hold
+            else if (holdActive) {
+                holdActive = false;
+
+              //Remove event listeners
+                if (document.removeEventListener) {
+                    document.removeEventListener("mousemove", onMouseMove);
+                    document.removeEventListener("mouseup", onMouseUp);
+                } else if (document.detachEvent) {
+                    document.detachEvent("onmousemove", onMouseMove);
+                    document.detachEvent("onmouseup", onMouseUp);
+                }
+
+              //Update cursor
+                dragHandle.style.cursor = cursor;
+
+                if (config.onDragEnd)
+                config.onDragEnd.apply(dragHandle, []);
+
+
+              //Remove the "javaxt-noselect" class
+                var body = document.getElementsByTagName('body')[0];
+                body.className = body.className.replace( /(?:^|\s)javaxt-noselect(?!\S)/g , '' );
+            }
+        };
+
+
+        dragHandle.onmouseup = onMouseUp;
+
+
+
+      //Start touch (similar to "onmousedown")
+        dragHandle.ontouchstart = function(e) {
+
+            e.preventDefault();
+            var touch = e.touches[0];
+            var x = touch.pageX;
+            var y = touch.pageY;
+
+
+
+
+          //Set the holdStarter and wait for the holdDelay before starting the drag
+            holdStarter = setTimeout(function() {
+                holdStarter = null;
+                holdActive = true;
+
+              //Initiate drag
+                startDrag({
+                    clientX: x,
+                    clientY: y
+                });
+
+
+              //Add "touchmove" event listener
+                if (document.removeEventListener) {
+                    dragHandle.addEventListener("touchmove", onTouchMove);
+                }
+                else if (document.detachEvent) {
+                    dragHandle.attachEvent("ontouchmove", onTouchMove);
+                }
+
+
+            }, holdDelay);
+        };
+
+      //End touch (similar to "onmouseup")
+        dragHandle.ontouchend = function(e) {
+
+
+          //Remove "touchmove" event listener
+            if (document.removeEventListener) {
+                dragHandle.removeEventListener("touchmove", onTouchMove);
+            }
+            else if (document.detachEvent) {
+                dragHandle.detachEvent("ontouchmove", onTouchMove);
+            }
+
+
+
+          //If the mouse is released immediately (i.e., a click), before the
+          //holdStarter runs, then cancel the holdStarter and do the click
+            if (holdStarter) {
+                clearTimeout(holdStarter);
+                //Click Event!
+            }
+
+          //Otherwise, if the mouse was being held, end the hold
+            else if (holdActive) {
+                holdActive = false;
+                //End drag!
+            }
+
+        };
+
+
+
+        var onMouseMove = function(e){
+            var x = e.clientX;
+            var y = e.clientY;
+
+            if (config.onDrag)
+            config.onDrag.apply(dragHandle, [x,y]);
+        };
+
+        var onTouchMove = function(e) {
+            e.preventDefault();
+            var touch = e.touches[0];
+            var x = touch.pageX;
+            var y = touch.pageY;
+
+            onMouseMove({
+                clientX: x,
+                clientY: y
+            });
+        };
+
+
+        var startDrag = function(e){
+            var x = e.clientX;
+            var y = e.clientY;
+
+            if (config.onDragStart)
+            config.onDragStart.apply(dragHandle, [x,y]);
+
+
+          //Disable text selection in the entire document - very important!
+            var body = document.getElementsByTagName('body')[0];
+            if (!body.className.match(/(?:^|\s)javaxt-noselect(?!\S)/) ){
+                body.className += (body.className.length==0 ? "" : " ") + "javaxt-noselect";
+            }
+
+        };
+    },
+
+
+  //**************************************************************************
   //** addResizeListener
   //**************************************************************************
   /** Used to watch for resize events for a given element. Credit:
