@@ -33,9 +33,9 @@ javaxt.dhtml.Window = function(parent, config) {
         width: null,
         height: null,
         modal: false,
-        valign: "middle",
-
+        resizable: true,
         closable: true,
+        valign: "middle",
 
 
         style: {
@@ -120,6 +120,10 @@ javaxt.dhtml.Window = function(parent, config) {
 
             },
 
+            resizeHandle: {
+                //should be about 20x20 px with rounded corner to match window
+            },
+
             mask: {
                 background: "rgba(0,0,0,0.1)"
             }
@@ -168,10 +172,12 @@ javaxt.dhtml.Window = function(parent, config) {
         me.setHeight(config.height);
 
 
-
         parent.appendChild(mainDiv);
         me.el = mainDiv;
 
+        if (config.resizable===true){
+            addResizeHandle(mainDiv);
+        }
 
 
 
@@ -274,8 +280,49 @@ javaxt.dhtml.Window = function(parent, config) {
 
 
       //Initialize drag
-        addNoSelectRule();
-        initDrag(mainDiv, dragHandle, 50);
+        initDrag(dragHandle, {
+            onDragStart: function(x,y){
+                var div = mainDiv;
+
+                var rect = _getRect(div);
+                var rect2 = _getRect(parent);
+                var xOffset = x-rect.x;
+                var yOffset = (y-rect.y)+rect2.y;
+
+
+                div.xOffset = xOffset;
+                div.yOffset = yOffset;
+                div.width = rect.width;
+                div.height = rect.height;
+
+
+                div.style.left = rect.x + 'px';
+                div.style.top = (y-yOffset) + 'px';
+                dragHandle.style.cursor = 'move';
+
+            },
+            onDrag: function(x,y){
+                var div = mainDiv;
+
+                var left = (x-div.xOffset);
+                if (left<0) left = 0;
+
+
+                if (left+div.width>parent.offsetWidth) left=parent.offsetWidth-div.width;
+
+                var top = (y-div.yOffset);
+                if (top<0) top = 0;
+
+                if (top+div.height>parent.offsetHeight) top=parent.offsetHeight-div.height;
+
+                div.style.left = left + 'px';
+                div.style.top = top + 'px';
+
+            },
+            onDragEnd: function(){
+                this.style.cursor = 'default';
+            }
+        });
 
 
       //Watch for resize events
@@ -566,227 +613,197 @@ javaxt.dhtml.Window = function(parent, config) {
     };
 
 
-
   //**************************************************************************
-  //** initDrag
+  //** addResizeHandle
   //**************************************************************************
-
-    var initDrag = function(div, dragHandle, holdDelay){
-
-
-
-      //This timeout, started on mousedown, triggers the beginning of a hold
-        var holdStarter = null;
-
-
-      //This flag indicates the user is currently holding the mouse down
-        var holdActive = false;
-
-
-      //OnClick
-        //div.onclick = NOTHING!! not using onclick at all - onmousedown and onmouseup take care of everything
-
-
-      //MouseDown
-        dragHandle.onmousedown = function(e){
-
-
-          //Set the holdStarter and wait for the predetermined delay, and then begin a hold
-            holdStarter = setTimeout(function() {
-                holdStarter = null;
-                holdActive = true;
-
-
-              //Initiate drag
-                startDrag(e);
-
-
-              //Add event listeners
-                if (document.addEventListener) {
-                    document.addEventListener("mousemove", onMouseMove);
-                    document.addEventListener("mouseup", onMouseUp);
-                }
-                else if (document.attachEvent) {
-                    document.attachEvent("onmousemove", onMouseMove);
-                    document.attachEvent("onmouseup", onMouseUp);
-                }
-
-            }, holdDelay);
-
-        };
-
-
-
-      //MouseUp
-        var onMouseUp = function(e){
-
-
-
-          //If the mouse is released immediately (i.e., a click), before the
-          //holdStarter runs, then cancel the holdStarter and do the click
-            if (holdStarter) {
-                clearTimeout(holdStarter);
-
-
-                //simple click
-            }
-
-          //Otherwise, if the mouse was being held, end the hold
-            else if (holdActive) {
-                holdActive = false;
-
-              //Remove event listeners
-                if (document.removeEventListener) {
-                    document.removeEventListener("mousemove", onMouseMove);
-                    document.removeEventListener("mouseup", onMouseUp);
-                } else if (document.detachEvent) {
-                    document.detachEvent("onmousemove", onMouseMove);
-                    document.detachEvent("onmouseup", onMouseUp);
-                }
-
-              //Update cursor
-                dragHandle.style.cursor = 'default';
-
-
-              //Remove the "javaxt-noselect" class
-                var body = document.getElementsByTagName('body')[0];
-                body.className = body.className.replace( /(?:^|\s)javaxt-noselect(?!\S)/g , '' );
-            }
-        };
-
-
-        dragHandle.onmouseup = onMouseUp;
-
-
-
-      //Start touch (similar to "onmousedown")
-        dragHandle.ontouchstart = function(e) {
-
-            e.preventDefault();
-            var touch = e.touches[0];
-            var x = touch.pageX;
-            var y = touch.pageY;
-
-
-
-
-          //Set the holdStarter and wait for the holdDelay before starting the drag
-            holdStarter = setTimeout(function() {
-                holdStarter = null;
-                holdActive = true;
-
-              //Initiate drag
-                startDrag({
-                    clientX: x,
-                    clientY: y
-                });
-
-
-              //Add "touchmove" event listener
-                if (document.removeEventListener) {
-                    dragHandle.addEventListener("touchmove", onTouchMove);
-                }
-                else if (document.detachEvent) {
-                    dragHandle.attachEvent("ontouchmove", onTouchMove);
-                }
-
-
-            }, holdDelay);
-        };
-
-      //End touch (similar to "onmouseup")
-        dragHandle.ontouchend = function(e) {
-
-
-          //Remove "touchmove" event listener
-            if (document.removeEventListener) {
-                dragHandle.removeEventListener("touchmove", onTouchMove);
-            }
-            else if (document.detachEvent) {
-                dragHandle.detachEvent("ontouchmove", onTouchMove);
-            }
-
-
-
-          //If the mouse is released immediately (i.e., a click), before the
-          //holdStarter runs, then cancel the holdStarter and do the click
-            if (holdStarter) {
-                clearTimeout(holdStarter);
-                //Click Event!
-            }
-
-          //Otherwise, if the mouse was being held, end the hold
-            else if (holdActive) {
-                holdActive = false;
-                //End drag!
-            }
-
-        };
-
-
-
-        var onMouseMove = function(e){
-            var x = e.clientX;
-            var y = e.clientY;
-
-            var left = (x-div.xOffset);
-            if (left<0) left = 0;
-
-
-            if (left+div.width>parent.offsetWidth) left=parent.offsetWidth-div.width;
-
-            var top = (y-div.yOffset);
-            if (top<0) top = 0;
-
-            if (top+div.height>parent.offsetHeight) top=parent.offsetHeight-div.height;
-
-            div.style.left = left + 'px';
-            div.style.top = top + 'px';
-        };
-
-        var onTouchMove = function(e) {
-            e.preventDefault();
-            var touch = e.touches[0];
-            var x = touch.pageX;
-            var y = touch.pageY;
-
-            onMouseMove({
-                clientX: x,
-                clientY: y
-            });
-        };
-
-
-        var startDrag = function(e){
-            var x = e.clientX;
-            var y = e.clientY;
-
+    var addResizeHandle = function(parent){
+
+        var xOffset, yOffset;
+        var orgHeight, orgWidth;
+        var dx, dy;
+        var onDragStart = function(x,y){
+            var div = this;
             var rect = _getRect(div);
             var rect2 = _getRect(parent);
-            var xOffset = x-rect.x;
-            var yOffset = (y-rect.y)+rect2.y;
 
+            xOffset = (x-rect.x)+rect2.x;
+            yOffset = (y-rect.y)+rect2.y;
+            orgHeight = rect2.height;
+            orgWidth = rect2.width;
 
-            div.xOffset = xOffset;
-            div.yOffset = yOffset;
-            div.width = rect.width;
-            div.height = rect.height;
+            dx = parseFloat(parent.style.width);
+            if (dx<orgWidth) dx = orgWidth-dx;
+            else dx = 0;
 
-
-            div.style.left = rect.x + 'px';
-            div.style.top = (y-yOffset) + 'px';
-            dragHandle.style.cursor = 'move';
-
-
-          //Disable text selection in the entire document - very important!
-            var body = document.getElementsByTagName('body')[0];
-            if (!body.className.match(/(?:^|\s)javaxt-noselect(?!\S)/) ){
-                body.className += (body.className.length==0 ? "" : " ") + "javaxt-noselect";
-            }
-
+            dy = parseFloat(parent.style.height);
+            if (dy<orgHeight) dy = orgHeight-dy;
+            else dy = 0;
         };
-    };
 
+
+      //Add vertical resizer to the top of the window (buggy!)
+        var resizeHandle = document.createElement("div");
+        resizeHandle.style.position = "absolute";
+        resizeHandle.style.width = "100%";
+        resizeHandle.style.height = "10px";
+        resizeHandle.style.top = "-5px";
+        resizeHandle.style.cursor = "ns-resize";
+        //resizeHandle.style.backgroundColor = "#ff0000";
+        resizeHandle.style.zIndex = 2;
+        parent.appendChild(resizeHandle);
+        javaxt.dhtml.utils.initDrag(resizeHandle, {
+            onDragStart: onDragStart,
+            onDrag: function(x,y){
+                var top = (yOffset-y);
+                parent.style.top = (y) + "px";
+                parent.style.height = ((orgHeight+top)-dy) + "px";
+            }
+        });
+
+
+      //Add vertical resizer to the bottom of the window
+        resizeHandle = resizeHandle.cloneNode();
+        resizeHandle.style.top = "";
+        resizeHandle.style.bottom = "-5px";
+        parent.appendChild(resizeHandle);
+        javaxt.dhtml.utils.initDrag(resizeHandle, {
+            onDragStart: onDragStart,
+            onDrag: function(x,y){
+                var top = -(yOffset-y);
+                parent.style.height = (top+dy) + "px";
+            }
+        });
+
+
+      //Add horizontal resizer to the left of the window
+        resizeHandle = resizeHandle.cloneNode();
+        resizeHandle.style.top = "0px";
+        resizeHandle.style.bottom = "";
+        resizeHandle.style.left = "-5px";
+        resizeHandle.style.height = "100%";
+        resizeHandle.style.width = "10px";
+        resizeHandle.style.cursor = "ew-resize";
+        parent.appendChild(resizeHandle);
+        javaxt.dhtml.utils.initDrag(resizeHandle, {
+            onDragStart: onDragStart,
+            onDrag: function(x,y){
+                var top = (xOffset-x);
+                parent.style.left = x + 'px';
+                parent.style.width = ((orgWidth+top)) + "px";
+            }
+        });
+
+
+      //Add nw resizer
+        resizeHandle = resizeHandle.cloneNode();
+        resizeHandle.style.top = "-5px";
+        resizeHandle.style.right = "";
+        resizeHandle.style.height = "10px";
+        resizeHandle.style.cursor = "se-resize";
+        parent.appendChild(resizeHandle);
+        javaxt.dhtml.utils.initDrag(resizeHandle, {
+            onDragStart: onDragStart,
+            onDrag: function(x,y){
+                var top = (xOffset-x);
+                parent.style.left = x + 'px';
+                parent.style.width = ((orgWidth+top)) + "px";
+
+                var top = (yOffset-y);
+                parent.style.top = (y) + "px";
+                parent.style.height = ((orgHeight+top)-dy) + "px";
+            }
+        });
+
+
+      //Add sw resizer
+        resizeHandle = resizeHandle.cloneNode();
+        resizeHandle.style.top = "";
+        resizeHandle.style.bottom = "-5px";
+        resizeHandle.style.cursor = "ne-resize";
+        parent.appendChild(resizeHandle);
+        javaxt.dhtml.utils.initDrag(resizeHandle, {
+            onDragStart: onDragStart,
+            onDrag: function(x,y){
+                var top = (xOffset-x);
+                parent.style.left = x + 'px';
+                parent.style.width = ((orgWidth+top)) + "px";
+
+                var top = -(yOffset-y);
+                parent.style.height = (top+dy) + "px";
+            }
+        });
+
+
+      //Add horizontal resizer to the right of the window
+        resizeHandle = resizeHandle.cloneNode();
+        resizeHandle.style.left = "";
+        resizeHandle.style.right = "-5px";
+        resizeHandle.style.top = "0px";
+        resizeHandle.style.height = "100%";
+        resizeHandle.style.cursor = "ew-resize";
+        parent.appendChild(resizeHandle);
+        javaxt.dhtml.utils.initDrag(resizeHandle, {
+            onDragStart: onDragStart,
+            onDrag: function(x,y){
+                var d = -(xOffset-x);
+                parent.style.width = (d+dx) + "px";
+            }
+        });
+
+
+      //Add ne resizer
+        resizeHandle = resizeHandle.cloneNode();
+        resizeHandle.style.top = "-5px";
+        resizeHandle.style.height = "10px";
+        resizeHandle.style.cursor = "ne-resize";
+        parent.appendChild(resizeHandle);
+        javaxt.dhtml.utils.initDrag(resizeHandle, {
+            onDragStart: onDragStart,
+            onDrag: function(x,y){
+                var d = -(xOffset-x);
+                parent.style.width = (d+dx) + "px";
+                var top = (yOffset-y);
+                parent.style.top = (y) + "px";
+                parent.style.height = ((orgHeight+top)-dy) + "px";
+            }
+        });
+
+
+
+      //Add se resizer
+        resizeHandle = resizeHandle.cloneNode();
+        resizeHandle.style.top = "";
+        resizeHandle.style.cursor = "se-resize";
+        if (config.style.resizeHandle==null || isEmpty(config.style.resizeHandle)){
+            resizeHandle.style.bottom = "-5px";
+            javaxt.dhtml.utils.initDrag(resizeHandle, {
+                onDragStart: onDragStart,
+                onDrag: function(x,y){
+                    var d = -(xOffset-x);
+                    parent.style.width = (d+dx) + "px";
+                    var top = -(yOffset-y);
+                    parent.style.height = (top+dy) + "px";
+                }
+            });
+        }
+        else{
+            resizeHandle.style.width = "25px";
+            resizeHandle.style.height = "25px";
+            var div = document.createElement("div");
+            resizeHandle.appendChild(div);
+            setStyle(div, "resizeHandle");
+            javaxt.dhtml.utils.initDrag(resizeHandle, {
+                onDragStart: onDragStart,
+                onDrag: function(x,y){
+                    var d = -(xOffset-x)+20;
+                    parent.style.width = (d+dx) + "px";
+                    var top = -(yOffset-y)+20;
+                    parent.style.height = (top+dy) + "px";
+                }
+            });
+        }
+        parent.appendChild(resizeHandle);
+    };
 
 
   //**************************************************************************
@@ -794,13 +811,11 @@ javaxt.dhtml.Window = function(parent, config) {
   //**************************************************************************
     var _getRect = javaxt.dhtml.utils.getRect;
     var merge = javaxt.dhtml.utils.merge;
+    var isEmpty = javaxt.dhtml.utils.isEmpty;
     var getNextHighestZindex = javaxt.dhtml.utils.getNextHighestZindex;
     var addResizeListener = javaxt.dhtml.utils.addResizeListener;
-    var addNoSelectRule = function(){
-        if (noselect===true) return;
-        javaxt.dhtml.utils.addNoSelectRule();
-        noselect = true;
-    };
+    var initDrag = javaxt.dhtml.utils.initDrag;
+
     var setStyle = function(el, style){
         javaxt.dhtml.utils.setStyle(el, config.style[style]);
     };
