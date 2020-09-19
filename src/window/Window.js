@@ -20,7 +20,6 @@ javaxt.dhtml.Window = function(parent, config) {
     var titleDiv;
     var recenter = true;
     var visible = false;
-    var noselect;
     var overflow;
 
     var defaultConfig = {
@@ -168,6 +167,7 @@ javaxt.dhtml.Window = function(parent, config) {
         mainDiv.style.top = "0px";
         mainDiv.style.display = "none";
         mainDiv.style.visibility = "hidden";
+        mainDiv.tabIndex = -1; //allows the div to have focus
         me.setWidth(config.width);
         me.setHeight(config.height);
 
@@ -262,20 +262,20 @@ javaxt.dhtml.Window = function(parent, config) {
 
 
 
-      //Create mask for modal dialogs
+      //Create mask (used for modal dialogs and resize)
+        mask = document.createElement('div');
         if (config.modal===true){
-            mask = document.createElement('div');
             addStyle(mask, "mask");
-            mask.style.position = "absolute";
-            mask.style.left = "0px";
-            mask.style.top = "0px";
-            mask.style.width = "100%";
-            mask.style.height = "100%";
-            mask.style.display = "none";
-            mask.style.visibility = "hidden";
-            parent.appendChild(mask);
-            //parent.insertBefore(mask, parent.firstChild);
         }
+        mask.style.position = "absolute";
+        mask.style.left = "0px";
+        mask.style.top = "0px";
+        mask.style.width = "100%";
+        mask.style.height = "100%";
+        mask.style.display = "none";
+        mask.style.visibility = "hidden";
+        parent.appendChild(mask);
+        //parent.insertBefore(mask, parent.firstChild);
 
 
 
@@ -443,14 +443,15 @@ javaxt.dhtml.Window = function(parent, config) {
 
         var z = getNextHighestZindex();
 
-        if (mask){
-            overflow = mask.parentNode.style.overflow;
-            mask.parentNode.style.overflow = "hidden";
-            mask.style.zIndex = z;
+        overflow = mask.parentNode.style.overflow;
+        mask.parentNode.style.overflow = "hidden";
+        mask.style.zIndex = z;
+        if (config.modal===true){
             mask.style.display = '';
             mask.style.visibility = '';
-            z++;
         }
+        z++;
+
 
         mainDiv.style.zIndex = z;
         mainDiv.style.display = '';
@@ -485,12 +486,12 @@ javaxt.dhtml.Window = function(parent, config) {
 
         if (visible){
 
-            if (mask){
-                if (overflow) mask.parentNode.style.overflow = overflow;
+            if (overflow) mask.parentNode.style.overflow = overflow;
+            if (config.modal===true){
                 mask.style.display = "none";
                 mask.style.visibility = "hidden";
-                mask.style.zIndex = '';
             }
+            mask.style.zIndex = '';
 
             mainDiv.style.display = "none";
             mainDiv.style.visibility = "hidden";
@@ -623,6 +624,11 @@ javaxt.dhtml.Window = function(parent, config) {
         var dx, dy;
         var onDragStart = function(x,y){
             var div = this;
+
+            mask.style.cursor = div.style.cursor;
+            mask.style.display = "";
+            mask.style.visibility = "";
+
             var rect = _getRect(div);
             var rect2 = _getRect(parent);
 
@@ -638,6 +644,12 @@ javaxt.dhtml.Window = function(parent, config) {
             dy = parseFloat(parent.style.height);
             if (dy<orgHeight) dy = orgHeight-dy;
             else dy = 0;
+        };
+        var onDragEnd = function(){
+            mask.style.display = "none";
+            mask.style.visibility = "hidden";
+            mask.style.cursor = "";
+            mainDiv.focus();
         };
 
 
@@ -657,7 +669,8 @@ javaxt.dhtml.Window = function(parent, config) {
                 var top = (yOffset-y);
                 parent.style.top = (y) + "px";
                 parent.style.height = ((orgHeight+top)-dy) + "px";
-            }
+            },
+            onDragEnd: onDragEnd
         });
 
 
@@ -671,7 +684,8 @@ javaxt.dhtml.Window = function(parent, config) {
             onDrag: function(x,y){
                 var top = -(yOffset-y);
                 parent.style.height = (top+dy) + "px";
-            }
+            },
+            onDragEnd: onDragEnd
         });
 
 
@@ -690,7 +704,8 @@ javaxt.dhtml.Window = function(parent, config) {
                 var top = (xOffset-x);
                 parent.style.left = x + 'px';
                 parent.style.width = ((orgWidth+top)) + "px";
-            }
+            },
+            onDragEnd: onDragEnd
         });
 
 
@@ -711,7 +726,8 @@ javaxt.dhtml.Window = function(parent, config) {
                 var top = (yOffset-y);
                 parent.style.top = (y) + "px";
                 parent.style.height = ((orgHeight+top)-dy) + "px";
-            }
+            },
+            onDragEnd: onDragEnd
         });
 
 
@@ -730,7 +746,8 @@ javaxt.dhtml.Window = function(parent, config) {
 
                 var top = -(yOffset-y);
                 parent.style.height = (top+dy) + "px";
-            }
+            },
+            onDragEnd: onDragEnd
         });
 
 
@@ -747,7 +764,8 @@ javaxt.dhtml.Window = function(parent, config) {
             onDrag: function(x,y){
                 var d = -(xOffset-x);
                 parent.style.width = (d+dx) + "px";
-            }
+            },
+            onDragEnd: onDragEnd
         });
 
 
@@ -765,7 +783,8 @@ javaxt.dhtml.Window = function(parent, config) {
                 var top = (yOffset-y);
                 parent.style.top = (y) + "px";
                 parent.style.height = ((orgHeight+top)-dy) + "px";
-            }
+            },
+            onDragEnd: onDragEnd
         });
 
 
@@ -783,7 +802,8 @@ javaxt.dhtml.Window = function(parent, config) {
                     parent.style.width = (d+dx) + "px";
                     var top = -(yOffset-y);
                     parent.style.height = (top+dy) + "px";
-                }
+                },
+                onDragEnd: onDragEnd
             });
         }
         else{
@@ -799,7 +819,8 @@ javaxt.dhtml.Window = function(parent, config) {
                     parent.style.width = (d+dx) + "px";
                     var top = -(yOffset-y)+20;
                     parent.style.height = (top+dy) + "px";
-                }
+                },
+                onDragEnd: onDragEnd
             });
         }
         parent.appendChild(resizeHandle);
