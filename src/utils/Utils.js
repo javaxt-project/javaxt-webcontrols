@@ -734,7 +734,9 @@ javaxt.dhtml.utils = {
 
               //Remove the "javaxt-noselect" class
                 var body = document.getElementsByTagName('body')[0];
+                setTimeout(function() {
                 body.className = body.className.replace( /(?:^|\s)javaxt-noselect(?!\S)/g , '' );
+                }, 800);
             }
         };
 
