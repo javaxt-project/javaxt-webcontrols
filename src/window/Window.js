@@ -326,10 +326,11 @@ javaxt.dhtml.Window = function(parent, config) {
 
 
       //Watch for resize events
-        addResizeListener(parent, function(){
-            if (recenter) me.center();
-        });
-
+        if (recenter){
+            addResizeListener(parent, function(){
+                me.center();
+            });
+        }
     };
 
 
@@ -377,12 +378,24 @@ javaxt.dhtml.Window = function(parent, config) {
 
 
   //**************************************************************************
+  //** onResize
+  //**************************************************************************
+  /** Override to capture resize events.
+   */
+    this.onResize = function(){};
+
+
+  //**************************************************************************
   //** getBody
   //**************************************************************************
     this.getBody = function(){
         return body;
     };
 
+
+  //**************************************************************************
+  //** setBody
+  //**************************************************************************
     this.setBody = this.setContent = function(obj){
         if (obj==null) body.innerHTML = "";
         else{
@@ -407,6 +420,10 @@ javaxt.dhtml.Window = function(parent, config) {
         return footer;
     };
 
+    
+  //**************************************************************************
+  //** setFooter
+  //**************************************************************************
     this.setFooter = function(obj){
         if (obj==null) footer.innerHTML = "";
         else{
@@ -669,6 +686,7 @@ javaxt.dhtml.Window = function(parent, config) {
                 var top = (yOffset-y);
                 parent.style.top = (y) + "px";
                 parent.style.height = ((orgHeight+top)-dy) + "px";
+                me.onResize();
             },
             onDragEnd: onDragEnd
         });
@@ -684,6 +702,7 @@ javaxt.dhtml.Window = function(parent, config) {
             onDrag: function(x,y){
                 var top = -(yOffset-y);
                 parent.style.height = (top+dy) + "px";
+                me.onResize();
             },
             onDragEnd: onDragEnd
         });
@@ -704,6 +723,7 @@ javaxt.dhtml.Window = function(parent, config) {
                 var top = (xOffset-x);
                 parent.style.left = x + 'px';
                 parent.style.width = ((orgWidth+top)) + "px";
+                me.onResize();
             },
             onDragEnd: onDragEnd
         });
@@ -726,6 +746,7 @@ javaxt.dhtml.Window = function(parent, config) {
                 var top = (yOffset-y);
                 parent.style.top = (y) + "px";
                 parent.style.height = ((orgHeight+top)-dy) + "px";
+                me.onResize();
             },
             onDragEnd: onDragEnd
         });
@@ -746,6 +767,7 @@ javaxt.dhtml.Window = function(parent, config) {
 
                 var top = -(yOffset-y);
                 parent.style.height = (top+dy) + "px";
+                me.onResize();
             },
             onDragEnd: onDragEnd
         });
@@ -764,6 +786,7 @@ javaxt.dhtml.Window = function(parent, config) {
             onDrag: function(x,y){
                 var d = -(xOffset-x);
                 parent.style.width = (d+dx) + "px";
+                me.onResize();
             },
             onDragEnd: onDragEnd
         });
@@ -783,6 +806,7 @@ javaxt.dhtml.Window = function(parent, config) {
                 var top = (yOffset-y);
                 parent.style.top = (y) + "px";
                 parent.style.height = ((orgHeight+top)-dy) + "px";
+                me.onResize();
             },
             onDragEnd: onDragEnd
         });
@@ -802,6 +826,7 @@ javaxt.dhtml.Window = function(parent, config) {
                     parent.style.width = (d+dx) + "px";
                     var top = -(yOffset-y);
                     parent.style.height = (top+dy) + "px";
+                    me.onResize();
                 },
                 onDragEnd: onDragEnd
             });
@@ -819,6 +844,7 @@ javaxt.dhtml.Window = function(parent, config) {
                     parent.style.width = (d+dx) + "px";
                     var top = -(yOffset-y)+20;
                     parent.style.height = (top+dy) + "px";
+                    me.onResize();
                 },
                 onDragEnd: onDragEnd
             });
