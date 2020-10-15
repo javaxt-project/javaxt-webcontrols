@@ -379,8 +379,9 @@ javaxt.dhtml.DataGrid = function(parent, config) {
   //** setFilter
   //**************************************************************************
     this.setFilter = function(newFilter){
-        if (!filter) filter = {};
         if (!newFilter) newFilter = {};
+        if (!filter) filter = newFilter;
+
 
         for (var key in newFilter) {
             if (newFilter.hasOwnProperty(key)) {
