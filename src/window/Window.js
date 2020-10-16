@@ -169,7 +169,7 @@ javaxt.dhtml.Window = function(parent, config) {
         mainDiv.style.top = "0px";
         mainDiv.style.display = "none";
         mainDiv.style.visibility = "hidden";
-        mainDiv.style.overflow = "hidden";
+        //mainDiv.style.overflow = "hidden";
         mainDiv.tabIndex = -1; //allows the div to have focus
         me.setWidth(config.width);
         me.setHeight(config.height);
