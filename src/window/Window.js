@@ -20,6 +20,7 @@ javaxt.dhtml.Window = function(parent, config) {
     var titleDiv;
     var recenter = true;
     var visible = false;
+    var seen = false;
     var overflow;
 
     var defaultConfig = {
@@ -47,7 +48,8 @@ javaxt.dhtml.Window = function(parent, config) {
                 border: "1px solid #b4cbdd",
                 borderRadius: "5px",
                 display: "inline-block",
-                boxShadow: "0 12px 14px 0 rgba(0, 0, 0, 0.2), 0 13px 20px 0 rgba(0, 0, 0, 0.2)"
+                boxShadow: "0 12px 14px 0 rgba(0, 0, 0, 0.2), 0 13px 20px 0 rgba(0, 0, 0, 0.2)",
+                minWidth: "50px"
                 //rgba(0, 0, 0, 0.2) 0px 2px 4px 0px, rgba(0, 0, 0, 0.2) 0px 3px 2px 0px
             },
 
@@ -167,6 +169,7 @@ javaxt.dhtml.Window = function(parent, config) {
         mainDiv.style.top = "0px";
         mainDiv.style.display = "none";
         mainDiv.style.visibility = "hidden";
+        mainDiv.style.overflow = "hidden";
         mainDiv.tabIndex = -1; //allows the div to have focus
         me.setWidth(config.width);
         me.setHeight(config.height);
@@ -324,13 +327,6 @@ javaxt.dhtml.Window = function(parent, config) {
             }
         });
 
-
-      //Watch for resize events
-        if (recenter){
-            addResizeListener(parent, function(){
-                me.center();
-            });
-        }
     };
 
 
@@ -357,6 +353,14 @@ javaxt.dhtml.Window = function(parent, config) {
         div.appendChild(innerDiv);
         div.onclick = onclick;
         return div;
+    };
+
+
+  //**************************************************************************
+  //** getTitle
+  //**************************************************************************
+    this.getTitle = function(){
+        return titleDiv.innerHTML;
     };
 
 
@@ -420,7 +424,7 @@ javaxt.dhtml.Window = function(parent, config) {
         return footer;
     };
 
-    
+
   //**************************************************************************
   //** setFooter
   //**************************************************************************
@@ -483,6 +487,15 @@ javaxt.dhtml.Window = function(parent, config) {
            if (recenter) me.center();
         }
 
+
+        if (!seen){
+            if (recenter){
+                addResizeListener(parent, function(){
+                    if (recenter) me.center();
+                });
+            }
+            seen = true;
+        }
 
 
         if (!visible){
