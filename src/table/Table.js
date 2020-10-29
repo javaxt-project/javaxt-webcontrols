@@ -26,6 +26,7 @@ javaxt.dhtml.Table = function(parent, config) {
     var defaultConfig = {
 
         multiselect: false,
+        overflow: true,
 
         style: {
 
@@ -335,6 +336,7 @@ javaxt.dhtml.Table = function(parent, config) {
                 });
             }
             else{
+                if (config.overflow===false) bodyDiv.style.overflowY = 'hidden';
                 bodyDiv.onscroll = function(){
                     onScroll(bodyDiv.scrollTop);
                 };
@@ -671,79 +673,122 @@ javaxt.dhtml.Table = function(parent, config) {
     var selectRows = function(event){
         var row = this;
         me.onRowClick(row, event);
-        var rows = [];
+        var rows = [row];
+
+        var selectRow = function(){
+            for (var i=1; i<body.childNodes.length; i++){
+                var tr = body.childNodes[i];
+                if (tr.selected){
+                    me.deselect(tr);
+                    rows.push(tr);
+                }
+            }
+            me.select(row);
+        };
+
+
+        //config.multiselect = false;
         if (config.multiselect === true){
 
             var e;
             if (event) e = event;
-            if (window.event) e = window.event;
+            else{ if (window.event) e = window.event; }
 
 
-          //unselect all previously selected items
-            if (!e.ctrlKey){
-                var _prevSelection = prevSelection;
-                me.deselectAll();
-                prevSelection = _prevSelection;
-            }
-
-
-          //select row (change row color and set "selected" attribute)
-            if (row.selected) { //then the row is already selected
-                me.deselect(row);
-            }
-            else{ //then the row is not already selected
-                me.select(row);
-            }
-
-            rows.push(row);
-
-
-          //shift + select event (highlight multiple rows)
-            if (e.shiftKey){
-                var tbody = row.parentNode;
-                var prevID, currID;
-                for (var i=0; i<tbody.childNodes.length; i++){
-                    var tr = tbody.childNodes[i];
-
-                    if (tr===prevSelection){
-                        prevID = i;
-                    }
-
-                    if (tr===row){
-                        currID = i;
+            if (row.selected){
+                if (e.ctrlKey){
+                    me.deselect(row);
+                    for (var i=1; i<body.childNodes.length; i++){
+                        var tr = body.childNodes[i];
+                        if (tr.selected && tr!=row){
+                            rows.push(tr);
+                        }
                     }
                 }
-
-                for (var i = Math.min(currID, prevID); i <= Math.max(currID, prevID); i++){
-                    var tr = tbody.childNodes[i];
-                    me.select(tr);
-                    rows.push(tr);
+                else{
+                    var selectedRows = 0;
+                    for (var i=1; i<body.childNodes.length; i++){
+                        var tr = body.childNodes[i];
+                        if (tr.selected){
+                            if (tr!=row) {
+                                me.deselect(tr);
+                                rows.push(tr);
+                                selectedRows++;
+                            }
+                        }
+                    }
+                    if (selectedRows===0) me.deselect(row);
                 }
             }
+            else{
+                if (e.shiftKey){
+                    var tbody = row.parentNode;
+                    var prevID, currID;
+                    for (var i=0; i<tbody.childNodes.length; i++){
+                        var tr = tbody.childNodes[i];
 
-            me.onSelectionChange(rows);
+                        if (tr===prevSelection){
+                            prevID = i;
+                        }
 
+                        if (tr===row){
+                            currID = i;
+                        }
+                    }
+
+                    var selectedRows = [];
+                    for (var i = Math.min(currID, prevID); i <= Math.max(currID, prevID); i++){
+                        var tr = tbody.childNodes[i];
+                        me.select(tr);
+                        if (tr!=row){
+                            rows.push(tr);
+                        }
+                        selectedRows.push(tr);
+                    }
+                    for (var i=1; i<body.childNodes.length; i++){
+                        var tr = body.childNodes[i];
+                        if (tr.selected){
+                            var deselect = true;
+                            for (var j=0; j<selectedRows.length; j++){
+                                var selectedRow = selectedRows[j];
+                                if (tr==selectedRow){
+                                    deselect = false;
+                                }
+                            }
+                            if (deselect){
+                                me.deselect(tr);
+                                rows.push(tr);
+                            }
+                        }
+                    }
+                }
+                else{
+                    if (e.ctrlKey){
+                        me.select(row);
+                        for (var i=1; i<body.childNodes.length; i++){
+                            var tr = body.childNodes[i];
+                            if (tr.selected && tr!=row){
+                                rows.push(tr);
+                            }
+                        }
+                    }
+                    else{
+                        selectRow();
+                    }
+                }
+            }
         }
         else{
-            if (!row.selected){
-
-              //Deselect previous selection
-                for (var i=1; i<body.childNodes.length; i++){
-                    var tr = body.childNodes[i];
-                    if (tr.selected){
-                        me.deselect(tr);
-                        rows.push(tr);
-                    }
-                }
-
-              //Select row
-                me.select(row);
-
-                rows.push(row);
-                me.onSelectionChange(rows);
+            if (row.selected){
+                me.deselect(row);
+            }
+            else {
+                selectRow();
             }
         }
 
+
+        me.onSelectionChange(rows);
         prevSelection = row;
     };
 
@@ -754,6 +799,7 @@ javaxt.dhtml.Table = function(parent, config) {
   /** Used to select a given row.
    */
     this.select = function(row){
+        if (row.selected) return;
         row.selected=true;
         setStyle(row, "selectedRow");
     };
@@ -765,8 +811,10 @@ javaxt.dhtml.Table = function(parent, config) {
   /** Used to deselect a given row.
    */
     this.deselect = function(row){
-        row.selected=false;
-        setStyle(row, "row");
+        if (row.selected){
+            row.selected=false;
+            setStyle(row, "row");
+        }
     };
 
 
@@ -815,7 +863,7 @@ javaxt.dhtml.Table = function(parent, config) {
   //**************************************************************************
   /** Called whenever a row in the grid is selected or deselected. Contents of
    *  the selected rows can be retrieved using the getContent method. Example:
-
+    <pre>
         table.onSelectionChange = function(rows){
             for (var i=0; i<rows.length; i++){
                 var row = rows[i];
@@ -833,6 +881,8 @@ javaxt.dhtml.Table = function(parent, config) {
                 }
             }
         };
+    </pre>
+    @param rows An array of rows that have had thier selection changed
    */
     this.onSelectionChange = function(rows){};
 
