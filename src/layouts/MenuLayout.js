@@ -412,7 +412,7 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
   //** showMenu
   //**************************************************************************
     this.showMenu = function(){
-        console.log("showMenu!");
+        //console.log("showMenu!");
         me.beforeShow();
         if (config.fx){
             setTimeout(function(){
