@@ -28,7 +28,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
   //Optional config parameters
     var defaultConfig = {
-        //style: javaxt.dhtml.style.table
+        style: {}, //javaxt.dhtml.style.table
         url: "",
         params: null,
         payload: null,
@@ -60,20 +60,15 @@ javaxt.dhtml.DataGrid = function(parent, config) {
        *  do not need to override this method.
        */
         getResponse: function(url, payload, callback){
-            var request = new XMLHttpRequest();
-            var method = payload ? "POST" : "GET";
-            request.open(method, url);
-            request.onreadystatechange = function(){
-                if (request.readyState === 4) {
+            javaxt.dhtml.utils.get(url, {
+                payload: payload,
+                success: function(text, xml, url, request){
+                    callback.apply(me, [request]);
+                },
+                failure: function(request){
                     callback.apply(me, [request]);
                 }
-            };
-            if (payload){
-                request.send(payload);
-            }
-            else{
-                request.send();
-            }
+            });
         },
 
       /** Default method used to parse responses from the server. Should return
@@ -231,7 +226,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                                 }
                                 else{
                                     val = this.record[field];
-                                    var checkboxDiv = createCheckbox(val);
+                                    var checkboxDiv = createCheckbox(val, this);
                                     var checkbox = checkboxDiv.checkbox;
                                     if (select) checkbox.select();
                                     this._set(j, checkboxDiv);
@@ -261,32 +256,64 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                 rows[i].onclick = function(e){
 
 
-                  //Check if the client clicked inside a checkbox
+                  //Special case for columns with checkboxes
                     if (checkboxHeader){
+
+                      //Check if the client clicked inside a checkbox
+                        var insideCheckbox = false;
                         var checkboxCol = this.childNodes[checkboxHeader.idx];
                         var checkboxDiv = checkboxCol.getContent();
                         var rect = _getRect(checkboxDiv);
                         var clientX = e.clientX;
                         var clientY = e.clientY;
-
-
-                      //If the client clicked inside a checkbox, select/deslect
-                      //the row as needed.
                         if (clientX>=rect.left && clientX<=rect.right){
                             if (clientY>=rect.top && clientY<=rect.bottom){
-
-                                if (this.selected){
-                                    table.deselect(this);
-                                    //checkboxHeader.uncheck();
-                                }
-                                else{
-                                    //table.select(this);
-                                }
-
-                                return;
+                                insideCheckbox = true;
                             }
                         }
 
+                        if (insideCheckbox){
+                            if (this.selected){
+                                table.deselect(this);
+                                //checkboxHeader.uncheck();
+                            }
+                            else{
+                                table.select(this);
+                            }
+                            me.onSelectionChange();
+                            return;
+                        }
+                        else{
+
+                            if (!e.ctrlKey && !e.shiftKey){
+                                var numSelectedRows = 0;
+                                table.forEachRow(function (row) {
+                                    if (row.selected){
+                                        numSelectedRows++;
+                                        if (numSelectedRows>1){
+
+                                          //Update the click event to simulate a ctrl+click
+                                            e = new MouseEvent("click", {
+                                                isTrusted: e.isTrusted,
+                                                view: e.view,
+                                                bubbles: e.bubbles,
+                                                cancelable: e.cancelable,
+                                                clientX: e.clientX,
+                                                clientY: e.clientY,
+                                                screenX: e.screenX,
+                                                screenY: e.screenY,
+                                                altKey: e.altKey,
+                                                ctrlKey: true
+                                            });
+
+
+                                          //Exit forEachRow
+                                            return true;
+                                        }
+                                    }
+                                });
+                            }
+                        }
                     }
 
 
@@ -406,7 +433,8 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
         for (var j=0; j<columns.length; j++){
             columns[j].sort = null;
-            columns[j].header.setSortIndicator(null);
+            var colHeader = columns[j].header;
+            if (colHeader.setSortIndicator) colHeader.setSortIndicator(null);
         }
 
 
@@ -434,7 +462,10 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                         if (columns[j].field){
                             if (columns[j].field.toUpperCase() === fieldName){
                                 columns[j].sort = sortDirection;
-                                columns[j].header.setSortIndicator(sortDirection);
+                                var colHeader = columns[j].header;
+                                if (colHeader.setSortIndicator){
+                                    colHeader.setSortIndicator(sortDirection);
+                                }
                                 break;
                             }
                         }
@@ -498,6 +529,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
     this.onError = function(request){};
     this.onRowClick = function(row, e){};
     this.onKeyEvent = function(keyCode, modifiers){};
+    this.onCheckbox = function(value, checked, checkbox){};
 
 
   //**************************************************************************
@@ -554,6 +586,17 @@ javaxt.dhtml.DataGrid = function(parent, config) {
    */
     this.clear = function(){
         table.clear();
+        currPage = 0;
+    };
+
+
+  //**************************************************************************
+  //** remove
+  //**************************************************************************
+  /** Removes a row from the grid
+   */
+    this.remove = function(row){
+        table.removeRow(row);
     };
 
 
@@ -879,7 +922,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
   //**************************************************************************
   //** createCheckbox
   //**************************************************************************
-    var createCheckbox = function(value){
+    var createCheckbox = function(value, row){
         var div = document.createElement('div');
         div.style.display = "inline-block";
         div.style.position = "relative";
@@ -890,13 +933,21 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                 box: "table-checkbox"
             }
         });
-        checkbox.onClick = function(checked){
-            var value = this.getValue();
-            if (value){
 
-            }
-            else{ //checkbox header
 
+        if (typeof value !== 'undefined'){
+            checkbox.onClick = function(checked){
+                var value = this.getValue();
+                me.onCheckbox(value, checked, this);
+                if (checked){
+                    //table.select(row);
+                }
+
+                //me.onSelectionChange();
+            };
+        }
+        else{ //checkbox header
+            checkbox.onClick = function(checked){
               /*
               //Method 1: Select/deselect using the table control. This will
               //highlight the rows and the onSelectionChange listener will
@@ -923,11 +974,12 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                     }
 
                 });
-            }
+
+                //me.onSelectionChange();
+            };
+        }
 
 
-            me.onSelectionChange();
-        };
         div.checkbox = checkbox;
         return div;
     };
