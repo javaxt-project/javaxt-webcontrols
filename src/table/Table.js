@@ -1054,6 +1054,22 @@ javaxt.dhtml.Table = function(parent, config) {
 
 
   //**************************************************************************
+  //** removeRow
+  //**************************************************************************
+  /** Used to remove a row from the table and update the scroll.
+   */
+    this.removeRow = function(row){
+        var scrollInfo = me.getScrollInfo();
+        var x = scrollInfo.x;
+        var y = scrollInfo.y;
+        var h = row.offsetHeight;
+        body.removeChild(row);
+        me.update();
+        me.scrollTo(x, y-h);
+    };
+
+
+  //**************************************************************************
   //** getColumnWidth
   //**************************************************************************
   /** Returns the width of a given column
