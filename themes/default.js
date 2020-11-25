@@ -22,6 +22,12 @@ javaxt.dhtml.style.default = {
     },
 
 
+    callout : {
+        panel: "callout-panel",
+        arrow: "callout-arrow"
+    },
+
+
     form : {
         label: "form-label",
         input: "form-input",
@@ -29,7 +35,10 @@ javaxt.dhtml.style.default = {
             padding: "0 8px 6px 0"
         },
         button: "form-button",
-        radio: "form-radio"
+        radio: "form-radio",
+        checkbox: "form-checkbox",
+        groupbox: "form-groupbox",
+        grouplabel: "form-grouplabel"
     },
 
 
