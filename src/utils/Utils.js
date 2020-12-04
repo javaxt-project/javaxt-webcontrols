@@ -177,9 +177,7 @@ javaxt.dhtml.utils = {
   //** clone
   //**************************************************************************
     clone: function(obj){
-        var clone = {};
-        javaxt.dhtml.utils.merge(clone, obj);
-        return clone;
+        return javaxt.dhtml.utils.merge({}, obj);
     },
 
 
@@ -513,6 +511,8 @@ javaxt.dhtml.utils = {
    */
     updateDOM: function(){
 
+        if (document.javaxt) return;
+
       //Disable right-click context menu
         document.oncontextmenu = function(e){
             return false;
@@ -549,6 +549,8 @@ javaxt.dhtml.utils = {
             return false;
         }, false);
 
+
+        document.javaxt = {};
     },
 
 
