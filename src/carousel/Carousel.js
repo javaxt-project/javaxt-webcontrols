@@ -560,6 +560,25 @@ javaxt.dhtml.Carousel = function(parent, config) {
     };
 
 
+  //**************************************************************************
+  //** enableAnimation
+  //**************************************************************************
+  /** Used to enable animations when transitioning between panels
+   */
+    this.enableAnimation = function(){
+        config.animate = true;
+    };
+
+
+  //**************************************************************************
+  //** disableAnimation
+  //**************************************************************************
+  /** Used to disable animations when transitioning between panels
+   */
+    this.disableAnimation = function(){
+        config.animate = false;
+    };
+
 
   //**************************************************************************
   //** initDrag
