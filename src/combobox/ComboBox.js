@@ -197,7 +197,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         };
 
         input.oninput = function(){
-            if (config.readOnly===true) return;
+            //if (config.readOnly===true) return;
             var foundMatch = false;
             var filter = input.value.replace(/^\s*/, "").replace(/\s*$/, "").toLowerCase();
             for (var i=0; i<menuOptions.childNodes.length; i++){
@@ -359,6 +359,24 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         else if (document.attachEvent) { // For IE 8 and earlier versions
             document.attachEvent("onclick", hideMenu);
         }
+    };
+
+
+  //**************************************************************************
+  //** show
+  //**************************************************************************
+    this.show = function(){
+        me.el.style.visibility = '';
+        me.el.style.display = '';
+    };
+
+
+  //**************************************************************************
+  //** hide
+  //**************************************************************************
+    this.hide = function(){
+        me.el.style.visibility = 'hidden';
+        me.el.style.display = 'none';
     };
 
 
