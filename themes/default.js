@@ -92,7 +92,12 @@ javaxt.dhtml.style.default = {
         selectedRow: "table-row-selected",
         resizeHandle: "table-resizeHandle",
         ascendingSortIcon: "table-icon-sort-asc",
-        descendingSortIcon: "table-icon-sort-desc"
+        descendingSortIcon: "table-icon-sort-desc",
+        iscroll: {
+            horizontalScrollbar: "iScrollHorizontalScrollbar",
+            verticalScrollbar: "iScrollVerticalScrollbar",
+            indicator: "iScrollIndicator"
+        }
     },
 
     tabPanel: {
