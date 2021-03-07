@@ -135,7 +135,10 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                 if (addField) config.fields.push(column.field);
             }
             else{
-                column.sortable = false;
+              //Don't allow remote sorting on columns without a field name
+                if (config.localSort!==true){
+                    column.sortable = false;
+                }
             }
 
 
@@ -1097,156 +1100,158 @@ javaxt.dhtml.DataGrid = function(parent, config) {
   /** Called whenever a client clicks on a header.
    */
     var sort = function(idx, colConfig, cell, event){
-        if (colConfig.field!=null && colConfig.sortable!==false){
+        if (colConfig.sortable!==true) return;
 
-          //Get sort direction
-            var sort = colConfig.sort;
-            if (sort=="DESC") sort = "";
-            else sort = "DESC";
-            colConfig.sort = sort;
-            
+      //Get sort direction
+        var sort = colConfig.sort;
+        if (sort=="DESC") sort = "";
+        else sort = "DESC";
+        colConfig.sort = sort;
 
-          //Update sort indicator
-            var row = cell.parentNode;
-            for (var i=0; i<row.childNodes.length; i++){
-                if (row.childNodes[i].getContent){
-                    var headerCell = row.childNodes[i].getContent();
-                    if (headerCell.setSortIndicator){
-                        if (row.childNodes[i]==cell){
-                            headerCell.setSortIndicator(sort.length==0 ? "ASC" : "DESC");
-                        }
-                        else{
-                            headerCell.setSortIndicator(null);
-                        }
+
+      //Update sort indicator
+        var row = cell.parentNode;
+        for (var i=0; i<row.childNodes.length; i++){
+            if (row.childNodes[i].getContent){
+                var headerCell = row.childNodes[i].getContent();
+                if (headerCell.setSortIndicator){
+                    if (row.childNodes[i]==cell){
+                        headerCell.setSortIndicator(sort.length==0 ? "ASC" : "DESC");
+                    }
+                    else{
+                        headerCell.setSortIndicator(null);
                     }
                 }
             }
+        }
 
 
-          //Sort records
-            if (config.localSort){
+      //Sort records
+        if (config.localSort){
 
 
-                var arr = [];
-                var rows = [];
+            var arr = [];
+            var rows = [];
 
-              //Collect column content to sort
-                table.forEachRow(function (row) {
-                    var content = row.get(idx);
-                    if (content){
-                        if (content.nodeType===1) content = content.innerText;
+          //Collect column content to sort
+            table.forEachRow(function (row) {
+                var content = row.get(idx);
+                if (content){
+                    if (content.nodeType===1) content = content.innerText;
 
-                        var f = parseFloat(content);
-                        if (!isNaN(f)){
-                            numbers++;
-                        }
-                        else if (typeof content === "string"){
-
-                        }
-                        else{
-
-                        }
-                    }
-                    else{
-                        content = "";
-                    }
-                    arr.push(content);
-                    row.sortKey = content;
-                    rows.push(row);
-                });
-
-                if (rows.length == 0) return;
-
-
-              //Analyze and update the sort keys
-                var numericSort = false;
-                var numbers = 0;
-                var dashes = 0;
-                for (var i=0; i<arr.length; i++){
-                    var key = arr[i];
-                    var f = parseFloat(key);
+                    var f = parseFloat(content);
                     if (!isNaN(f)){
                         numbers++;
                     }
-                    else if (typeof key === "string"){
-                        if (key=="-") dashes++;
-                        /*
-                        else{
-                            var s = key.split(" ");
-                            if (s.length==2){
-                                var t = parseInt(s[0]);
-                                if (!isNaN(t)){
-                                    var u = s[1];
-                                    if (u.substring(u.length-1)=="s") u = u.substring(0, u.length-1);
-                                    if (u=="day" || u=="hour" || u=="minute" || u=="second"){
-                                        numbers++;
-                                        if (u=="minute") t = t*60;
-                                        if (u=="hour") t = (t*60)*60;
-                                        if (u=="day") t = ((t*24)*60)*60;
-                                    }
-                                }
-                            }
-                        }
-                        */
-                    }
-                }
-                if ((numbers+dashes)==rows.length){
-                    numericSort = true;
-                    for (var i=0; i<arr.length; i++){
-                        if (arr[i]=="-") arr[i] = 0;
-                        var f = parseFloat(arr[i]);
-                        arr[i] = f;
-                        rows[i].sortKey = f;
-                    }
-                }
+                    else if (typeof content === "string"){
 
-
-              //Sort the values
-                if (numericSort){
-                    //console.log("All numbers!");
-
-                    if (sort == "DESC"){
-                        arr.sort(function(a, b){return b - a});
                     }
                     else{
-                        arr.sort(function(a, b){return a - b});
+
                     }
                 }
                 else{
-                    arr.sort();
-                    if (sort == "DESC"){
-                        arr.reverse();
-                    }
+                    content = "";
                 }
+                arr.push(content);
+                row.sortKey = content;
+                rows.push(row);
+            });
 
-              //Remove unsorted rows
-                var parent = rows[0].parentNode;
-                for (var i=0; i<rows.length; i++){
-                    parent.removeChild(rows[i]);
+            if (rows.length == 0) return;
+
+
+          //Analyze and update the sort keys
+            var numericSort = false;
+            var numbers = 0;
+            var dashes = 0;
+            for (var i=0; i<arr.length; i++){
+                var key = arr[i];
+                var f = parseFloat(key);
+                if (!isNaN(f)){
+                    numbers++;
                 }
-
-              //Insert sorted rows
-                for (var i=0; i<arr.length; i++){
-                    var key = arr[i];
-                    for (var j=0; j<rows.length; j++){
-                        var row = rows[j];
-                        if (row.sortKey == key){
-                            row.sortKey = null;
-                            parent.appendChild(row);
-                            rows.splice(j, 1);
-                            break;
+                else if (typeof key === "string"){
+                    if (key=="-") dashes++;
+                    /*
+                    else{
+                        var s = key.split(" ");
+                        if (s.length==2){
+                            var t = parseInt(s[0]);
+                            if (!isNaN(t)){
+                                var u = s[1];
+                                if (u.substring(u.length-1)=="s") u = u.substring(0, u.length-1);
+                                if (u=="day" || u=="hour" || u=="minute" || u=="second"){
+                                    numbers++;
+                                    if (u=="minute") t = t*60;
+                                    if (u=="hour") t = (t*60)*60;
+                                    if (u=="day") t = ((t*24)*60)*60;
+                                }
+                            }
                         }
                     }
+                    */
                 }
+            }
+            if ((numbers+dashes)==rows.length){
+                numericSort = true;
+                for (var i=0; i<arr.length; i++){
+                    if (arr[i]=="-") arr[i] = 0;
+                    var f = parseFloat(arr[i]);
+                    arr[i] = f;
+                    rows[i].sortKey = f;
+                }
+            }
 
+
+          //Sort the values
+            if (numericSort){
+                //console.log("All numbers!");
+
+                if (sort == "DESC"){
+                    arr.sort(function(a, b){return b - a});
+                }
+                else{
+                    arr.sort(function(a, b){return a - b});
+                }
             }
             else{
+                arr.sort();
+                if (sort == "DESC"){
+                    arr.reverse();
+                }
+            }
+
+          //Remove unsorted rows
+            var parent = rows[0].parentNode;
+            for (var i=0; i<rows.length; i++){
+                parent.removeChild(rows[i]);
+            }
+
+          //Insert sorted rows
+            for (var i=0; i<arr.length; i++){
+                var key = arr[i];
+                for (var j=0; j<rows.length; j++){
+                    var row = rows[j];
+                    if (row.sortKey == key){
+                        row.sortKey = null;
+                        parent.appendChild(row);
+                        rows.splice(j, 1);
+                        break;
+                    }
+                }
+            }
+
+        }
+        else{
+            if (colConfig.field!=null){
                 table.clear();
                 if (!filter) filter = {};
                 filter.orderby = (colConfig.field + " " + sort).trim();
                 load();
             }
         }
+
     };
 
   //**************************************************************************
