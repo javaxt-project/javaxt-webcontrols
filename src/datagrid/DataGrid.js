@@ -637,7 +637,8 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                 table.load(records, page>1);
                 setPage(page);
                 calculateRowHeight();
-                if (records.length<config.limit) eof = true;
+                //if (records.length<config.limit) eof = true;
+                eof = true;
 
                 me.onLoad();
             }
@@ -1090,7 +1091,6 @@ javaxt.dhtml.DataGrid = function(parent, config) {
     };
 
 
-
   //**************************************************************************
   //** sort
   //**************************************************************************
@@ -1098,14 +1098,13 @@ javaxt.dhtml.DataGrid = function(parent, config) {
    */
     var sort = function(idx, colConfig, cell, event){
         if (colConfig.field!=null && colConfig.sortable!==false){
-            table.clear();
+
+          //Get sort direction
             var sort = colConfig.sort;
             if (sort=="DESC") sort = "";
             else sort = "DESC";
             colConfig.sort = sort;
-            if (!filter) filter = {};
-            filter.orderby = (colConfig.field + " " + sort).trim();
-
+            
 
           //Update sort indicator
             var row = cell.parentNode;
@@ -1204,7 +1203,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
               //Sort the values
                 if (numericSort){
-                    console.log("All numbers!");
+                    //console.log("All numbers!");
 
                     if (sort == "DESC"){
                         arr.sort(function(a, b){return b - a});
@@ -1242,6 +1241,9 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
             }
             else{
+                table.clear();
+                if (!filter) filter = {};
+                filter.orderby = (colConfig.field + " " + sort).trim();
                 load();
             }
         }
