@@ -22,6 +22,7 @@ javaxt.dhtml.Window = function(parent, config) {
     var visible = false;
     var seen = false;
     var overflow;
+    var resizeListener;
 
     var defaultConfig = {
 
@@ -331,6 +332,43 @@ javaxt.dhtml.Window = function(parent, config) {
 
 
   //**************************************************************************
+  //** destroy
+  //**************************************************************************
+  /** Used to destroy the window and remove it from the DOM
+   */
+    this.destroy = function(){
+        me.close();
+        if (mask){
+            mask.innerHTML = "";
+            parent.removeChild(mask);
+            mask = null;
+        }
+
+        if (resizeListener) resizeListener.destroy();
+
+        me.el.innerHTML = "";
+        parent.removeChild(me.el);
+
+
+        var props = [];
+        for (var key in me) {
+            if (me.hasOwnProperty(key)){
+                props.push(key);
+            }
+        }
+
+        for (var i=0; i<props.length; i++){
+            var key = props[i];
+            me[key] = null;
+            delete me[key];
+        }
+
+        me = null;
+        return me;
+    };
+
+
+  //**************************************************************************
   //** createHeaderButtons
   //**************************************************************************
   /** Default renderer for header buttons.
@@ -490,7 +528,7 @@ javaxt.dhtml.Window = function(parent, config) {
 
         if (!seen){
             if (recenter){
-                addResizeListener(parent, function(){
+                resizeListener = addResizeListener(parent, function(){
                     if (recenter) me.center();
                 });
             }
