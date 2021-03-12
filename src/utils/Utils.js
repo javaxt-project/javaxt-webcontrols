@@ -860,8 +860,7 @@ javaxt.dhtml.utils = {
    */
     addResizeListener: function(element, fn){
 
-        var attachEvent = document.attachEvent;
-        var isIE = navigator.userAgent.match(/Trident/);
+        var destroy, isDestroyed = false;
 
         var requestFrame = (function(){
             var raf = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame ||
@@ -876,38 +875,53 @@ javaxt.dhtml.utils = {
         })();
 
         function resizeListener(e, fn){
-            var win = e.target || e.srcElement;
-            if (win.__resizeRAF__) cancelFrame(win.__resizeRAF__);
-            win.__resizeRAF__ = requestFrame(function(){
-                var trigger = win.__resizeTrigger__;
-                fn.call(trigger, e);
+            var el = e.target || e.srcElement;
+            if (el.raf) cancelFrame(el.raf);
+            el.raf = requestFrame(function(){
+                if (isDestroyed) return;
+                fn.call(el.resizeTrigger, e);
             });
         };
 
 
-        if (attachEvent) {
-            element.__resizeTrigger__ = element;
-            element.attachEvent('onresize', function(e){
+        if (document.attachEvent) { //non-standard JS function implemented in IE8 and below
+            element.resizeTrigger = element;
+            var f = function(e){
                 resizeListener(e, fn);
-            });
+            };
+            element.attachEvent('onresize', f);
+            destroy = function(){
+                element.detachEvent('onresize', f);
+            };
         }
         else {
             if (getComputedStyle(element).position == 'static') element.style.position = 'relative';
-            var obj = element.__resizeTrigger__ = document.createElement('object');
+            var obj = element.resizeTrigger = document.createElement('object');
             obj.setAttribute('style', 'display: block; position: absolute; top: 0; left: 0; height: 100%; width: 100%; overflow: hidden; pointer-events: none; z-index: -1;');
-            obj.__resizeElement__ = element;
+            obj.resizeElement = element;
             obj.onload = function(e){
-                this.contentDocument.defaultView.__resizeTrigger__ = this.__resizeElement__;
+                this.contentDocument.defaultView.resizeTrigger = this.resizeElement;
                 this.contentDocument.defaultView.addEventListener('resize', function(e){
                     resizeListener(e, fn);
                 });
             };
+            var isIE = navigator.userAgent.match(/Trident/);
             obj.type = 'text/html';
             if (isIE) element.appendChild(obj);
             obj.data = 'about:blank';
             if (!isIE) element.appendChild(obj);
+            destroy = function(){
+                element.removeChild(obj);
+            };
         }
 
+
+        return {
+            destroy: function(){
+                try{ destroy(); } catch(e){}
+                isDestroyed = true;
+            }
+        };
     },
 
 
