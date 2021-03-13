@@ -182,10 +182,11 @@ javaxt.dhtml.WebSocket = function(config) {
   //** stop
   //**************************************************************************
     this.stop = function(){
-        if (socket) socket.close();
+        connectionSuccess = false;
         if (timer) clearInterval(timer);
         if (keepAliveTimer) clearTimeout(keepAliveTimer);
         if (statusTimer) clearTimeout(statusTimer);
+        if (socket) socket.close();
     };
 
     init();
