@@ -928,6 +928,9 @@ javaxt.dhtml.utils = {
   //**************************************************************************
   //** getNextHighestZindex
   //**************************************************************************
+  /** Returns an integer represeting the highest z-value of all the DOM
+   *  elements that appear with the given object + 1
+   */
     getNextHighestZindex: function(obj){
         var highestIndex = 0;
         var currentIndex = 0;
@@ -942,6 +945,64 @@ javaxt.dhtml.utils = {
             if(!isNaN(currentIndex) && currentIndex > highestIndex){highestIndex = currentIndex;}
         }
         return(highestIndex+1);
+    },
+
+
+  //**************************************************************************
+  //** addShowHide
+  //**************************************************************************
+  /** Adds show/hide methods to a DOM element or javaxt component
+   */
+    addShowHide: function(el){
+        if (el.el){ //Special case for javaxt components
+            var me = el;
+            me.show = function(){
+                me.el.style.visibility = '';
+                me.el.style.display = '';
+            };
+            me.hide = function(){
+                me.el.style.visibility = 'hidden';
+                me.el.style.display = 'none';
+            };
+        }
+        else{
+            el.show = function(){
+                this.style.visibility = '';
+                this.style.display = '';
+            };
+            el.hide = function(){
+                this.style.visibility = 'hidden';
+                this.style.display = 'none';
+            };
+        }
+    },
+
+
+  //**************************************************************************
+  //** destroy
+  //**************************************************************************
+  /** Used to help destroy javaxt components
+   */
+    destroy: function(me){
+        if (!me.el) return;
+
+        me.el.innerHTML = "";
+        var parent = me.el.parentNode;
+        if (parent) parent.removeChild(me.el);
+
+        var props = [];
+        for (var key in me) {
+            if (me.hasOwnProperty(key)){
+                props.push(key);
+            }
+        }
+
+        for (var i=0; i<props.length; i++){
+            var key = props[i];
+            me[key] = null;
+            delete me[key];
+        }
+        props = null;
     },
 
 
