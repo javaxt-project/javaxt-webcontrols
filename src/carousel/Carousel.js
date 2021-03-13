@@ -180,6 +180,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
    */
     this.destroy = function(){
         if (resizeListener) resizeListener.destroy();
+        me.disableAnimation();
         sliding = true;
         destroy(me);
         me = null;
@@ -253,7 +254,11 @@ javaxt.dhtml.Carousel = function(parent, config) {
   /** Used to remove all the panels from the carousel
    */
     this.clear = function(){
+        currPanel = null;
         innerDiv.innerHTML = "";
+        innerDiv.style.left = "0px";
+        sliding = false;
+        resize();
     };
 
 
@@ -386,8 +391,10 @@ javaxt.dhtml.Carousel = function(parent, config) {
    */
     this.next = function(){
 
-        if (sliding) return;
-        sliding = true;
+        if (config.animate===true){
+            if (sliding) return;
+            sliding = true;
+        }
 
         var start = parseInt(innerDiv.style.left);
         var w;
@@ -452,8 +459,10 @@ javaxt.dhtml.Carousel = function(parent, config) {
    */
     this.back = function(){
 
-        if (sliding) return;
-        sliding = true;
+        if (config.animate===true){
+            if (sliding) return;
+            sliding = true;
+        }
 
         var start, end, w;
 
