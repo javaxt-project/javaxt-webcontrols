@@ -359,24 +359,10 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         else if (document.attachEvent) { // For IE 8 and earlier versions
             document.attachEvent("onclick", hideMenu);
         }
-    };
 
 
-  //**************************************************************************
-  //** show
-  //**************************************************************************
-    this.show = function(){
-        me.el.style.visibility = '';
-        me.el.style.display = '';
-    };
-
-
-  //**************************************************************************
-  //** hide
-  //**************************************************************************
-    this.hide = function(){
-        me.el.style.visibility = 'hidden';
-        me.el.style.display = 'none';
+      //Add public show/hide methods
+        addShowHide(me);
     };
 
 
@@ -965,6 +951,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
   //**************************************************************************
     var merge = javaxt.dhtml.utils.merge;
     var createTable = javaxt.dhtml.utils.createTable;
+    var addShowHide = javaxt.dhtml.utils.addShowHide;
     var setStyle = function(el, style){
         javaxt.dhtml.utils.setStyle(el, config.style[style]);
         if (el.type === "text"){

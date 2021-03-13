@@ -17,10 +17,9 @@ javaxt.dhtml.Carousel = function(parent, config) {
     var currPanel;
     var sliding = false;
     var noselect;
-
+    var resizeListener;
 
     var defaultConfig = {
-
         animate: true,
         animationSteps: 250.0, //time in milliseconds
         transitionEffect: "linear",
@@ -32,12 +31,9 @@ javaxt.dhtml.Carousel = function(parent, config) {
     };
 
 
-
   //**************************************************************************
   //** Constructor
   //**************************************************************************
-  /** Creates a new instance of this class. */
-
     var init = function(){
 
         if (typeof parent === "string"){
@@ -158,8 +154,12 @@ javaxt.dhtml.Carousel = function(parent, config) {
         }
 
 
+      //Add public show/hide methods
+        addShowHide(me);
+
+
       //Watch for resize events
-        addResizeListener(parent, function(){
+        resizeListener = addResizeListener(parent, function(){
             me.resize();
         });
 
@@ -174,6 +174,20 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
 
   //**************************************************************************
+  //** destroy
+  //**************************************************************************
+  /** Used to destroy the carousel and remove it from the DOM
+   */
+    this.destroy = function(){
+        if (resizeListener) resizeListener.destroy();
+        sliding = true;
+        destroy(me);
+        me = null;
+        return me;
+    };
+
+
+  //**************************************************************************
   //** onRender
   //**************************************************************************
   /** Called after the carousel has been added to the DOM
@@ -182,27 +196,9 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
 
   //**************************************************************************
-  //** show
-  //**************************************************************************
-    this.show = function(){
-        me.el.style.visibility = '';
-        me.el.style.display = '';
-    };
-
-
-  //**************************************************************************
-  //** hide
-  //**************************************************************************
-    this.hide = function(){
-        me.el.style.visibility = 'hidden';
-        me.el.style.display = 'none';
-    };
-
-
-  //**************************************************************************
   //** add
   //**************************************************************************
-  /**  Used to add a panel to the carousel.
+  /** Used to add a panel to the carousel
    */
     this.add = function(el){
 
@@ -248,6 +244,16 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
       //Resize all the divs (bug fix for Chrome)
         me.resize();
+    };
+
+
+  //**************************************************************************
+  //** clear
+  //**************************************************************************
+  /** Used to remove all the panels from the carousel
+   */
+    this.clear = function(){
+        innerDiv.innerHTML = "";
     };
 
 
@@ -845,11 +851,13 @@ javaxt.dhtml.Carousel = function(parent, config) {
   //** Utils
   //**************************************************************************
     var merge = javaxt.dhtml.utils.merge;
+    var destroy = javaxt.dhtml.utils.destroy;
     var onRender = javaxt.dhtml.utils.onRender;
     var _getRect = javaxt.dhtml.utils.getRect;
     var intersects = javaxt.dhtml.utils.intersects;
     var getAreaOfIntersection = javaxt.dhtml.utils.getAreaOfIntersection;
     var addResizeListener = javaxt.dhtml.utils.addResizeListener;
+    var addShowHide = javaxt.dhtml.utils.addShowHide;
     var addNoSelectRule = function(){
         if (noselect===true) return;
         javaxt.dhtml.utils.addNoSelectRule();
