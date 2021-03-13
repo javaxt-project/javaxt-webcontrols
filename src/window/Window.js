@@ -337,32 +337,15 @@ javaxt.dhtml.Window = function(parent, config) {
   /** Used to destroy the window and remove it from the DOM
    */
     this.destroy = function(){
+        if (resizeListener) resizeListener.destroy();
         me.close();
         if (mask){
             mask.innerHTML = "";
-            parent.removeChild(mask);
+            var parent = mask.parentNode;
+            if (parent) parent.removeChild(mask);
             mask = null;
         }
-
-        if (resizeListener) resizeListener.destroy();
-
-        me.el.innerHTML = "";
-        parent.removeChild(me.el);
-
-
-        var props = [];
-        for (var key in me) {
-            if (me.hasOwnProperty(key)){
-                props.push(key);
-            }
-        }
-
-        for (var i=0; i<props.length; i++){
-            var key = props[i];
-            me[key] = null;
-            delete me[key];
-        }
-
+        destroy(me);
         me = null;
         return me;
     };
@@ -909,6 +892,7 @@ javaxt.dhtml.Window = function(parent, config) {
   //**************************************************************************
     var _getRect = javaxt.dhtml.utils.getRect;
     var merge = javaxt.dhtml.utils.merge;
+    var destroy = javaxt.dhtml.utils.destroy;
     var isEmpty = javaxt.dhtml.utils.isEmpty;
     var getNextHighestZindex = javaxt.dhtml.utils.getNextHighestZindex;
     var addResizeListener = javaxt.dhtml.utils.addResizeListener;
