@@ -697,8 +697,10 @@ javaxt.dhtml.Window = function(parent, config) {
             else dy = 0;
         };
         var onDragEnd = function(){
-            mask.style.display = "none";
-            mask.style.visibility = "hidden";
+            if (config.modal!==true){
+                mask.style.display = "none";
+                mask.style.visibility = "hidden";
+            }
             mask.style.cursor = "";
             mainDiv.focus();
         };
