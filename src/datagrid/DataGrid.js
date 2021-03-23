@@ -185,6 +185,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
             columns: columns,
             style: config.style
         });
+        me.el = table.el;
 
 
       //Add load function to the table
