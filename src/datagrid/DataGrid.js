@@ -641,8 +641,14 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                 table.load(records, page>1);
                 setPage(page);
                 calculateRowHeight();
-                //if (records.length<config.limit) eof = true;
-                eof = true;
+
+
+                if (arguments.length===1){
+                    eof = true;
+                }
+                else{ //caller provided a page number 
+                    if (records.length<config.limit) eof = true;
+                }
 
                 me.onLoad();
             }
