@@ -442,7 +442,7 @@ javaxt.dhtml.Button = function(parent, config) {
                     //TODO: Add mouseup events to buttons in the menu
                 }
 
-                return false;
+                //return false;
             };
             div.onclick = function(){
                 onclick();
@@ -519,6 +519,25 @@ javaxt.dhtml.Button = function(parent, config) {
 
             outerDiv.insertBefore(mask, outerDiv.firstChild);
         }
+    };
+
+
+  //**************************************************************************
+  //** isEnabled
+  //**************************************************************************
+    this.isEnabled = function(){
+        return !me.isDisabled();
+    };
+
+
+  //**************************************************************************
+  //** isDisabled
+  //**************************************************************************
+    this.isDisabled = function(){
+        if (mask){
+            if (mask.style.visibility !== "hidden") return true;
+        }
+        return false;
     };
 
 
