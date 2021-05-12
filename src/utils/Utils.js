@@ -731,7 +731,7 @@ javaxt.dhtml.utils = {
                 dragHandle.style.cursor = cursor;
 
                 if (config.onDragEnd)
-                config.onDragEnd.apply(dragHandle, []);
+                config.onDragEnd.apply(dragHandle, [e]);
 
 
               //Remove the "javaxt-noselect" class
@@ -839,7 +839,7 @@ javaxt.dhtml.utils = {
             var y = e.clientY;
 
             if (config.onDragStart)
-            config.onDragStart.apply(dragHandle, [x,y]);
+            config.onDragStart.apply(dragHandle, [x,y,e]);
 
 
           //Disable text selection in the entire document - very important!
@@ -964,6 +964,9 @@ javaxt.dhtml.utils = {
                 me.el.style.visibility = 'hidden';
                 me.el.style.display = 'none';
             };
+            me.isVisible = function(){
+                return !(me.el.style.visibility === 'hidden' && me.el.style.display === 'none');
+            };
         }
         else{
             el.show = function(){
@@ -973,6 +976,9 @@ javaxt.dhtml.utils = {
             el.hide = function(){
                 this.style.visibility = 'hidden';
                 this.style.display = 'none';
+            };
+            el.isVisible = function(){
+                return !(this.style.visibility === 'hidden' && this.style.display === 'none');
             };
         }
     },
