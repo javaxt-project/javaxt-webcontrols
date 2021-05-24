@@ -1097,8 +1097,8 @@ javaxt.dhtml.Form = function (parent, config) {
             var row = field.row;
             row.style.opacity=1;
             row.style.filter = 'alpha(opacity=100)';
-            row.childNodes[0].style.filter = row.childNodes[1].style.filter = row.style.filter;
-            row.childNodes[1].childNodes[0].disabled=false;
+            for (var i=0; i<row.childNodes.length; i++) row.childNodes[i].style.filter = row.style.filter;
+            row.childNodes[2].childNodes[0].disabled=false;
             return true;
         }
         return false;
@@ -1117,8 +1117,8 @@ javaxt.dhtml.Form = function (parent, config) {
             var row = field.row;
             row.style.opacity=0.6;
             row.style.filter = 'alpha(opacity=' + row.style.opacity*100 + ')';
-            row.childNodes[0].style.filter = row.childNodes[1].style.filter = row.style.filter;
-            row.childNodes[1].childNodes[0].disabled=true;
+            for (var i=0; i<row.childNodes.length; i++) row.childNodes[i].style.filter = row.style.filter;
+            row.childNodes[2].childNodes[0].disabled=true;
             return true;
         }
         return false;
