@@ -202,7 +202,9 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             var filter = input.value.replace(/^\s*/, "").replace(/\s*$/, "").toLowerCase();
             for (var i=0; i<menuOptions.childNodes.length; i++){
                 var div = menuOptions.childNodes[i];
-                if (div.innerHTML.toLowerCase()===filter){
+                var text = div.text;
+                if (!text) text = div.innerText;
+                if (text.toLowerCase()===filter){
                     foundMatch = true;
                     input.data = div.value;
                     break;
@@ -436,7 +438,9 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         for (var i=0; i<menuOptions.childNodes.length; i++){
             var div = menuOptions.childNodes[i];
             if (div.value===val){
-                setValue(div.innerHTML, div.value);
+                var text = div.text;
+                if (!text) text = div.innerText;
+                setValue(text, div.value);
                 return;
             }
         }
@@ -444,8 +448,10 @@ javaxt.dhtml.ComboBox = function(parent, config) {
       //Try to match the val to one of the menu items using the menu text
         for (var i=0; i<menuOptions.childNodes.length; i++){
             var div = menuOptions.childNodes[i];
-            if (div.innerHTML.toLowerCase() === getText(val).toLowerCase()){
-                setValue(div.innerHTML, div.value);
+            var text = div.text;
+            if (!text) text = div.innerText;
+            if (text.toLowerCase() === getText(val).toLowerCase()){
+                setValue(text, div.value);
                 return;
             }
         }
@@ -481,8 +487,10 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         var arr = [];
         for (var i=0; i<menuOptions.childNodes.length; i++){
             var div = menuOptions.childNodes[i];
+            var text = div.text;
+            if (!text) text = div.innerText;
             arr.push({
-                text: div.innerHTML,
+                text: text,
                 value: div.value
             });
         }
@@ -550,8 +558,9 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         var h = 0;
         for (var i=0; i<menuOptions.childNodes.length; i++){
             var div = menuOptions.childNodes[i];
-
-            if (div.innerHTML.toLowerCase().indexOf(filter) === 0) {
+            var text = div.text;
+            if (!text) text = div.innerText;
+            if (text.toLowerCase().indexOf(filter) === 0) {
                 div.style.display = "";
                 numVisibleItems++;
                 h = Math.max(div.offsetHeight, h);
@@ -749,7 +758,9 @@ javaxt.dhtml.ComboBox = function(parent, config) {
       //Scroll to a menu item that matches the text in the input
         for (var i=0; i<menuOptions.childNodes.length; i++){
             var div = menuOptions.childNodes[i];
-            if (div.innerHTML===input.value){
+            var text = div.text;
+            if (!text) text = div.innerText;
+            if (text===input.value){
                 overflowDiv.scrollTop = div.offsetTop;
                 div.focus();
                 return;
@@ -758,26 +769,28 @@ javaxt.dhtml.ComboBox = function(parent, config) {
 
       //If we're still here, we didn't find an exact match so we'll do a fuzzy search
         var a = input.value;
-        var div = null;
+        var d = null;
         var max = 0;
         for (var i=0; i<menuOptions.childNodes.length; i++){
-            var b = menuOptions.childNodes[i].innerHTML;
+            var div = menuOptions.childNodes[i];
+            var text = div.text;
+            if (!text) text = div.innerText;
             var x = 0;
-            for (var j=0; j<Math.min(a.length, b.length); j++) {
-                if (a.charAt(j) !== b.charAt(j)){
+            for (var j=0; j<Math.min(a.length, text.length); j++) {
+                if (a.charAt(j) !== text.charAt(j)){
                     break;
                 }
                 x++;
             }
             if (x>max){
-                div = menuOptions.childNodes[i];
+                d = div;
                 max = x;
             }
         }
 
-        if (div){
-            overflowDiv.scrollTop = div.offsetTop;
-            div.focus();
+        if (d){
+            overflowDiv.scrollTop = d.offsetTop;
+            d.focus();
             return;
         }
     };
@@ -794,8 +807,10 @@ javaxt.dhtml.ComboBox = function(parent, config) {
     this.add = function(text, value){
         var div = document.createElement('div');
         setStyle(div, "option");
-        div.innerHTML = getText(text);
-        div.value = (typeof value === "undefined") ? div.innerHTML : value;
+        text = getText(text);
+        div.text = text;
+        div.innerHTML = text;
+        div.value = (typeof value === "undefined") ? text : value;
         div.tabIndex = -1; //allows the div to have focus
         div.onclick = function(){
             select(this);
@@ -827,8 +842,10 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         div.onmousedown = function () {return false;};
 
         div.oncontextmenu = function(){
-            var el = this;
-            me.onMenuContext(el.innerHTML, el.value, el);
+            var div = this;
+            var text = div.text;
+            if (!text) text = div.innerText;
+            me.onMenuContext(text, div.value, div);
         };
 
         menuOptions.appendChild(div);
@@ -841,10 +858,13 @@ javaxt.dhtml.ComboBox = function(parent, config) {
   /** Removes an entry from the menu.
    */
     this.remove = function(name){
+        name = getText(name);
         var arr = [];
         for (var i=0; i<menuOptions.childNodes.length; i++){
             var div = menuOptions.childNodes[i];
-            if (div.innerHTML === getText(name)){
+            var text = div.text;
+            if (!text) text = div.innerText;
+            if (text === name){
                 arr.push(div);
             }
         }
@@ -897,7 +917,9 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         if (div){
 
           //Set input value and hide menu
-            input.value = div.innerHTML;
+            var text = div.text;
+            if (!text) text = div.innerText;
+            input.value = text;
             input.data = div.value;
             me.hideMenu();
             me.onChange(input.value, input.data);
