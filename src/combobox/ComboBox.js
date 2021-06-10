@@ -306,7 +306,9 @@ javaxt.dhtml.ComboBox = function(parent, config) {
 
             newOption = document.createElement('div');
             setStyle(newOption, "newOption");
-            newOption.innerHTML = config.addNewOptionText;
+            var text = getText(config.addNewOptionText);
+            newOption.text = text;
+            newOption.innerHTML = text;
             newOption.tabIndex = -1; //allows the div to have focus
             var selectNewOption = function(){
                 me.hideMenu();
