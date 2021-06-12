@@ -422,11 +422,12 @@ javaxt.dhtml.ComboBox = function(parent, config) {
   //**************************************************************************
   /** Used to set the value for the input.
    */
-    this.setValue = function(val){
+    this.setValue = function(val, silent){
 
         var setValue = function(value, data){
             input.value = value;
             input.data = data;
+            if (silent===true) return;
             input.oninput();
         };
 
