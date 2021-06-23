@@ -112,8 +112,6 @@ javaxt.dhtml.ComboBox = function(parent, config) {
   //**************************************************************************
   //** Constructor
   //**************************************************************************
-  /** Creates a new instance of this class. */
-
     var init = function(){
 
         if (typeof parent === "string"){
@@ -197,6 +195,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         };
 
         input.oninput = function(){
+            if (me.isDisabled()===true) return;
             //if (config.readOnly===true) return;
             var foundMatch = false;
             var filter = input.value.replace(/^\s*/, "").replace(/\s*$/, "").toLowerCase();
@@ -219,6 +218,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
 
         if (config.showMenuOnFocus){
             input.onclick = function(){
+                if (me.isDisabled()===true) return;
                 me.showMenu(true);
                 scroll();
                 this.focus();
@@ -371,16 +371,23 @@ javaxt.dhtml.ComboBox = function(parent, config) {
 
 
   //**************************************************************************
+  //** isDisabled
+  //**************************************************************************
+    this.isDisabled = function(){
+        return me.el.disabled;
+    };
+
+
+  //**************************************************************************
   //** enable
   //**************************************************************************
-  /** Used to enable the button.
-   */
     this.enable = function(){
         if (mask){
             var outerDiv = me.el;
             outerDiv.style.opacity = "";
             mask.style.visibility = "hidden";
         }
+        outerDiv.disabled = false;
     };
 
 
@@ -390,7 +397,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
     this.disable = function(){
 
         var outerDiv = me.el;
-        outerDiv.style.opacity = "0.5";
+        outerDiv.style.opacity = "0.6";
 
         if (mask){
             mask.style.visibility = "visible";
@@ -406,7 +413,9 @@ javaxt.dhtml.ComboBox = function(parent, config) {
 
             outerDiv.insertBefore(mask, outerDiv.firstChild);
         }
+        outerDiv.disabled = true;
     };
+
 
   //**************************************************************************
   //** reset
