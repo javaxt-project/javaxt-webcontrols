@@ -1082,9 +1082,6 @@ javaxt.dhtml.Form = function (parent, config) {
     };
 
 
-
-
-
   //**************************************************************************
   //** enableField
   //**************************************************************************
@@ -1095,10 +1092,18 @@ javaxt.dhtml.Form = function (parent, config) {
         var field = me.findField(name);
         if (field){
             var row = field.row;
-            row.style.opacity=1;
-            row.style.filter = 'alpha(opacity=100)';
-            for (var i=0; i<row.childNodes.length; i++) row.childNodes[i].style.filter = row.style.filter;
-            row.childNodes[2].childNodes[0].disabled=false;
+            for (var i=0; i<row.childNodes.length; i++){
+                var cell = row.childNodes[i];
+                var opacity = 1;
+                if (i===2){
+                    if (field.enable){
+                        field.enable();
+                        opacity = "";
+                    }
+                    else cell.childNodes[0].disabled=false;
+                }
+                cell.style.opacity = opacity;
+            }
             return true;
         }
         return false;
@@ -1115,10 +1120,19 @@ javaxt.dhtml.Form = function (parent, config) {
         var field = me.findField(name);
         if (field){
             var row = field.row;
-            row.style.opacity=0.6;
-            row.style.filter = 'alpha(opacity=' + row.style.opacity*100 + ')';
-            for (var i=0; i<row.childNodes.length; i++) row.childNodes[i].style.filter = row.style.filter;
-            row.childNodes[2].childNodes[0].disabled=true;
+            for (var i=0; i<row.childNodes.length; i++){
+                var cell = row.childNodes[i];
+                var opacity = "0.6";
+                if (i===2){
+                    if (field.disable){
+                        field.disable();
+                        opacity = "";
+                    }
+                    else cell.childNodes[0].disabled=true;
+                }
+                cell.style.opacity = opacity;
+            }
+
             return true;
         }
         return false;
