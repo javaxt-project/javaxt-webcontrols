@@ -36,6 +36,7 @@ javaxt.dhtml.Window = function(parent, config) {
         modal: false,
         resizable: true,
         closable: true,
+        shrinkToFit: false,
         valign: "middle",
 
 
@@ -328,6 +329,11 @@ javaxt.dhtml.Window = function(parent, config) {
             }
         });
 
+
+      //Watch for resize events
+        if (config.shrinkToFit===true){
+            addResizeListener(shrinkToFit);
+        }
     };
 
 
@@ -337,7 +343,10 @@ javaxt.dhtml.Window = function(parent, config) {
   /** Used to destroy the window and remove it from the DOM
    */
     this.destroy = function(){
-        if (resizeListener) resizeListener.destroy();
+        if (resizeListener){
+            resizeListener.listeners = [];
+            resizeListener.destroy();
+        }
         me.close();
         if (mask){
             mask.innerHTML = "";
@@ -511,7 +520,7 @@ javaxt.dhtml.Window = function(parent, config) {
 
         if (!seen){
             if (recenter){
-                resizeListener = addResizeListener(parent, function(){
+                addResizeListener(function(){
                     if (recenter) me.center();
                 });
             }
@@ -522,6 +531,9 @@ javaxt.dhtml.Window = function(parent, config) {
         if (!visible){
             visible = true;
             me.onOpen();
+            if (config.shrinkToFit===true){
+                shrinkToFit();
+            }
         }
     };
 
@@ -601,6 +613,7 @@ javaxt.dhtml.Window = function(parent, config) {
         else{
             mainDiv.style.width = width + "px";
         }
+        me.onResize();
     };
 
 
@@ -624,6 +637,7 @@ javaxt.dhtml.Window = function(parent, config) {
         else{
             mainDiv.style.height = height + "px";
         }
+        me.onResize();
     };
 
 
@@ -890,6 +904,42 @@ javaxt.dhtml.Window = function(parent, config) {
 
 
   //**************************************************************************
+  //** shrinkToFit
+  //**************************************************************************
+  /** Resize window if it is larger that the parent
+   */
+    var shrinkToFit = function(){
+        var width = me.getWidth();
+        var height = me.getHeight();
+        var w = parent.offsetWidth;
+        var h = parent.offsetHeight;
+        if (width>w){
+            me.setWidth(w);
+        }
+        if (height>h){
+            me.setHeight(h);
+        }
+    };
+
+
+  //**************************************************************************
+  //** addResizeListener
+  //**************************************************************************
+    var addResizeListener = function(fn){
+        if (!resizeListener){
+            resizeListener = javaxt.dhtml.utils.addResizeListener(parent, function(){
+                var listeners = resizeListener.listeners;
+                for (var i=0; i<listeners.length; i++){
+                    listeners[i].apply(me, []);
+                }
+            });
+            resizeListener.listeners = [];
+        }
+        resizeListener.listeners.push(fn);
+    };
+
+
+  //**************************************************************************
   //** Utils
   //**************************************************************************
     var _getRect = javaxt.dhtml.utils.getRect;
@@ -897,7 +947,6 @@ javaxt.dhtml.Window = function(parent, config) {
     var destroy = javaxt.dhtml.utils.destroy;
     var isEmpty = javaxt.dhtml.utils.isEmpty;
     var getNextHighestZindex = javaxt.dhtml.utils.getNextHighestZindex;
-    var addResizeListener = javaxt.dhtml.utils.addResizeListener;
     var initDrag = javaxt.dhtml.utils.initDrag;
 
     var setStyle = function(el, style){
