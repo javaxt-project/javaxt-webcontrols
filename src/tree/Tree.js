@@ -289,6 +289,7 @@ javaxt.dhtml.Tree = function (parent, config) {
         return {
             type: getNodeType(li),
             name: li.getText(),
+            node: li.node,
             el: li
         };
     };
@@ -306,6 +307,7 @@ javaxt.dhtml.Tree = function (parent, config) {
           //Create node
             var li = document.createElement("li");
             li.className = config.style.li;
+            li.node = node;
             li.onclick = function(){
                 if (this.nextSibling){
                     var nextNode = this.nextSibling;
