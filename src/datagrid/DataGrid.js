@@ -15,7 +15,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
     var me = this;
     var table;
-    var currPage;
+    var currPage = 1;
     var eof = false;
     var checkboxHeader;
     var columns;
@@ -51,8 +51,8 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
       /** Optional list of field names used to specify which database fields
        *  should be returned from the server. If not provided, uses the "field"
-       *  attributes in the column definition. If both are provides, the list
-       *  of fields are merges into a unique list.
+       *  attributes in the column definition. If both are provided, the list
+       *  of fields are merged into a unique list.
        */
         fields: [],
 
@@ -496,6 +496,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
   /** Used to set the currPage variable and call the onPageChange method.
    */
     var setPage = function(page){
+        if (isNaN(page) || page<1) page = 1;
         if (page!=currPage){
             var prevPage = currPage;
             currPage = page;
@@ -528,7 +529,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
     this.onScroll = function(){};
     this.onPageChange = function(currPage, prevPage){};
     this.onSelectionChange = function(){};
-    this.beforeLoad = function(){};
+    this.beforeLoad = function(page){};
     this.onLoad = function(){};
     this.onError = function(request){};
     this.onRowClick = function(row, e){};
@@ -590,7 +591,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
    */
     this.clear = function(){
         table.clear();
-        currPage = 0;
+        currPage = 1;
     };
 
 
@@ -617,7 +618,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
   //**************************************************************************
     this.refresh = function(){
         //eof = false;
-        setPage(0);
+        setPage(1);
         load();
     };
 
@@ -626,7 +627,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
   //** load
   //**************************************************************************
   /** Used to load records from the remote store. Optionally, you can pass an
-   *  array of records, along with a page count, to append rows to the table.
+   *  array of records, along with a page number, to append rows to the table.
    */
     this.load = function(){
 
@@ -634,10 +635,12 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
             var records = arguments[0];
             var page = 1;
-            if (arguments.length>1) page = arguments[1];
+            if (arguments.length>1) page = parseInt(arguments[1]);
+            if (isNaN(page) || page<1) page = 1;
+
 
             if (isArray(records) || records instanceof javaxt.dhtml.DataStore){
-                me.beforeLoad();
+                me.beforeLoad(page);
                 table.load(records, page>1);
                 setPage(page);
                 calculateRowHeight();
@@ -646,7 +649,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                 if (arguments.length===1){
                     eof = true;
                 }
-                else{ //caller provided a page number 
+                else{ //caller provided a page number
                     if (records.length<config.limit) eof = true;
                 }
 
