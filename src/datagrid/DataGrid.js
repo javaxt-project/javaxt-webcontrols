@@ -1082,7 +1082,6 @@ javaxt.dhtml.DataGrid = function(parent, config) {
               //Parse response
                 var records = config.parseResponse.apply(me, [request]);
                 if (records.length===0){
-                    table.clear();
                     eof = true;
                 }
                 else{
