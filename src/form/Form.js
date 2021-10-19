@@ -760,9 +760,9 @@ javaxt.dhtml.Form = function (parent, config) {
     var addGroup = function(name, items, hidden){
 
       //Create new row for the groupbox
-        var row = document.createElement('tr');
-        row.setAttribute("desc", "-- Group Start --");
-        formTable.appendChild(row);
+        var startGroup = document.createElement('tr');
+        startGroup.setAttribute("desc", "-- Group Start --");
+        formTable.appendChild(startGroup);
 
 
       //Calculate padding and border width for the group box
@@ -791,7 +791,7 @@ javaxt.dhtml.Form = function (parent, config) {
         var td = document.createElement('td');
         td.style.padding = (parseInt(verticalSpacing)*2) + "px " + borderWidth + "px " + paddingTop + "px 0";
         td.colSpan = 3;
-        row.appendChild(td);
+        startGroup.appendChild(td);
         var div = document.createElement('div');
         div.style.position = "relative";
         div.style.width = "100%";
@@ -828,19 +828,35 @@ javaxt.dhtml.Form = function (parent, config) {
         }
 
 
-      //Generate list of rows associated with the groupbox
-        var rows = [];
-        for (var i=0; i<formTable.childNodes.length; i++){
-            var tr = formTable.childNodes[i];
-            if (tr===row){
-                for (var j=i+1; j<formTable.childNodes.length; j++){
-                    tr = formTable.childNodes[j];
-                    rows.push(tr);
-                }
-                break;
-            }
-        }
+      //Add row below the last input for padding
+        var endGroup = document.createElement('tr');
+        endGroup.setAttribute("desc", "-- Group End --");
+        formTable.appendChild(endGroup);
+        var td = document.createElement('td');
+        td.style.padding = (parseInt(verticalSpacing) + paddingBottom) + "px 0 0 0";
+        td.colSpan = 3;
+        endGroup.appendChild(td);
 
+
+
+
+      //Generate list of rows associated with the groupbox
+        var getRows = function(){
+            var rows = [];
+            var addRow = false;
+            for (var i=0; i<formTable.childNodes.length; i++){
+                var tr = formTable.childNodes[i];
+                if (tr===startGroup) addRow = true;
+                if (addRow){
+                    rows.push(tr);
+                    if (tr===endGroup){
+                        addRow = false;
+                        break;
+                    }
+                }
+            }
+            return rows;
+        };
 
 
       //Set groupbox height
@@ -855,12 +871,12 @@ javaxt.dhtml.Form = function (parent, config) {
             groupbox.style.height = h + "px";
             div.style.visibility = '';
         };
-        getHeight(rows, setHeight);
 
 
 
       //Add padding to the inputs
-        for (var i=0; i<rows.length; i++){
+        var rows = getRows();
+        for (var i=1; i<rows.length-1; i++){
             var tr = rows[i];
             var cols = tr.childNodes;
             cols[0].style.paddingLeft = paddingLeft + "px";
@@ -868,28 +884,9 @@ javaxt.dhtml.Form = function (parent, config) {
         }
 
 
-      //Add row below the last input for padding
-        var row = document.createElement('tr');
-        row.setAttribute("desc", "-- Group End --");
-        formTable.appendChild(row);
-        var td = document.createElement('td');
-        td.style.padding = (parseInt(verticalSpacing) + paddingBottom) + "px 0 0 0";
-        td.colSpan = 3;
-        row.appendChild(td);
-
-
-
-      //Update groups variable
-        var arr = [];
-        for (var i=0; i<rows.length; i++){
-            var tr = rows[i];
-            if (i===0) arr.push(tr.previousSibling);
-            arr.push(tr);
-        }
-        arr.push(row);
         groups.push({
             name: name,
-            rows: arr,
+            getRows: getRows,
             setHeight: setHeight
         });
 
@@ -932,8 +929,9 @@ javaxt.dhtml.Form = function (parent, config) {
             }
         }
         if (group){
-            for (var i=0; i<group.rows.length; i++){
-                var tr = group.rows[i];
+            var rows = group.getRows();
+            for (var i=0; i<rows.length; i++){
+                var tr = rows[i];
                 if (hide){
                     tr.style.visibility = 'hidden';
                     tr.style.display = 'none';
@@ -1270,8 +1268,9 @@ javaxt.dhtml.Form = function (parent, config) {
     var findGroup = function(row){
         for (var i=0; i<groups.length; i++){
             var group = groups[i];
-            for (var j=0; j<group.rows.length; j++){
-                var tr = group.rows[j];
+            var rows = group.getRows();
+            for (var j=0; j<rows.length; j++){
+                var tr = rows[j];
                 if (tr===row) return group;
             }
         }
@@ -1285,7 +1284,7 @@ javaxt.dhtml.Form = function (parent, config) {
   /** Used to update the hight of a given groupbox.
    */
     var updateGroup = function(group){
-        var rows = group.rows;
+        var rows = group.getRows();
         var setHeight = group.setHeight;
         var arr = [];
         for (var i=1; i<rows.length-1; i++){
@@ -1357,6 +1356,7 @@ javaxt.dhtml.Form = function (parent, config) {
             for (var i=0; i<rows.length; i++){
                 if (rows[i].style.display !== 'none'){
                     h+= rows[i].offsetHeight;
+                    console.log(rows[i], rows[i].offsetHeight);
                 }
             }
             return h;
