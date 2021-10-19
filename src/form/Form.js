@@ -1356,7 +1356,6 @@ javaxt.dhtml.Form = function (parent, config) {
             for (var i=0; i<rows.length; i++){
                 if (rows[i].style.display !== 'none'){
                     h+= rows[i].offsetHeight;
-                    console.log(rows[i], rows[i].offsetHeight);
                 }
             }
             return h;
