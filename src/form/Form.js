@@ -167,6 +167,7 @@ javaxt.dhtml.Form = function (parent, config) {
                 e.preventDefault();
             };
         }
+        parent.appendChild(form);
         me.el = form;
 
 
@@ -264,8 +265,7 @@ javaxt.dhtml.Form = function (parent, config) {
             me.resize();
         });
 
-
-        parent.appendChild(form);
+        onRender(parent, me.resize);
     };
 
 
@@ -1445,8 +1445,11 @@ javaxt.dhtml.Form = function (parent, config) {
     };
 
 
-
+  //**************************************************************************
+  //** Utils
+  //**************************************************************************
     var merge = javaxt.dhtml.utils.merge;
+    var onRender = javaxt.dhtml.utils.onRender;
     var addResizeListener = javaxt.dhtml.utils.addResizeListener;
 
     init();
