@@ -321,6 +321,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
 
       //Update position
+        if (sliding) return;
         innerDiv.style.left = -(currPanelIdx*width)+"px";
     };
 
