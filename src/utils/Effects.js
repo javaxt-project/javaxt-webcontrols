@@ -62,7 +62,6 @@ javaxt.dhtml.Effects = function() {
     this.setTransition = function(el, transitionEffect, duration){
         if (isNaN(duration) || duration<=0) return;
         var points = getPoints(transitionEffect);
-        if (duration) duration = 500;
         setTransition(el, duration, points);
     };
 
