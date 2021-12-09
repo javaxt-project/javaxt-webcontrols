@@ -540,7 +540,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
     this.onRowClick = function(row, e){};
     this.onKeyEvent = function(keyCode, modifiers){};
     this.onCheckbox = function(value, checked, checkbox){};
-    this.onSort = function(idx){};
+    this.onSort = function(idx, sortDirection){};
 
 
   //**************************************************************************
@@ -1110,6 +1110,26 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
 
   //**************************************************************************
+  //** setSortIndicator
+  //**************************************************************************
+    this.setSortIndicator = function(idx, sortDirection){
+        for (var i=0; i<columns.length; i++){
+            var colHeader = columns[i].header;
+            if (colHeader.setSortIndicator){
+                if (i===idx){
+                    colHeader.setSortIndicator(sortDirection);
+                    columns[i].sort = sortDirection;
+                }
+                else{
+                    colHeader.setSortIndicator(null);
+                    columns[i].sort = null;
+                }
+            }
+        }
+    };
+
+
+  //**************************************************************************
   //** sort
   //**************************************************************************
   /** Called whenever a client clicks on a header.
@@ -1125,20 +1145,8 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
 
       //Update sort indicator
-        var row = cell.parentNode;
-        for (var i=0; i<row.childNodes.length; i++){
-            if (row.childNodes[i].getContent){
-                var headerCell = row.childNodes[i].getContent();
-                if (headerCell.setSortIndicator){
-                    if (row.childNodes[i]==cell){
-                        headerCell.setSortIndicator(sort.length==0 ? "ASC" : "DESC");
-                    }
-                    else{
-                        headerCell.setSortIndicator(null);
-                    }
-                }
-            }
-        }
+        var sortDirection = sort.length==0 ? "ASC" : "DESC";
+        me.setSortIndicator(idx, sortDirection);
 
 
       //Sort records
@@ -1280,7 +1288,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
             }
 
           //Fire onSort event
-            me.onSort(idx);
+            me.onSort(idx, sortDirection);
 
         }
         else{
@@ -1288,7 +1296,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                 table.clear();
                 if (!filter) filter = {};
                 filter.orderby = (colConfig.field + " " + sort).trim();
-                me.onSort(idx);
+                me.onSort(idx, sortDirection);
                 load();
             }
         }
