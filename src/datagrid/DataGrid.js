@@ -47,6 +47,11 @@ javaxt.dhtml.DataGrid = function(parent, config) {
        *  on start-up
        */
         autoload: false,
+
+      /** If true, the grid will sort values in the grid locally using whatever
+       *  data is available. If fetching data from a remote server, recommend
+       *  setting localSort to false (default)
+       */
         localSort: false,
 
       /** Optional list of field names used to specify which database fields
@@ -535,6 +540,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
     this.onRowClick = function(row, e){};
     this.onKeyEvent = function(keyCode, modifiers){};
     this.onCheckbox = function(value, checked, checkbox){};
+    this.onSort = function(idx){};
 
 
   //**************************************************************************
@@ -1138,26 +1144,22 @@ javaxt.dhtml.DataGrid = function(parent, config) {
       //Sort records
         if (config.localSort){
 
+            if (typeof config.localSort === "function"){
+                //TODO: allow users to implement thier own sorting function
+            }
+
 
             var arr = [];
             var rows = [];
 
           //Collect column content to sort
             table.forEachRow(function (row) {
+
                 var content = row.get(idx);
+                var data = row.record[idx];
                 if (content){
                     if (content.nodeType===1) content = content.innerText;
-
-                    var f = parseFloat(content);
-                    if (!isNaN(f)){
-                        numbers++;
-                    }
-                    else if (typeof content === "string"){
-
-                    }
-                    else{
-
-                    }
+                    content = content.trim();
                 }
                 else{
                     content = "";
@@ -1167,46 +1169,72 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                 rows.push(row);
             });
 
-            if (rows.length == 0) return;
+            if (rows.length === 0) return;
 
 
           //Analyze and update the sort keys
-            var numericSort = false;
+            var dates = 0;
             var numbers = 0;
-            var dashes = 0;
+            var nulls = [];
             for (var i=0; i<arr.length; i++){
-                var key = arr[i];
-                var f = parseFloat(key);
+                var val = arr[i];
+
+                var f = parseFloat(val.replace(/[^0-9\.]+/g,""));
                 if (!isNaN(f)){
                     numbers++;
                 }
-                else if (typeof key === "string"){
-                    if (key=="-") dashes++;
-                    /*
-                    else{
-                        var s = key.split(" ");
-                        if (s.length==2){
-                            var t = parseInt(s[0]);
-                            if (!isNaN(t)){
-                                var u = s[1];
-                                if (u.substring(u.length-1)=="s") u = u.substring(0, u.length-1);
-                                if (u=="day" || u=="hour" || u=="minute" || u=="second"){
-                                    numbers++;
-                                    if (u=="minute") t = t*60;
-                                    if (u=="hour") t = (t*60)*60;
-                                    if (u=="day") t = ((t*24)*60)*60;
-                                }
+                else{
+
+                    if (typeof val === "string"){
+                        if (val=="" || val=="-" || val=="n/a"){
+                            nulls.push(i);
+                        }
+                        else{
+                            var d = new Date(val).getTime();
+                            if (!isNaN(d)){
+                                dates++;
                             }
                         }
                     }
-                    */
                 }
             }
-            if ((numbers+dashes)==rows.length){
+
+
+            var numericSort = false;
+
+          //Sort by numbers if possible
+            if ((numbers+nulls.length)===rows.length){ //numeric sort
                 numericSort = true;
                 for (var i=0; i<arr.length; i++){
-                    if (arr[i]=="-") arr[i] = 0;
-                    var f = parseFloat(arr[i]);
+                    var isNull = false;
+                    for (var j=0; j<nulls.length; nulls++){
+                        if (nulls[j]===i){
+                            isNull = true;
+                            break;
+                        }
+                    }
+
+                    var val = arr[i];
+                    var f = isNull ? 0 : parseFloat(val.replace(/[^0-9\.]+/g,""));
+                    arr[i] = f;
+                    rows[i].sortKey = f;
+                }
+            }
+
+          //Sort by dates if possible
+            if ((dates+nulls.length)===rows.length){
+                numericSort = true;
+                for (var i=0; i<arr.length; i++){
+                    var isNull = false;
+                    for (var j=0; j<nulls.length; nulls++){
+                        if (nulls[j]===i){
+                            isNull = true;
+                            break;
+                        }
+                    }
+
+                    var val = arr[i];
+                    var f = isNull ? 0 : new Date(val).getTime();
                     arr[i] = f;
                     rows[i].sortKey = f;
                 }
@@ -1215,13 +1243,11 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
           //Sort the values
             if (numericSort){
-                //console.log("All numbers!");
-
                 if (sort == "DESC"){
-                    arr.sort(function(a, b){return b - a});
+                    arr.sort(function(a, b){return b - a;});
                 }
                 else{
-                    arr.sort(function(a, b){return a - b});
+                    arr.sort(function(a, b){return a - b;});
                 }
             }
             else{
@@ -1231,11 +1257,13 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                 }
             }
 
+
           //Remove unsorted rows
             var parent = rows[0].parentNode;
             for (var i=0; i<rows.length; i++){
                 parent.removeChild(rows[i]);
             }
+
 
           //Insert sorted rows
             for (var i=0; i<arr.length; i++){
@@ -1251,12 +1279,16 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                 }
             }
 
+          //Fire onSort event
+            me.onSort(idx);
+
         }
         else{
             if (colConfig.field!=null){
                 table.clear();
                 if (!filter) filter = {};
                 filter.orderby = (colConfig.field + " " + sort).trim();
+                me.onSort(idx);
                 load();
             }
         }
