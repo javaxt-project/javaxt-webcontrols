@@ -1287,6 +1287,13 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                 }
             }
 
+
+          //Insert unsorted rows
+            for (var i=0; i<rows.length; i++){
+                parent.appendChild(rows[i]);
+            }
+
+
           //Fire onSort event
             me.onSort(idx, sortDirection);
 
