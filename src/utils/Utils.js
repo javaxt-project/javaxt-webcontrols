@@ -971,6 +971,9 @@ javaxt.dhtml.utils = {
   //**************************************************************************
   //** getNextHighestZindex
   //**************************************************************************
+  /** Returns an integer represeting the highest z-value of all the DOM
+   *  elements that appear with the given object + 1
+   */
     getNextHighestZindex: function(obj){
         var highestIndex = javaxt.dhtml.utils.getHighestElements(obj).zIndex;
         return(highestIndex+1);
