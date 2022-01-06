@@ -909,24 +909,56 @@ javaxt.dhtml.utils = {
         }
 
     },
-
-
+    
+    
   //**************************************************************************
-  //** getNextHighestZindex
+  //** getHighestElements
   //**************************************************************************
-    getNextHighestZindex: function(obj){
+  /** Returns an array of elements at the highest z-index in the document
+   */
+    getHighestElements: function(obj){
+        var arr = [];
         var highestIndex = 0;
         var currentIndex = 0;
         var elArray = Array();
         if(obj){elArray = obj.getElementsByTagName('*');}else{elArray = document.getElementsByTagName('*');}
-        for(var i=0; i < elArray.length; i++){
-            if (elArray[i].currentStyle){
-                currentIndex = parseFloat(elArray[i].currentStyle['zIndex']);
-            }else if(window.getComputedStyle){
-                currentIndex = parseFloat(document.defaultView.getComputedStyle(elArray[i],null).getPropertyValue('z-index'));
+        for (var i=0; i < elArray.length; i++){
+            var el = elArray[i];
+            if (el.currentStyle){
+                currentIndex = parseFloat(el.currentStyle['zIndex']);
             }
-            if(!isNaN(currentIndex) && currentIndex > highestIndex){highestIndex = currentIndex;}
+            else if(window.getComputedStyle){
+                currentIndex = parseFloat(document.defaultView.getComputedStyle(el,null).getPropertyValue('z-index'));
+            }
+            if(!isNaN(currentIndex)){
+                if (currentIndex > highestIndex){
+                    highestIndex = currentIndex;
+                    arr = [];
+                    arr.push(el);
+                }
+                else if (currentIndex===highestIndex){
+                    arr.push(el);
+                }
+            }
         }
+        return {
+            zIndex: highestIndex,
+            elements: arr,
+            contains: function(el){  
+                for (var i=0; i<arr.length; i++){
+                    if (arr[i]===el) return true;
+                }
+                return false;
+            }
+        };
+    },
+    
+    
+  //**************************************************************************
+  //** getNextHighestZindex
+  //**************************************************************************
+    getNextHighestZindex: function(obj){
+        var highestIndex = javaxt.dhtml.utils.getHighestElements(obj).zIndex;
         return(highestIndex+1);
     },
 
