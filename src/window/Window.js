@@ -22,6 +22,7 @@ javaxt.dhtml.Window = function(parent, config) {
     var visible = false;
     var seen = false;
     var overflow;
+    var resizeListener;
 
     var defaultConfig = {
 
@@ -35,6 +36,7 @@ javaxt.dhtml.Window = function(parent, config) {
         modal: false,
         resizable: true,
         closable: true,
+        shrinkToFit: false,
         valign: "middle",
 
 
@@ -327,6 +329,34 @@ javaxt.dhtml.Window = function(parent, config) {
             }
         });
 
+
+      //Watch for resize events
+        if (config.shrinkToFit===true){
+            addResizeListener(shrinkToFit);
+        }
+    };
+
+
+  //**************************************************************************
+  //** destroy
+  //**************************************************************************
+  /** Used to destroy the window and remove it from the DOM
+   */
+    this.destroy = function(){
+        if (resizeListener){
+            resizeListener.listeners = [];
+            resizeListener.destroy();
+        }
+        me.close();
+        if (mask){
+            mask.innerHTML = "";
+            var parent = mask.parentNode;
+            if (parent) parent.removeChild(mask);
+            mask = null;
+        }
+        destroy(me);
+        me = null;
+        return me;
     };
 
 
@@ -490,7 +520,7 @@ javaxt.dhtml.Window = function(parent, config) {
 
         if (!seen){
             if (recenter){
-                addResizeListener(parent, function(){
+                addResizeListener(function(){
                     if (recenter) me.center();
                 });
             }
@@ -501,6 +531,9 @@ javaxt.dhtml.Window = function(parent, config) {
         if (!visible){
             visible = true;
             me.onOpen();
+            if (config.shrinkToFit===true){
+                shrinkToFit();
+            }
         }
     };
 
@@ -580,6 +613,7 @@ javaxt.dhtml.Window = function(parent, config) {
         else{
             mainDiv.style.width = width + "px";
         }
+        me.onResize();
     };
 
 
@@ -603,6 +637,7 @@ javaxt.dhtml.Window = function(parent, config) {
         else{
             mainDiv.style.height = height + "px";
         }
+        me.onResize();
     };
 
 
@@ -676,8 +711,10 @@ javaxt.dhtml.Window = function(parent, config) {
             else dy = 0;
         };
         var onDragEnd = function(){
-            mask.style.display = "none";
-            mask.style.visibility = "hidden";
+            if (config.modal!==true){
+                mask.style.display = "none";
+                mask.style.visibility = "hidden";
+            }
             mask.style.cursor = "";
             mainDiv.focus();
         };
@@ -867,13 +904,49 @@ javaxt.dhtml.Window = function(parent, config) {
 
 
   //**************************************************************************
+  //** shrinkToFit
+  //**************************************************************************
+  /** Resize window if it is larger that the parent
+   */
+    var shrinkToFit = function(){
+        var width = me.getWidth();
+        var height = me.getHeight();
+        var w = parent.offsetWidth;
+        var h = parent.offsetHeight;
+        if (width>w){
+            me.setWidth(w);
+        }
+        if (height>h){
+            me.setHeight(h);
+        }
+    };
+
+
+  //**************************************************************************
+  //** addResizeListener
+  //**************************************************************************
+    var addResizeListener = function(fn){
+        if (!resizeListener){
+            resizeListener = javaxt.dhtml.utils.addResizeListener(parent, function(){
+                var listeners = resizeListener.listeners;
+                for (var i=0; i<listeners.length; i++){
+                    listeners[i].apply(me, []);
+                }
+            });
+            resizeListener.listeners = [];
+        }
+        resizeListener.listeners.push(fn);
+    };
+
+
+  //**************************************************************************
   //** Utils
   //**************************************************************************
     var _getRect = javaxt.dhtml.utils.getRect;
     var merge = javaxt.dhtml.utils.merge;
+    var destroy = javaxt.dhtml.utils.destroy;
     var isEmpty = javaxt.dhtml.utils.isEmpty;
     var getNextHighestZindex = javaxt.dhtml.utils.getNextHighestZindex;
-    var addResizeListener = javaxt.dhtml.utils.addResizeListener;
     var initDrag = javaxt.dhtml.utils.initDrag;
 
     var setStyle = function(el, style){

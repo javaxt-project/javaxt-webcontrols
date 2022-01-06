@@ -337,6 +337,10 @@ javaxt.dhtml.Button = function(parent, config) {
       //Set button state
         if (config.disabled===true) me.disable();
         if (config.selected===true) me.select();
+
+
+      //Add public show/hide methods
+        addShowHide(me);
     };
 
 
@@ -438,7 +442,7 @@ javaxt.dhtml.Button = function(parent, config) {
                     //TODO: Add mouseup events to buttons in the menu
                 }
 
-                return false;
+                //return false;
             };
             div.onclick = function(){
                 onclick();
@@ -466,30 +470,11 @@ javaxt.dhtml.Button = function(parent, config) {
 
 
   //**************************************************************************
-  //** show
-  //**************************************************************************
-    this.show = function(){
-        me.el.style.visibility = '';
-        me.el.style.display = '';
-    };
-
-
-  //**************************************************************************
-  //** hide
-  //**************************************************************************
-    this.hide = function(){
-        me.el.style.visibility = 'hidden';
-        me.el.style.display = 'none';
-    };
-
-
-  //**************************************************************************
   //** onClick
   //**************************************************************************
   /** Called whenever the button is clicked.
    */
     this.onClick = function(){};
-
 
 
   //**************************************************************************
@@ -534,6 +519,25 @@ javaxt.dhtml.Button = function(parent, config) {
 
             outerDiv.insertBefore(mask, outerDiv.firstChild);
         }
+    };
+
+
+  //**************************************************************************
+  //** isEnabled
+  //**************************************************************************
+    this.isEnabled = function(){
+        return !me.isDisabled();
+    };
+
+
+  //**************************************************************************
+  //** isDisabled
+  //**************************************************************************
+    this.isDisabled = function(){
+        if (mask){
+            if (mask.style.visibility !== "hidden") return true;
+        }
+        return false;
     };
 
 
@@ -605,15 +609,12 @@ javaxt.dhtml.Button = function(parent, config) {
     };
 
 
-
-
-
-
   //**************************************************************************
   //** Utils
   //**************************************************************************
     var merge = javaxt.dhtml.utils.merge;
     var createTable = javaxt.dhtml.utils.createTable;
+    var addShowHide = javaxt.dhtml.utils.addShowHide;
     var setStyle = function(el, style){
         javaxt.dhtml.utils.setStyle(el, config.style[style]);
     };

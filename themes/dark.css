@@ -440,6 +440,8 @@ input, select, textarea { /* Allows overriding native style of form elements on 
     border-radius: 5px;
     display: inline-block;
     box-shadow: 0 12px 14px 0 rgba(0, 0, 0, 0.2), 0 13px 20px 0 rgba(0, 0, 0, 0.2);
+    min-width: 150px;
+    min-height: 75px;
 }
 
 .window-header {
@@ -452,6 +454,7 @@ input, select, textarea { /* Allows overriding native style of form elements on 
     border: 1px solid #2e588d;
     box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 4px 0px;
     cursor: default;
+    overflow: hidden;
 }
 
 .window-title {

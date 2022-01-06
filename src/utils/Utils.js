@@ -731,7 +731,7 @@ javaxt.dhtml.utils = {
                 dragHandle.style.cursor = cursor;
 
                 if (config.onDragEnd)
-                config.onDragEnd.apply(dragHandle, []);
+                config.onDragEnd.apply(dragHandle, [e]);
 
 
               //Remove the "javaxt-noselect" class
@@ -839,7 +839,7 @@ javaxt.dhtml.utils = {
             var y = e.clientY;
 
             if (config.onDragStart)
-            config.onDragStart.apply(dragHandle, [x,y]);
+            config.onDragStart.apply(dragHandle, [x,y,e]);
 
 
           //Disable text selection in the entire document - very important!
@@ -860,8 +860,7 @@ javaxt.dhtml.utils = {
    */
     addResizeListener: function(element, fn){
 
-        var attachEvent = document.attachEvent;
-        var isIE = navigator.userAgent.match(/Trident/);
+        var destroy, isDestroyed = false;
 
         var requestFrame = (function(){
             var raf = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame ||
@@ -876,38 +875,53 @@ javaxt.dhtml.utils = {
         })();
 
         function resizeListener(e, fn){
-            var win = e.target || e.srcElement;
-            if (win.__resizeRAF__) cancelFrame(win.__resizeRAF__);
-            win.__resizeRAF__ = requestFrame(function(){
-                var trigger = win.__resizeTrigger__;
-                fn.call(trigger, e);
+            var el = e.target || e.srcElement;
+            if (el.raf) cancelFrame(el.raf);
+            el.raf = requestFrame(function(){
+                if (isDestroyed) return;
+                fn.call(el.resizeTrigger, e);
             });
         };
 
 
-        if (attachEvent) {
-            element.__resizeTrigger__ = element;
-            element.attachEvent('onresize', function(e){
+        if (document.attachEvent) { //non-standard JS function implemented in IE8 and below
+            element.resizeTrigger = element;
+            var f = function(e){
                 resizeListener(e, fn);
-            });
+            };
+            element.attachEvent('onresize', f);
+            destroy = function(){
+                element.detachEvent('onresize', f);
+            };
         }
         else {
             if (getComputedStyle(element).position == 'static') element.style.position = 'relative';
-            var obj = element.__resizeTrigger__ = document.createElement('object');
+            var obj = element.resizeTrigger = document.createElement('object');
             obj.setAttribute('style', 'display: block; position: absolute; top: 0; left: 0; height: 100%; width: 100%; overflow: hidden; pointer-events: none; z-index: -1;');
-            obj.__resizeElement__ = element;
+            obj.resizeElement = element;
             obj.onload = function(e){
-                this.contentDocument.defaultView.__resizeTrigger__ = this.__resizeElement__;
+                this.contentDocument.defaultView.resizeTrigger = this.resizeElement;
                 this.contentDocument.defaultView.addEventListener('resize', function(e){
                     resizeListener(e, fn);
                 });
             };
+            var isIE = navigator.userAgent.match(/Trident/);
             obj.type = 'text/html';
             if (isIE) element.appendChild(obj);
             obj.data = 'about:blank';
             if (!isIE) element.appendChild(obj);
+            destroy = function(){
+                element.removeChild(obj);
+            };
         }
 
+
+        return {
+            destroy: function(){
+                try{ destroy(); } catch(e){}
+                isDestroyed = true;
+            }
+        };
     },
     
     
@@ -960,6 +974,70 @@ javaxt.dhtml.utils = {
     getNextHighestZindex: function(obj){
         var highestIndex = javaxt.dhtml.utils.getHighestElements(obj).zIndex;
         return(highestIndex+1);
+    },
+
+
+  //**************************************************************************
+  //** addShowHide
+  //**************************************************************************
+  /** Adds show/hide methods to a DOM element or javaxt component
+   */
+    addShowHide: function(el){
+        if (el.el){ //Special case for javaxt components
+            var me = el;
+            me.show = function(){
+                me.el.style.visibility = '';
+                me.el.style.display = '';
+            };
+            me.hide = function(){
+                me.el.style.visibility = 'hidden';
+                me.el.style.display = 'none';
+            };
+            me.isVisible = function(){
+                return !(me.el.style.visibility === 'hidden' && me.el.style.display === 'none');
+            };
+        }
+        else{
+            el.show = function(){
+                this.style.visibility = '';
+                this.style.display = '';
+            };
+            el.hide = function(){
+                this.style.visibility = 'hidden';
+                this.style.display = 'none';
+            };
+            el.isVisible = function(){
+                return !(this.style.visibility === 'hidden' && this.style.display === 'none');
+            };
+        }
+    },
+
+
+  //**************************************************************************
+  //** destroy
+  //**************************************************************************
+  /** Used to help destroy javaxt components
+   */
+    destroy: function(me){
+        if (!me.el) return;
+
+        me.el.innerHTML = "";
+        var parent = me.el.parentNode;
+        if (parent) parent.removeChild(me.el);
+
+        var props = [];
+        for (var key in me) {
+            if (me.hasOwnProperty(key)){
+                props.push(key);
+            }
+        }
+
+        for (var i=0; i<props.length; i++){
+            var key = props[i];
+            me[key] = null;
+            delete me[key];
+        }
+        props = null;
     },
 
 
