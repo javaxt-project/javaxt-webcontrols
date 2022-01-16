@@ -660,6 +660,7 @@ javaxt.dhtml.Table = function(parent, config) {
             }
         }
         else{
+            if (id<0 || id>config.columns.length-1) return;
             this.childNodes[id].setContent(val);
         }
     };
