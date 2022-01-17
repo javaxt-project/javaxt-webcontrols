@@ -492,19 +492,25 @@ javaxt.dhtml.Window = function(parent, config) {
    */
     this.showAt = function(x, y){
 
-        var z = getNextHighestZindex();
 
+      //Set zIndex
+        var highestElements = getHighestElements();
+        var zIndex = highestElements.zIndex;
+        if (!highestElements.contains(mask)) zIndex++;
+
+
+      //Update mask
         overflow = mask.parentNode.style.overflow;
         mask.parentNode.style.overflow = "hidden";
-        mask.style.zIndex = z;
+        mask.style.zIndex = zIndex;
         if (config.modal===true){
             mask.style.display = '';
             mask.style.visibility = '';
         }
-        z++;
 
 
-        mainDiv.style.zIndex = z;
+      //Update window
+        mainDiv.style.zIndex = zIndex+1;
         mainDiv.style.display = '';
         mainDiv.style.visibility = '';
 
@@ -946,7 +952,7 @@ javaxt.dhtml.Window = function(parent, config) {
     var merge = javaxt.dhtml.utils.merge;
     var destroy = javaxt.dhtml.utils.destroy;
     var isEmpty = javaxt.dhtml.utils.isEmpty;
-    var getNextHighestZindex = javaxt.dhtml.utils.getNextHighestZindex;
+    var getHighestElements = javaxt.dhtml.utils.getHighestElements;
     var initDrag = javaxt.dhtml.utils.initDrag;
 
     var setStyle = function(el, style){
