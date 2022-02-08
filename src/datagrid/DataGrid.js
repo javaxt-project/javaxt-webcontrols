@@ -846,15 +846,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
 
           //Add query params
-            var params = config.params;
-            if (params){
-                for (var key in params) {
-                    if (params.hasOwnProperty(key)) {
-                        var str = encodeURIComponent(params[key].trim());
-                        url += "&" + key + "=" + str;
-                    }
-                }
-            }
+            url += encodeParams(config.params);
 
 
           //Add filter
@@ -1045,15 +1037,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
 
       //Add query params
-        var params = config.params;
-        if (params){
-            for (var key in params) {
-                if (params.hasOwnProperty(key)) {
-                    var str = (params[key]+"").trim();
-                    url += "&" + key + "=" + str;
-                }
-            }
-        }
+        url += encodeParams(config.params);
 
 
       //Add filter and order by
@@ -1106,6 +1090,33 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                 me.onError(request);
             }
         });
+    };
+
+
+  //**************************************************************************
+  //** encodeParams
+  //**************************************************************************
+    var encodeParams = function(params){
+        var url = "";
+        if (params){
+            for (var key in params) {
+                if (params.hasOwnProperty(key)) {
+                    var val = params[key];
+                    if (isArray(val)){
+                        for (var i=0; i<val.length; i++){
+                            var v = val[i];
+                            if (typeof v === "string") v = v.trim();
+                            url += "&" + key + "=" + encodeURIComponent(v);
+                        }
+                    }
+                    else{
+                        if (typeof val === "string") val = val.trim();
+                        url += "&" + key + "=" + encodeURIComponent(val);
+                    }
+                }
+            }
+        }
+        return url;
     };
 
 
