@@ -76,10 +76,42 @@ javaxt.dhtml.DataStore = function(data) {
 
 
   //**************************************************************************
+  //** insert
+  //**************************************************************************
+  /** Used to add a record at a specific index and pushes records below it
+   *  down a level
+   */
+    this.insert = function(record, idx){
+        if (!isNaN(idx)){
+            records.splice(idx, 0, record);
+        }
+        else{
+            records.push(record);
+        }
+        me.length = records.length;
+        fireEvent("add", record);
+    };
+
+
+  //**************************************************************************
   //** pop
   //**************************************************************************
-    this.pop = function(record){
-        var obj = records.pop(record);
+  /** Removes and returns the last element from the data store
+   */
+    this.pop = function(){
+        var obj = records.pop();
+        me.length = records.length;
+        fireEvent("remove", obj);
+    };
+
+
+  //**************************************************************************
+  //** shift
+  //**************************************************************************
+  /** Removes and returns the first element from the data store
+   */
+    this.shift = function(){
+        var obj = records.shift();
         me.length = records.length;
         fireEvent("remove", obj);
     };
@@ -88,6 +120,8 @@ javaxt.dhtml.DataStore = function(data) {
   //**************************************************************************
   //** remove
   //**************************************************************************
+  /** Used to remove a record from the data store
+   */
     this.remove = function(record){
         for (var i=0; i<records.length; i++){
             if (records[i]===record){
@@ -103,6 +137,14 @@ javaxt.dhtml.DataStore = function(data) {
   //**************************************************************************
     this.removeAt = function(idx){
         me.splice(idx, 1);
+    };
+
+
+  //**************************************************************************
+  //** clear
+  //**************************************************************************
+    this.clear = function(){
+        me.splice(0,records.length);
     };
 
 
@@ -139,6 +181,28 @@ javaxt.dhtml.DataStore = function(data) {
   //**************************************************************************
     this.sort = function(fn){
         records.sort(fn);
+    };
+
+
+  //**************************************************************************
+  //** forEach
+  //**************************************************************************
+  /** Used to iterate through all the records in the store using a callback
+   *  function. Example:
+   <pre>
+      store.forEach(function (record, i) {
+          console.log(i, record);
+      });
+   </pre>
+   *  Optional: return true in the callback function if you wish to break and
+   *  iterate stop iterating.
+   */
+    this.forEach = function(callback){
+        if (!callback) return;
+        for (var i=0; i<records.length; i++){
+            var r = callback.apply(me, [me.get(i), i]);
+            if (r===true) return;
+        }
     };
 
 
