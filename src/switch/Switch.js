@@ -103,7 +103,7 @@ javaxt.dhtml.Switch = function(parent, config) {
   //**************************************************************************
   //** setValue
   //**************************************************************************
-    this.setValue = function(b){
+    this.setValue = function(b, silent){
         if (b===true || b===false){
             if (b===value) return;
             if (value===true){
@@ -119,7 +119,8 @@ javaxt.dhtml.Switch = function(parent, config) {
                 handle.style.right = 0;
             }
             value = b;
-            me.onChange(value);
+            if (silent===true){}
+            else me.onChange(value);
         }
     };
     
