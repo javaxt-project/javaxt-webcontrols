@@ -1,0 +1,40 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>Toggle Switch Demo</title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<link  href="../style.css" rel="stylesheet" type="text/css" />
+
+
+<!-- JavaXT Includes -->
+<script type="text/javascript" src="../../src/switch/Switch.js"></script>
+<script type="text/javascript" src="../../src/utils/Utils.js"></script>
+
+
+
+<script type="text/javascript">
+window.onload = function() {
+
+    var value = document.getElementById("value");
+
+    var toggleSwitch = new javaxt.dhtml.Switch(document.getElementById("switch"));
+    toggleSwitch.onChange = function(val){
+        value.innerHTML = "Value: " + val;
+    };
+
+
+};
+</script>
+</head>
+
+<body>
+
+    
+    <div id="switch"></div>
+    <div id="value" style="padding:5px;"></div>
+
+</body>
+</html>
