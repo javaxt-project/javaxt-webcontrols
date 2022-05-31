@@ -391,7 +391,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
    *  active panel will slide left.
    */
     this.next = function(){
-
+        
         if (config.animate===true){
             if (sliding) return;
             sliding = true;
@@ -447,6 +447,9 @@ javaxt.dhtml.Carousel = function(parent, config) {
                     sliding = false;
 
                 });
+            }
+            else{
+                sliding = false;
             }
         }
     };
@@ -521,6 +524,9 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
                 });
 
+            }
+            else{
+                sliding = false;
             }
         }
     };
