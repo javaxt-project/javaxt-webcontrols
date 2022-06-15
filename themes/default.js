@@ -105,6 +105,13 @@ javaxt.dhtml.style.default = {
 
     },
 
+    switch: {
+        groove: "switch-groove",
+        handle: "switch-handle",
+        grooveActive: "switch-groove-active",
+        handleActive: "switch-handle-active"
+    },
+
     merge : function(settings, defaults) {
         javaxt.dhtml.utils.merge(settings, defaults);
         return settings;
