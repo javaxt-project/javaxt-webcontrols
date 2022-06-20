@@ -519,6 +519,65 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 
 
 /**************************************************************************/
+/** Checkbox
+/**************************************************************************/
+/** The following classes are used to define the style for checkboxes
+ *  generated using the javaxt.dhtml.Checkbox class.
+ */
+.checkbox-box {
+    width: 18px;
+    height: 18px;
+    border: 1px solid #4c5258;
+    border-radius: 3px;
+    background-color: #353a46;
+    cursor: pointer;
+    margin: 0px;
+    color: #2b2b2b;
+}
+
+.checkbox-label {
+    color: #bfc0c3;
+    font-size: 14px;
+    white-space: nowrap;
+    cursor: default;
+    vertical-align: top;
+    padding: 0 0 0 5px;
+}
+
+.checkbox-check {
+    content: "";
+    display: block;
+    width: 4px;
+    height: 9px;
+    border: solid #ffffff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    margin: 2px 0 0 6px;
+}
+
+.checkbox-select {
+    background-color: #345994;
+    border: 1px solid #33363f;
+    color: #FFFFFF;
+}
+
+.checkbox-disable {
+    background-color: #353a46;
+    border: 1px solid #ffffff;
+    border-radius: 3px;
+    cursor: pointer;
+    opacity: 0.5;
+}
+
+.checkbox-hover {
+    /*background-color: #ededed;*/
+    border-color: rgba(82, 168, 236, 0.8);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6);
+    outline: 0 none;
+}
+
+
+/**************************************************************************/
 /** Callout
 /**************************************************************************/
 
