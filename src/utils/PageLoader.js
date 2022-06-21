@@ -281,7 +281,8 @@ javaxt.dhtml.PageLoader = function(config) {
 
             var t = arr.length;
             var loadResource = function(obj){
-                obj.onload = function() {
+
+                var processResponse = function(){
                     log(
                         Math.round((1-(arr.length/t))*100) + "%"
                     );
@@ -291,6 +292,14 @@ javaxt.dhtml.PageLoader = function(config) {
                         if (callback!=null) callback.apply(me, []);
                     }
                 };
+
+                obj.onload = function() {
+                    processResponse();
+                };
+                obj.onerror = function() {
+                    processResponse();
+                };
+
                 head.appendChild(obj);
             };
 
