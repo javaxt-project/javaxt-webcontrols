@@ -234,7 +234,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                                     //Column has a checkbox already?
                                 }
                                 else{
-                                    val = this.record[field];
+                                    val = field  ? this.record[field] : this.record;
                                     var checkboxDiv = createCheckbox(val, this);
                                     var checkbox = checkboxDiv.checkbox;
                                     if (select) checkbox.select();
@@ -960,6 +960,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         }
         else{ //checkbox header
             checkbox.onClick = function(checked){
+
               /*
               //Method 1: Select/deselect using the table control. This will
               //highlight the rows and the onSelectionChange listener will
@@ -1025,41 +1026,58 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         me.beforeLoad(page);
 
 
-      //Build URL
-        var url = config.url;
-        if (url.indexOf("?")==-1) url+= "?";
-        url += "&page=" + page + "&limit=" + config.limit + "&fields=" + fieldNames;
 
-      //Request count
-        if (config.count==true && page==1) url += "&count=true";
-        else url += "&count=false";
-
+      //Create params for the querystring
+        var params = {
+            page: page,
+            limit: config.limit,
+            fields: fieldNames
+        };
 
 
-      //Add query params
-        url += encodeParams(config.params);
+      //Add config.params to the querystring as needed
+        if (config.params){
+            for (var key in config.params) {
+                if (config.params.hasOwnProperty(key)) {
+                    if (!params.hasOwnProperty(key)){
+                        params[key] = config.params[key];
+                    }
+                }
+            }
+        }
+
+      //Add count to the querystring
+        if (config.count==true && page==1) params.count = true;
+        else params.count = false;
 
 
-      //Add filter and order by
+      //Add filter to the querystring
         var orderby = "";
         if (filter){
             for (var key in filter) {
                 if (filter.hasOwnProperty(key)) {
                     if (key==='orderby'){
                         orderby = filter[key];
-                        orderby = ((orderby!=null && orderby!="") ? "&orderby=" + orderby : "");
+                        orderby = ((orderby!=null && orderby!="") ? "&orderby=" + encodeURIComponent(orderby) : "");
                     }
                     else{
                         var str = filter[key];
                         str = str+"";
                         str = str.trim();
                         if (str.length>0){
-                            url += "&" + key + "=" + encodeURIComponent(str);
+                            params[key] = str;
+                            //url += "&" + key + "=" + encodeURIComponent(str);
                         }
                     }
                 }
             }
         }
+
+
+      //Build URL
+        var url = config.url;
+        if (url.indexOf("?")==-1) url+= "?";
+        url += encodeParams(params);
         url += orderby;
 
 
