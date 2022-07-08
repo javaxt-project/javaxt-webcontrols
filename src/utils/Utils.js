@@ -455,7 +455,11 @@ javaxt.dhtml.utils = {
   //**************************************************************************
   //** createTable
   //**************************************************************************
-    createTable: function(){
+  /** Used to create a table element.
+   *  @param parent DOM element to append to (optional)
+   *  @returns Table element (DOM object) with custom methods
+   */
+    createTable: function(parent){
         var table = document.createElement('table');
 
         table.cellSpacing = 0;
@@ -469,6 +473,24 @@ javaxt.dhtml.utils = {
 
         var tbody = document.createElement('tbody');
         table.appendChild(tbody);
+
+        table.addRow = function(){
+            var tr = document.createElement("tr");
+            tbody.appendChild(tr);
+            tr.addColumn = function(){
+                var td = document.createElement("td");
+                tr.appendChild(td);
+                return td;
+            };
+            return tr;
+        };
+
+        table.clear = function(){
+            tbody.innerHTML = "";
+        };
+
+        if (parent) parent.appendChild(table);
+
         return table;
     },
 
@@ -923,8 +945,8 @@ javaxt.dhtml.utils = {
             }
         };
     },
-    
-    
+
+
   //**************************************************************************
   //** getHighestElements
   //**************************************************************************
@@ -958,7 +980,7 @@ javaxt.dhtml.utils = {
         return {
             zIndex: highestIndex,
             elements: arr,
-            contains: function(el){  
+            contains: function(el){
                 for (var i=0; i<arr.length; i++){
                     if (arr[i]===el) return true;
                 }
@@ -966,8 +988,8 @@ javaxt.dhtml.utils = {
             }
         };
     },
-    
-    
+
+
   //**************************************************************************
   //** getNextHighestZindex
   //**************************************************************************
