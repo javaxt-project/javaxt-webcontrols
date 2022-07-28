@@ -5,7 +5,10 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 //**  Carousel
 //******************************************************************************
 /**
- *   Simple carousel control
+ *   Component used to render two or more panels in a horizonal layout. Users 
+ *   can cycle through the panels using the back() and next() functions. The
+ *   carousel can store a fixed set of panels or you can create the illusion
+ *   of having infinite panels by updating panels when they are out of view.
  *
  ******************************************************************************/
 
@@ -20,13 +23,60 @@ javaxt.dhtml.Carousel = function(parent, config) {
     var resizeListener;
 
     var defaultConfig = {
+        
+      /** If true, will animate transitions when calling the back() and next()
+       *  functions.
+       */
         animate: true,
-        animationSteps: 250.0, //time in milliseconds
+        
+        
+      /** Time to transition between panels, in milliseconds. Only applicable 
+       *  when "animate" is set to true.
+       */
+        animationSteps: 250.0,
+        
+        
+      /** Transition effect. Only applicable when "animate" is set to true and
+       *  an "fx" config is given. See the javaxt.dhtml.Effects class for
+       *  a list of options.
+       */
         transitionEffect: "linear",
+        
+        
+      /** An instance of a javaxt.dhtml.Effects class used to animate 
+       *  transitions. Only used when "animate" is set to true.
+       */
         fx: null,
+        
+        
+      /** By default, a user cannot go past the last panel in the carousel when
+       *  calling next() or past the first panel when calling back(). However,
+       *  when "loop" is set to true, users can go past the first/last panels 
+       *  by cloning the "next" or "previous" panel and appending it to
+       *  the carousel so you can cycle through elements.
+       */
         loop: false,
-        visiblePanels: 1,
+        
+        
+      /** If true, will move the next panel over the current panel during
+       *  transitions. Only applicable when "animate" is set to true.
+       */
+        slideOver: false,
+        
+        
+      /** If true, will allow touchscreen users to slide back and forth through 
+       *  the panels using touch gestures.
+       */
         drag: true,
+        
+        
+      /** Currently unused
+       */
+        visiblePanels: 1,
+        
+        
+      /** Amount of padding between panels, in pixels.
+       */
         padding: 0
     };
 
@@ -329,23 +379,23 @@ javaxt.dhtml.Carousel = function(parent, config) {
   //**************************************************************************
   //** slide
   //**************************************************************************
-    var slide = function(start, end, lastTick, timeLeft, callback){
+    var slide = function(el, start, end, lastTick, timeLeft, callback){
 
         if (config.fx){
 
 
             setTimeout(function(){
 
-                config.fx.setTransition(innerDiv, config.transitionEffect, config.animationSteps);
-                innerDiv.style.left = end+"px";
+                config.fx.setTransition(el, config.transitionEffect, config.animationSteps);
+                el.style.left = end+"px";
                 setTimeout(function(){
 
 
-                    innerDiv.style.WebkitTransition =
-                    innerDiv.style.MozTransition =
-                    innerDiv.style.MsTransition =
-                    innerDiv.style.OTransition =
-                    innerDiv.style.transition = "";
+                    el.style.WebkitTransition =
+                    el.style.MozTransition =
+                    el.style.MsTransition =
+                    el.style.OTransition =
+                    el.style.transition = "";
 
                     if (callback) callback.apply(me, []);
 
@@ -362,7 +412,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
           //If the animation is complete, ensure that the panel is completely visible
             if (timeLeft <= elapsedTicks){
-                innerDiv.style.left = end+"px";
+                el.style.left = end+"px";
                 if (callback) callback.apply(me, []);
                 return;
             }
@@ -375,10 +425,10 @@ javaxt.dhtml.Carousel = function(parent, config) {
             var d = start-end;
             var percentComplete = 1-(timeLeft/config.animationSteps);
             var offset = Math.round(percentComplete * d);
-            innerDiv.style.left = start-offset + "px";
+            el.style.left = start-offset + "px";
 
             setTimeout(function(){
-                slide(start, end, curTick, timeLeft, callback);
+                slide(el, start, end, curTick, timeLeft, callback);
             }, 33);
         }
     };
@@ -399,6 +449,8 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
         var start = parseInt(innerDiv.style.left);
         var w;
+        var currDiv = currPanel.childNodes[0].childNodes[0];
+        var nextDiv;
 
 
         var next = function(callback){
@@ -406,7 +458,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
             var end = start-w;
 
             if (config.animate===true){
-                slide(start, end, new Date().getTime(), config.animationSteps, callback);
+                slide(innerDiv, start, end, new Date().getTime(), config.animationSteps, callback);
             }
             else{
                 innerDiv.style.left = end+"px";
@@ -414,17 +466,77 @@ javaxt.dhtml.Carousel = function(parent, config) {
             }
         };
 
-        var nextDiv = currPanel.nextSibling;
-        if (nextDiv) {
-            me.beforeChange(currPanel.childNodes[0].childNodes[0], nextDiv.childNodes[0].childNodes[0]);
+        var raiseDiv = function(div){
 
-            w = nextDiv.offsetWidth;
+          //Get y-offset of nextPanel
+            var s = 0;
+            for (var i=0; i<innerDiv.childNodes.length; i++){
+                var p = innerDiv.childNodes[i];
+                s+=p.offsetWidth;
+                if (p===currPanel) break;
+            }
 
-            next(function(){
-                me.onChange(nextDiv.childNodes[0].childNodes[0], currPanel.childNodes[0].childNodes[0]);
-                currPanel = nextDiv;
+          //Update div to be an absolute div
+            div.style.display = "none";
+            currPanel.style.marginRight = w +"px";
+            div.style.position = "absolute";
+            div.style.zIndex = 2;
+            div.style.left = s + "px";
+            div.style.top = "0px";
+            div.style.display = "";
+            return s;
+        };
+        
+        var lowerDiv = function(div){
+            div.style.display = "inline-block";
+            div.style.position = "relative";
+            div.style.zIndex = "";
+            div.style.left = "";
+            div.style.top = "";
+        };
+
+
+        
+        var nextPanel = currPanel.nextSibling;
+        if (nextPanel) {
+            
+            nextDiv = nextPanel.childNodes[0].childNodes[0];
+
+            
+            me.beforeChange(currDiv, nextDiv);
+
+            var onChange = function(){
+                me.onChange(nextDiv, currDiv);
+                currPanel = nextPanel;
                 sliding = false;
-            });
+            };
+            
+
+            w = nextPanel.offsetWidth;
+
+            if (config.slideOver===true && config.animate===true){
+                
+              //Update nextPanel to be an absolute div
+                var s = raiseDiv(nextPanel);
+
+              //Slide nextPanel over currPanel
+                slide(nextPanel, s, s-w, new Date().getTime(), config.animationSteps, function(){
+                    
+                  //Slide innerDiv
+                    var end = start-w;
+                    innerDiv.style.left = end+"px";
+                    currPanel.style.marginRight = "0px";
+                    
+                  //Update nextPanel to it's original state (e.g. relative div)
+                    lowerDiv(nextPanel);
+                    
+                  //Call onChange
+                    onChange();
+                });
+            }
+            else{
+                next(onChange);
+            }
         }
         else{
             if (config.loop===true){
@@ -434,19 +546,44 @@ javaxt.dhtml.Carousel = function(parent, config) {
                 var clone = firstDiv.cloneNode(true);
                 innerDiv.style.width = (innerDiv.offsetWidth+w)+"px";
                 innerDiv.appendChild(clone);
-                me.beforeChange(currPanel.childNodes[0].childNodes[0], clone.childNodes[0].childNodes[0]);
+                
+                nextDiv = clone.childNodes[0].childNodes[0];
+                
+                me.beforeChange(currDiv, nextDiv);
 
-                next(function(){
-
+                var onChange = function(){
                     innerDiv.style.left = start + "px";
                     innerDiv.removeChild(firstDiv);
                     innerDiv.style.width = (innerDiv.offsetWidth-w)+"px";
 
-                    me.onChange(clone.childNodes[0].childNodes[0], currPanel.childNodes[0].childNodes[0]);
+                    me.onChange(nextDiv, currDiv);
                     currPanel = clone;
                     sliding = false;
+                };
 
-                });
+
+                if (config.slideOver===true && config.animate===true){
+
+                  //Update clone to be an absolute div
+                    var s = raiseDiv(clone);
+                    
+                  //Slide nextPanel over currPanel
+                    slide(clone, s, s-w, new Date().getTime(), config.animationSteps, function(){
+
+                      //Slide innerDiv
+                        currPanel.style.marginRight = "0px";
+
+                      //Update clone to it's original state (e.g. relative div)
+                        lowerDiv(clone);
+
+                      //Call onChange
+                        onChange();
+                    });
+                    
+                }
+                else{
+                    next(onChange);
+                }
             }
             else{
                 sliding = false;
@@ -469,12 +606,14 @@ javaxt.dhtml.Carousel = function(parent, config) {
         }
 
         var start, end, w;
-
+        var currDiv = currPanel.childNodes[0].childNodes[0];
+        var nextDiv;
+        
 
         var back = function(callback){
 
             if (config.animate===true){
-                slide(start, end, new Date().getTime(), config.animationSteps, callback);
+                slide(innerDiv, start, end, new Date().getTime(), config.animationSteps, callback);
             }
             else{
                 innerDiv.style.left = end+"px";
@@ -482,20 +621,77 @@ javaxt.dhtml.Carousel = function(parent, config) {
             }
         };
 
+        var raiseDiv = function(div){
+            
+          //Get y-offset of div
+            var s = 0;
+            for (var i=0; i<innerDiv.childNodes.length; i++){
+                var p = innerDiv.childNodes[i];
+                if (p===div) break;
+                s+=p.offsetWidth;
+            }
 
-        var previousDiv = currPanel.previousSibling;
-        if (previousDiv){
-            me.beforeChange(currPanel.childNodes[0].childNodes[0], previousDiv.childNodes[0].childNodes[0]);
+          //Update div to be an absolute div
+            div.style.display = "none";
+            currPanel.style.marginLeft = w +"px";
+            div.style.position = "absolute";
+            div.style.zIndex = 2;
+            div.style.left = s + "px";
+            div.style.top = "0px";
+            div.style.display = "";
 
-            w = previousDiv.offsetWidth;
+            return s;
+        };
+        
+        var lowerDiv = function(div){
+            div.style.display = "inline-block";
+            div.style.position = "relative";
+            div.style.zIndex = "";
+            div.style.left = "";
+            div.style.top = "";
+        };
+
+
+        var nextPanel = currPanel.previousSibling;
+        if (nextPanel){
+            
+            nextDiv = nextPanel.childNodes[0].childNodes[0];
+            
+            me.beforeChange(currDiv, nextDiv);
+
+            var onChange = function(){
+                me.onChange(nextDiv, currDiv);
+                currPanel = nextPanel;
+                sliding = false;
+            };
+
+
+            w = nextPanel.offsetWidth;
             start = parseFloat(innerDiv.style.left);
             end = start + w;
 
-            back(function(){
-                me.onChange(previousDiv.childNodes[0].childNodes[0], currPanel.childNodes[0].childNodes[0]);
-                currPanel = previousDiv;
-                sliding = false;
-            });
+            if (config.slideOver===true && config.animate===true){
+                
+              //Update nextPanel to be an absolute div
+                var s = raiseDiv(nextPanel);
+
+              //Slide nextPanel over currPanel
+                slide(nextPanel, s, s+w, new Date().getTime(), config.animationSteps, function(){
+                    
+                  //Slide innerDiv
+                    innerDiv.style.left = end+"px";
+                    currPanel.style.marginLeft = "0px";
+                    
+                  //Update nextPanel to it's original state (e.g. relative div)
+                    lowerDiv(nextPanel);
+                    
+                  //Call onChange
+                    onChange();
+                });
+            }
+            else{
+                back(onChange);
+            }
         }
         else{
             if (config.loop===true){
@@ -505,25 +701,57 @@ javaxt.dhtml.Carousel = function(parent, config) {
                 var clone = lastDiv.cloneNode(true);
                 innerDiv.style.width = (innerDiv.offsetWidth+w)+"px";
                 innerDiv.insertBefore(clone, innerDiv.firstChild);
-                me.beforeChange(currPanel.childNodes[0].childNodes[0], clone.childNodes[0].childNodes[0]);
+                
+                nextDiv = clone.childNodes[0].childNodes[0];
+
+                me.beforeChange(currDiv, nextDiv);
+                
+                var onChange = function(){
+                    me.onChange(nextDiv, currDiv);
+                    currPanel = clone;
+                    sliding = false;
+                };
 
                 start = -w;
                 end = 0;
 
 
-                innerDiv.style.left = start + "px";
-
-                back(function(){
-
-                    innerDiv.removeChild(lastDiv);
+                if (config.slideOver===true && config.animate===true){
+                    
+                  //Update clone to be an absolute div
+                    raiseDiv(clone);
+                    var s = -w;
+                    clone.style.left = s + "px";
+                    
+                    
                     innerDiv.style.width = (innerDiv.offsetWidth-w)+"px";
+                    currPanel.style.marginLeft = "0px";
+                    
+                    
+                  //Slide clone over currPanel
+                    slide(clone, s, s+w, new Date().getTime(), config.animationSteps, function(){
 
-                    me.onChange(clone.childNodes[0].childNodes[0], currPanel.childNodes[0].childNodes[0]);
-                    currPanel = clone;
-                    sliding = false;
+                      //Remove lastDiv
+                        innerDiv.removeChild(lastDiv);
 
-                });
+                      //Update clone to it's original state (e.g. relative div)
+                        lowerDiv(clone);
 
+                      //Call onChange
+                        onChange();
+                    });
+
+                }
+                else{
+
+                    innerDiv.style.left = start + "px";
+
+                    back(function(){
+                        innerDiv.removeChild(lastDiv);
+                        innerDiv.style.width = (innerDiv.offsetWidth-w)+"px";
+                        onChange();
+                    });
+                }
             }
             else{
                 sliding = false;
@@ -766,7 +994,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
             if (animationSteps<0) animationSteps = -animationSteps;
             //console.log(start + "/" + end + " --> move " + (start-end) + "px in " + animationSteps + "ms");
 
-            slide(start, end, new Date().getTime(), 100, function(){
+            slide(innerDiv, start, end, new Date().getTime(), 100, function(){
                 currPanel = innerDiv.childNodes[visiblePanel];
                 if (currPanel!=prevPanel){
                     me.onChange(currPanel.childNodes[0].childNodes[0], prevPanel.childNodes[0].childNodes[0]);
