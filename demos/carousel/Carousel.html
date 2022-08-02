@@ -33,7 +33,9 @@
 <h1>Carousel Demos</h1>
 
 <h2>Demo 1</h2>
-<p>Basic looping carousel initiated using existing DOM elements</p>
+<p>Basic looping carousel with 3 panels. In this example, the carousel is 
+   initiated using existing DOM elements.
+</p>
 <table style="width:500px;">
   <tr>
     <td align="center" class="javaxt-noselect">
@@ -81,15 +83,27 @@ var demo1 = function() {
 
 
 <h2>Demo 2</h2>
-<p>Looping carousel with incrementing/decrementing panel IDs.
-   The carousel consists of only 3 panels but the content is updated to appear
-   as though it is made up of many panels.
+<p>Looping carousel with slide over effect. As with the previous example, the 
+   carousel is initiated using existing DOM elements. However, unlike the 
+   previous example, the "next" panel slides over the current panel during the
+   transitions.
 </p>
 <table style="width:500px;">
   <tr>
     <td align="center" class="javaxt-noselect">
 
-    <div id="carousel2" style="width:250px;height:250px;border:1px solid #757575;"></div>
+
+    <div id="carousel2" style="width:300px;height:450px;border:1px solid #757575;">
+        <div style="background:#f0f8ff;height:100%;">
+            <div class="panelID">1</div>
+        </div>
+        <div style="background:#96a5b2;height:100%;">
+            <div class="panelID">2</div>
+        </div>
+        <div style="background:#ffd8d6;height:100%;">
+            <div class="panelID">3</div>
+        </div>
+    </div>
 
     <div style="padding-top:10px;">
       <input type="button" id="Back2" value="Back"/>
@@ -101,11 +115,51 @@ var demo1 = function() {
 </table>
 
 
-
 <script type="text/javascript">
 var demo2 = function() {
 
-    var carouselDiv = document.getElementById("carousel2");
+    var carousel = new javaxt.dhtml.Carousel(document.getElementById("carousel2"),{
+        loop: true,
+        animate: true,
+        slideOver: true
+    });
+
+    document.getElementById("Back2").onclick = function(){
+        carousel.back();
+    };
+    document.getElementById("Next2").onclick = function(){
+        carousel.next();
+    };
+};
+</script>
+
+
+<h2>Demo 3</h2>
+<p>Looping carousel with incrementing/decrementing panel IDs.
+   The carousel consists of only 3 panels but the content is updated to appear
+   as though it is made up of many panels.
+</p>
+<table style="width:500px;">
+  <tr>
+    <td align="center" class="javaxt-noselect">
+
+    <div id="carousel3" style="width:250px;height:250px;border:1px solid #757575;"></div>
+
+    <div style="padding-top:10px;">
+      <input type="button" id="Back3" value="Back"/>
+      <input type="button" id="Next3" value="Next"/>
+    </div>
+
+    </td>
+  </tr>
+</table>
+
+
+
+<script type="text/javascript">
+var demo3 = function() {
+
+    var carouselDiv = document.getElementById("carousel3");
     var carousel = new javaxt.dhtml.Carousel(carouselDiv,{
         loop: true,
         animate: true
@@ -143,7 +197,15 @@ var demo2 = function() {
     carousel.add(prevPanel);
 
 
-  //Catch for onChange events
+  //Watch for beforeChange events. Update the contents of the "next" panel
+  //before the transition.
+    carousel.beforeChange = function(currPanel, nextPanel){
+        nextPanel.innerHTML = "";
+    };
+
+
+  //Watch for onChange events. Update contents of the "current" panel after
+  //the transition.
     carousel.onChange = function(currPanel, prevPanel){
 
         if (currPanel.getAttribute("panelID")=="nextPanel"){
@@ -187,10 +249,10 @@ var demo2 = function() {
 
 
 
-    document.getElementById("Back2").onclick = function(){
+    document.getElementById("Back3").onclick = function(){
         carousel.back();
     };
-    document.getElementById("Next2").onclick = function(){
+    document.getElementById("Next3").onclick = function(){
         carousel.next();
     };
 
@@ -202,6 +264,7 @@ var demo2 = function() {
 window.onload = function() {
     demo1();
     demo2();
+    demo3();
 };
 </script>
 </body>
