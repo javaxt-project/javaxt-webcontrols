@@ -15,34 +15,52 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
     this.className = "javaxt.dhtml.MenuLayout";
 
     var me = this;
-    var outerDiv;
-    var innerDiv;
-    var headerDiv;
-    var menuDiv;
-    var bodyDiv;
-    var titleDiv;
-    var title;
-
-    var menuWidth, menuPosition;
-    var menuIcon;
-
-
     var defaultConfig = {
 
-        animationSteps: 250.0, //time in milliseconds
+
+      /** Time to slide open the menu panel, in milliseconds.
+       */
+        animationSteps: 250.0,
+
+
+      /** Transition effect. A "linear" transition is applied by default.
+       *  Additional options are available if an instance of a
+       *  javaxt.dhtml.Effects class is provided in the "fx" config. See
+       *  the javaxt.dhtml.Effects class for complete a list of options.
+       */
         transitionEffect: "linear",
+
+
+      /** An instance of a javaxt.dhtml.Effects class used to animate
+       *  transitions.
+       */
         fx: null,
 
+
+      /** Width of the menu panel, in pixels.
+       */
         menuWidth: 250,
+
+
+      /** Used to set which side to use for the menu panel and corresponding
+       *  icon. Options are "left" or "right".
+       */
         menuPosition: "left",
 
+
+      /** Text to appear in the header area.
+       */
         title: "",
 
+
+      /** Style for individual elements within this component. Note that you
+       *  can provide CSS class names instead of individual style definitions.
+       */
         style: {
 
             header: {
                 height: "35px",
-                background: "#777777",
+                backgroundColor: "#777777",
                 color: "#FFFFFF"
             },
 
@@ -61,7 +79,7 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
 
 
             menu: {
-                background: "#4BB5EF"
+                backgroundColor: "#4BB5EF"
             },
 
             menuIcon: {
@@ -72,16 +90,22 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
 
             }
         }
-
     };
 
+    var outerDiv;
+    var innerDiv;
+    var headerDiv;
+    var menuDiv;
+    var bodyDiv;
+    var titleDiv;
+    var title;
+    var menuWidth, menuPosition;
+    var menuIcon;
 
 
   //**************************************************************************
   //** Constructor
   //**************************************************************************
-  /** Creates a new instance of this class. */
-
     var init = function(){
 
 
@@ -91,12 +115,9 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
         if (!parent) return;
 
 
-
-
       //Clone the config so we don't modify the original config object
         var clone = {};
         merge(clone, config);
-
 
 
       //Merge clone with default config
@@ -123,18 +144,14 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
 
 
       //Create outer table (for resize purposes)
-        var table = createTable();
+        var table = createTable(mainDiv);
         table.setAttribute("desc", me.className);
-        var tbody = table.firstChild;
-        var row = document.createElement('tr');
-        var td = document.createElement('td');
+        var row = table.addRow();
+        var td = row.addColumn();
         td.style.width = "100%";
         td.style.height = "100%";
         td.style.border = "0px"; //"1px solid #969696"
         td.style.verticalAlign = "top";
-        row.appendChild(td);
-        tbody.appendChild(row);
-        mainDiv.appendChild(table);
 
 
 
@@ -154,7 +171,6 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
 
 
 
-
       //Create content div with a width = parent width + menu width
         innerDiv = document.createElement('div');
         innerDiv.style.width=(outerDiv.offsetWidth+menuWidth)+"px";
@@ -169,21 +185,19 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
 
 
       //Create table with 2 columns - one for the menu and one for the body
-        table = createTable();
-        tbody = table.firstChild;
-        row = document.createElement('tr');
-        var leftCol = document.createElement('td');
+        table = createTable(innerDiv);
+        row = table.addRow();
+        var leftCol = row.addColumn();
         if (menuPosition==="right") leftCol.style.width="100%";
         leftCol.style.height="100%";
         leftCol.style.verticalAlign = "top";
-        row.appendChild(leftCol);
 
 
-        var rightCol = document.createElement('td');
+
+        var rightCol = row.addColumn();
         if (menuPosition==="left") rightCol.style.width="100%";
         rightCol.style.height="100%";
         rightCol.style.verticalAlign = "top";
-        row.appendChild(rightCol);
 
 
         menuDiv = document.createElement('div');
@@ -194,27 +208,21 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
         else rightCol.appendChild(menuDiv);
 
 
-        tbody.appendChild(row);
-        innerDiv.appendChild(table);
-
-
 
       //Create table with 2 rows - one for the header and one for the body
         table = createTable();
-        tbody = table.firstChild;
-        row = document.createElement('tr');
-        headerDiv = document.createElement('td');
+
+        row = table.addRow();
+        headerDiv = row.addColumn();
         setStyle(headerDiv, "header");
         headerDiv.style.width="100%";
-        row.appendChild(headerDiv);
-        tbody.appendChild(row);
-        row = document.createElement('tr');
-        bodyDiv = document.createElement('td');
+
+        row = table.addRow();
+        bodyDiv = row.addColumn();
+        setStyle(bodyDiv, "body");
         bodyDiv.style.width="100%";
         bodyDiv.style.height="100%";
         bodyDiv.style.verticalAlign = "top";
-        row.appendChild(bodyDiv);
-        tbody.appendChild(row);
 
         if (menuPosition==="left") rightCol.appendChild(table);
         else leftCol.appendChild(table);
@@ -249,26 +257,22 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
     var createHeader = function(){
 
         var table = createTable();
-        var tbody = table.firstChild;
-        var row = document.createElement('tr');
+        var row = table.addRow();
 
 
       //Create left column
-        var leftCol = document.createElement('td');
-        row.appendChild(leftCol);
+        var leftCol = row.addColumn();
 
 
       //Create title
-        var centerCol = document.createElement('td');
+        var centerCol = row.addColumn();
         centerCol.style.width = "100%";
         centerCol.style.height = "100%";
-        row.appendChild(centerCol);
         centerCol.appendChild(createTitle());
 
 
       //Create right column
-        var rightCol = document.createElement('td');
-        row.appendChild(rightCol);
+        var rightCol = row.addColumn();
 
 
 
@@ -293,8 +297,6 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
         tgt.appendChild(menuIcon);
 
 
-
-        tbody.appendChild(row);
         return table;
     };
 
