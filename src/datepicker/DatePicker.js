@@ -5,50 +5,60 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 //**  DatePicker Class
 //******************************************************************************
 /**
- *   Simple date picker
+ *   Calendar component used select dates
  *
  ******************************************************************************/
-
 
 javaxt.dhtml.DatePicker = function(parent, config) {
     this.className = "javaxt.dhtml.DatePicker";
 
-
     var me = this;
-    var currDate;
-    var startDate;
-
-    var mainDiv;
-    var todayHighlightDiv;
-    var cells = [];
-
-    var selectionMode;
-
-
     var defaultConfig = {
 
-        date: new Date(), //all we need is a month and a year
-        selectionMode: "day", //options are "day" or "week"
+      /** Used to set the initial view. All we need is a month and a year. 
+       */
+        date: new Date(),
+        
+      /** Used to set the selection mode. Options are "day" or "week".
+       */
+        selectionMode: "day",
+        
+        
+      /** Day names or abbreviations to use in the column headers
+       */
         daysOfWeek: ["S","M","T","W","T","F","S"],
+        
+        
+      /** Month names or abbreviations used in the header
+       */
         months : ["January", "February", "March", "April", "May", "June",
             "July", "August", "September", "October", "November", "December"
         ],
-        allowDeselect: true, //Once a date is selected, can it be deselected
+        
+        
+      /** If true, allows users to deselect the current selection via mouse
+       *  click
+       */
+        allowDeselect: true, 
 
+
+      /** Style for individual elements within the component. Note that you can 
+       *  provide CSS class names instead of individual style definitions.
+       */
         style: {
 
 
           //Panel Style
             panel: {
-                fontFamily: "helvetica,arial,verdana,sans-serif", //"tahoma,arial,verdana,sans-serif",
-                background: "#ffffff",
+                fontFamily: "helvetica,arial,verdana,sans-serif", 
+                backgroundColor: "#ffffff",
                 border: "1px solid #b4cbdd",
                 display: "inline-block"
             },
 
 
             header: {
-                background: "#d9e7f8",
+                backgroundColor: "#d9e7f8",
                 height: "25px",
                 lineHeight: "25px"
             },
@@ -134,13 +144,20 @@ javaxt.dhtml.DatePicker = function(parent, config) {
             selected: {
                 color: "#000000",
                 fontWeight: "bold",
-                background: "#fff4bf",
+                backgroundColor: "#fff4bf",
                 border: "1px solid #bfa52f"
             }
 
         }
     };
-
+    
+    var currDate;
+    var startDate;
+    var mainDiv;
+    var todayHighlightDiv;
+    var cells = [];
+    var selectionMode;
+    
 
   //**************************************************************************
   //** Constructor
@@ -293,21 +310,18 @@ javaxt.dhtml.DatePicker = function(parent, config) {
 
 
       //Create main table
-        var table = createTable();
+        var table = createTable(mainDiv);
         table.style.fontFamily = "inherit";
         table.style.textAlign = "inherit";
         table.style.color = "inherit";
-        var tbody = table.firstChild;
 
 
       //Add cell headers
-        var tr = document.createElement('tr');
-        tbody.appendChild(tr);
+        var tr = table.addRow();
         for (var i=0; i<7; i++){
-            var td = document.createElement('td');
+            var td = tr.addColumn();
             td.style.fontFamily = "inherit";
             td.innerHTML = config.daysOfWeek[i];
-            tr.appendChild(td);
             addStyle(td, "cell");
             addStyle(td, "cellHeader");
         }
@@ -319,15 +333,13 @@ javaxt.dhtml.DatePicker = function(parent, config) {
         var d = new Date(startDate);
         for (var i=0; i<numWeeks; i++){
 
-            tr = document.createElement('tr');
-            tbody.appendChild(tr);
+            tr = table.addRow();
 
             for (var j=0; j<7; j++){
 
               //Create new column
-                var td = document.createElement('td');
+                var td = tr.addColumn();
                 td.style.fontFamily = "inherit";
-                tr.appendChild(td);
 
 
               //Create cell
@@ -390,10 +402,6 @@ javaxt.dhtml.DatePicker = function(parent, config) {
             }
 
         }
-
-
-      //Append table
-        mainDiv.appendChild(table);
 
 
 
