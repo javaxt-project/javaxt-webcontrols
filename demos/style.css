@@ -34,3 +34,13 @@ p {
 select:focus, textarea:focus, input:focus{ /* Remove default glow around form inputs (e.g. Chrome) */
     outline:0;
 }
+
+
+pre {
+    background-color: #e5e5e5;
+    font-size: 12px;
+    padding: 7px 3px;
+    margin: 0;
+    border-radius: 8px;
+    color: #4e3310;
+}
