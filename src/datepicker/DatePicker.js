@@ -15,34 +15,34 @@ javaxt.dhtml.DatePicker = function(parent, config) {
     var me = this;
     var defaultConfig = {
 
-      /** Used to set the initial view. All we need is a month and a year. 
+      /** Used to set the initial view. All we need is a month and a year.
        */
         date: new Date(),
-        
+
       /** Used to set the selection mode. Options are "day" or "week".
        */
         selectionMode: "day",
-        
-        
+
+
       /** Day names or abbreviations to use in the column headers
        */
         daysOfWeek: ["S","M","T","W","T","F","S"],
-        
-        
+
+
       /** Month names or abbreviations used in the header
        */
         months : ["January", "February", "March", "April", "May", "June",
             "July", "August", "September", "October", "November", "December"
         ],
-        
-        
+
+
       /** If true, allows users to deselect the current selection via mouse
        *  click
        */
-        allowDeselect: true, 
+        allowDeselect: true,
 
 
-      /** Style for individual elements within the component. Note that you can 
+      /** Style for individual elements within the component. Note that you can
        *  provide CSS class names instead of individual style definitions.
        */
         style: {
@@ -50,7 +50,7 @@ javaxt.dhtml.DatePicker = function(parent, config) {
 
           //Panel Style
             panel: {
-                fontFamily: "helvetica,arial,verdana,sans-serif", 
+                fontFamily: "helvetica,arial,verdana,sans-serif",
                 backgroundColor: "#ffffff",
                 border: "1px solid #b4cbdd",
                 display: "inline-block"
@@ -141,7 +141,12 @@ javaxt.dhtml.DatePicker = function(parent, config) {
                 left: "-1px"
             },
 
-            selected: {
+
+            selectedRow: {
+
+            },
+
+            selectedCell: {
                 color: "#000000",
                 fontWeight: "bold",
                 backgroundColor: "#fff4bf",
@@ -150,14 +155,14 @@ javaxt.dhtml.DatePicker = function(parent, config) {
 
         }
     };
-    
+
     var currDate;
     var startDate;
     var mainDiv;
     var todayHighlightDiv;
     var cells = [];
     var selectionMode;
-    
+
 
   //**************************************************************************
   //** Constructor
@@ -180,6 +185,13 @@ javaxt.dhtml.DatePicker = function(parent, config) {
       //Merge clone with default config
         merge(clone, defaultConfig);
         config = clone;
+
+
+      //Update style config keyword for legacy apps
+        if (config.style.selected && !config.style.selectedCell){
+            config.style.selectedCell = config.style.selected;
+        }
+
 
       //Get selection mode
         selectionMode = config.selectionMode;
@@ -537,7 +549,7 @@ javaxt.dhtml.DatePicker = function(parent, config) {
 
           //Highlight cell
             cell.selected=true;
-            addStyle(cell, "selected");
+            addStyle(cell, "selectedCell");
 
 
           //Return selected date
@@ -546,8 +558,13 @@ javaxt.dhtml.DatePicker = function(parent, config) {
         }
         else if (selectionMode==="week"){
 
-          //Get start/end dates for the week
+
+          //Update row style
             var parentRow = cell.parentNode.parentNode;
+            addStyle(parentRow, "selectedRow");
+
+
+          //Get start/end dates for the week
             var d1 = new Date(parentRow.childNodes[0].childNodes[0].date);
             var d2 = new Date(parentRow.childNodes[parentRow.childNodes.length-1].childNodes[0].date);
 
@@ -579,11 +596,15 @@ javaxt.dhtml.DatePicker = function(parent, config) {
 
                   //Highlight cell
                     _cell.selected=true;
-                    addStyle(_cell, "selected");
+                    addStyle(_cell, "selectedCell");
                 }
                 else{
 
                   //Deselect previously selected row
+                    var row = _cell.parentNode.parentNode;
+                    row.style = '';
+                    row.className = '';
+                    row.removeAttribute("class");
                     if (_cell.selected) deselect(_cell);
                 }
             }
@@ -658,6 +679,19 @@ javaxt.dhtml.DatePicker = function(parent, config) {
   //**************************************************************************
     this.setSelectionMode = function(str){
         selectionMode = str;
+    };
+
+
+  //**************************************************************************
+  //** getSelectedCells
+  //**************************************************************************
+    this.getSelectedCells = function(){
+        var selectedCells = [];
+        for (var x=0; x<cells.length; x++){
+            var cell = cells[x];
+            if (cell.selected) selectedCells.push(cell);
+        }
+        return selectedCells;
     };
 
 
