@@ -79,11 +79,6 @@ javaxt.dhtml.PageLoader = function(config) {
    *  element) and when to execute the inline scripts.
    */
     this.load = function(url, callback, onFail){
-
-
-        if (url.indexOf("?")==-1) url += "?";
-        url += "&_=" + new Date().getTime();
-
         get(url, function(html){
 
             var div = document.createElement("div");
@@ -173,10 +168,6 @@ javaxt.dhtml.PageLoader = function(config) {
    *  the name and main function used to instantiate the application.
    */
     this.loadApp = function(url, callback, onFail){
-
-        if (url.indexOf("?")==-1) url += "?";
-        url += "&_=" + new Date().getTime();
-
         get(url, function(text, xml){
 
           //Parse app info
@@ -342,6 +333,7 @@ javaxt.dhtml.PageLoader = function(config) {
         }
     };
 
+
   //**************************************************************************
   //** removeNodes
   //**************************************************************************
@@ -415,6 +407,7 @@ javaxt.dhtml.PageLoader = function(config) {
         }
         window.dispatchEvent(evt);
     };
+
 
   //**************************************************************************
   //** log
