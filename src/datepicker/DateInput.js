@@ -5,10 +5,11 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 //**  DateInput Class
 //******************************************************************************
 /**
- *   Simple date input field. Requires javaxt.dhtml.DatePicker.
+ *   Form input used to specify a date. The input consists of a text field and
+ *   a button. When the user clicks on the button, a javaxt.dhtml.DatePicker
+ *   will appear below the input.
  *
  ******************************************************************************/
-
 
 javaxt.dhtml.DateInput = function(parent, config) {
     this.className = "javaxt.dhtml.DateInput";
@@ -57,6 +58,12 @@ javaxt.dhtml.DateInput = function(parent, config) {
                 backgroundColor: "#e4e4e4"
             },
 
+            menu: {
+                backgroundColor: "#fff",
+                border: "1px solid #ccc",
+                borderTop: "0 none"
+            },
+
             datePicker: {
 
             }
@@ -71,8 +78,6 @@ javaxt.dhtml.DateInput = function(parent, config) {
   //**************************************************************************
   //** Constructor
   //**************************************************************************
-  /** Creates a new instance of this class. */
-
     var init = function(){
 
         if (typeof parent === "string"){
@@ -97,6 +102,7 @@ javaxt.dhtml.DateInput = function(parent, config) {
       //Create main div
         var mainDiv = document.createElement("div");
         mainDiv.setAttribute("desc", me.className);
+        mainDiv.style.position = "relative";
 
 
       //Create table with 2 columns
@@ -112,7 +118,7 @@ javaxt.dhtml.DateInput = function(parent, config) {
         input = document.createElement('input');
         input.type = "text";
         me.setDate(config.date);
-        setStyle(input, "input");
+        setStyle(input, config.style.input);
         input.style.width="100%";
         td.appendChild(input);
         tr.appendChild(td);
@@ -145,7 +151,7 @@ javaxt.dhtml.DateInput = function(parent, config) {
         td = document.createElement('td');
         button = document.createElement('input');
         button.type = "button";
-        setStyle(button, "button");
+        setStyle(button, config.style.button);
         td.appendChild(button);
         tr.appendChild(td);
 
@@ -192,8 +198,10 @@ javaxt.dhtml.DateInput = function(parent, config) {
 
             menu = document.createElement('div');
             menu.setAttribute("desc", "menu");
-
+            setStyle(menu, config.style.menu);
+            menu.style.width = "100%";
             menu.style.position = "absolute";
+            menu.style.zIndex = 1;
             //menu.style.visibility = "hidden";
             mainDiv.appendChild(menu);
 
@@ -218,7 +226,7 @@ javaxt.dhtml.DateInput = function(parent, config) {
             if (isNaN( date.getTime() )) date = new Date();
             datePicker = new javaxt.dhtml.DatePicker(menu, {
                 date: date,
-                style: config.datePicker
+                style: config.style.datePicker
             });
             datePicker.select();
             datePicker.onClick = function(date){
@@ -238,9 +246,9 @@ javaxt.dhtml.DateInput = function(parent, config) {
 
 
   //**************************************************************************
-  //** setDate
+  //** setValue
   //**************************************************************************
-    this.setDate = function(date){
+    this.setValue = function(date){
         if (date){
             if (typeof parent === "string"){
                 date = new Date(date);
@@ -261,14 +269,29 @@ javaxt.dhtml.DateInput = function(parent, config) {
 
 
   //**************************************************************************
-  //** getDate
+  //** getValue
   //**************************************************************************
-    this.getDate = this.getValue = function(){
+    this.getValue = function(){
         var date = new Date(input.value);
         if (isNaN( date.getTime() )) date = null;
         return date;
     };
 
+
+  //**************************************************************************
+  //** setDate
+  //**************************************************************************
+    this.setDate = function(date){
+        me.setValue(date);
+    };
+
+
+  //**************************************************************************
+  //** getDate
+  //**************************************************************************
+    this.getDate = function(){
+        me.getValue();
+    };
 
 
   //**************************************************************************
@@ -294,10 +317,7 @@ javaxt.dhtml.DateInput = function(parent, config) {
   //**************************************************************************
     var merge = javaxt.dhtml.utils.merge;
     var createTable = javaxt.dhtml.utils.createTable;
-    var setStyle = function(el, style){
-        javaxt.dhtml.utils.setStyle(el, config.style[style]);
-    };
-
+    var setStyle = javaxt.dhtml.utils.setStyle;
 
     init();
 };
