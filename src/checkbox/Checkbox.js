@@ -41,7 +41,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
                 height: "13px",
                 border: "1px solid #cccccc",
                 borderRadius: "3px",
-                background: "#F6F6F6",
+                backgroundColor: "#F6F6F6",
                 cursor: "pointer",
                 margin: "0px",
                 color: "#2b2b2b"
@@ -67,13 +67,13 @@ javaxt.dhtml.Checkbox = function(parent, config) {
             },
 
             select: {
-                background: "#007FFF",
+                backgroundColor: "#007FFF",
                 border: "1px solid #003EFF",
                 color: "#FFFFFF"
             },
 
             disable: {
-                background: "#ffffff",
+                backgroundColor: "#ffffff",
                 border: "1px solid #ffffff",
                 borderRadius: "3px",
                 cursor: "pointer",
@@ -81,7 +81,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
             },
 
             hover: {
-                background: "#ededed"
+                backgroundColor: "#ededed"
             }
 
         }

@@ -938,11 +938,15 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         var div = document.createElement('div');
         div.style.display = "inline-block";
         div.style.position = "relative";
-        div.style.padding = "9px 0 0 1px";
+        //div.style.padding = "9px 0 0 1px";
         var checkbox = new javaxt.dhtml.Checkbox(div,{
             value: value,
             style: {
-                box: "table-checkbox"
+                box: "table-checkbox",
+                check: "table-checkbox-check",
+                select: "table-checkbox-select",
+                disable: "table-checkbox-disable",
+                hover: "table-checkbox-hover"
             }
         });
 
