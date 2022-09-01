@@ -929,13 +929,20 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         if (div){
 
           //Set input value and hide menu
-            var text = div.text;
-            if (!text) text = div.innerText;
-            input.value = text;
-            input.data = div.value;
+            var orgVal = input.data;
+            var newVal = div.value;
+            var orgLabel = input.value;
+            var newLabel = div.text;
+            if (!newLabel) newLabel = div.innerText;
+            input.value = newLabel;
+            input.data = newVal;
             me.hideMenu();
-            me.onChange(input.value, input.data);
 
+            if (newVal!==orgVal){
+                if (orgLabel!==newLabel){
+                    me.onChange(input.value, input.data);
+                }
+            }
 
           //Focus on the next input in the form
             if (_focusNext){
