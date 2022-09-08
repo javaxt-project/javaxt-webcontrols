@@ -85,7 +85,8 @@ javaxt.dhtml.Button = function(parent, config) {
                 zIndex: "1"
             },
 
-            menuAlign: "bottom"
+            menuAlign: "bottom",
+            iconAlign: "left"
 
         }
     };
@@ -116,7 +117,8 @@ javaxt.dhtml.Button = function(parent, config) {
 
 
       //Get icon alignment
-        var iconAlignment = config.style.iconAlign;
+        var iconAlignment = config.iconAlign;
+        if (!iconAlignment) iconAlignment = config.style.iconAlign; //legacy
         if (iconAlignment!=="right") iconAlignment = "left";
 
 
