@@ -26,15 +26,47 @@ javaxt.dhtml.DataGrid = function(parent, config) {
     var filterName, filter;
 
 
-  //Optional config parameters
+
+  //Create default style
+    var defaultStyle = {};
+    if (javaxt.dhtml.style){
+        if (javaxt.dhtml.style.default){
+            var tableStyle = javaxt.dhtml.style.default.table;
+            if (tableStyle){
+                defaultStyle = tableStyle;
+                var checkboxStyle = javaxt.dhtml.style.default.checkbox;
+                defaultStyle.checkbox = checkboxStyle;
+            }
+        }
+    }
+
+
+
+  //Set default config
     var defaultConfig = {
-        style: {}, //javaxt.dhtml.style.table
+
+
+      /** Style config. See default styles in javaxt.dhtml.Table for a list of
+       *  options. In addition to the table styles, you can also specify a
+       *  checkbox style
+       */
+        style: defaultStyle,
+
+
         url: "",
         params: null,
         payload: null,
 
+
+      /** If true, and if the payload is empty, will sent params as a URL
+       *  encoded string in a POST request. Otherwise the params will be
+       *  appended to the query string in the request URL.
+       */
+        post: false,
+
+
       /** Used to specify the page size (i.e. the maximum number records to
-       *  fetch from the server at a time.
+       *  fetch from the server at a time)
        */
         limit: 50,
 
@@ -65,6 +97,20 @@ javaxt.dhtml.DataGrid = function(parent, config) {
        *  do not need to override this method.
        */
         getResponse: function(url, payload, callback){
+
+
+          //Transform GET request into POST request if possbile. This will
+          //tidy up the URLs and reduce log size
+            if (!payload && config.post==true){
+                var idx = url.indexOf("?");
+                if (idx>-1){
+                    payload = url.substring(idx+1);
+                    url = url.substring(0, idx);
+                }
+            }
+
+
+          //Get response
             javaxt.dhtml.utils.get(url, {
                 payload: payload,
                 success: function(text, xml, url, request){
@@ -180,7 +226,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
 
       //Update column config using the "sort" filter
-        me.setFilter(config.filter);
+        setFilter(config.filter);
 
 
 
@@ -414,9 +460,23 @@ javaxt.dhtml.DataGrid = function(parent, config) {
   //**************************************************************************
   //** setFilter
   //**************************************************************************
+  /** Used to update the filter with new params
+   *  @deprecated The filter object is a legacy feature and will be removed
+   */
     this.setFilter = function(newFilter){
+        console.warn(
+        "The filter object in the javaxt.dhtml.DataGrid class is a legacy " +
+        "feature and will be removed in the future.");
+        setFilter(newFilter);
+    };
+
+    var setFilter = function(newFilter){
         if (!newFilter) newFilter = {};
         if (!filter) filter = newFilter;
+
+
+      //Remove duplicates from newFilter
+        removeDuplicateParams(newFilter);
 
 
         for (var key in newFilter) {
@@ -490,8 +550,22 @@ javaxt.dhtml.DataGrid = function(parent, config) {
   //**************************************************************************
   //** getFilter
   //**************************************************************************
+  /** Returns the current filter
+   *  @deprecated The filter object is a legacy feature and will be removed
+   */
     this.getFilter = function(){
+        console.warn(
+        "The filter object in the javaxt.dhtml.DataGrid class is a legacy " +
+        "feature and will be removed in the future.");
         return filter;
+    };
+
+
+  //**************************************************************************
+  //** getParams
+  //**************************************************************************
+    this.getParams = function(){
+        return config.params;
     };
 
 
@@ -853,7 +927,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
             if (filter){
                 for (var key in filter) {
                     if (filter.hasOwnProperty(key)) {
-                        if (key!=='orderby'){
+                        if (key.toLowerCase()!=='orderby'){
                             var str = filter[key];
                             if (str){
                                 str = str.trim();
@@ -941,13 +1015,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         //div.style.padding = "9px 0 0 1px";
         var checkbox = new javaxt.dhtml.Checkbox(div,{
             value: value,
-            style: {
-                box: "table-checkbox",
-                check: "table-checkbox-check",
-                select: "table-checkbox-select",
-                disable: "table-checkbox-disable",
-                hover: "table-checkbox-hover"
-            }
+            style: config.style.checkbox
         });
 
 
@@ -1043,12 +1111,15 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         if (config.params){
             for (var key in config.params) {
                 if (config.params.hasOwnProperty(key)) {
-                    if (!params.hasOwnProperty(key)){
-                        params[key] = config.params[key];
+                    if (!hasParam(key, params)){
+                        if (key.toLowerCase()!=='orderby'){
+                            params[key] = config.params[key];
+                        }
                     }
                 }
             }
         }
+
 
       //Add count to the querystring
         if (config.count==true && page==1) params.count = true;
@@ -1060,22 +1131,42 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         if (filter){
             for (var key in filter) {
                 if (filter.hasOwnProperty(key)) {
-                    if (key==='orderby'){
-                        orderby = filter[key];
-                        orderby = ((orderby!=null && orderby!="") ? "&orderby=" + encodeURIComponent(orderby) : "");
+                    if (key.toLowerCase()==='orderby'){
+                        if (!hasParam(key, params)){
+                            orderby = filter[key];
+                            orderby = ((orderby!=null && orderby!="") ? "&orderby=" + encodeURIComponent(orderby) : "");
+                        }
                     }
                     else{
                         var str = filter[key];
                         str = str+"";
                         str = str.trim();
                         if (str.length>0){
-                            params[key] = str;
-                            //url += "&" + key + "=" + encodeURIComponent(str);
+                            if (!hasParam(key, params)){
+                                params[key] = str;
+                                //url += "&" + key + "=" + encodeURIComponent(str);
+                            }
                         }
                     }
                 }
             }
         }
+
+
+      //Get orderby from config.params only if it is not found in the filter
+        if (orderby.length===0){
+            if (config.params){
+                for (var key in config.params) {
+                    if (config.params.hasOwnProperty(key)) {
+                        if (key.toLowerCase()==='orderby'){
+                            orderby = config.params[key];
+                            orderby = ((orderby!=null && orderby!="") ? "&orderby=" + encodeURIComponent(orderby) : "");
+                        }
+                    }
+                }
+            }
+        }
+
 
 
       //Build URL
@@ -1116,6 +1207,24 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
 
   //**************************************************************************
+  //** hasParam
+  //**************************************************************************
+  /** Performs case-insensitve search for a parameter. Returns true if a
+   *  parameter exists for a given key
+   */
+    var hasParam = function(key, params){
+        for (var k in params) {
+            if (params.hasOwnProperty(k)) {
+                if (k.toLowerCase()===key.toLowerCase()){
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+
+
+  //**************************************************************************
   //** encodeParams
   //**************************************************************************
     var encodeParams = function(params){
@@ -1139,6 +1248,40 @@ javaxt.dhtml.DataGrid = function(parent, config) {
             }
         }
         return url;
+    };
+
+
+  //**************************************************************************
+  //** removeDuplicateParams
+  //**************************************************************************
+  /** Performs a case-insensitve search for unique keys and removes duplicates
+   *  (e.g OrderBy == orderBy == orderby). Alters the given parameters instead
+   *  or returning a new parameter map..
+   */
+    var removeDuplicateParams = function(params){
+
+        var uniqueProperties = {};
+        for (var key in params) {
+            if (params.hasOwnProperty(key)) {
+                if (!hasParam(key, uniqueProperties)){
+                    uniqueProperties[key] = params[key];
+                }
+            }
+        }
+
+        var deletions = [];
+        for (var key in params) {
+            if (params.hasOwnProperty(key)) {
+                if (!uniqueProperties.hasOwnProperty(key)){
+                    deletions.push(key);
+                }
+            }
+        }
+
+        for (var i=0; i<deletions.length; i++){
+            var key = deletions[i];
+            delete params[key];
+        }
     };
 
 
