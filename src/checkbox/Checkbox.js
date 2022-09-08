@@ -9,7 +9,6 @@ if(!javaxt.dhtml) javaxt.dhtml={};
  *
  ******************************************************************************/
 
-
 javaxt.dhtml.Checkbox = function(parent, config) {
     this.className = "javaxt.dhtml.Checkbox";
 
@@ -24,17 +23,18 @@ javaxt.dhtml.Checkbox = function(parent, config) {
         value: null,
 
 
-
       //Checkbox state
         checked: false,
         disabled: false,
 
 
-        display: "inline-block",
-
-
       //Default styles for the checkbox
         style:{
+
+            panel: {
+                display: "inline-block",
+                position: "relative"
+            },
 
             box: {
                 width: "13px",
@@ -83,17 +83,13 @@ javaxt.dhtml.Checkbox = function(parent, config) {
             hover: {
                 backgroundColor: "#ededed"
             }
-
         }
     };
-
 
 
   //**************************************************************************
   //** Constructor
   //**************************************************************************
-  /** Creates a new instance of this class. */
-
     var init = function(){
 
         if (typeof parent === "string"){
@@ -114,8 +110,13 @@ javaxt.dhtml.Checkbox = function(parent, config) {
 
       //Create container
         outerDiv = document.createElement('div');
-        outerDiv.style.display = config.display;
-        outerDiv.style.position = "relative";
+        setStyle(outerDiv, "panel");
+        if (config.display){
+            console.warn(
+            "The 'display' config in the javaxt.dhtml.Checkbox " +
+            "class has been deprecated. Use panel style instead");
+            outerDiv.style.display = config.display;
+        }
         parent.appendChild(outerDiv);
         me.el = outerDiv;
 
@@ -126,32 +127,24 @@ javaxt.dhtml.Checkbox = function(parent, config) {
 
           //Create table with 2 columns - one for the checkbox
           //and a column for the checkbox label.
-            var table = createTable();
+            var table = createTable(outerDiv);
             table.style.fontFamily = "inherit";
             table.style.textAlign = "inherit";
             table.style.color = "inherit";
-            var tbody = table.firstChild;
-            var tr = document.createElement('tr');
-            tbody.appendChild(tr);
+            var tr = table.addRow();
             var td;
 
-
-            td = document.createElement('td');
-            tr.appendChild(td);
+            td = tr.addColumn();
             box = document.createElement('div');
             setStyle(box, "box");
             td.appendChild(box);
 
-
-            td = document.createElement('td');
-            tr.appendChild(td);
+            td = tr.addColumn();
             label = document.createElement("div");
             setStyle(label, "label");
             label.innerHTML = config.label;
             td.appendChild(label);
 
-
-            outerDiv.appendChild(table);
             addEventHandlers(table);
         }
         else{
@@ -244,7 +237,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
 
         };
         div.onmouseout = function(){
-
+            
             if (box.checked!==true){
                 setStyle(box, "box");
             }
