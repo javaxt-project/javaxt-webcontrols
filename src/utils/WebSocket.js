@@ -17,8 +17,14 @@ javaxt.dhtml.WebSocket = function(config) {
     var me = this;
     var defaultConfig = {
         onConnect : function(){},
+        onFailure : function(code, reason){},
         onMessage : function(msg){},
-        url: ""
+        url: "",
+        debugr : {
+            append: function(msg){
+                //console.log(msg);
+            }
+        }
     };
 
 
@@ -49,6 +55,8 @@ javaxt.dhtml.WebSocket = function(config) {
         config = clone;
 
 
+        var debugr = config.debugr;
+
 
         var protocol = window.location.protocol.toLowerCase();
         if (protocol.indexOf("https")===0) protocol = "wss";
@@ -71,32 +79,31 @@ javaxt.dhtml.WebSocket = function(config) {
 
 
 
-//        config.onMessage(lastMessage);
-
-
-
         var start = function(){
+            connectionSuccess = false;
+            var connectionStatusTimer;
+
             socket = new WebSocket(url);
 
             socket.onopen = function(){
-                connectionSuccess = true;
+                debugr.append("onopen");
+
+              //Update the connectionSuccess variable after a small delay. This
+              //gives us a chance to see if the socket closes immediately after
+              //open (see onclose)
+                connectionStatusTimer = setTimeout(function(){
+                    connectionSuccess = true;
+                }, 500);
+
                 keepAlive();
 
                 config.onConnect();
-
-
-//              //The following can be used to test WebSocket failures
-//                var testFallback = false;
-//                if (testFallback){
-//                    connectionSuccess = false;
-//                    socket.close();
-//                    me.stop();
-//                }
             };
 
 
           //Handle messages sent by the server
             socket.onmessage = function(event) {
+                connectionSuccess = true;
                 var msg = event.data;
                 debugr.append(msg);
                 lastMessage = msg;
@@ -106,54 +113,19 @@ javaxt.dhtml.WebSocket = function(config) {
 
           //Reconnect on disconnect
             socket.onclose = function(event){
-                debugr.append("onclose!");
-                debugr.append(event.code);
+                debugr.append("onclose");
+                debugr.append(event.code + ": " + event.reason);
 
                 if (keepAliveTimer) clearTimeout(keepAliveTimer);
                 if (connectionSuccess){
                     if (timer) check(); //Reconnect on disconnect
                 }
-                else{ //Websocket failed! Fallback to HTTP polling for status updates
+                else{ //Websocket failed!
                     debugr.append("Websocket failed");
                     socket = null;
                     clearTimeout(timer);
-
-                    if (config.fallback){
-//                        statusTimer = setTimeout(function(){
-//                            config.onConnect();
-//                        }, 2000);
-//
-//
-//                      //Periodically check job status
-//                        var checkStatus = function(){
-//
-//                            get(config.fallback, {
-//                                success : function(text){
-//                                    var json = JSON.parse(text);
-//                                    var status = json.status;
-//                                    if (status==="pending" || status==="running"){
-//                                        var message = status;
-//                                        var messages = json.messages;
-//                                        if (messages.length>0) message = messages[messages.length-1];
-//                                        config.onMessage(message);
-//                                        timer = setTimeout(checkStatus, 250);
-//                                    }
-//                                    else{
-//                                        config.onMessage(status);
-//                                        me.stop();
-//                                        config.onComplete();
-//                                    }
-//                                },
-//                                failure: function(response){
-//                                    me.stop();
-//                                    alert(response);
-//                                    //config.onError(response);
-//                                }
-//                            });
-//
-//                        };
-//                        timer = setTimeout(checkStatus, 1000);
-                    }
+                    clearTimeout(connectionStatusTimer);
+                    config.onFailure(event.code, event.reason);
                 }
             };
 
@@ -165,10 +137,7 @@ javaxt.dhtml.WebSocket = function(config) {
 
 
 
-
-
         function check(){
-//            if (lastMessage.indexOf("---")===0) return;
             if (!socket || socket.readyState === WebSocket.CLOSED) start();
         }
 
