@@ -25,11 +25,10 @@ javaxt.dhtml.Effects = function() {
         me.setTransition(el, transitionEffect, duration);
         setTimeout(function(){
             el.style.opacity = "";
-            if (callback){
-                setTimeout(function(){
-                    callback.apply(el, []);
-                }, duration+50);
-            }
+            setTimeout(function(){
+                removeTransition(el);
+                if (callback) callback.apply(el, []);
+            }, duration+50);
         }, 50);
     };
 
@@ -44,12 +43,11 @@ javaxt.dhtml.Effects = function() {
         me.setTransition(el, transitionEffect, duration);
         setTimeout(function(){
             el.style.opacity = 0;
-            if (callback){
-                setTimeout(function(){
-                    el.style.display = "none";
-                    callback.apply(el, []);
-                }, duration+50);
-            }
+            setTimeout(function(){
+                el.style.display = "none";
+                removeTransition(el);
+                if (callback) callback.apply(el, []);
+            }, duration+50);
         }, 50);
     };
 
@@ -127,6 +125,22 @@ javaxt.dhtml.Effects = function() {
           el.style.WebkitTransition = 'all ' + t + 'ms cubic-bezier' + '(' + x1 + ', ' + wy1 + ', ' + x2 + ', ' + wy2 + ')';
         }
 
+    };
+
+    
+  //**************************************************************************
+  //** removeTransition
+  //**************************************************************************
+    var removeTransition = function(el){
+        el.style.WebkitTransition =
+        el.style.MozTransition =
+        el.style.MsTransition =
+        el.style.OTransition =
+        el.style.transition = "";
+
+        if ( !supportsBezierRange ) {
+            el.style.WebkitTransition = "";
+        }
     };
 
 
