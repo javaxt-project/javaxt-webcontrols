@@ -141,6 +141,7 @@ javaxt.dhtml.utils = {
    */
     getParameter: function(name, url){
         name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+        if (!url) url = window.location.href;
         var regexS = "[\\?&]"+name+"=([^&#]*)";
         var regex = new RegExp( regexS );
         var results = regex.exec(url);
