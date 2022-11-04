@@ -21,10 +21,21 @@ javaxt.dhtml.DateInput = function(parent, config) {
 
     var defaultConfig = {
 
-        label: false,
+
+      /** Initial date/value for the input. Supports both strings and dates.
+       */
         date: null,
+
+
+      /** If true, the calendar menu will appear whenever the text field has
+       *  focus (e.g. mouse click). Default is false.
+       */
         showMenuOnFocus: false,
 
+
+      /** Style for individual elements within the component. Note that you can
+       *  provide CSS class names instead of individual style definitions.
+       */
         style: {
 
             input: {
@@ -69,6 +80,8 @@ javaxt.dhtml.DateInput = function(parent, config) {
             }
         },
 
+      /** Function used to format date for display. Returns "M/D/YYYY" by default.
+       */
         formatDate: function(date){
             return (date.getMonth()+1) + "/" + date.getDate() + "/" + date.getFullYear();
         }
@@ -107,13 +120,11 @@ javaxt.dhtml.DateInput = function(parent, config) {
 
       //Create table with 2 columns
         var table = createTable();
-        var tbody = table.firstChild;
-        var tr = document.createElement('tr');
-        tbody.appendChild(tr);
+        var tr = table.addRow();
 
 
       //Create input in the first column
-        var td = document.createElement('td');
+        var td = tr.addColumn();
         td.style.width="100%";
         input = document.createElement('input');
         input.type = "text";
@@ -121,7 +132,6 @@ javaxt.dhtml.DateInput = function(parent, config) {
         setStyle(input, config.style.input);
         input.style.width="100%";
         td.appendChild(input);
-        tr.appendChild(td);
 
         input.onkeydown = function(e){
             if (e.keyCode===9){
@@ -148,12 +158,11 @@ javaxt.dhtml.DateInput = function(parent, config) {
 
 
       //Create button in the second column
-        td = document.createElement('td');
+        td = tr.addColumn();
         button = document.createElement('input');
         button.type = "button";
         setStyle(button, config.style.button);
         td.appendChild(button);
-        tr.appendChild(td);
 
 
         button.onclick = function(){
