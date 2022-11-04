@@ -5,7 +5,8 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 //**  Checkbox Class
 //******************************************************************************
 /**
- *   Custom checkbox control.
+ *   Form input that can be either checked or unchecked. The input consists of
+ *   a square box with a checkmark when activated and text label.
  *
  ******************************************************************************/
 
@@ -19,16 +20,34 @@ javaxt.dhtml.Checkbox = function(parent, config) {
 
     var defaultConfig = {
 
-        label: null, //Text to display
+      /** Label for the checkbox (optional). Accepts either a string or a DOM
+       *  element.
+       */
+        label: null,
+
+
+      /** Value associated with the checkbox (optional). Note that this is
+       *  different than the checkbox state. Use the isChecked() method to
+       *  determine whether the checkbox is checked.
+       */
         value: null,
 
 
-      //Checkbox state
+      /** If true, the checkbox will initially render with a check. Default is
+       *  false.
+       */
         checked: false,
+
+
+      /** If true, the component will be disabled when rendered. Default is
+       *  false.
+       */
         disabled: false,
 
 
-      //Default styles for the checkbox
+      /** Style for individual elements within the component. Note that you can
+       *  provide CSS class names instead of individual style definitions.
+       */
         style:{
 
             panel: {
@@ -142,7 +161,13 @@ javaxt.dhtml.Checkbox = function(parent, config) {
             td = tr.addColumn();
             label = document.createElement("div");
             setStyle(label, "label");
-            label.innerHTML = config.label;
+
+            if (config.label instanceof Element){
+                label.appendChild(config.label);
+            }
+            else{
+                label.innerHTML = config.label;
+            }
             td.appendChild(label);
 
             addEventHandlers(table);
@@ -237,7 +262,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
 
         };
         div.onmouseout = function(){
-            
+
             if (box.checked!==true){
                 setStyle(box, "box");
             }
