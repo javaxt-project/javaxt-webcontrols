@@ -497,6 +497,120 @@ javaxt.dhtml.utils = {
 
 
   //**************************************************************************
+  //** getSuggestedColumnWidths
+  //**************************************************************************
+  /** Used to analyze a given dataset and suggest column widths for a table or
+   *  a datagrid
+   *  @param records A two-dimensional array representing rows and columns
+   *  @param pixelsPerChar Approximate, average width of a character
+   *  @returns JSON object with various stats and suggestedWidths
+   */
+    getSuggestedColumnWidths: function(records, pixelsPerChar){
+
+        var widths = [];
+        var zscores = [];
+        var totalWidth = 0;
+        var headerWidth = 0;
+        var suggestedWidths = [];
+
+        var columns = records[0];
+
+        if (columns.length>1){
+
+            for (var i=0; i<columns.length; i++){
+                var len = 0;
+                var column = columns[i];
+                if (column!=null) len = (column+"").length;
+                widths.push(len);
+                headerWidth+=len*pixelsPerChar;
+            }
+
+
+            for (var i=0; i<records.length; i++){
+                var record = records[i];
+                for (var j=0; j<record.length; j++){
+                    var rec = record[j];
+                    var len = 0;
+                    if (rec!=null){
+                        var str = rec+"";
+                        var r = str.indexOf("\r");
+                        var n = str.indexOf("\n");
+                        if (r==-1){
+                            if (n>-1) str = str.substring(0, n);
+                        }
+                        else{
+                            if (n>-1){
+                                str = str.substring(0, Math.min(r,n));
+                            }
+                            else str = str.substring(0, r);
+                        }
+
+                        len = str.length*pixelsPerChar;
+                    }
+                    widths[j] = Math.max(widths[j], len);
+                }
+            }
+
+
+          //Get total width
+            for (var i=0; i<widths.length; i++){
+                totalWidth += widths[i];
+            }
+
+
+          //Check if any columns are super wide using z-scores
+            var outliers = [];
+            zscores = javaxt.dhtml.utils.getZScores(widths, true);
+            for (var i=0; i<zscores.length; i++){
+                if (zscores[i]>1) outliers.push(i);
+            }
+
+
+          //Come up with suggestedWidths
+            if (outliers.length==1){
+
+
+              //If we have one column that's really wide, let's make it 100%
+              //width and use pixels for the other columns
+                var outlier = outliers[0];
+                for (var i=0; i<widths.length; i++){
+                    var colWidth = i==outlier ? "100%" : widths[i] + "px";
+                    suggestedWidths.push(colWidth);
+                }
+
+            }
+            else{
+
+              //Use percentages for all the fields
+                for (var i=0; i<widths.length; i++){
+                    var colWidth = ((widths[i]/totalWidth)*100)+"%";
+                    suggestedWidths.push(colWidth);
+                }
+
+            }
+
+
+        }
+        else{
+            widths.push(1);
+            totalWidth = 1;
+            suggestedWidths.push("100%");
+        }
+
+
+
+
+        return {
+            widths: widths,
+            zscores: zscores,
+            totalWidth: totalWidth,
+            headerWidth: headerWidth,
+            suggestedWidths: suggestedWidths
+        };
+    },
+
+
+  //**************************************************************************
   //** onRender
   //**************************************************************************
   /** Used to check whether DOM element has been added to the document. Calls
@@ -664,6 +778,55 @@ javaxt.dhtml.utils = {
         var w = right-left;
         var h = bottom-top;
         return w*h;
+    },
+
+
+  //**************************************************************************
+  //** getZScores
+  //**************************************************************************
+  /** Returns z-scores for a given set of values
+   *  @param values An array of numbers
+   *  @param normalize If true, will return positive values for z-scores
+   *  @returns An array of decimal values representing z-scores
+   */
+    getZScores: function(values, normalize){
+
+      //Sum all the values
+        var total = 0;
+        for (var i=0; i<values.length; i++){
+            total+=values[i];
+        }
+
+
+      //Work out the Mean (the simple average of the numbers)
+        var numSamples = values.length;
+        var mean = total / numSamples;
+
+
+      //Then for each number: subtract the Mean and square the result
+        var sum = 0.0;
+        for (var i=0; i<values.length; i++){
+            var x = values[i];
+            sum += Math.pow(x - mean, 2);
+        }
+
+
+      //Then compute the square root of the mean of the squared differences
+        var std = Math.sqrt(sum/numSamples);
+
+
+
+      //Calculate z-scores
+        var zScores = [];
+        for (var i=0; i<values.length; i++){
+            var x = values[i];
+            var z = (x - mean)/std;
+
+            if (z<0 && normalize) z = -z;
+            zScores.push(z);
+        }
+
+        return zScores;
     },
 
 
