@@ -393,7 +393,7 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
   //**************************************************************************
     this.setTitle = function(str){
         title = str;
-        if (str instanceof Element){
+        if (isElement(str)){
             titleDiv.appendChild(str);
         }
         else{
@@ -546,6 +546,7 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
     var onRender = javaxt.dhtml.utils.onRender;
     var createTable = javaxt.dhtml.utils.createTable;
     var addResizeListener = javaxt.dhtml.utils.addResizeListener;
+    var isElement = javaxt.dhtml.utils.isElement;
     var setStyle = function(el, style){
         javaxt.dhtml.utils.setStyle(el, config.style[style]);
     };

@@ -433,7 +433,7 @@ javaxt.dhtml.Window = function(parent, config) {
     this.setBody = this.setContent = function(obj){
         if (obj==null) body.innerHTML = "";
         else{
-            if (obj instanceof Element){
+            if (isElement(obj)){
                 var p = obj.parentNode;
                 if (p) p.removeChild(obj);
                 body.appendChild(obj);
@@ -461,7 +461,7 @@ javaxt.dhtml.Window = function(parent, config) {
     this.setFooter = function(obj){
         if (obj==null) footer.innerHTML = "";
         else{
-            if (obj instanceof Element){
+            if (isElement(obj)){
                 var p = obj.parentNode;
                 if (p) p.removeChild(obj);
                 footer.appendChild(obj);
@@ -952,6 +952,7 @@ javaxt.dhtml.Window = function(parent, config) {
     var merge = javaxt.dhtml.utils.merge;
     var destroy = javaxt.dhtml.utils.destroy;
     var isEmpty = javaxt.dhtml.utils.isEmpty;
+    var isElement = javaxt.dhtml.utils.isElement;
     var getHighestElements = javaxt.dhtml.utils.getHighestElements;
     var initDrag = javaxt.dhtml.utils.initDrag;
 

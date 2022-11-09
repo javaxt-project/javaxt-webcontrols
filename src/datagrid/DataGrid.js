@@ -759,7 +759,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
    */
     this.scrollTo = function(page){
 
-        if (page instanceof Element){ //TODO: tighten up the logic...
+        if (isElement(page)){
             var r = page;
             var y = 0;
             table.forEachRow(function (row) {
@@ -1563,6 +1563,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
     var merge = javaxt.dhtml.utils.merge;
     var _getRect = javaxt.dhtml.utils.getRect;
     var isArray = javaxt.dhtml.utils.isArray;
+    var isElement = javaxt.dhtml.utils.isElement;
 
     init();
 };

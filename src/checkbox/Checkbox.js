@@ -162,7 +162,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
             label = document.createElement("div");
             setStyle(label, "label");
 
-            if (config.label instanceof Element){
+            if (isElement(config.label)){
                 label.appendChild(config.label);
             }
             else{
@@ -411,6 +411,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
   //**************************************************************************
     var merge = javaxt.dhtml.utils.merge;
     var createTable = javaxt.dhtml.utils.createTable;
+    var isElement = javaxt.dhtml.utils.isElement;
     var setStyle = function(el, style){
         javaxt.dhtml.utils.setStyle(el, config.style[style]);
     };
