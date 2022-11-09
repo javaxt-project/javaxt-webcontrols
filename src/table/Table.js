@@ -588,17 +588,18 @@ javaxt.dhtml.Table = function(parent, config) {
             this.innerDiv.innerHTML = "";
         }
         else{
-            if (typeof content === "string" || !isNaN(parseFloat(content))){
-                this.innerDiv.innerHTML = content;
-            }
-            else{
+
+            if (isElement(content)){
                 this.innerDiv.innerHTML = "";
                 try{
                     this.innerDiv.appendChild(content);
+                    return;
                 }
                 catch(e){
                 }
             }
+
+            this.innerDiv.innerHTML = content;
         }
     };
 
@@ -1167,6 +1168,7 @@ javaxt.dhtml.Table = function(parent, config) {
     var onRender = javaxt.dhtml.utils.onRender;
     var addResizeListener = javaxt.dhtml.utils.addResizeListener;
     var isArray = javaxt.dhtml.utils.isArray;
+    var isElement = javaxt.dhtml.utils.isElement;
     var setStyle = function(el, style){
         javaxt.dhtml.utils.setStyle(el, config.style[style]);
     };
