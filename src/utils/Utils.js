@@ -268,10 +268,42 @@ javaxt.dhtml.utils = {
   //**************************************************************************
   //** isNumber
   //**************************************************************************
-  /** Returns true if the given object can be converted to a number.
+  /** Return true if a given object is number or can be parsed into a number.
    */
     isNumber: function(n) {
+        if (typeof n === "number") return true;
+        if (typeof n !== "string") n = ""+n;
         return !isNaN(parseFloat(n)) && !isNaN(n - 0);
+    },
+
+
+  //**************************************************************************
+  //** isDate
+  //**************************************************************************
+  /** Return true if a given object can be parsed into a date. Returns false
+   *  if the object is a number (e.g. "3", "1.2")
+   */
+    isDate: function(d) {
+
+      //Don't pass numbers to Date.parse
+        if (typeof d === "string" || typeof d === "number"){
+            var n = (d+"").replace(/[^-+0-9,.]+/g,"");
+            if (d===n){
+                return false;
+            }
+        }
+
+        return !isNaN(Date.parse(d));
+    },
+
+
+  //**************************************************************************
+  //** isElement
+  //**************************************************************************
+  /** Return true if a given object is a DOM element.
+   */
+    isElement: function(obj){
+        return (obj instanceof Element); //TODO: tighten up the logic...
     },
 
 
