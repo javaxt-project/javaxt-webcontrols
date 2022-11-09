@@ -640,21 +640,21 @@ select:focus, textarea:focus, input:focus{
 /** Default style for grid controls
  */
 .table-header {
-    height: 36px; /*table-header-col height + border */
+    /*height: 36px; /*table-header-col height + border */
     border-bottom: 1px solid #ababab;
-    background: #eaeaea;
+    background-color: #eaeaea;
     background-image: linear-gradient(to bottom, #f9f9f9, #e4e5e7);
     /* box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19); */
 }
 
 .table-row, .table-row-selected {
-    background: #ffffff;
+    background-color: #ffffff;
     border-bottom: 1px solid #cccccc;
 }
 
 /* .table-row:nth-child(even) {background: #CCC} */
 .table-row:nth-child(odd) {
-    background: #F8F8F8;
+    background-color: #F8F8F8;
 }
 
 
@@ -711,38 +711,6 @@ select:focus, textarea:focus, input:focus{
 }
 
 
-.table-checkbox {
-    width: 14px;
-    height: 14px;
-    border: 1px solid #cccccc;
-    border-radius: 3px;
-    background-color: #F6F6F6;
-    cursor: pointer;
-    margin: 0px;
-    color: #2b2b2b
-}
-
-.table-checkbox {
-    border: 1px solid #9c9c9c;
-    background-color: #fff;
-}
-
-.table-checkbox-select {
-    background-color: #007FFF;
-}
-
-.table-checkbox-check {
-    content: '';
-    display: block;
-    width: 4px;
-    height: 8px;
-    border: 0px solid #ffffff;
-    border-width: 0 1px 1px 0;
-    transform: rotate(45deg);
-    margin: 1px 0 0 4px;
-}
-
-
 /* Up/down triangles that appear in the header */
 .table-icon-sort-asc, .table-icon-sort-desc {
     width: 0;
@@ -761,6 +729,79 @@ select:focus, textarea:focus, input:focus{
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
     border-top: 5px solid #525252;
+}
+
+
+/**************************************************************************/
+/** Checkbox
+/**************************************************************************/
+
+.checkbox-panel {
+    position: relative;
+    display: inline-block;
+}
+
+.checkbox-label {
+    white-space: nowrap;
+    cursor: default;
+    padding: 1px 0 0 5px;
+}
+
+.checkbox-box {
+    padding: 0px;
+    margin: 0px;
+    width: 14px;
+    height: 14px;
+    border: 1px solid #b9b9b9;
+    border-radius: 3px;
+    background-color: #f8f8f8;
+
+
+    transition: border 0.2s linear 0s, box-shadow 0.2s linear 0s;
+    -webkit-transition: all 0.20s ease-in-out;
+    -moz-transition: all 0.20s ease-in-out;
+    -ms-transition: all 0.20s ease-in-out;
+    -o-transition: all 0.20s ease-in-out;
+
+}
+
+.checkbox-check {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 9px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(40deg);
+    margin: 1px 0px 0px 4px;
+}
+
+.checkbox-select {
+    background-color: #0087ff;
+    border-color: #2a79bf;
+}
+
+.checkbox-hover {}
+.checkbox-panel:hover .checkbox-box {
+    border-color: rgba(82, 168, 236, 0.8);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6);
+}
+
+
+/**************************************************************************/
+/** Checkboxes in Table
+/**************************************************************************/
+
+.table-col .checkbox-box,
+.table-header-col .checkbox-box {
+    background-color: #fff;
+    cursor: pointer;
+}
+
+.table-col .checkbox-select,
+.table-header-col .checkbox-select {
+    background-color: #0087ff;
+    border-color: #2a79bf;
 }
 
 
@@ -830,7 +871,6 @@ select:focus, textarea:focus, input:focus{
 .date-picker-row-selected .date-picker-cell-selected {
     border-color: #fff4bf;
 }
-
 
 .date-picker-next {
     float: right;
