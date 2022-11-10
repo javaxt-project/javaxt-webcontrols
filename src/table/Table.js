@@ -385,6 +385,8 @@ javaxt.dhtml.Table = function(parent, config) {
             else{
                 var columnWidth = columnConfig.width;
                 cell.style.width = getPixels((columnWidth==null) ? 25 : columnWidth);
+                var minWidth = columnConfig.minWidth;
+                if (minWidth) cell.style.minWidth = getPixels(minWidth);
             }
 
             var x = document.createElement("div");
