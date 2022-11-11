@@ -197,6 +197,10 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         input.oninput = function(){
             if (me.isDisabled()===true) return;
             //if (config.readOnly===true) return;
+
+            var orgLabel = input.value;
+            var orgVal = input.data;
+
             var foundMatch = false;
             var filter = input.value.replace(/^\s*/, "").replace(/\s*$/, "").toLowerCase();
             for (var i=0; i<menuOptions.childNodes.length; i++){
@@ -211,7 +215,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             }
             if (!foundMatch) input.data = null;
 
-            me.onChange(input.value, input.data);
+            me.onChange(input.value, input.data, orgLabel, orgVal);
         };
         input.onpaste = input.oninput;
         input.onpropertychange = input.oninput;
@@ -535,7 +539,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
   //**************************************************************************
   /** Called when the input value changes
    */
-    this.onChange = function(text, value){};
+    this.onChange = function(label, value, prevLabel, prevValue){};
 
 
   //**************************************************************************
@@ -940,7 +944,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
 
             if (newVal!==orgVal){
                 if (orgLabel!==newLabel){
-                    me.onChange(input.value, input.data);
+                    me.onChange(input.value, input.data, orgLabel, orgVal);
                 }
             }
 
