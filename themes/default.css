@@ -123,8 +123,6 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 }
 
 .toolbar-button-label {
-    font-family: helvetica, arial, verdana, sans-serif;
-    font-size: 14px;
     white-space: nowrap;
     color: #272727;
 }

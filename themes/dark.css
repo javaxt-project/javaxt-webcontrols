@@ -128,8 +128,6 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 }
 
 .toolbar-button-label {
-    font-family: helvetica, arial, verdana, sans-serif;
-    font-size: 14px;
     white-space: nowrap;
     color: inherit;
 }
@@ -321,6 +319,17 @@ input, select, textarea { /* Allows overriding native style of form elements on 
     outline:0;
 }
 
+.form-button:disabled,
+.form-button[disabled]{
+    opacity: 0.4;
+}
+
+.form-button:disabled:hover,
+.form-button[disabled]:hover {
+    color: #97989c;
+    background-color: #353a46;
+    border: 1px solid #4c5258;
+}
 
 
 /**************************************************************************/
@@ -854,4 +863,9 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 
 .iScrollVerticalScrollbar .iScrollIndicator {
     width: 100%;
+}
+
+
+.form-input-menu .iScrollIndicator {
+    background: #4f5565;
 }
