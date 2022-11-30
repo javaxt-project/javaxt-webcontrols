@@ -266,9 +266,19 @@ javaxt.dhtml.utils = {
 
 
   //**************************************************************************
+  //** isString
+  //**************************************************************************
+  /** Return true if a given object is a string.
+   */
+    isString: function(obj){
+        return (typeof obj === "string"); // || obj instanceof String)
+    },
+
+
+  //**************************************************************************
   //** isNumber
   //**************************************************************************
-  /** Return true if a given object is number or can be parsed into a number.
+  /** Return true if a given object is a number or can be parsed into a number.
    */
     isNumber: function(n) {
         if (typeof n === "number") return true;
@@ -354,7 +364,7 @@ javaxt.dhtml.utils = {
         el.removeAttribute("style");
 
 
-        if (typeof style === 'string' || style instanceof String){
+        if (javaxt.dhtml.utils.isString(style)){
             el.className = style;
         }
         else{
@@ -381,7 +391,7 @@ javaxt.dhtml.utils = {
         if (el===null || el===0) return;
         if (style===null) return;
 
-        if (typeof style === 'string' || style instanceof String){
+        if (javaxt.dhtml.utils.isString(style)){
             if (el.className && el.className!=null) el.className += " " + style;
             else el.className = style;
         }
@@ -1277,78 +1287,4 @@ javaxt.dhtml.utils = {
         }
     }
 
-
 };
-
-
-//  //**************************************************************************
-//  //** alert
-//  //**************************************************************************
-//  /** Overrides the native javascript alert() method by creating a
-//   *  javaxt.dhtml.Alert window.
-//   */
-//    var alert = function(msg, callback, scope){
-//
-//        if (msg==null) msg = "";
-//
-//
-//      //Special case for ajax request
-//        if (!(typeof(msg) === 'string' || msg instanceof String)){
-//            if (msg.responseText){
-//                msg = (msg.responseText.length>0 ? msg.responseText : msg.statusText);
-//            }
-//        }
-//
-//        var win = javaxt.dhtml.Alert;
-//
-//        if (!win){
-//
-//            var body = document.getElementsByTagName("body")[0];
-//
-//
-//            var outerDiv = document.createElement('div');
-//            outerDiv.style.width = "100%";
-//            outerDiv.style.height = "100%";
-//            outerDiv.style.position = "relative";
-//            outerDiv.style.cursor = "inherit";
-//            var innerDiv = document.createElement('div');
-//            innerDiv.style.width = "100%";
-//            innerDiv.style.height = "100%";
-//            innerDiv.style.position = "absolute";
-//            innerDiv.style.overflowX = 'hidden';
-//            innerDiv.style.cursor = "inherit";
-//            outerDiv.appendChild(innerDiv);
-//
-//
-//            win = javaxt.dhtml.Alert = new javaxt.dhtml.Window(body, {
-//                width: 450,
-//                height: 200,
-//                valign: "top",
-//                modal: true,
-//                title: "Alert",
-//                body: outerDiv,
-//                style: {
-//                    panel: "window",
-//                    header: "window-header alert-header",
-//                    title: "window-title",
-//                    buttonBar: {
-//                        float: "right",
-//                        padding: "9px"
-//                    },
-//                    button: "window-header-button",
-//                    body: {
-//                        padding: "10px 10px 15px 15px",
-//                        verticalAlign: "top"
-//                    }
-//                }
-//            });
-//            win.div = innerDiv;
-//        }
-//
-//
-//        win.div.innerHTML = msg;
-//        win.show();
-//
-//    };
-//
-//    javaxt.dhtml.Alert = null;
