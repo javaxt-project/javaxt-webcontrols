@@ -16,10 +16,21 @@ javaxt.dhtml.WebSocket = function(config) {
 
     var me = this;
     var defaultConfig = {
-        onConnect : function(){},
-        onFailure : function(code, reason){},
-        onMessage : function(msg){},
+
+      /** Relative path the to websocket endpoint (e.g. "/updates"). You do not
+       *  need to specify a full url with a "ws://" or "wss://" prefix.
+       */
         url: "",
+
+      /** Interval used to check whether the websocket is still alive and send
+       *  pink messages. Value is in milliseconds. Default is 15000 (15 seconds).
+       */
+        keepAlive: 15000,
+
+
+      /** Class used to debug the websocket. This config is not required to use
+       *  this class. Implementations must implement an append() method.
+       */
         debugr : {
             append: function(msg){
                 //console.log(msg);
@@ -29,14 +40,8 @@ javaxt.dhtml.WebSocket = function(config) {
 
 
     var socket;
-    var timer, keepAliveTimer;
-    var statusTimer, lastMessage;
+    var timer;
     var connectionSuccess = false;
-    var debugr = {
-        append: function(msg){
-            //console.log(msg);
-        }
-    };
 
 
   //**************************************************************************
@@ -55,36 +60,63 @@ javaxt.dhtml.WebSocket = function(config) {
         config = clone;
 
 
+      //Update events handlers
+        for (var key in config) {
+            if (config.hasOwnProperty(key)){
+                if (typeof config[key] == "function") {
+                    if (me[key] && typeof me[key] == "function"){
+                        me[key] = config[key];
+                    }
+                }
+            }
+        }
+
+
+
+      //Get debugger
         var debugr = config.debugr;
 
 
+      //Set url to websocket endpoint
         var protocol = window.location.protocol.toLowerCase();
         if (protocol.indexOf("https")===0) protocol = "wss";
         else protocol = "ws";
         var url = protocol + '://' + window.location.host;
-        if (config.url.indexOf("/")!=0) url += "/";
-        url += config.url;
+        if (config.url.indexOf("/")!==0) url += "/";
 
-
-
-        var keepAlive = function() {
-            var timeout = 20000;
-            if (socket.readyState == socket.OPEN) {
-                socket.send('');
+        var path = config.url;
+        if (path){
+            var idx = path.indexOf("//");
+            if (idx>=0){
+                path = path.substring(idx+2);
+                idx = path.indexOf("/");
+                if (idx>-1) path = path.substring(idx+1);
             }
-            keepAliveTimer = setTimeout(keepAlive, timeout);
-        };
+            url += path;
+        }
 
 
 
 
 
-        var start = function(){
-            connectionSuccess = false;
+        var connect = function(){
             var connectionStatusTimer;
 
-            socket = new WebSocket(url);
 
+            if (timer) clearInterval(timer);
+            timer = setInterval(function() {
+                if (socket){
+                    if (socket.readyState === WebSocket.OPEN) {
+                        socket.send('');
+                    }
+                    else if (socket.readyState === WebSocket.CLOSED){
+                        connect();
+                    }
+                }
+            }, config.keepAlive);
+
+
+            socket = new WebSocket(url);
             socket.onopen = function(){
                 debugr.append("onopen");
 
@@ -95,9 +127,8 @@ javaxt.dhtml.WebSocket = function(config) {
                     connectionSuccess = true;
                 }, 500);
 
-                keepAlive();
 
-                config.onConnect();
+                me.onConnect();
             };
 
 
@@ -106,8 +137,7 @@ javaxt.dhtml.WebSocket = function(config) {
                 connectionSuccess = true;
                 var msg = event.data;
                 debugr.append(msg);
-                lastMessage = msg;
-                config.onMessage(msg);
+                me.onMessage(msg);
             };
 
 
@@ -116,16 +146,16 @@ javaxt.dhtml.WebSocket = function(config) {
                 debugr.append("onclose");
                 debugr.append(event.code + ": " + event.reason);
 
-                if (keepAliveTimer) clearTimeout(keepAliveTimer);
-                if (connectionSuccess){
-                    if (timer) check(); //Reconnect on disconnect
+
+                if (connectionSuccess){ //Reconnect!
+                    connect();
                 }
                 else{ //Websocket failed!
                     debugr.append("Websocket failed");
                     socket = null;
                     clearTimeout(timer);
                     clearTimeout(connectionStatusTimer);
-                    config.onFailure(event.code, event.reason);
+                    me.onFailure(event.code, event.reason);
                 }
             };
 
@@ -137,24 +167,45 @@ javaxt.dhtml.WebSocket = function(config) {
 
 
 
-        function check(){
-            if (!socket || socket.readyState === WebSocket.CLOSED) start();
-        }
-
-        start();
-
-        timer = setInterval(check, 15000);
+        connect();
     };
+
+
+  //**************************************************************************
+  //** onConnect
+  //**************************************************************************
+  /** Called whenever a websocket connection is established with the server.
+   *  Note that this event will be fired whenever a connection is dropped and
+   *  then restablished.
+   */
+    this.onConnect = function(){};
+
+
+  //**************************************************************************
+  //** onMessage
+  //**************************************************************************
+  /** Called whenever a message is recieved from the server.
+   */
+    this.onMessage = function(msg){};
+
+
+  //**************************************************************************
+  //** onFailure
+  //**************************************************************************
+  /** Called whenever there is a problem connecting or reconnecting to the
+   *  server.
+   */
+    this.onFailure = function(code, reason){};
 
 
   //**************************************************************************
   //** stop
   //**************************************************************************
+  /** Used to stop listening to events and close the websocket
+   */
     this.stop = function(){
         connectionSuccess = false;
         if (timer) clearInterval(timer);
-        if (keepAliveTimer) clearTimeout(keepAliveTimer);
-        if (statusTimer) clearTimeout(statusTimer);
         if (socket) socket.close();
     };
 
