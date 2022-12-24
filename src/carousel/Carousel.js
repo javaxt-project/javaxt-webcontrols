@@ -5,7 +5,7 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 //**  Carousel
 //******************************************************************************
 /**
- *   Component used to render two or more panels in a horizonal layout. Users 
+ *   Component used to render two or more panels in a horizonal layout. Users
  *   can cycle through the panels using the back() and next() functions. The
  *   carousel can store a fixed set of panels or you can create the illusion
  *   of having infinite panels by updating panels when they are out of view.
@@ -23,58 +23,58 @@ javaxt.dhtml.Carousel = function(parent, config) {
     var resizeListener;
 
     var defaultConfig = {
-        
+
       /** If true, will animate transitions when calling the back() and next()
        *  functions.
        */
         animate: true,
-        
-        
-      /** Time to transition between panels, in milliseconds. Only applicable 
+
+
+      /** Time to transition between panels, in milliseconds. Only applicable
        *  when "animate" is set to true.
        */
         animationSteps: 250.0,
-        
-        
+
+
       /** Transition effect. Only applicable when "animate" is set to true and
        *  an "fx" config is given. See the javaxt.dhtml.Effects class for
        *  a list of options.
        */
         transitionEffect: "linear",
-        
-        
-      /** An instance of a javaxt.dhtml.Effects class used to animate 
+
+
+      /** An instance of a javaxt.dhtml.Effects class used to animate
        *  transitions. Only used when "animate" is set to true.
        */
         fx: null,
-        
-        
+
+
       /** By default, a user cannot go past the last panel in the carousel when
        *  calling next() or past the first panel when calling back(). However,
-       *  when "loop" is set to true, users can go past the first/last panels 
+       *  when "loop" is set to true, users can go past the first/last panels
        *  by cloning the "next" or "previous" panel and appending it to
        *  the carousel so you can cycle through elements.
        */
         loop: false,
-        
-        
+
+
       /** If true, will move the next panel over the current panel during
        *  transitions. Only applicable when "animate" is set to true.
        */
         slideOver: false,
-        
-        
-      /** If true, will allow touchscreen users to slide back and forth through 
+
+
+      /** If true, will allow touchscreen users to slide back and forth through
        *  the panels using touch gestures.
        */
         drag: true,
-        
-        
+
+
       /** Currently unused
        */
         visiblePanels: 1,
-        
-        
+
+
       /** Amount of padding between panels, in pixels.
        */
         padding: 0
@@ -100,6 +100,19 @@ javaxt.dhtml.Carousel = function(parent, config) {
       //Merge clone with default config
         merge(clone, defaultConfig);
         config = clone;
+
+
+      //Update event handlers
+        for (var key in config) {
+            if (config.hasOwnProperty(key)){
+                if (typeof config[key] == "function") {
+                    if (me[key] && typeof me[key] == "function"){
+                        me[key] = config[key];
+                    }
+                }
+            }
+        }
+
 
 
       //Remove anything found inside the parent
@@ -247,6 +260,14 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
 
   //**************************************************************************
+  //** onResize
+  //**************************************************************************
+  /** Called after the carousel has been resized
+   */
+    this.onResize = function(){};
+
+
+  //**************************************************************************
   //** add
   //**************************************************************************
   /** Used to add a panel to the carousel
@@ -370,6 +391,9 @@ javaxt.dhtml.Carousel = function(parent, config) {
         }
 
 
+        me.onResize();
+
+
       //Update position
         if (sliding) return;
         innerDiv.style.left = -(currPanelIdx*width)+"px";
@@ -441,7 +465,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
    *  active panel will slide left.
    */
     this.next = function(){
-        
+
         if (config.animate===true){
             if (sliding) return;
             sliding = true;
@@ -486,7 +510,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
             div.style.display = "";
             return s;
         };
-        
+
         var lowerDiv = function(div){
             div.style.display = "inline-block";
             div.style.position = "relative";
@@ -496,13 +520,13 @@ javaxt.dhtml.Carousel = function(parent, config) {
         };
 
 
-        
+
         var nextPanel = currPanel.nextSibling;
         if (nextPanel) {
-            
+
             nextDiv = nextPanel.childNodes[0].childNodes[0];
 
-            
+
             me.beforeChange(currDiv, nextDiv);
 
             var onChange = function(){
@@ -510,26 +534,26 @@ javaxt.dhtml.Carousel = function(parent, config) {
                 currPanel = nextPanel;
                 sliding = false;
             };
-            
+
 
             w = nextPanel.offsetWidth;
 
             if (config.slideOver===true && config.animate===true){
-                
+
               //Update nextPanel to be an absolute div
                 var s = raiseDiv(nextPanel);
 
               //Slide nextPanel over currPanel
                 slide(nextPanel, s, s-w, new Date().getTime(), config.animationSteps, function(){
-                    
+
                   //Slide innerDiv
                     var end = start-w;
                     innerDiv.style.left = end+"px";
                     currPanel.style.marginRight = "0px";
-                    
+
                   //Update nextPanel to it's original state (e.g. relative div)
                     lowerDiv(nextPanel);
-                    
+
                   //Call onChange
                     onChange();
                 });
@@ -546,9 +570,9 @@ javaxt.dhtml.Carousel = function(parent, config) {
                 var clone = firstDiv.cloneNode(true);
                 innerDiv.style.width = (innerDiv.offsetWidth+w)+"px";
                 innerDiv.appendChild(clone);
-                
+
                 nextDiv = clone.childNodes[0].childNodes[0];
-                
+
                 me.beforeChange(currDiv, nextDiv);
 
                 var onChange = function(){
@@ -566,7 +590,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
                   //Update clone to be an absolute div
                     var s = raiseDiv(clone);
-                    
+
                   //Slide nextPanel over currPanel
                     slide(clone, s, s-w, new Date().getTime(), config.animationSteps, function(){
 
@@ -579,7 +603,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
                       //Call onChange
                         onChange();
                     });
-                    
+
                 }
                 else{
                     next(onChange);
@@ -608,7 +632,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
         var start, end, w;
         var currDiv = currPanel.childNodes[0].childNodes[0];
         var nextDiv;
-        
+
 
         var back = function(callback){
 
@@ -622,7 +646,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
         };
 
         var raiseDiv = function(div){
-            
+
           //Get y-offset of div
             var s = 0;
             for (var i=0; i<innerDiv.childNodes.length; i++){
@@ -642,7 +666,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
             return s;
         };
-        
+
         var lowerDiv = function(div){
             div.style.display = "inline-block";
             div.style.position = "relative";
@@ -654,9 +678,9 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
         var nextPanel = currPanel.previousSibling;
         if (nextPanel){
-            
+
             nextDiv = nextPanel.childNodes[0].childNodes[0];
-            
+
             me.beforeChange(currDiv, nextDiv);
 
             var onChange = function(){
@@ -671,20 +695,20 @@ javaxt.dhtml.Carousel = function(parent, config) {
             end = start + w;
 
             if (config.slideOver===true && config.animate===true){
-                
+
               //Update nextPanel to be an absolute div
                 var s = raiseDiv(nextPanel);
 
               //Slide nextPanel over currPanel
                 slide(nextPanel, s, s+w, new Date().getTime(), config.animationSteps, function(){
-                    
+
                   //Slide innerDiv
                     innerDiv.style.left = end+"px";
                     currPanel.style.marginLeft = "0px";
-                    
+
                   //Update nextPanel to it's original state (e.g. relative div)
                     lowerDiv(nextPanel);
-                    
+
                   //Call onChange
                     onChange();
                 });
@@ -701,11 +725,11 @@ javaxt.dhtml.Carousel = function(parent, config) {
                 var clone = lastDiv.cloneNode(true);
                 innerDiv.style.width = (innerDiv.offsetWidth+w)+"px";
                 innerDiv.insertBefore(clone, innerDiv.firstChild);
-                
+
                 nextDiv = clone.childNodes[0].childNodes[0];
 
                 me.beforeChange(currDiv, nextDiv);
-                
+
                 var onChange = function(){
                     me.onChange(nextDiv, currDiv);
                     currPanel = clone;
@@ -717,17 +741,17 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
 
                 if (config.slideOver===true && config.animate===true){
-                    
+
                   //Update clone to be an absolute div
                     raiseDiv(clone);
                     var s = -w;
                     clone.style.left = s + "px";
-                    
-                    
+
+
                     innerDiv.style.width = (innerDiv.offsetWidth-w)+"px";
                     currPanel.style.marginLeft = "0px";
-                    
-                    
+
+
                   //Slide clone over currPanel
                     slide(clone, s, s+w, new Date().getTime(), config.animationSteps, function(){
 
