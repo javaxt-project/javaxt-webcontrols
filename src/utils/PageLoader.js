@@ -32,40 +32,44 @@ javaxt.dhtml.PageLoader = function(config) {
    *  document found at a given url. Dynamically loads any css stylesheets and
    *  javascripts sourced in the html document.
    */
-    this.loadPage = function(url, callback, onFail){
-        me.load(url, function(html, title, inlineScripts){
+    this.loadPage = function(url, onSuccess, onFail, onUpdate){
+        me.load(url,
+            function(html, title, inlineScripts){
 
-          //Set title
-            document.title = title;
-
-
-          //Update body
-            var body = document.getElementsByTagName("body")[0];
-            body.innerHTML = html;
+              //Set title
+                document.title = title;
 
 
-          //Add inline scripts
-            for (var i=0; i<inlineScripts.length; i++){
-                var script = inlineScripts[i].firstChild.nodeValue;
-                var type = inlineScripts[i].getAttribute("type");
-                if (type=="module"){
-                    script = script.replace("//<![CDATA[","").replace("//]]>","");
-                    var s = document.createElement("script");
-                    s.setAttribute("type", type);
-                    s.innerHTML = script;
-                    body.appendChild(s);
+              //Update body
+                var body = document.getElementsByTagName("body")[0];
+                body.innerHTML = html;
+
+
+              //Add inline scripts
+                for (var i=0; i<inlineScripts.length; i++){
+                    var script = inlineScripts[i].firstChild.nodeValue;
+                    var type = inlineScripts[i].getAttribute("type");
+                    if (type=="module"){
+                        script = script.replace("//<![CDATA[","").replace("//]]>","");
+                        var s = document.createElement("script");
+                        s.setAttribute("type", type);
+                        s.innerHTML = script;
+                        body.appendChild(s);
+                    }
+                    else{
+                        eval(script);
+                    }
                 }
-                else{
-                    eval(script);
-                }
-            }
 
 
-          //Dispatch onload event. Warning: ES6 modules with imports may not be ready...
-            dispatchEvent("load");
+              //Dispatch onload event. Warning: ES6 modules with imports may not be ready...
+                dispatchEvent("load");
 
-            if (callback) callback.apply(me, []);
-        }, onFail);
+                if (onSuccess) onSuccess.apply(me, []);
+            },
+            onFail,
+            onUpdate
+        );
     };
 
 
@@ -78,7 +82,7 @@ javaxt.dhtml.PageLoader = function(config) {
    *  is up to the caller to decide what to do with the html (e.g. replace
    *  element) and when to execute the inline scripts.
    */
-    this.load = function(url, callback, onFail){
+    this.load = function(url, onSuccess, onFail, onUpdate){
         get(url, function(html){
 
             var div = document.createElement("div");
@@ -151,10 +155,15 @@ javaxt.dhtml.PageLoader = function(config) {
             div = null;
 
 
-          //Load includes and call the callback
-            loadIncludes(css, externalScripts, function(){
-                if (callback) callback.apply(me, [html, title, inlineScripts]);
-            });
+          //Load includes
+            loadIncludes(
+                css,
+                externalScripts,
+                function(){
+                    if (onSuccess) onSuccess.apply(me, [html, title, inlineScripts]);
+                },
+                onUpdate
+            );
 
         }, onFail);
     };
@@ -167,7 +176,7 @@ javaxt.dhtml.PageLoader = function(config) {
    *  any css stylesheets and javascripts sourced in the xml document. Returns
    *  the name and main function used to instantiate the application.
    */
-    this.loadApp = function(url, callback, onFail){
+    this.loadApp = function(url, onSuccess, onFail, onUpdate){
         get(url, function(text, xml){
 
           //Parse app info
@@ -197,16 +206,22 @@ javaxt.dhtml.PageLoader = function(config) {
             }
 
 
-          //Load includes and call the callback
-            loadIncludes(css, scripts, function(){
-                if (callback){
-                    appInfo.init = function(){
-                        var cls = stringToFunction(this.main);
-                        return newInstance(cls).apply(arguments);
-                    };
-                    callback.apply(me, [appInfo, xml]);
-                }
-            });
+          //Load includes and call the onSuccess callback
+            loadIncludes(
+                css,
+                scripts,
+                function(){
+                    if (onSuccess){
+                        appInfo.init = function(){
+                            var cls = stringToFunction(this.main);
+                            return newInstance(cls).apply(arguments);
+                        };
+                        onSuccess.apply(me, [appInfo, xml]);
+                    }
+                },
+                onUpdate
+            );
+
         }, onFail);
     };
 
@@ -216,7 +231,7 @@ javaxt.dhtml.PageLoader = function(config) {
   //**************************************************************************
   /** Dynamically loads javascript and stylesheets.
    */
-    var loadIncludes = function(css, scripts, callback){
+    var loadIncludes = function(css, scripts, onComplete, onUpdate){
 
         parseIncludes();
 
@@ -274,13 +289,23 @@ javaxt.dhtml.PageLoader = function(config) {
             var loadResource = function(obj){
 
                 var processResponse = function(){
-                    log(
-                        Math.round((1-(arr.length/t))*100) + "%"
-                    );
+
+                    var percentComplete = Math.round((1-(arr.length/t))*100);
+                    if (percentComplete===100 && arr.length>0) percentComplete = 99;
+                    log(percentComplete + "%");
+
+                    if (onUpdate!=null){
+                        onUpdate({
+                            totalIncludes: t,
+                            remainingIncludes: arr.length,
+                            percentComplete: percentComplete
+                        });
+                    }
+
 
                     if (arr.length>0) loadResource(arr.shift());
                     else {
-                        if (callback!=null) callback.apply(me, []);
+                        if (onComplete!=null) onComplete.apply(me, []);
                     }
                 };
 
@@ -297,7 +322,7 @@ javaxt.dhtml.PageLoader = function(config) {
             loadResource(arr.shift());
         }
         else{
-            if (callback!=null) callback.apply(me, []);
+            if (onComplete!=null) onComplete.apply(me, []);
         }
 
     };
