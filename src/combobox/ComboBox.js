@@ -567,7 +567,21 @@ javaxt.dhtml.ComboBox = function(parent, config) {
   //** getOptions
   //**************************************************************************
   /** Returns an array of all the options currently available in the dropdown
-   *  menu.
+   *  menu. Elements in the array will include a "text" and "value" for each
+   *  entry. Example:
+   <pre>
+    [
+      {
+        text: "United States",
+        value: "US"
+      },
+      {
+        text: "Mexico",
+        value: "MX"
+      },
+      ...
+    ]
+   </pre>
    */
     this.getOptions = function(){
         var arr = [];
@@ -869,7 +883,12 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         overflowDiv.style.position = "relative";
 
         if (config.addNewOption===true){
-            overflowDiv.style.overflowY = '';
+            if (typeof IScroll !== 'undefined'){
+                //console.log("removeOverflow?");
+            }
+            else{
+                overflowDiv.style.overflowY = '';
+            }
         }
     };
 
