@@ -19,10 +19,11 @@ javaxt.dhtml.Callout = function(parent, config) {
     var defaultConfig = {
 
         position: "absolute",
-        arrowLocation: "left",
-        arrowAlignment: "top",
 
 
+      /** Style for individual elements within the component. Note that you can
+       *  provide CSS class names instead of individual style definitions.
+       */
         style: {
 
             panel: {
@@ -50,8 +51,6 @@ javaxt.dhtml.Callout = function(parent, config) {
   //**************************************************************************
   //** Constructor
   //**************************************************************************
-  /** Creates a new instance of this class. */
-
     var init = function(){
 
       //Clone the config so we don't modify the original config object
@@ -498,6 +497,8 @@ javaxt.dhtml.Callout = function(parent, config) {
   //**************************************************************************
   //** isVisible
   //**************************************************************************
+  /** Returns true of the callout is visible.
+   */
     this.isVisible = function(){
         return (div.style.display !== 'none');
     };
@@ -506,12 +507,16 @@ javaxt.dhtml.Callout = function(parent, config) {
   //**************************************************************************
   //** onShow
   //**************************************************************************
+  /** Called whenever the callout is made visible.
+   */
     this.onShow = function(){};
 
 
   //**************************************************************************
   //** onHide
   //**************************************************************************
+  /** Called whenever the callout is hidden.
+   */
     this.onHide = function(){};
 
 
