@@ -390,7 +390,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
       //Add event listener to hide menu if the client clicks outside of the menu div
         var hideMenu = function(e){
             if (!mainDiv.contains(e.target)){
-                me.hideMenu();
+                me.hideMenu(false);
             }
         };
         if (document.addEventListener) { // For all major browsers, except IE 8 and earlier
@@ -566,9 +566,9 @@ javaxt.dhtml.ComboBox = function(parent, config) {
   //**************************************************************************
   //** getOptions
   //**************************************************************************
-  /** Returns an array of all the options currently available in the dropdown
-   *  menu. Elements in the array will include a "text" and "value" for each
-   *  entry. Example:
+  /** Returns an array of all the menu options currently available in the
+   *  dropdown menu. Elements in the array will include a "text", "value",
+   *  and "el" for each entry. Example:
    <pre>
     [
       {
@@ -591,7 +591,8 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             if (!text) text = div.innerText;
             arr.push({
                 text: text,
-                value: div.value
+                value: div.value,
+                el: div
             });
         }
         return arr;
@@ -799,7 +800,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
                 input.hide();
             }
             else{
-                input.focus();
+                if (arguments[0]!==false) input.focus();
             }
         }
     };
@@ -944,7 +945,8 @@ javaxt.dhtml.ComboBox = function(parent, config) {
   //**************************************************************************
   //** add
   //**************************************************************************
-  /** Used to add an entry to the dropdown menu.
+  /** Used to add an entry to the dropdown menu. Returns the new menu item as
+   *  a DOM element with custom methods like setLabel()
    *  @param label Text or element to display in the dropdown menu. The label
    *  will appear in the input when menu item is selected. This parameter is
    *  required.
@@ -955,15 +957,21 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         var div = document.createElement('div');
         setStyle(div, "option");
 
-        if (isElement(label)){
-            div.appendChild(label);
-        }
-        else{
-            label = getText(label);
-            div.innerHTML = label;
-        }
+        div.setLabel = function(label){
+            if (isElement(label)){
+                div.appendChild(label);
+            }
+            else{
+                label = getText(label);
+                div.innerHTML = label;
+            }
+            div.text = label;
+            return label;
+        };
+        div.setText = div.setLabel;
 
-        div.text = label;
+        label = div.setLabel(label);
+
         div.value = (typeof value === "undefined") ? label : value;
         div.tabIndex = -1; //allows the div to have focus
         div.onclick = function(){
@@ -1010,6 +1018,8 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         };
 
         menuOptions.appendChild(div);
+
+        return div;
     };
 
 
