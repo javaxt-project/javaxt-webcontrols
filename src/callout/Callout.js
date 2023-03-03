@@ -267,7 +267,8 @@ javaxt.dhtml.Callout = function(parent, config) {
   //**************************************************************************
   //** getSize
   //**************************************************************************
-  /** Returns the width and height of the callout. */
+  /** Returns the width and height of the callout.
+   */
     this.getSize = function(){
         var size;
 
@@ -400,6 +401,7 @@ javaxt.dhtml.Callout = function(parent, config) {
 
 
           //Set vertical position of the notch, div, and callout
+            div.style.left = x + "px";
             div.style.top = ((y-div.offsetHeight)-notchHeight) + "px";
             callout.style.top = "0px";
             notch.style.top = (div.offsetHeight-1) + "px"; //-1 for the border width
@@ -420,6 +422,7 @@ javaxt.dhtml.Callout = function(parent, config) {
 
 
           //Set vertical position of the notch, div, and callout
+            div.style.left = x + "px";
             div.style.top = y + "px";
             callout.style.top = notchHeight + "px";
             notch.style.top = "1px"; //+1 for border width
@@ -479,7 +482,6 @@ javaxt.dhtml.Callout = function(parent, config) {
 
         me.show();
     };
-
 
 
   //**************************************************************************
