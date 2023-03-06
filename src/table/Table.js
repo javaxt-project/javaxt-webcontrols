@@ -199,31 +199,29 @@ javaxt.dhtml.Table = function(parent, config) {
             if (e.keyCode===38 || e.keyCode===40){
 
                 var lastSelectedRow, lastRow;
-                var selectPrevious = function(){
-                    var prevRow = lastSelectedRow.previousSibling;
-                    if (prevRow) prevRow.click();
-                };
                 me.forEachRow(function (row) {
                     if (row.selected){
                         lastSelectedRow = row;
                     }
-                    else{
-                        if (lastSelectedRow){
-                            if (e.keyCode===40){ //down arrow
-                                row.click();
-                            }
-                            else{ //up arrow
-                                selectPrevious();
-                            }
-                            return true;
-                        }
-                    }
                     lastRow = row;
                 });
 
-                if (e.keyCode===38 && lastRow===lastSelectedRow){
-                    selectPrevious();
+
+                if (lastSelectedRow){
+                    var row;
+                    if (e.keyCode===40){ //down arrow
+                        row = lastSelectedRow.nextSibling;
+                    }
+                    else{ //up arrow
+                        row = lastSelectedRow.previousSibling;
+                    }
+
+                    if (row){
+                        me.scrollTo(row);
+                        row.click();
+                    }
                 }
+
             }
 
             me.onKeyEvent(e.keyCode, {
@@ -985,11 +983,67 @@ javaxt.dhtml.Table = function(parent, config) {
   //**************************************************************************
   //** scrollTo
   //**************************************************************************
+  /** Used to scroll to a specific x/y location when the table has an
+   *  overflow.
+   *  @param x Accepts an x position (integer) or a row in the table
+   *  @param y Accepts a y position. Ignored if x is a row.
+   */
     this.scrollTo = function(x, y){
-        bodyDiv.scrollTop = y;
 
-        var maxScrollPosition = bodyDiv.scrollHeight - bodyDiv.clientHeight;
-        me.onScroll(y, maxScrollPosition, bodyDiv.offsetHeight);
+
+      //If x is a row, compute the y offset
+        if (isElement(x)){
+            var bodyRect = javaxt.dhtml.utils.getRect(bodyDiv);
+            var rowRect = javaxt.dhtml.utils.getRect(x);
+
+            var padding = rowRect.height/2;
+            var padRect = {
+                left: bodyRect.left,
+                right: bodyRect.right,
+                top: bodyRect.top+padding,
+                bottom: bodyRect.bottom-padding
+            };
+
+
+            if (!javaxt.dhtml.utils.intersects(padRect, rowRect)){
+
+                var scrollInfo = me.getScrollInfo();
+                var ry = rowRect.top + scrollInfo.y;
+
+                if (ry>bodyRect.bottom){
+
+                    //console.log("scroll down!");
+                    y = ry+rowRect.height-bodyRect.bottom;
+
+                }
+                else if (ry+rowRect.height>bodyRect.top){
+
+                    //console.log("scroll up!");
+                    y = ry-bodyRect.top;
+
+                }
+                else{
+                    //console.log("scroll?");
+                }
+            }
+        }
+
+
+        if (isNaN(y)) return;
+
+
+      //Update the scroll position
+        if (me.iScroll){
+            me.iScroll.scrollTo(0, -y);
+        }
+        else{
+            bodyDiv.scrollTop = y;
+        }
+
+
+      //Fire the onScroll event
+        var maxY = bodyDiv.scrollHeight - bodyDiv.clientHeight;
+        me.onScroll(y, maxY, bodyRect.height);
     };
 
 
@@ -998,7 +1052,7 @@ javaxt.dhtml.Table = function(parent, config) {
   //**************************************************************************
     this.getScrollInfo = function(){
         return {
-            y: bodyDiv.scrollTop,
+            y: me.iScroll ? -me.iScroll.y : bodyDiv.scrollTop,
             h: bodyDiv.offsetHeight,
             maxY: bodyDiv.scrollHeight - bodyDiv.clientHeight
         };
