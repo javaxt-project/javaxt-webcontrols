@@ -52,9 +52,17 @@ javaxt.dhtml.DataGrid = function(parent, config) {
        */
         style: defaultStyle,
 
-
+      /** The URL endpoint that this component uses to fetch records
+       */
         url: "",
+
+      /** JSON object with key/value pairs that are appended to the URL
+       */
         params: null,
+
+      /** Data to send in the body of the request. This parameter is optional.
+       *  If payload is not null, the component executes a POST request.
+       */
         payload: null,
 
 
@@ -426,7 +434,8 @@ javaxt.dhtml.DataGrid = function(parent, config) {
             //console.log(startRow + "/" + endRow + " (Page: " + currPage + ")");
 
 
-            if (y===maxY){
+            var d = Math.abs(maxY-y);
+            if (d<rowHeight){ //if (y===maxY){
                 if (!eof) load(currPage);
             }
 
