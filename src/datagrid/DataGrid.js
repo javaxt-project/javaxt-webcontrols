@@ -429,6 +429,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
             var endRow = Math.ceil((y+h)/rowHeight);
 
 
+            var prevPage = currPage;
             setPage(Math.ceil(endRow/config.limit));
 
             //console.log(startRow + "/" + endRow + " (Page: " + currPage + ")");
@@ -436,7 +437,10 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
             var d = Math.abs(maxY-y);
             if (d<rowHeight){ //if (y===maxY){
-                if (!eof) load(currPage);
+                if (!eof){
+                    if (currPage===prevPage) setPage(currPage+1);
+                    load(currPage);
+                }
             }
 
             me.onScroll();
@@ -1193,6 +1197,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
               //Parse response
                 var records = config.parseResponse.apply(me, [request]);
+                console.log(records.length, config.limit);
                 if (records.length===0){
                     eof = true;
                 }
