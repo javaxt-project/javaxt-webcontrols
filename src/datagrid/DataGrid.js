@@ -1197,7 +1197,6 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
               //Parse response
                 var records = config.parseResponse.apply(me, [request]);
-                console.log(records.length, config.limit);
                 if (records.length===0){
                     eof = true;
                 }
