@@ -15,6 +15,7 @@ javaxt.dhtml.Form = function (parent, config) {
     var me = this;
 
     var form;
+    var outerTable;
     var formTable, buttonRow;
     var verticalSpacing;
 
@@ -173,61 +174,24 @@ javaxt.dhtml.Form = function (parent, config) {
 
 
       //Create table to store the form and buttons (2 rows, 1 column)
-        var outerTable = createTable("100%", "100%", me.className);
+        outerTable = createTable("100%", "100%", me.className);
         form.appendChild(outerTable.parentNode);
-        var formRow, formCell, buttonCell;
-        formRow = document.createElement('tr');
-        formCell = document.createElement('td');
-        buttonRow = document.createElement('tr');  //buttonRow is a global variable and is redefined below...
-        buttonCell = document.createElement('td');
 
+        var formRow = document.createElement('tr');
         formRow.setAttribute("desc", "formRow");
-        buttonRow.setAttribute("desc", "buttonRow");
-
-        formRow.appendChild(formCell);
         outerTable.appendChild(formRow);
-        buttonRow.appendChild(buttonCell);
-        outerTable.appendChild(buttonRow);
 
+        var formCell = document.createElement('td');
+        formRow.appendChild(formCell);
         setStyle(formCell, "form");
         formCell.style.width = "100%";
         formCell.style.height = "100%";
         formCell.style.verticalAlign = "top";
 
-        setStyle(buttonCell, "buttons");
-
-
-
 
       //Create table for the form inputs
         formTable = createTable("100%");
         formCell.appendChild(formTable.parentNode);
-
-
-
-      //Create table for the buttons
-        var buttonTable = createTable();
-        var buttonDiv = document.createElement('div');
-        buttonDiv.style.display = "inline-block";
-        buttonCell.appendChild(buttonDiv);
-        buttonDiv.appendChild(buttonTable.parentNode);
-
-        var align = config.style.buttons.textAlign;
-        if (align===null) align = "right";
-        else align = align.toLowerCase();
-
-        if (align==="fit"){
-            buttonTable.parentNode.style.width = "100%";
-        }
-        else if (align==="right"){
-            buttonTable.parentNode.align = "right";
-        }
-        else if (align==="center"){
-            buttonTable.parentNode.align = "center";
-        }
-
-        buttonRow = document.createElement("tr");
-        buttonTable.appendChild(buttonRow);
 
 
       //Add inputs defined in the config
@@ -242,7 +206,6 @@ javaxt.dhtml.Form = function (parent, config) {
                 }
             }
         }
-
 
 
       //Add buttons defined in the config
@@ -270,12 +233,29 @@ javaxt.dhtml.Form = function (parent, config) {
 
 
   //**************************************************************************
+  //** onChange
+  //**************************************************************************
+  /** Called whenever a field changes value in the form
+   */
+    this.onChange = function(formField){};
+
+
+  //**************************************************************************
+  //** onResize
+  //**************************************************************************
+  /** Called whenever the form is resized
+   */
+    this.onResize = function(){};
+
+
+  //**************************************************************************
   //** resize
   //**************************************************************************
     this.resize = function(){
         for (var i=0; i<groups.length; i++){
             updateGroup(groups[i]);
         }
+        me.onResize();
     };
 
 
@@ -414,6 +394,46 @@ javaxt.dhtml.Form = function (parent, config) {
   //** addButton
   //**************************************************************************
     this.addButton = function (name, enabled, onclick){
+
+
+      //Create buttonRow as needed
+        if (!buttonRow){
+
+            buttonRow = document.createElement('tr');  //buttonRow is a global variable and is redefined below...
+            buttonRow.setAttribute("desc", "buttonRow");
+            outerTable.appendChild(buttonRow);
+
+            var buttonCell = document.createElement('td');
+            setStyle(buttonCell, "buttons");
+            buttonRow.appendChild(buttonCell);
+
+
+          //Create table for the buttons
+            var buttonTable = createTable();
+            var buttonDiv = document.createElement('div');
+            buttonDiv.style.display = "inline-block";
+            buttonCell.appendChild(buttonDiv);
+            buttonDiv.appendChild(buttonTable.parentNode);
+
+            var align = config.style.buttons.textAlign;
+            if (align===null) align = "right";
+            else align = align.toLowerCase();
+
+            if (align==="fit"){
+                buttonTable.parentNode.style.width = "100%";
+            }
+            else if (align==="right"){
+                buttonTable.parentNode.align = "right";
+            }
+            else if (align==="center"){
+                buttonTable.parentNode.align = "center";
+            }
+
+            buttonRow = document.createElement("tr");
+            buttonTable.appendChild(buttonRow);
+        }
+
+
 
         var td = document.createElement('td');
         if (name.toLowerCase()==="spacer"){
@@ -898,6 +918,9 @@ javaxt.dhtml.Form = function (parent, config) {
   //**************************************************************************
   //** getGroups
   //**************************************************************************
+  /** Returns an array of groups found in the form. Each entry in the array
+   *  has a name and custom methods for the group.
+   */
     this.getGroups = function(){
         return groups;
     };
@@ -1221,7 +1244,6 @@ javaxt.dhtml.Form = function (parent, config) {
 //    };
 
 
-    this.onChange = function(formField){};
 
 
   //**************************************************************************
