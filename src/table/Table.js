@@ -328,6 +328,9 @@ javaxt.dhtml.Table = function(parent, config) {
                 if (config.style.iscroll) setStyle(me.iScroll, "iscroll");
 
 
+                me.iScroll.on('scrollStart', function(){
+                    onScroll(-me.iScroll.y);
+                });
 
                 me.iScroll.on('scrollEnd', function(){
                     onScroll(-me.iScroll.y);
