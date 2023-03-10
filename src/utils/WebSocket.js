@@ -148,6 +148,7 @@ javaxt.dhtml.WebSocket = function(config) {
 
 
                 if (connectionSuccess){ //Reconnect!
+                    me.onDisconnect();
                     connect();
                 }
                 else{ //Websocket failed!
@@ -156,6 +157,7 @@ javaxt.dhtml.WebSocket = function(config) {
                     clearTimeout(timer);
                     clearTimeout(connectionStatusTimer);
                     me.onFailure(event.code, event.reason);
+                    me.onDisconnect();
                 }
             };
 
@@ -179,6 +181,14 @@ javaxt.dhtml.WebSocket = function(config) {
    *  then restablished.
    */
     this.onConnect = function(){};
+
+
+  //**************************************************************************
+  //** onDisconnect
+  //**************************************************************************
+  /** Called whenever a websocket connection is closed or severed.
+   */
+    this.onDisconnect = function(){};
 
 
   //**************************************************************************
