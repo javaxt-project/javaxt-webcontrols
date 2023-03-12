@@ -25,9 +25,24 @@ javaxt.dhtml.Table = function(parent, config) {
 
     var defaultConfig = {
 
+
+      /** If true, the table will allow users to select multiple rows using
+       *  control or shift key. Default is false (only one row is selected at
+       *  a time).
+       */
         multiselect: false,
+
+
+      /** If true, the table will render a vertical scrollbar, allowing users
+       *  to scroll up/down and see rows that are out of view. If false, the
+       *  scrollbar is hidden from view. Default is true.
+       */
         overflow: true,
 
+
+      /** Style for individual elements within the component. Note that you can
+       *  provide CSS class names instead of individual style definitions.
+       */
         style: {
 
             table: {
@@ -83,17 +98,20 @@ javaxt.dhtml.Table = function(parent, config) {
             },
 
 
-            iscroll: null //If null or false, uses inline style. If "custom",
-            //uses, "iScrollHorizontalScrollbar", "iScrollVerticalScrollbar",
-            //and "iScrollIndicator" classes. You can also define custom class
-            //names by providing a style map like this:
-            /*
+          /** Style for iScroll (if present). If the style is set to null or
+           *  false, uses inline style. If a "custom" keyword is given, will
+           *  use "iScrollHorizontalScrollbar", "iScrollVerticalScrollbar",
+           *  and "iScrollIndicator" classes defined in your css. You can also
+           *  define custom class names by providing a style map like this:
+            <pre>
             iscroll: {
                 horizontalScrollbar: "my-iScrollHorizontalScrollbar",
                 verticalScrollbar: "my-iScrollVerticalScrollbar",
                 indicator: "my-iScrollIndicator"
             }
-            */
+            </pre>
+           */
+            iscroll: null
         }
     };
 
@@ -480,7 +498,13 @@ javaxt.dhtml.Table = function(parent, config) {
   //**************************************************************************
   /** Appends multiple rows to the table. On some browsers (e.g. iPad) this
    *  method is significantly faster than calling addRow() multiple times.
-   *  Example: table.addRows([["Bob","12/30","$5.25"],["Jim","10/28","$7.33"]]);
+   *  Example:
+   <pre>
+    table.addRows([
+        ["Bob","12/30","$5.25"],
+        ["Jim","10/28","$7.33"]
+    ]);
+   </pre>
    */
     this.addRows = function(rows){
 
@@ -520,9 +544,14 @@ javaxt.dhtml.Table = function(parent, config) {
   //** addRow
   //**************************************************************************
   /** Appends a row to the table and populates the cells with given values.
-   *  Example: table.addRow("Bob","12/30","$5.25");
-   *  Note that this method also accepts an array of values.
-   *  Example: table.addRow(["Bob","12/30","$5.25"]);
+   *  Example:
+   <pre>
+    table.addRow("Bob","12/30","$5.25");
+   </pre>
+   *  Note that this method also accepts an array of values. Example:
+   <pre>
+    table.addRow(["Bob","12/30","$5.25"]);
+   </pre>
    */
     this.addRow = function(){
 
@@ -913,12 +942,16 @@ javaxt.dhtml.Table = function(parent, config) {
   //**************************************************************************
   //** onKeyEvent
   //**************************************************************************
+  /** Called whenever a keyboard event is initiated from the table.
+   */
     this.onKeyEvent = function(keyCode, modifiers){};
 
 
   //**************************************************************************
   //** focus
   //**************************************************************************
+  /** Used to set browser focus on the table.
+   */
     this.focus = function(){
         bodyDiv.parentNode.focus();
     };
@@ -942,15 +975,12 @@ javaxt.dhtml.Table = function(parent, config) {
   //**************************************************************************
   //** update
   //**************************************************************************
-  /** Called whenever rows are added or removed from the table.
+  /** Used to refresh the scroll bars. This method is called internally
+   *  whenever rows are added or removed from the table.
    */
     this.update = function(){
-
-
-        me.onOverflow(me.hasOverflow());
-
-
         if (me.iScroll) me.iScroll.refresh();
+        me.onOverflow(me.hasOverflow());
     };
 
 
@@ -1053,9 +1083,13 @@ javaxt.dhtml.Table = function(parent, config) {
   //**************************************************************************
   //** getScrollInfo
   //**************************************************************************
+  /** Returns scroll position and dimenstions for the visible area.
+   */
     this.getScrollInfo = function(){
         return {
+            x: me.iScroll ? -me.iScroll.x : bodyDiv.scrollLeft,
             y: me.iScroll ? -me.iScroll.y : bodyDiv.scrollTop,
+            w: bodyDiv.offsetWidth,
             h: bodyDiv.offsetHeight,
             maxY: bodyDiv.scrollHeight - bodyDiv.clientHeight
         };
@@ -1077,9 +1111,11 @@ javaxt.dhtml.Table = function(parent, config) {
   //**************************************************************************
   /** Used to traverse all the rows in the table and extract contents of each
    *  cell. Example:
-   *  table.forEachRow(function (row, content) {
-   *      console.log(content);
-   *  });
+   <pre>
+    table.forEachRow(function (row, content) {
+        console.log(content);
+    });
+   </pre>
    *
    *  Optional: return true in the callback function if you wish to stop
    *  processing rows.
