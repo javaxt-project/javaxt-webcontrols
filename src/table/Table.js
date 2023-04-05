@@ -25,6 +25,32 @@ javaxt.dhtml.Table = function(parent, config) {
 
     var defaultConfig = {
 
+      /** Column definitions for the table. This config is required. Example:
+        <pre>
+        columns: [
+            {header: 'ID', hidden:true},
+            {header: 'Name', width:'100%'},
+            {header: 'Username', width:'150'},
+            {header: 'Role', width:'100'},
+            {header: 'Enabled', width:'80', align:'center'},
+            {header: 'Last Active', width:'150', align:'right'}
+        ]
+        </pre>
+        Column headers are used as labels in the header row. They are also
+        used as column identifiers using the get and set methods for a row.
+        <p/>
+        Column widths can be defined using percentages (e.g. '100%') or in
+        pixels (e.g. '100px' or '100' or 100). Normally, there should be one
+        column with a width of '100%'. This will allow the column fill all
+        available area not occupied by columns with fixed column widths. The
+        only exception is to define multiple columns with percentages as long
+        as all the percentages add up to 100%.
+        <p/>
+        Column alignment is used to set the alignment of the cells associated
+        with the column. Options include 'left', 'right', and 'center'.
+       */
+        columns: [],
+
 
       /** If true, the table will allow users to select multiple rows using
        *  control or shift key. Default is false (only one row is selected at
@@ -107,7 +133,8 @@ javaxt.dhtml.Table = function(parent, config) {
             iscroll: {
                 horizontalScrollbar: "my-iScrollHorizontalScrollbar",
                 verticalScrollbar: "my-iScrollVerticalScrollbar",
-                indicator: "my-iScrollIndicator"
+                indicator: "my-iScrollIndicator",
+                columnWidth: "15px"
             }
             </pre>
            */
@@ -129,9 +156,6 @@ javaxt.dhtml.Table = function(parent, config) {
         if (!parent) return;
 
 
-      //Exit if no columns defined
-        if (config==null || config.columns==null) return;
-
 
       //Clone the config so we don't modify the original config object
         var clone = {};
@@ -142,6 +166,20 @@ javaxt.dhtml.Table = function(parent, config) {
         merge(clone, defaultConfig);
         config = clone;
 
+
+      //Parse config
+        if (!config.columns || config.columns.length===0) return;
+        if (typeof IScroll !== 'undefined'){
+            var columnWidth = config.style.iscroll ? config.style.iscroll.columnWidth : null;
+            if (!columnWidth) columnWidth = "15px";
+
+            if (columnWidth<=0 || columnWidth==="0px" || columnWidth==="0%"){
+                //Allow users to not have a spacer for iScroll
+            }
+            else{
+                config.columns.push({header: '', width: columnWidth});
+            }
+        }
 
 
       //Create main table
