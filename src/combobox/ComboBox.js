@@ -1028,15 +1028,34 @@ javaxt.dhtml.ComboBox = function(parent, config) {
   //**************************************************************************
   /** Removes an entry from the menu.
    */
-    this.remove = function(name){
-        name = getText(name);
+    this.remove = function(value){
+
+      //Try to match the value to one of the menu items using the menu data
+        for (var i=0; i<menuOptions.childNodes.length; i++){
+            var div = menuOptions.childNodes[i];
+            if (div.value===value){
+                menuOptions.removeChild(div);
+                if (me.getValue()===value){
+                    me.setValue("", true);
+                }
+                return;
+            }
+        }
+
+
+      //Try to match the value to the menu items using the menu text
+        var filter = getText(value).toLowerCase();
         var arr = [];
         for (var i=0; i<menuOptions.childNodes.length; i++){
             var div = menuOptions.childNodes[i];
             var text = div.text;
             if (!text) text = div.innerText;
-            if (text === name){
+            if (isString(text)) text = text.toLowerCase();
+            if (text === filter){
                 arr.push(div);
+                if (me.getValue()===div.value){
+                    me.setValue("", true);
+                }
             }
         }
         for (i=0; i<arr.length; i++){
