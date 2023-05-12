@@ -30,6 +30,10 @@ javaxt.dhtml.Form = function (parent, config) {
         onsubmit: null,
         items: [],
 
+
+      /** Style for individual elements within the component. Note that you can
+       *  provide CSS class names instead of individual style definitions.
+       */
         style:{
 
             spacing: "8px", //vertical spacing btw form inputs
@@ -513,10 +517,11 @@ javaxt.dhtml.Form = function (parent, config) {
         var getValue = function(){
             return input.value;
         };
-        var setValue = function(value){
+        var setValue = function(value, silent){
             if (typeof value === "undefined") value = "";
             if (input.value!=value){
                 input.value = value;
+                if (silent===true) return;
                 input.oninput(); //fire onchange event
             }
         };
@@ -543,10 +548,11 @@ javaxt.dhtml.Form = function (parent, config) {
         var getValue = function(){
             return input.value;
         };
-        var setValue = function(value){
+        var setValue = function(value, silent){
             if (typeof value === "undefined") value = "";
             if (input.value!=value){
                 input.value = value;
+                if (silent===true) return;
                 input.onchange(); //fire onchange event
             }
         };
@@ -648,7 +654,7 @@ javaxt.dhtml.Form = function (parent, config) {
             return null;
         };
 
-        var setValue = function(value){
+        var setValue = function(value, silent){
             var numChanges = 0;
             for (var i=0; i<arr.length; i++){
                 if ((arr[i].value+"")==(value+"")){
@@ -660,6 +666,7 @@ javaxt.dhtml.Form = function (parent, config) {
                     if (arr[i].checked===true) numChanges++;
                 }
             }
+            if (silent===true) return;
             if (numChanges>0) me.onChange(formInput, getValue());
         };
 
@@ -752,7 +759,7 @@ javaxt.dhtml.Form = function (parent, config) {
             return values.length==0 ? null : values;
         };
 
-        var setValue = function(value){
+        var setValue = function(value, silent){
             var numChanges = 0;
             for (var i=0; i<arr.length; i++){
                 if ((arr[i].value+"")==(value+"")){
@@ -764,6 +771,7 @@ javaxt.dhtml.Form = function (parent, config) {
                     if (arr[i].checked===true) numChanges++;
                 }
             }
+            if (silent===true) return;
             if (numChanges>0) me.onChange(formInput, getValue());
         };
 
@@ -1012,10 +1020,21 @@ javaxt.dhtml.Form = function (parent, config) {
                     getValue = function(){
                         return input.value;
                     };
-                    setValue = function(value){
-                        input.value = value;
+                    setValue = function(value, silent){
+                        if (typeof value === "undefined") value = "";
+                        if (input.value!=value){
+                            input.value = value;
+                            if (silent===true) return;
+                            input.onchange(); //fire onchange event
+                        }
+
                     };
-                    addInput(name, label, el, getValue, setValue, icon);
+                    var formInput = addInput(name, label, el, getValue, setValue, icon);
+
+                    input.onchange = function(){
+                        me.onChange(formInput, input.value);
+                    };
+                    
                 }
             }
             else{
@@ -1249,6 +1268,8 @@ javaxt.dhtml.Form = function (parent, config) {
   //**************************************************************************
   //** getValue
   //**************************************************************************
+  /** Returns the value for an input in the form.
+   */
     this.getValue = function(name){
         var field = me.findField(name);
         if (field){
@@ -1261,10 +1282,17 @@ javaxt.dhtml.Form = function (parent, config) {
   //**************************************************************************
   //** setValue
   //**************************************************************************
-    this.setValue = function(name, value){
+  /** Used to set the value for an input in the form.
+   *  @param name Input name or label associated with the input.
+   *  @param value A value for the input.
+   *  @param silent By default, if the input value is changed, it will fire.
+   *  the onChange event. When silent is set to true, the input will NOT fire
+   *  the onChange event. This parameter is optional.
+   */
+    this.setValue = function(name, value, silent){
         var field = me.findField(name);
         if (field){
-            field.setValue(value);
+            field.setValue(value, silent);
             return true;
         }
         return false;
@@ -1275,7 +1303,7 @@ javaxt.dhtml.Form = function (parent, config) {
   //** findField
   //**************************************************************************
   /** Used to find a row in the form.
-   *  @param keyword Input name or label associated with the input.
+   *  @param name Input name or label associated with the input.
    */
     this.findField = function(name){
 
