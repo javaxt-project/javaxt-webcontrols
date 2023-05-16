@@ -48,7 +48,7 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
         menuPosition: "left",
 
 
-      /** Text to appear in the header area.
+      /** Text or DOM object to appear in the header area.
        */
         title: "",
 
@@ -101,6 +101,7 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
     var title;
     var menuWidth, menuPosition;
     var menuIcon;
+    var isMenuVisible = false;
 
 
   //**************************************************************************
@@ -345,7 +346,6 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
 
 
 
-
         return outerDiv;
     };
 
@@ -387,14 +387,17 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
     };
 
 
-
   //**************************************************************************
   //** setTitle
   //**************************************************************************
-    this.setTitle = function(str){
-        title = str;
-        if (isElement(str)){
-            titleDiv.appendChild(str);
+  /** Used to update the contents of the header area
+   *  @param obj Text or DOM object to appear in the header area
+   */
+    this.setTitle = function(obj){
+        title = obj;
+        if (isElement(title)){
+            titleDiv.innerHTML = "";
+            titleDiv.appendChild(title);
         }
         else{
             titleDiv.innerHTML = title;
@@ -405,17 +408,33 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
   //**************************************************************************
   //** getTitle
   //**************************************************************************
+  /** Returns the title (e.g. string or DOM object). See setTitle()
+   */
     this.getTitle = function(){
         return title;
     };
 
 
   //**************************************************************************
+  //** isMenuVisible
+  //**************************************************************************
+  /** Returns true if the menu is visible
+   */
+    this.isMenuVisible = function(){
+        return isMenuVisible;
+    };
+
+
+  //**************************************************************************
   //** showMenu
   //**************************************************************************
+  /** Used to slide open the menu, if it is hidden from view
+   */
     this.showMenu = function(){
+        if (isMenuVisible) return;
         //console.log("showMenu!");
         me.beforeShow();
+        isMenuVisible = true;
         if (config.fx){
             setTimeout(function(){
                 innerDiv.style.marginLeft = "0px";
@@ -433,33 +452,66 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
   //**************************************************************************
   //** hideMenu
   //**************************************************************************
+  /** Used to hide the menu, if it is visible
+   */
     this.hideMenu = function(){
+        if (!isMenuVisible) return;
         me.beforeHide();
+
+        var callback = function(){
+            isMenuVisible = false;
+            me.onHide.apply(me, []);
+        };
+
         if (config.fx){
             setTimeout(function(){
                 innerDiv.style.marginLeft = -menuWidth+"px";
-                setTimeout(function(){
-                    me.onHide.apply(me, []);
-                }, config.animationSteps+50);
+                setTimeout(callback, config.animationSteps+50);
             }, 50);
         }
         else{
-            slideMenu(false, new Date().getTime(), config.animationSteps, me.onHide);
+
+            slideMenu(false, new Date().getTime(), config.animationSteps, callback);
         }
     };
 
 
+  //**************************************************************************
+  //** onShow
+  //**************************************************************************
+  /** Called whenever the menu is made visible
+   */
     this.onShow = function(){};
+
+
+  //**************************************************************************
+  //** onHide
+  //**************************************************************************
+  /** Called whenever the menu is hidden
+   */
     this.onHide = function(){};
 
+
+  //**************************************************************************
+  //** beforeShow
+  //**************************************************************************
+  /** Called immediately before the menu is made visible
+   */
     this.beforeShow = function(){};
+
+
+  //**************************************************************************
+  //** beforeHide
+  //**************************************************************************
+  /** Called immediately before the menu is hidden
+   */
     this.beforeHide = function(){};
 
 
   //**************************************************************************
   //** slideMenu
   //**************************************************************************
-  /**  Used to slide the menu panel open or close.
+  /** Used to slide the menu panel open or close.
    */
     var slideMenu = function(slideOpen, lastTick, timeLeft, callback){
 
@@ -500,11 +552,11 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
     };
 
 
-
-
   //**************************************************************************
   //** resize
   //**************************************************************************
+  /** Used to update the layout of this component
+   */
     this.resize = function(){
         innerDiv.style.width=(outerDiv.offsetWidth+menuWidth)+"px";
     };
