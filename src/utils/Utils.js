@@ -496,6 +496,21 @@ javaxt.dhtml.utils = {
 
 
   //**************************************************************************
+  //** createElement
+  //**************************************************************************
+  /** Used to create a DOM element
+   *  @param type Node type (string). Example "div". This field is required.
+   *  @param parent Parent node. Optional. If provided, will append the newly
+   *  created node into the parent.
+   */
+    createElement: function(type, parent){
+        var el = document.createElement(type);
+        if (parent) parent.appendChild(el);
+        return el;
+    },
+
+
+  //**************************************************************************
   //** createTable
   //**************************************************************************
   /** Used to create a table element.
