@@ -6,8 +6,7 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 //*****************************************************************************/
 /**
  *   Basic horizontal slide control. Can be used as a range slider, play
- *   control, etc. Supports touch devices. Currently requires a css file
- *   or inline style to define the slider handle and grove. Credit:
+ *   control, etc. Supports touch devices. Credit:
  *   http://css3wizardry.com/2010/09/14/range-slider-with-css-and-javascript/
  *
  ******************************************************************************/
@@ -15,18 +14,37 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 javaxt.dhtml.Slider = function(parent, config) {
 
     var me = this;
-    var thumb, slider;
-
-  //Private Variables
-    var value = 0;
-    var thumbWidth = 0;
-
     var defaultConfig = {
+        
+      /** Initial value for the slider
+       */
+        value: 0,
+        
+      /** If true, the slider will be disabled when it is initialized. The
+       *  slider can be enabled and disabled using the enable() and disable() 
+       *  methods.
+       */
+        disabled: false,
+        
+        
+      /** Style for individual elements within the component. Note that you can
+       *  provide CSS class names instead of individual style definitions.
+       */
         style: {
             groove: "sliderGrove",
             handle: "sliderHandle"
         }
     };
+    
+    
+    var handle, slider, mask;
+    var value; //number - leave undefined initially
+    
+    var sliderHeight = 0;
+    var handleWidth = 0;
+    var handleHeight = 0;
+    var xOffset = 0;
+    var yOffset = 0;
 
 
   //**************************************************************************
@@ -49,63 +67,142 @@ javaxt.dhtml.Slider = function(parent, config) {
         merge(clone, defaultConfig);
         config = clone;
 
-
-
-        var w = parent.offsetWidth;
-
-        slider = document.createElement('div');
+        
+      //Create slider div
+        slider = createElement('div', parent);
         setStyle(slider, config.style.groove);
-        slider.style.width = '100%';//w + 'px';
-        updateSlider((w/2), 9, slider);
-        parent.appendChild(slider);
+        slider.style.position = "relative";
+        slider.style.width = '100%';
         me.el = slider;
 
 
-        thumb = document.createElement('div');
-        thumb.style.left = ((w/2)-6.5) + 'px';
-        thumb.style.top = -6.5 + 'px';
-        setStyle(thumb, config.style.handle);
-        slider.appendChild(thumb);
+      //Add slider control
+        handle = createElement('div', slider);
+        setStyle(handle, config.style.handle);
 
-
+        
 
         onRender(slider, function(){
 
-            thumbWidth = parseInt(getStyle(thumb, "width"));
+            var handleRect = javaxt.dhtml.utils.getRect(handle);
+            var sliderRect = javaxt.dhtml.utils.getRect(slider);
+
+
+            handleWidth = handleRect.width;
+            handleHeight = handleRect.height;
             var sliderWidth = getWidth(slider);
+            sliderHeight = sliderRect.height;
+            
+            xOffset = -(handleWidth/2);
+            yOffset = -(handleHeight/2) + (sliderHeight/2);
 
-            var top = -6;
-            Drag.init(thumb, null, 0, sliderWidth-thumbWidth, top, top);
+            updateSlider(0);
+            handle.style.left = xOffset + 'px';
+            handle.style.top = yOffset + 'px';
+            
+            
+            
+
+            var top = yOffset; //-6;
+            Drag.init(handle, null, 0, sliderWidth-handleWidth, top, top);
 
 
-            thumb.onDrag = function() {
-                updateSlider(Drag.x, thumbWidth, slider);
+            handle.onDrag = function() {
+                updateSlider(Drag.x);
                 me.onDrag(me.getValue());
             };
 
-            thumb.onDragEnd = function() {
+            handle.onDragEnd = function() {
 
             };
 
 
           //Bind to 'touchmove' events (touch devices only)
-            thumb.addEventListener('touchmove', function(event) {
+            handle.addEventListener('touchmove', function(event) {
                 event.preventDefault();
                 var touch = event.touches[0];
                 var x = touch.pageX - this.parentNode.offsetLeft;
                 if (x<0) x = 0;
-                if (x>(sliderWidth-(thumbWidth))) x = (sliderWidth-(thumbWidth));
+                if (x>(sliderWidth-(handleWidth))) x = (sliderWidth-(handleWidth));
                 this.style.left = x + 'px';
 
-                updateSlider(x, thumbWidth, slider);
+                updateSlider(x);
                 me.onDrag(me.getValue());
             }, false);
 
 
+            if (config.disabled===true) me.disable();
+
+            me.setValue(config.value, true);
             me.onRender();
         });
     };
 
+
+  //**************************************************************************
+  //** enable
+  //**************************************************************************
+  /** Used to enable the slider.
+   */
+    this.enable = function(){
+        var outerDiv = me.el;
+        outerDiv.style.opacity = "";
+        if (mask) mask.style.visibility = "hidden";
+    };
+
+
+  //**************************************************************************
+  //** disable
+  //**************************************************************************
+  /** Used to disable the slider.
+   */
+    this.disable = function(){
+
+        var outerDiv = me.el;
+        outerDiv.style.opacity = "0.5";
+
+        if (mask){
+            mask.style.visibility = "visible";
+        }
+        else{
+
+            mask = document.createElement('div');
+            mask.setAttribute("desc", "mask");
+            mask.style.position = "absolute";
+            mask.style.zIndex = 1;
+            mask.style.width = "100%";
+            mask.style.height = handleHeight + "px";
+            mask.style.top = yOffset + "px";
+            mask.style.left = -(handleWidth/2) + "px";
+            mask.style.margin = "0 " + (handleWidth/2) + "px";
+
+            outerDiv.insertBefore(mask, outerDiv.firstChild);
+        }
+    };
+
+
+  //**************************************************************************
+  //** isEnabled
+  //**************************************************************************
+  /** Returns true if the slider is enabled.
+   */
+    this.isEnabled = function(){
+        return !me.isDisabled();
+    };
+
+
+  //**************************************************************************
+  //** isDisabled
+  //**************************************************************************
+  /** Returns true if the slider is disabled.
+   */
+    this.isDisabled = function(){
+        if (mask){
+            if (mask.style.visibility !== "hidden") return true;
+        }
+        return false;
+    };
+    
 
   //**************************************************************************
   //** onRender
@@ -136,15 +233,23 @@ javaxt.dhtml.Slider = function(parent, config) {
   //**************************************************************************
   /** Returns the value of the slider.
    *  @param returnPercentage Optional. If true, returns a percentage value.
-   *  Otherwise, returns the current position of the slider.
+   *  Otherwise, returns the current position of the slider in pixels.
    */
     this.getValue = function(returnPercentage){
         var w = me.getWidth();
-        if (returnPercentage==true) return Math.round((value/w) * 100) / 100;
-
+        
         var val = value;
-        if (val>=(w-(thumbWidth/2))) val = w;
-        return val;
+        if (val>=(w-(handleWidth/2))) val = w;
+        
+        if (returnPercentage===true){
+            var p = Math.round((val/w) * 100) / 100;
+            if (p>1) p = 1;
+            if (p<0) p = 0;
+            return p;
+        }
+        else{
+            return val;
+        }
     };
 
 
@@ -155,7 +260,7 @@ javaxt.dhtml.Slider = function(parent, config) {
    *  method, can be used to compute a percentage value.
    */
     this.getWidth = function(){
-        return getWidth(slider)-(thumbWidth/2);
+        return getWidth(slider)-(handleWidth/2);
     };
 
 
@@ -163,12 +268,29 @@ javaxt.dhtml.Slider = function(parent, config) {
   //** setValue
   //**************************************************************************
   /** Used to set the position of the slider.
-   *  @param x Number of pixels from the left
+   *  @param x Accepts a number representing pixels from the left or a string
+   *  representing a percentage value (e.g. '50%') 
    *  @param silent If true, will not fire the onChange event
    */
     this.setValue = function(x, silent){
-        thumb.style.left = (x-6.5) + 'px';
-        updateSlider(x, 9, slider, silent);
+        
+        if (javaxt.dhtml.utils.isString(x)){
+            if (x.lastIndexOf("%")===x.length-1){
+                x = parseInt(x.substring(0,x.length-1));
+                if (isNaN(x) || x<0 || x>100) return;
+                x = me.getWidth() * (x/100);
+            }
+        }
+        
+        if (javaxt.dhtml.utils.isNumber(x)){
+            x = parseFloat(x);
+        }
+        else {
+            return;
+        }
+        
+        handle.style.left = (x-(handleWidth/2)) + 'px';
+        updateSlider(x, silent);
     };
 
 
@@ -177,8 +299,16 @@ javaxt.dhtml.Slider = function(parent, config) {
   //**************************************************************************
   /** Returns the computed style for a given element.
    */
-    var getStyle = function(element, property){
-        return document.defaultView.getComputedStyle(element, null).getPropertyValue(property.toLowerCase());
+    var getStyle = function(element){
+        return document.defaultView.getComputedStyle(element, null);
+    };
+    
+
+  //**************************************************************************
+  //** getProperty
+  //**************************************************************************
+    var getProperty = function(style, property){
+        return style.getPropertyValue(property.toLowerCase());
     };
 
 
@@ -188,14 +318,16 @@ javaxt.dhtml.Slider = function(parent, config) {
   /** Updates the background of the slider and fires the onChange event.
    *  @param silent If true, will not fire the onChange event
    */
-    var updateSlider = function(x, thumbWidth, slider, silent){
+    var updateSlider = function(x, silent){
+        if (x===value) return;
 
         value = x;
-        if (silent===true){} else me.onChange(value);
-
-        var sz = (x+(thumbWidth/2)) + "px 9px, 100% 9px";
+        
+        var sz = (x+(handleWidth/2)) + "px " + sliderHeight + "px, 100% " + sliderHeight + "px";
         slider.style.MozBackgroundSize = sz; //-moz-background-size
         slider.style.backgroundSize = sz; //background-size
+        
+        if (silent!==true) me.onChange(value);
     };
 
 
@@ -203,9 +335,10 @@ javaxt.dhtml.Slider = function(parent, config) {
   //** getWidth
   //**************************************************************************
     var getWidth = function(slider){
-        var sliderWidth = parseInt(getStyle(slider, "width"));
-        var padding = parseInt(getStyle(slider, "padding-right"));
-        var border = parseInt(getStyle(slider, "border-right-width"));
+        var style = getStyle(slider);
+        var sliderWidth = parseInt(getProperty(style, "width"));
+        var padding = parseInt(getProperty(style, "padding-right"));
+        var border = parseInt(getProperty(style, "border-right-width"));
         sliderWidth -= padding;
         sliderWidth -= border;
         return sliderWidth;
@@ -242,22 +375,25 @@ javaxt.dhtml.Slider = function(parent, config) {
             elem.vmode = bSwapVertRef ? false : true ;
             // Figure out which element is acting as the draggable "handle."
             elem.root = elemParent && elemParent != null ? elemParent : elem ;
+            
+            var style = getStyle(elem.root);
+            
             // Initalize the specified coordinate system.
             // In order to keep track of the position of the dragged element,
             // we need to query the inline position values.
             // Therefore we query the element's style properties
             // to get those values and attach them inline on the element.
             if (elem.hmode && isNaN(parseInt(elem.root.style.left ))) {
-               elem.root.style.left = getStyle(elem.root, "left");
+               elem.root.style.left = getProperty(style, "left");
             }
             if (elem.vmode && isNaN(parseInt(elem.root.style.top ))) {
-               elem.root.style.top = getStyle(elem.root, "top")
+               elem.root.style.top = getProperty(style, "top");
             }
             if (!elem.hmode && isNaN(parseInt(elem.root.style.right ))) {
-               elem.root.style.right = getStyle(elem.root, "right")
+               elem.root.style.right = getProperty(style, "right");
             }
             if (!elem.vmode && isNaN(parseInt(elem.root.style.bottom))) {
-               elem.root.style.bottom = getStyle(elem.root, "bottom")
+               elem.root.style.bottom = getProperty(style, "bottom");
             }
             // Look to see if the user provided min/max x/y coordinates.
             elem.minX = typeof minX != 'undefined' ? minX : null;
@@ -383,6 +519,7 @@ javaxt.dhtml.Slider = function(parent, config) {
     var merge = javaxt.dhtml.utils.merge;
     var setStyle = javaxt.dhtml.utils.setStyle;
     var onRender = javaxt.dhtml.utils.onRender;
+    var createElement = javaxt.dhtml.utils.createElement;
 
     init();
 };
