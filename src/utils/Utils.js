@@ -574,6 +574,15 @@ javaxt.dhtml.utils = {
             return tr;
         };
 
+        table.removeRow = function(tr){
+            if (!tr) return;
+            tbody.removeChild(tr);
+        };
+
+        table.getRows = function(){
+            return tbody.childNodes;
+        };
+
         table.clear = function(){
             tbody.innerHTML = "";
         };
