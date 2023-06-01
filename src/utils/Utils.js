@@ -320,8 +320,13 @@ javaxt.dhtml.utils = {
   //**************************************************************************
   //** setStyle
   //**************************************************************************
-  /** Used to set the style for a given element. Styles are defined via a CSS
-   *  class name or inline using the config.style definitions.
+  /** Used to set the style for a given element, replacing whatever style was
+   *  there before.
+   *  @param el DOM element.
+   *  @param style If a string is provided, assumes that the string represents
+   *  a CSS class name update "class" attribute of given element. If a JSON
+   *  object is provided, will assign the key/value pairs to the "style"
+   *  attribute of the node.
    */
     setStyle: function(el, style){
         if (el===null || el===0) return;
@@ -384,8 +389,12 @@ javaxt.dhtml.utils = {
   //**************************************************************************
   //** addStyle
   //**************************************************************************
-  /** Used to add style to a given element. Styles are defined via a CSS class
-   *  name or inline using the config.style definitions.
+  /** Used to add style to a given element.
+   *  @param el DOM element.
+   *  @param style If a string is provided, assumes that the string represents
+   *  a CSS class name update "class" attribute of given element. If a JSON
+   *  object is provided, will assign the key/value pairs to the "style"
+   *  attribute of the node.
    */
     addStyle: function(el, style){
         if (el===null || el===0) return;
@@ -500,12 +509,35 @@ javaxt.dhtml.utils = {
   //**************************************************************************
   /** Used to create a DOM element
    *  @param type Node type (string). Example "div". This field is required.
-   *  @param parent Parent node. Optional. If provided, will append the newly
-   *  created node into the parent.
+   *  @param obj Optional. If a DOM element is provided, will append the newly
+   *  created node into the element. Otherwise, will assume that the object is
+   *  a style.
+   *  @param style Optional. If a string is provided, assumes that the string
+   *  represents a CSS class name update "class" attribute of the newly created
+   *  node. If a JSON object is provided, will assign the key/value pairs to
+   *  the "style" attribute.
    */
-    createElement: function(type, parent){
+    createElement: function(type, obj, style){
+        var setStyle = javaxt.dhtml.utils.setStyle;
+
+
         var el = document.createElement(type);
-        if (parent) parent.appendChild(el);
+
+        if (obj){
+            if (javaxt.dhtml.utils.isElement(obj)){
+                setStyle(el, style);
+                obj.appendChild(el);
+            }
+            else{
+              //Shift args (2nd arg might be a style)
+                if (!style) style = obj;
+                setStyle(el, style);
+            }
+        }
+        else{
+            setStyle(el, style);
+        }
+
         return el;
     },
 
@@ -518,27 +550,26 @@ javaxt.dhtml.utils = {
    *  @returns Table element (DOM object) with custom methods
    */
     createTable: function(parent){
-        var table = document.createElement('table');
+        var createElement = javaxt.dhtml.utils.createElement;
 
+
+        var table = createElement('table', parent, {
+            width: "100%",
+            height: "100%",
+            margin: 0,
+            padding: 0,
+            borderCollapse: "collapse"
+        });
         table.cellSpacing = 0;
         table.cellPadding = 0;
-        table.style.width = "100%";
-        table.style.height = "100%";
-        table.style.margin = 0;
-        table.style.padding = 0;
-        table.style.borderCollapse = "collapse";
 
 
-        var tbody = document.createElement('tbody');
-        table.appendChild(tbody);
+        var tbody = createElement('tbody', table);
 
-        table.addRow = function(){
-            var tr = document.createElement("tr");
-            tbody.appendChild(tr);
-            tr.addColumn = function(){
-                var td = document.createElement("td");
-                tr.appendChild(td);
-                return td;
+        table.addRow = function(style){
+            var tr = createElement("tr", tbody, style);
+            tr.addColumn = function(style){
+                return createElement("td", tr, style);
             };
             return tr;
         };
