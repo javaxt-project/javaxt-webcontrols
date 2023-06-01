@@ -175,11 +175,10 @@ javaxt.dhtml.ComboBox = function(parent, config) {
 
 
       //Create main div
-        var mainDiv = document.createElement("div");
+        var mainDiv = createElement("div", parent);
         mainDiv.setAttribute("desc", me.className);
         mainDiv.style.width = config.style.width;
         mainDiv.style.position = "relative";
-        parent.appendChild(mainDiv);
         me.el = mainDiv;
 
 
@@ -192,7 +191,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
       //Create input in the first column
         var td = tr.addColumn();
         td.style.width="100%";
-        input = document.createElement('input');
+        input = createElement('input', td);
         input.type = "text";
         setStyle(input, "input");
         if (config.readOnly===true){
@@ -202,7 +201,6 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         }
         if (config.spellcheck===true){} else input.setAttribute("spellcheck", "false");
         if (config.placeholder) input.setAttribute("placeholder", config.placeholder);
-        td.appendChild(input);
 
         input.onkeydown = function(e){
             if (e.keyCode===9){
@@ -270,11 +268,10 @@ javaxt.dhtml.ComboBox = function(parent, config) {
 
 
       //Create button in the second column
-        td = tr.addColumn();
-        button = document.createElement('button');
+        button = createElement('button', tr.addColumn());
         //button.type = "button";
         setStyle(button, "button");
-        td.appendChild(button);
+
         button.onclick = function(e){
             button.blur();
             e.preventDefault();
@@ -290,12 +287,13 @@ javaxt.dhtml.ComboBox = function(parent, config) {
 
 
       //Create menu
-        var div = document.createElement('div');
-        div.style.position = "relative";
-        div.style.width = "100%";
-        mainDiv.appendChild(div);
+        var div = createElement('div', mainDiv, {
+            position: "relative",
+            width: "100%"
+        });
 
-        menuDiv = document.createElement('div');
+
+        menuDiv = createElement('div', div);
         menuDiv.setAttribute("desc", "menuDiv");
         setStyle(menuDiv, "menu");
         menuDiv.style.position = "absolute";
@@ -304,14 +302,14 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         menuDiv.style.width = "100%";
         menuDiv.style.zIndex = 1;
         menuDiv.style.boxSizing = "border-box";
-        div.appendChild(menuDiv);
 
 
       //Create overflow divs
-        overflowContainer = document.createElement("div");
-        overflowContainer.style.position = "relative";
-        overflowContainer.style.width = "100%";
-        overflowContainer.style.height = "100%";
+        overflowContainer = createElement("div", {
+            position: "relative",
+            width: "100%",
+            height: "100%"
+        });
 
         overflowDiv = overflowContainer.cloneNode();
         overflowDiv.style.position = "absolute";
@@ -320,10 +318,9 @@ javaxt.dhtml.ComboBox = function(parent, config) {
 
 
       //Create menu options
-        menuOptions = document.createElement("div");
-        menuOptions.style.position = "relative";
-        overflowDiv.appendChild(menuOptions);
-
+        menuOptions = createElement("div", overflowDiv, {
+            position: "relative"
+        });
 
 
         if (config.addNewOption===true){
@@ -331,17 +328,18 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             var menuTable = createTable(menuDiv);
             menuTable.style.height = "";
             tr = menuTable.addRow();
-            td = tr.addColumn();
-            td.style.width = "100%";
-            td.style.height = "100%";
-            td.style.verticalAlign = "top";
+            td = tr.addColumn({
+                width: "100%",
+                height: "100%",
+                verticalAlign: "top"
+            });
             td.appendChild(overflowContainer);
 
 
-            tr = menuTable.addRow();
-            td = tr.addColumn();
 
-            newOption = document.createElement('div');
+            td = menuTable.addRow().addColumn();
+
+            newOption = createElement('div', td);
             setStyle(newOption, "newOption");
             var text = getText(config.addNewOptionText);
             newOption.text = text;
@@ -377,7 +375,6 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             newOption.onselectstart = function () {return false;};
             newOption.onmousedown = function () {return false;};
 
-            td.appendChild(newOption);
 
         }
         else{
@@ -446,14 +443,13 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             mask.style.visibility = "visible";
         }
         else{
-
-            mask = document.createElement('div');
+            mask = createElement('div', {
+                width: "100%",
+                height: "100%",
+                position: "absolute",
+                zIndex: 1
+            });
             mask.setAttribute("desc", "mask");
-            mask.style.position = "absolute";
-            mask.style.zIndex = "1";
-            mask.style.width = "100%";
-            mask.style.height = "100%";
-
             outerDiv.insertBefore(mask, outerDiv.firstChild);
         }
         outerDiv.disabled = true;
@@ -573,11 +569,13 @@ javaxt.dhtml.ComboBox = function(parent, config) {
     [
       {
         text: "United States",
-        value: "US"
+        value: "US",
+        el: div
       },
       {
         text: "Mexico",
-        value: "MX"
+        value: "MX",
+        el: div
       },
       ...
     ]
@@ -954,7 +952,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
    *  If undefined, the label will be used as the value.
    */
     this.add = function(label, value){
-        var div = document.createElement('div');
+        var div = createElement('div', menuOptions);
         setStyle(div, "option");
 
         div.setLabel = function(label){
@@ -1016,8 +1014,6 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             if (!text) text = div.innerText;
             me.onMenuHover(text, div.value, div);
         };
-
-        menuOptions.appendChild(div);
 
         return div;
     };
@@ -1128,7 +1124,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
 
                   //Update input area
                     if (isElement(newLabel)){
-                        var menuItem = document.createElement("div");
+                        var menuItem = createElement("div", input.parentElement);
                         menuItem.className = input.className;
                         menuItem.style.width = "100%";
                         var el = newLabel.cloneNode(true);
@@ -1138,7 +1134,6 @@ javaxt.dhtml.ComboBox = function(parent, config) {
                                 input.onclick();
                             };
                         }
-                        input.parentElement.appendChild(menuItem);
                         input.hide(); //do last
                     }
                     else{
@@ -1202,6 +1197,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
     var merge = javaxt.dhtml.utils.merge;
     var isString = javaxt.dhtml.utils.isString;
     var isElement = javaxt.dhtml.utils.isElement;
+    var createElement = javaxt.dhtml.utils.createElement;
     var createTable = javaxt.dhtml.utils.createTable;
     var addShowHide = javaxt.dhtml.utils.addShowHide;
     var setStyle = function(el, style){
