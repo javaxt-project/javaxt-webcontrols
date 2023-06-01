@@ -11,18 +11,10 @@ if(!javaxt.dhtml) javaxt.dhtml={};
  *
  ******************************************************************************/
 
-
 javaxt.dhtml.Window = function(parent, config) {
     this.className = "javaxt.dhtml.Window";
 
     var me = this;
-    var mainDiv, header, body, footer, mask;
-    var titleDiv;
-    var recenter = true;
-    var visible = false;
-    var seen = false;
-    var overflow;
-    var resizeListener;
 
     var defaultConfig = {
 
@@ -40,6 +32,9 @@ javaxt.dhtml.Window = function(parent, config) {
         valign: "middle",
 
 
+      /** Style for individual elements within the component. Note that you can
+       *  provide CSS class names instead of individual style definitions.
+       */
         style: {
 
 
@@ -139,6 +134,14 @@ javaxt.dhtml.Window = function(parent, config) {
 
     };
 
+    var mainDiv, header, body, footer, mask;
+    var titleDiv, iconDiv, buttonDiv; //header elements
+    var recenter = true;
+    var visible = false;
+    var seen = false;
+    var overflow;
+    var resizeListener;
+
 
   //**************************************************************************
   //** Constructor
@@ -164,8 +167,7 @@ javaxt.dhtml.Window = function(parent, config) {
 
 
       //Create container
-        mainDiv = document.createElement('div');
-        setStyle(mainDiv, "panel");
+        mainDiv = createElement('div', parent, config.style.panel);
         mainDiv.style.position = "absolute";
         mainDiv.style.left = "0px";
         mainDiv.style.top = "0px";
@@ -175,9 +177,6 @@ javaxt.dhtml.Window = function(parent, config) {
         mainDiv.tabIndex = -1; //allows the div to have focus
         me.setWidth(config.width);
         me.setHeight(config.height);
-
-
-        parent.appendChild(mainDiv);
         me.el = mainDiv;
 
         if (config.resizable===true){
@@ -187,70 +186,42 @@ javaxt.dhtml.Window = function(parent, config) {
 
 
       //Create table with 3 rows: header, body, and footer
-        var table = document.createElement('table');
-        table.cellSpacing = 0;
-        table.cellPadding = 0;
-        table.style.width = "100%";
-        table.style.height = "100%";
+        var table = createTable(mainDiv);
         table.style.fontFamily = "inherit";
         table.style.textAlign = "inherit";
         table.style.color = "inherit";
-        table.style.borderCollapse = "collapse";
-        var tbody = document.createElement('tbody');
-        table.appendChild(tbody);
-        mainDiv.appendChild(table);
 
-        var tr = document.createElement('tr');
-        tbody.appendChild(tr);
-        header = document.createElement("td");
-        tr.appendChild(header);
 
-        tr = document.createElement('tr');
-        tbody.appendChild(tr);
-        body = document.createElement("td");
-        setStyle(body, "body");
+        header = table.addRow().addColumn();
+
+        body = table.addRow().addColumn(config.style.body);
         body.style.width = "100%";
         body.style.height = "100%";
-        tr.appendChild(body);
 
-        tr = document.createElement('tr');
-        tbody.appendChild(tr);
-        footer = document.createElement("td");
-        setStyle(footer, "footer");
-        tr.appendChild(footer);
+        footer = table.addRow().addColumn(config.style.footer);
 
 
 
       //Populate header
-        var headerDiv = document.createElement('div');
-        addStyle(headerDiv, "header");
+        var headerDiv = createElement('div', header, config.style.header);
         headerDiv.style.position = "relative";
-        header.appendChild(headerDiv);
 
-        var dragHandle = document.createElement('div');
+        var dragHandle = createElement('div', headerDiv);
         dragHandle.style.position = "absolute";
         dragHandle.style.width = "100%";
         dragHandle.style.height = "100%";
         dragHandle.style.zIndex = 1;
-        headerDiv.appendChild(dragHandle);
 
-        titleDiv = document.createElement('div');
-        addStyle(titleDiv, "title");
+        titleDiv = createElement('div', headerDiv, config.style.title);
         if (config.title) titleDiv.innerHTML = config.title;
         titleDiv.onclick = function(e){
             me.onHeaderClick(headerDiv, e);
         };
-        headerDiv.appendChild(titleDiv);
 
+        iconDiv = createElement('div', headerDiv, config.style.icon);
 
-        var iconDiv = document.createElement('div');
-        addStyle(iconDiv, "icon");
-        headerDiv.appendChild(iconDiv);
-
-        var buttonDiv = document.createElement('div');
-        addStyle(buttonDiv, "buttonBar");
+        buttonDiv = createElement('div', headerDiv, config.style.buttonBar);
         buttonDiv.style.zIndex = 2;
-        headerDiv.appendChild(buttonDiv);
 
 
         if (config.renderers.headerButtons){
@@ -268,7 +239,7 @@ javaxt.dhtml.Window = function(parent, config) {
 
 
       //Create mask (used for modal dialogs and resize)
-        mask = document.createElement('div');
+        mask = createElement('div', parent);
         if (config.modal===true){
             addStyle(mask, "mask");
         }
@@ -279,7 +250,6 @@ javaxt.dhtml.Window = function(parent, config) {
         mask.style.height = "100%";
         mask.style.display = "none";
         mask.style.visibility = "hidden";
-        parent.appendChild(mask);
         //parent.insertBefore(mask, parent.firstChild);
 
 
@@ -376,12 +346,9 @@ javaxt.dhtml.Window = function(parent, config) {
   //** createButton
   //**************************************************************************
     var createButton = function(icon, onclick){
-        var div = document.createElement('div');
-        setStyle(div, "button");
-        var innerDiv = document.createElement('div');
-        setStyle(innerDiv, icon);
-        div.appendChild(innerDiv);
+        var div = createElement('div', config.style.button);
         div.onclick = onclick;
+        createElement('div', div, icon);
         return div;
     };
 
@@ -389,6 +356,8 @@ javaxt.dhtml.Window = function(parent, config) {
   //**************************************************************************
   //** getTitle
   //**************************************************************************
+  /** Returns the content of the window's header/title area
+   */
     this.getTitle = function(){
         return titleDiv.innerHTML;
     };
@@ -397,9 +366,21 @@ javaxt.dhtml.Window = function(parent, config) {
   //**************************************************************************
   //** setTitle
   //**************************************************************************
-    this.setTitle = function(title){
-        if (title==null) title = "";
-        titleDiv.innerHTML = title;
+  /** Used to update the content of the window's header/title area
+   */
+    this.setTitle = function(obj){
+        if (obj==null) titleDiv.innerHTML = "";
+        else{
+            if (isElement(obj)){
+                titleDiv.innerHTML = "";
+                body.appendChild(obj);
+            }
+            else{
+                if (typeof obj === "string"){
+                    titleDiv.innerHTML = obj;
+                }
+            }
+        }
     };
 
 
@@ -422,6 +403,8 @@ javaxt.dhtml.Window = function(parent, config) {
   //**************************************************************************
   //** getBody
   //**************************************************************************
+  /** Returns the window's body (main content panel) as a DOM element
+   */
     this.getBody = function(){
         return body;
     };
@@ -430,10 +413,14 @@ javaxt.dhtml.Window = function(parent, config) {
   //**************************************************************************
   //** setBody
   //**************************************************************************
+  /** Used to update/replace window's body (main content panel)
+   *  @param obj Accepts strings, DOM elements, and nulls
+   */
     this.setBody = this.setContent = function(obj){
         if (obj==null) body.innerHTML = "";
         else{
             if (isElement(obj)){
+                body.innerHTML = "";
                 var p = obj.parentNode;
                 if (p) p.removeChild(obj);
                 body.appendChild(obj);
@@ -727,7 +714,7 @@ javaxt.dhtml.Window = function(parent, config) {
 
 
       //Add vertical resizer to the top of the window (buggy!)
-        var resizeHandle = document.createElement("div");
+        var resizeHandle = createElement("div", parent);
         resizeHandle.style.position = "absolute";
         resizeHandle.style.width = "100%";
         resizeHandle.style.height = "10px";
@@ -735,7 +722,6 @@ javaxt.dhtml.Window = function(parent, config) {
         resizeHandle.style.cursor = "ns-resize";
         //resizeHandle.style.backgroundColor = "#ff0000";
         resizeHandle.style.zIndex = 2;
-        parent.appendChild(resizeHandle);
         javaxt.dhtml.utils.initDrag(resizeHandle, {
             onDragStart: onDragStart,
             onDrag: function(x,y){
@@ -890,9 +876,7 @@ javaxt.dhtml.Window = function(parent, config) {
         else{
             resizeHandle.style.width = "25px";
             resizeHandle.style.height = "25px";
-            var div = document.createElement("div");
-            resizeHandle.appendChild(div);
-            setStyle(div, "resizeHandle");
+            createElement("div", resizeHandle, config.style.resizeHandle);
             javaxt.dhtml.utils.initDrag(resizeHandle, {
                 onDragStart: onDragStart,
                 onDrag: function(x,y){
@@ -954,11 +938,10 @@ javaxt.dhtml.Window = function(parent, config) {
     var isEmpty = javaxt.dhtml.utils.isEmpty;
     var isElement = javaxt.dhtml.utils.isElement;
     var getHighestElements = javaxt.dhtml.utils.getHighestElements;
+    var createElement = javaxt.dhtml.utils.createElement;
+    var createTable = javaxt.dhtml.utils.createTable;
     var initDrag = javaxt.dhtml.utils.initDrag;
 
-    var setStyle = function(el, style){
-        javaxt.dhtml.utils.setStyle(el, config.style[style]);
-    };
     var addStyle = function(el, style){
         javaxt.dhtml.utils.addStyle(el, config.style[style]);
     };
