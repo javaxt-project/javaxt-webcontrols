@@ -15,7 +15,8 @@ javaxt.dhtml.utils = {
   //**************************************************************************
   //** get
   //**************************************************************************
-  /** Used to generate a HTTP get request. Example:
+  /** Used to execute an HTTP GET request. Example:
+  <pre>
     get(url + "?filter=" + encodeURIComponent(filter), {
         success: function(text){
             var arr = JSON.parse(text).records;
@@ -24,6 +25,12 @@ javaxt.dhtml.utils = {
             alert(request.status);
         }
     });
+   </pre>
+   *  @param url Required.
+   *  @param config Optional. Common config settings include a "success"
+   *  callback function, "failure" callback function, and "payload". Note that
+   *  if a payload is given, an HTTP POST request will be executed. See the
+   *  http() method for a full range of options.
    */
     get: function(url, config){
 
@@ -45,6 +52,8 @@ javaxt.dhtml.utils = {
   //**************************************************************************
   //** post
   //**************************************************************************
+  /** Used to execute an HTTP POST request.
+   */
     post: function(url, payload, config){
         var settings;
         if (payload.payload){
@@ -65,6 +74,8 @@ javaxt.dhtml.utils = {
   //**************************************************************************
   //** delete
   //**************************************************************************
+  /** Used to execute an HTTP DELETE request.
+   */
     delete: function(url, config){
         config.method = "DELETE";
         return javaxt.dhtml.utils.http(url, config);
@@ -74,6 +85,8 @@ javaxt.dhtml.utils = {
   //**************************************************************************
   //** http
   //**************************************************************************
+  /** Used to execute an HTTP request.
+   */
     http: function(url, config){
 
         var cache = false; //no caching by default!
@@ -177,6 +190,8 @@ javaxt.dhtml.utils = {
   //**************************************************************************
   //** clone
   //**************************************************************************
+  /** Used to clone a json object
+   */
     clone: function(obj){
         return javaxt.dhtml.utils.merge({}, obj);
     },
@@ -364,8 +379,7 @@ javaxt.dhtml.utils = {
         }
 
 
-
-        el.style = '';
+        //el.style = '';
         el.removeAttribute("style");
 
 
@@ -374,12 +388,14 @@ javaxt.dhtml.utils = {
         }
         else{
             for (var key in style){
-                var val = style[key];
-                if (key==="content"){
-                    el.innerHTML = val;
-                }
-                else{
-                    el.style[key] = val;
+                if (style.hasOwnProperty(key)){
+                    var val = style[key];
+                    if (key==="content"){
+                        el.innerHTML = val;
+                    }
+                    else{
+                        el.style[key] = val;
+                    }
                 }
             }
         }
@@ -401,8 +417,18 @@ javaxt.dhtml.utils = {
         if (style===null) return;
 
         if (javaxt.dhtml.utils.isString(style)){
-            if (el.className && el.className!=null) el.className += " " + style;
-            else el.className = style;
+            style = style.replace(/^\s*/, "").replace(/\s*$/, "");
+            if (el.hasAttribute("class")){
+                var arr = el.className.split(" ");
+                for (var i=0; i<arr.length; i++){
+                    var className = arr[i].replace(/^\s*/, "").replace(/\s*$/, "");
+                    if (className===style) return;
+                }
+                el.className += " " + style;
+            }
+            else{
+                el.className = style;
+            }
         }
         else{
             for (var key in style){
