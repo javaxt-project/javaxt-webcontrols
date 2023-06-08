@@ -15,18 +15,18 @@ javaxt.dhtml.Slider = function(parent, config) {
 
     var me = this;
     var defaultConfig = {
-        
+
       /** Initial value for the slider
        */
         value: 0,
-        
+
       /** If true, the slider will be disabled when it is initialized. The
-       *  slider can be enabled and disabled using the enable() and disable() 
+       *  slider can be enabled and disabled using the enable() and disable()
        *  methods.
        */
         disabled: false,
-        
-        
+
+
       /** Style for individual elements within the component. Note that you can
        *  provide CSS class names instead of individual style definitions.
        */
@@ -35,11 +35,11 @@ javaxt.dhtml.Slider = function(parent, config) {
             handle: "sliderHandle"
         }
     };
-    
-    
+
+
     var handle, slider, mask;
     var value; //number - leave undefined initially
-    
+
     var sliderHeight = 0;
     var handleWidth = 0;
     var handleHeight = 0;
@@ -67,20 +67,19 @@ javaxt.dhtml.Slider = function(parent, config) {
         merge(clone, defaultConfig);
         config = clone;
 
-        
+
       //Create slider div
-        slider = createElement('div', parent);
-        setStyle(slider, config.style.groove);
+        slider = createElement('div', parent, config.style.groove);
         slider.style.position = "relative";
+        slider.style.padding = "0px"; //padding inside the grove can throw off height calc
         slider.style.width = '100%';
         me.el = slider;
 
 
       //Add slider control
-        handle = createElement('div', slider);
-        setStyle(handle, config.style.handle);
+        handle = createElement('div', slider, config.style.handle);
+        handle.style.position = "absolute";
 
-        
 
         onRender(slider, function(){
 
@@ -92,16 +91,16 @@ javaxt.dhtml.Slider = function(parent, config) {
             handleHeight = handleRect.height;
             var sliderWidth = getWidth(slider);
             sliderHeight = sliderRect.height;
-            
+
             xOffset = -(handleWidth/2);
             yOffset = -(handleHeight/2) + (sliderHeight/2);
 
             updateSlider(0);
             handle.style.left = xOffset + 'px';
             handle.style.top = yOffset + 'px';
-            
-            
-            
+
+
+
 
             var top = yOffset; //-6;
             Drag.init(handle, null, 0, sliderWidth-handleWidth, top, top);
@@ -174,7 +173,11 @@ javaxt.dhtml.Slider = function(parent, config) {
             mask.style.height = handleHeight + "px";
             mask.style.top = yOffset + "px";
             mask.style.left = -(handleWidth/2) + "px";
-            mask.style.margin = "0 " + (handleWidth/2) + "px";
+            var m2 = mask.cloneNode();
+            m2.style.top = "";
+            m2.style.left = "";
+            m2.style.right = -(handleWidth/2) + "px";
+            mask.appendChild(m2);
 
             outerDiv.insertBefore(mask, outerDiv.firstChild);
         }
@@ -202,7 +205,7 @@ javaxt.dhtml.Slider = function(parent, config) {
         }
         return false;
     };
-    
+
 
   //**************************************************************************
   //** onRender
@@ -237,10 +240,10 @@ javaxt.dhtml.Slider = function(parent, config) {
    */
     this.getValue = function(returnPercentage){
         var w = me.getWidth();
-        
+
         var val = value;
         if (val>=(w-(handleWidth/2))) val = w;
-        
+
         if (returnPercentage===true){
             var p = Math.round((val/w) * 100) / 100;
             if (p>1) p = 1;
@@ -269,11 +272,11 @@ javaxt.dhtml.Slider = function(parent, config) {
   //**************************************************************************
   /** Used to set the position of the slider.
    *  @param x Accepts a number representing pixels from the left or a string
-   *  representing a percentage value (e.g. '50%') 
+   *  representing a percentage value (e.g. '50%')
    *  @param silent If true, will not fire the onChange event
    */
     this.setValue = function(x, silent){
-        
+
         if (javaxt.dhtml.utils.isString(x)){
             if (x.lastIndexOf("%")===x.length-1){
                 x = parseInt(x.substring(0,x.length-1));
@@ -281,14 +284,14 @@ javaxt.dhtml.Slider = function(parent, config) {
                 x = me.getWidth() * (x/100);
             }
         }
-        
+
         if (javaxt.dhtml.utils.isNumber(x)){
             x = parseFloat(x);
         }
         else {
             return;
         }
-        
+
         handle.style.left = (x-(handleWidth/2)) + 'px';
         updateSlider(x, silent);
     };
@@ -302,7 +305,7 @@ javaxt.dhtml.Slider = function(parent, config) {
     var getStyle = function(element){
         return document.defaultView.getComputedStyle(element, null);
     };
-    
+
 
   //**************************************************************************
   //** getProperty
@@ -322,11 +325,11 @@ javaxt.dhtml.Slider = function(parent, config) {
         if (x===value) return;
 
         value = x;
-        
+
         var sz = (x+(handleWidth/2)) + "px " + sliderHeight + "px, 100% " + sliderHeight + "px";
         slider.style.MozBackgroundSize = sz; //-moz-background-size
         slider.style.backgroundSize = sz; //background-size
-        
+
         if (silent!==true) me.onChange(value);
     };
 
@@ -375,9 +378,9 @@ javaxt.dhtml.Slider = function(parent, config) {
             elem.vmode = bSwapVertRef ? false : true ;
             // Figure out which element is acting as the draggable "handle."
             elem.root = elemParent && elemParent != null ? elemParent : elem ;
-            
+
             var style = getStyle(elem.root);
-            
+
             // Initalize the specified coordinate system.
             // In order to keep track of the position of the dragged element,
             // we need to query the inline position values.
@@ -517,7 +520,6 @@ javaxt.dhtml.Slider = function(parent, config) {
   //** Utils
   //**************************************************************************
     var merge = javaxt.dhtml.utils.merge;
-    var setStyle = javaxt.dhtml.utils.setStyle;
     var onRender = javaxt.dhtml.utils.onRender;
     var createElement = javaxt.dhtml.utils.createElement;
 
