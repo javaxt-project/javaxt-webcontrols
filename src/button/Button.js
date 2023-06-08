@@ -13,33 +13,72 @@ javaxt.dhtml.Button = function(parent, config) {
     this.className = "javaxt.dhtml.Button";
 
     var me = this;
-    var mainDiv;
-    var mask, menu;
-    var icon, label, arrow;
-
-
     var defaultConfig = {
 
-        label: null, //Text to display
-        name: null, //Name of the button (optional)
+      /** Text label for the button.
+       */
+        label: null,
 
 
-
-      //Button state
+      /** If true, the button will initially appear in a selected state and the
+       *  isSelected() method will return true. Default is false.
+       */
         selected: false,
+
+
+      /** If true, the button will initially appear disabled and the
+       *  isDisabled() method will return true. Default is false.
+       */
         disabled: false,
+
+
+      /** If true, the button will be rendered as a toggle button. Default is
+       *  false, unless the button has a menu.
+       */
         toggle: false,
+
+
+      /** If true, will create a drop-down menu for the button. Components such
+       *  as buttons or custom DOM elements can be added directly to the menu.
+       *  See getMenuPanel() for more information.
+       */
         menu: false,
-        hidden: false,
 
 
-      //Properties for the outer div
+      /** Sets the position of the menu panel. Options are "bottom" or "right".
+       */
+        menuAlign: "bottom",
+
+
+
+      /** Used to set the "display" style attribute for the outer DOM element.
+       *  This is not commonly ued. Default is "inline-block".
+       */
         display: "inline-block",
+
+
+      /** Used to set the width of the button. This property is optional.
+       */
         width: null,
+
+
+      /** Used to set the height of the button. This property is optional.
+       */
         height: null,
 
 
-      //Default styles for the button, label, icon, arrow, and menu
+      /** Used to set the icon position relative to the button label. Options
+       *  are "left" or "right". Note that the icon style is set in the style
+       *  config. The icon style should not be used to control whether the
+       *  icon appears to the left or right of the label. Use this config
+       *  instead.
+       */
+        iconAlign: "left",
+
+
+      /** Style for individual elements within the component. Note that you can
+       *  provide CSS class names instead of individual style definitions.
+       */
         style:{
 
             button: {
@@ -83,21 +122,24 @@ javaxt.dhtml.Button = function(parent, config) {
                 cursor: "pointer",
                 padding: "3px 3px",
                 zIndex: "1"
-            },
+            }
 
-            menuAlign: "bottom",
-            iconAlign: "left"
+        },
 
-        }
+
+      /** Sound to play when the button is clicked
+       */
+        sound: null
     };
 
+    var mainDiv;
+    var mask, menu;
+    var icon, label, arrow;
 
 
   //**************************************************************************
   //** Constructor
   //**************************************************************************
-  /** Creates a new instance of this class. */
-
     var init = function(){
 
         if (typeof parent === "string"){
@@ -123,7 +165,8 @@ javaxt.dhtml.Button = function(parent, config) {
 
 
       //Get menu alignment
-        var menuAlignment = config.style.menuAlign;
+        var menuAlignment = config.menuAlign;
+        if (!menuAlignment) menuAlignment = config.style.menuAlignment; //legacy
         if (menuAlignment!=="right") menuAlignment = "bottom";
 
 
@@ -157,7 +200,7 @@ javaxt.dhtml.Button = function(parent, config) {
 
 
       //Create outer div used to hold the button, mask, and menu
-        var outerDiv = document.createElement('div');
+        var outerDiv = createElement('div', parent);
         outerDiv.setAttribute("desc", me.className);
         outerDiv.style.display = config.display;
         if (config.width){
@@ -177,19 +220,13 @@ javaxt.dhtml.Button = function(parent, config) {
             }
         }
         outerDiv.style.position = "relative";
-        if (config.hidden===true){
+        if (config.hidden===true){ //legacy config...
             outerDiv.style.visibility = 'hidden';
             outerDiv.style.display = 'none';
         }
-        parent.appendChild(outerDiv);
         me.el = outerDiv;
 
 
-      //Create main div used to represent the button
-        mainDiv = document.createElement('div');
-        mainDiv.setAttribute("desc", "button");
-        addStyle(mainDiv, "button");
-        addEventHandlers(mainDiv);
 
 
       //The button is implemented using a simple HTML table with 3 columns. The
@@ -204,95 +241,64 @@ javaxt.dhtml.Button = function(parent, config) {
       //a width, the "inline-block" style is ignored and the button is stretched
       //to 100% of the available width. As a workaround, it looks like we can
       //wrap the button div in another div with the display style set to "table".
-        var tableDiv = document.createElement('div');
+        var tableDiv = createElement('div', outerDiv);
         if (outerDiv.style.display==="inline-block"){
             tableDiv.style.display = "table";
             if (config.width) tableDiv.style.width = outerDiv.style.width;
         }
         tableDiv.style.height = "100%";
-        outerDiv.appendChild(tableDiv);
-        tableDiv.appendChild(mainDiv);
+
+
+      //Create main div used to represent the button
+        mainDiv = createElement('div', tableDiv, config.style.button);
+        mainDiv.setAttribute("desc", "button");
+        addEventHandlers(mainDiv);
 
 
 
-
-
-
-      //Create button elements
-        icon = document.createElement("div");
-        setStyle(icon, "icon");
-
-        arrow = document.createElement("div");
-        setStyle(arrow, "arrow");
-
-        label = document.createElement("div");
-        setStyle(label, "label");
-        if (config.label) label.innerHTML = config.label;
-
-
-
-        var table = createTable();
+        var table = createTable(mainDiv);
         table.style.fontFamily = "inherit";
         table.style.textAlign = "inherit";
         table.style.color = "inherit";
-        var tbody = table.firstChild;
-        var tr = document.createElement('tr');
-        tbody.appendChild(tr);
+        var tr = table.addRow();
         var td;
 
 
-        td = document.createElement('td');
-        tr.appendChild(td);
+      //Add icon (or label)
+        td = tr.addColumn();
         if (iconAlignment==="left"){
-            icon = document.createElement("div");
-            setStyle(icon, "icon");
-            td.appendChild(icon);
+            icon = createElement("div", td, config.style.icon);
         }
         else{
-            arrow = document.createElement("div");
-            setStyle(arrow, "arrow");
-            td.appendChild(arrow);
+            arrow = createElement("div", td, config.style.arrow);
         }
 
 
-        td = document.createElement('td');
-        td.style.width = "100%";
-        tr.appendChild(td);
-        label = document.createElement("div");
+      //Add label
+        td = tr.addColumn({width: "100%"});
+        label = createElement("div", td);
         setStyle(label, "label");
         if (config.label) label.innerHTML = config.label;
-        td.appendChild(label);
 
 
-
-        td = document.createElement('td');
-        tr.appendChild(td);
+      //Add arrow (or icon)
+        td = tr.addColumn();
         if (iconAlignment==="left"){
-            arrow = document.createElement("div");
-            setStyle(arrow, "arrow");
-            td.appendChild(arrow);
+            arrow = createElement("div", td, config.style.arrow);
         }
         else{
-            icon = document.createElement("div");
-            setStyle(icon, "icon");
-            td.appendChild(icon);
+            icon = createElement("div", td, config.style.icon);
         }
-
-
-      //Add table to the main div
-        mainDiv.appendChild(table);
 
 
 
       //Create menu panel as needed
         if (config.menu===true){
             config.toggle = true;
-            menu = document.createElement('div');
+            menu = createElement('div', outerDiv, config.style.menu);
             menu.setAttribute("desc", "menu");
-            setStyle(menu, "menu");
             menu.style.position = "absolute";
             menu.style.visibility = "hidden";
-            outerDiv.appendChild(menu);
 
 
             var hideMenu = function(e){
@@ -482,6 +488,8 @@ javaxt.dhtml.Button = function(parent, config) {
   //**************************************************************************
   //** getText
   //**************************************************************************
+  /** Returns the button label.
+   */
     this.getText = function(){
         return label.innerHTML;
     };
@@ -495,13 +503,15 @@ javaxt.dhtml.Button = function(parent, config) {
     this.enable = function(){
         var outerDiv = me.el;
         outerDiv.style.opacity = "";
-        mask.style.visibility = "hidden";
+        if (mask) mask.style.visibility = "hidden";
     };
 
 
   //**************************************************************************
   //** disable
   //**************************************************************************
+  /** Used to disable the button.
+   */
     this.disable = function(){
 
         var outerDiv = me.el;
@@ -511,14 +521,13 @@ javaxt.dhtml.Button = function(parent, config) {
             mask.style.visibility = "visible";
         }
         else{
-
-            mask = document.createElement('div');
+            mask = createElement('div',{
+                position: "absolute",
+                zIndex: "1",
+                width: "100%",
+                height: "100%"
+            });
             mask.setAttribute("desc", "mask");
-            mask.style.position = "absolute";
-            mask.style.zIndex = "1";
-            mask.style.width = "100%";
-            mask.style.height = "100%";
-
             outerDiv.insertBefore(mask, outerDiv.firstChild);
         }
     };
@@ -527,6 +536,8 @@ javaxt.dhtml.Button = function(parent, config) {
   //**************************************************************************
   //** isEnabled
   //**************************************************************************
+  /** Returns true if the button is enabled (i.e. not disabled).
+   */
     this.isEnabled = function(){
         return !me.isDisabled();
     };
@@ -535,6 +546,8 @@ javaxt.dhtml.Button = function(parent, config) {
   //**************************************************************************
   //** isDisabled
   //**************************************************************************
+  /** Returns true if the button is disabled.
+   */
     this.isDisabled = function(){
         if (mask){
             if (mask.style.visibility !== "hidden") return true;
@@ -616,6 +629,7 @@ javaxt.dhtml.Button = function(parent, config) {
   //**************************************************************************
     var merge = javaxt.dhtml.utils.merge;
     var createTable = javaxt.dhtml.utils.createTable;
+    var createElement = javaxt.dhtml.utils.createElement;
     var addShowHide = javaxt.dhtml.utils.addShowHide;
     var setStyle = function(el, style){
         javaxt.dhtml.utils.setStyle(el, config.style[style]);
