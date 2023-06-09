@@ -80,16 +80,12 @@ javaxt.dhtml.Switch = function(parent, config) {
         config = clone;
 
 
-        groove = document.createElement("div");
-        setStyle(groove, config.style.groove);
-        parent.appendChild(groove);
+        groove = createElement("div", parent, config.style.groove);
         groove.onclick = function(){
             me.setValue(!me.getValue());
         };
 
-        handle = document.createElement("div");
-        setStyle(handle, config.style.handle);
-        groove.appendChild(handle);
+        handle = createElement("div", groove, config.style.handle);
         me.setValue(config.value, true);
         me.el = groove;
 
@@ -155,6 +151,7 @@ javaxt.dhtml.Switch = function(parent, config) {
     var merge = javaxt.dhtml.utils.merge;
     var setStyle = javaxt.dhtml.utils.setStyle;
     var addShowHide = javaxt.dhtml.utils.addShowHide;
+    var createElement = javaxt.dhtml.utils.createElement;
 
     init();
 };
