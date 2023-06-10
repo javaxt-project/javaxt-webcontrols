@@ -1,6 +1,7 @@
 if(!javaxt) var javaxt={};
 if(!javaxt.dhtml) javaxt.dhtml={};
 
+
 //******************************************************************************
 //**  Callout Class
 //******************************************************************************
@@ -66,39 +67,35 @@ javaxt.dhtml.Callout = function(parent, config) {
 
 
       //Create outer div
-        div = document.createElement("div");
+        div = createElement("div", parent);
         div.setAttribute("desc", me.className);
         if (config.position==="absolute"){
             div.style.display = "none";
             div.style.position = "absolute";
             div.style.top = div.style.left = 0;
         }
-        parent.appendChild(div);
         me.el = div;
 
 
       //Create callout box
-        callout = document.createElement("div");
-        setStyle(callout, "panel");
+        callout = createElement("div", div, config.style.panel);
         callout.style.position = "relative";
         callout.style.margin = 0;
         callout.style.padding = 0;
         callout.style.borderWidth = "1px"; //notch assumes the border is 1px. See showAt() method...
-        div.appendChild(callout);
 
 
 
       //Create content div
-        innerDiv = document.createElement("div");
-        innerDiv.style.width="100%";
-        innerDiv.style.height="100%";
-        callout.appendChild(innerDiv);
+        innerDiv = createElement("div", callout, {
+            width: "100%",
+            height: "100%"
+        });
 
 
 
       //Create temporary div to get arrow style
-        var temp = document.createElement("div");
-        setStyle(temp, "arrow");
+        var temp = createElement("div", config.style.arrow);
         temp.style.position = "absolute";
         temp.style.visibility = 'hidden';
         temp.style.display = 'block';
@@ -153,7 +150,7 @@ javaxt.dhtml.Callout = function(parent, config) {
 
 
       //Create notch (triangle)
-        notch = document.createElement("b");
+        notch = createElement("b");
         notch.setAttribute("desc","notch");
         notch.style.position = "absolute";
         notch.style.top=0;
@@ -168,7 +165,7 @@ javaxt.dhtml.Callout = function(parent, config) {
 
 
       //Create border for the notch
-        notchBorder = document.createElement("b");
+        notchBorder = createElement("b", div);
         notchBorder.setAttribute("desc","notchBorder");
         notchBorder.style.position="absolute";
         notchBorder.style.top=0;
@@ -188,7 +185,6 @@ javaxt.dhtml.Callout = function(parent, config) {
 
 
 
-        div.appendChild(notchBorder);
         div.appendChild(notch);
 
 
@@ -528,9 +524,7 @@ javaxt.dhtml.Callout = function(parent, config) {
   //**************************************************************************
     var merge = javaxt.dhtml.utils.merge;
     var getNextHighestZindex = javaxt.dhtml.utils.getNextHighestZindex;
-    var setStyle = function(el, style){
-        javaxt.dhtml.utils.setStyle(el, config.style[style]);
-    };
+    var createElement = javaxt.dhtml.utils.createElement;
 
 
     init();
