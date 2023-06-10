@@ -375,7 +375,10 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             newOption.onselectstart = function () {return false;};
             newOption.onmousedown = function () {return false;};
 
-
+            newOption.onmouseover = function(){
+                var div = this;
+                me.onMenuHover(text, div.value, div);
+            };
         }
         else{
             menuDiv.appendChild(overflowContainer);
@@ -635,6 +638,22 @@ javaxt.dhtml.ComboBox = function(parent, config) {
 
 
   //**************************************************************************
+  //** onMenuShow
+  //**************************************************************************
+  /** Called when the menu is made visible
+   */
+    this.onMenuShow = function(){};
+
+
+  //**************************************************************************
+  //** onMenuHide
+  //**************************************************************************
+  /** Called when the menu is hidden
+   */
+    this.onMenuHide = function(){};
+
+
+  //**************************************************************************
   //** onMenuContext
   //**************************************************************************
   /** Called when a user attempts to render the context menu on a menu option
@@ -766,6 +785,10 @@ javaxt.dhtml.ComboBox = function(parent, config) {
               //Scroll to top
                 if (me.iScroll) me.iScroll.scrollTo(0,0);
                 else overflowDiv.scrollTop = 0;
+
+
+              //Fire event
+                me.onMenuShow();
             }
         }
     };
@@ -800,6 +823,9 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             else{
                 if (arguments[0]!==false) input.focus();
             }
+
+          //Fire event
+            me.onMenuHide();
         }
     };
 
