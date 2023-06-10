@@ -337,7 +337,7 @@ javaxt.dhtml.Window = function(parent, config) {
    */
     var createHeaderButtons = function(buttonDiv){
         if (config.closable===true){
-            buttonDiv.appendChild(createButton("closeIcon", me.close));
+            buttonDiv.appendChild(createButton(config.style.closeIcon, me.close));
         }
     };
 
@@ -589,6 +589,8 @@ javaxt.dhtml.Window = function(parent, config) {
   //**************************************************************************
   //** getWidth
   //**************************************************************************
+  /** Returns the current width of the window in pixels (number)
+   */
     this.getWidth = function(){
         return mainDiv.offsetWidth;
     };
@@ -597,6 +599,9 @@ javaxt.dhtml.Window = function(parent, config) {
   //**************************************************************************
   //** setWidth
   //**************************************************************************
+  /** Used to set the width of the window
+   *  @param width Accepts numbers or strings with valid CSS values ("1px, "1%")
+   */
     this.setWidth = function(width){
         if (isNaN(width)){
             if (typeof width === "string"){
@@ -613,6 +618,8 @@ javaxt.dhtml.Window = function(parent, config) {
   //**************************************************************************
   //** getHeight
   //**************************************************************************
+  /** Returns the current height of the window in pixels (number)
+   */
     this.getHeight = function(){
         return mainDiv.offsetHeight;
     };
@@ -621,6 +628,9 @@ javaxt.dhtml.Window = function(parent, config) {
   //**************************************************************************
   //** setHeight
   //**************************************************************************
+  /** Used to set the height of the window
+   *  @param height Accepts numbers or strings with valid CSS values ("1px, "1%")
+   */
     this.setHeight = function(height){
         if (isNaN(height)){
             if (typeof height === "string"){
@@ -634,12 +644,11 @@ javaxt.dhtml.Window = function(parent, config) {
     };
 
 
-
   //**************************************************************************
   //** center
   //**************************************************************************
-  /** Moves the window to the center of the screen. */
-
+  /** Moves the window to the center of the screen.
+   */
     this.center = function(){
 
        var w = mainDiv.offsetWidth;
