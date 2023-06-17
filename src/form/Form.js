@@ -736,15 +736,42 @@ javaxt.dhtml.Form = function (parent, config) {
         };
 
         var setValue = function(value, silent){
+
+          //Convert value to an array of values
+            if (!value){
+                value = [value];
+            }
+            else{
+                if (!isArray(value)){
+                    if (typeof value === "string"){
+                        value = value.split(",");
+                    }
+                    else{
+                        value = [value];
+                    }
+                }
+            }
+
             var numChanges = 0;
             for (var i=0; i<arr.length; i++){
-                if ((arr[i].value+"")==(value+"")){
-                    if (arr[i].checked!==true) numChanges++;
-                    arr[i].checked = true;
+                var input = arr[i];
+
+                
+                var val = null;
+                for (var x=0; x<value.length; x++){
+                    if ((input.value+"")==(value[x]+"")){
+                        val = value[x];
+                        break;
+                    }
+                }
+
+                if ((input.value+"")==(val+"")){
+                    if (input.checked!==true) numChanges++;
+                    input.checked = true;
                 }
                 else{
-                    arr[i].checked = false;
-                    if (arr[i].checked===true) numChanges++;
+                    input.checked = false;
+                    if (input.checked===true) numChanges++;
                 }
             }
             if (silent===true) return;
@@ -1470,6 +1497,7 @@ javaxt.dhtml.Form = function (parent, config) {
     var onRender = javaxt.dhtml.utils.onRender;
     var createElement = javaxt.dhtml.utils.createElement;
     var addResizeListener = javaxt.dhtml.utils.addResizeListener;
+    var isArray = javaxt.dhtml.utils.isArray;
 
     init();
 };
