@@ -135,12 +135,12 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
         title = config.title;
 
 
-        var mainDiv = document.createElement("div");
+        var mainDiv = createElement("div", parent, {
+            width: "100%",
+            height: "100%",
+            position: "relative"
+        });
         mainDiv.setAttribute("desc", me.className);
-        mainDiv.style.position = "relative";
-        mainDiv.style.width = "100%";
-        mainDiv.style.height = "100%";
-        parent.appendChild(mainDiv);
         me.el = mainDiv;
 
 
@@ -148,61 +148,64 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
         var table = createTable(mainDiv);
         table.setAttribute("desc", me.className);
         var row = table.addRow();
-        var td = row.addColumn();
-        td.style.width = "100%";
-        td.style.height = "100%";
-        td.style.border = "0px"; //"1px solid #969696"
-        td.style.verticalAlign = "top";
+        var td = row.addColumn({
+            width: "100%",
+            height: "100%",
+            border: "0px", //"1px solid #969696"
+            verticalAlign: "top"
+        });
+
 
 
 
       //Create divs (for overflow purposes)
-        outerDiv = document.createElement('div');
-        outerDiv.style.width="100%";
-        outerDiv.style.height="100%";
-        outerDiv.style.position = "relative";
-        td.appendChild(outerDiv);
+        outerDiv = createElement('div', td, {
+            width: "100%",
+            height: "100%",
+            position: "relative"
+        });
 
-        var overflowDiv = document.createElement('div');
-        overflowDiv.style.width="100%";
-        overflowDiv.style.height="100%";
-        overflowDiv.style.position = "absolute";
-        overflowDiv.style.overflow = "hidden";
-        outerDiv.appendChild(overflowDiv);
 
+        var overflowDiv = createElement('div', outerDiv, {
+            width: "100%",
+            height: "100%",
+            position: "absolute",
+            overflow: "hidden"
+        });
 
 
       //Create content div with a width = parent width + menu width
-        innerDiv = document.createElement('div');
-        innerDiv.style.width=(outerDiv.offsetWidth+menuWidth)+"px";
-        innerDiv.style.height="100%";
-        innerDiv.style.position = "relative";
-        innerDiv.style.marginLeft = (menuPosition==="left" ? -menuWidth : 0) +"px";
+        innerDiv = createElement('div', overflowDiv, {
+            width: (outerDiv.offsetWidth+menuWidth)+"px",
+            height: "100%",
+            position: "relative",
+            marginLeft: (menuPosition==="left" ? -menuWidth : 0) +"px"
+        });
         if (config.fx){
             config.fx.setTransition(innerDiv, config.transitionEffect, config.animationSteps);
         }
-        overflowDiv.appendChild(innerDiv);
 
 
 
       //Create table with 2 columns - one for the menu and one for the body
         table = createTable(innerDiv);
         row = table.addRow();
-        var leftCol = row.addColumn();
+        var leftCol = row.addColumn({
+            height: "100%",
+            verticalAlign: "top"
+        });
         if (menuPosition==="right") leftCol.style.width="100%";
-        leftCol.style.height="100%";
-        leftCol.style.verticalAlign = "top";
 
 
 
-        var rightCol = row.addColumn();
+        var rightCol = row.addColumn({
+            height: "100%",
+            verticalAlign: "top"
+        });
         if (menuPosition==="left") rightCol.style.width="100%";
-        rightCol.style.height="100%";
-        rightCol.style.verticalAlign = "top";
 
 
-        menuDiv = document.createElement('div');
-        setStyle(menuDiv, "menu");
+        menuDiv = createElement('div', config.style.menu);
         menuDiv.style.height = "100%";
         menuDiv.style.width = menuWidth + "px";
         if (menuPosition==="left") leftCol.appendChild(menuDiv);
@@ -214,13 +217,11 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
         table = createTable();
 
         row = table.addRow();
-        headerDiv = row.addColumn();
-        setStyle(headerDiv, "header");
+        headerDiv = row.addColumn(config.style.header);
         headerDiv.style.width="100%";
 
         row = table.addRow();
-        bodyDiv = row.addColumn();
-        setStyle(bodyDiv, "body");
+        bodyDiv = row.addColumn(config.style.body);
         bodyDiv.style.width="100%";
         bodyDiv.style.height="100%";
         bodyDiv.style.verticalAlign = "top";
@@ -266,9 +267,10 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
 
 
       //Create title
-        var centerCol = row.addColumn();
-        centerCol.style.width = "100%";
-        centerCol.style.height = "100%";
+        var centerCol = row.addColumn({
+            width: "100%",
+            height: "100%"
+        });
         centerCol.appendChild(createTitle());
 
 
@@ -292,8 +294,7 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
             menuIcon = config.style.menuIcon();
         }
         else{
-            menuIcon = document.createElement('div');
-            setStyle(menuIcon, config.style.menuIcon);
+            menuIcon = createElement('div', config.style.menuIcon);
         }
         tgt.appendChild(menuIcon);
 
@@ -309,19 +310,21 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
 
         var h = headerDiv.offsetHeight;
 
-        var outerDiv = document.createElement('div');
-        outerDiv.style.width = h+"px";
-        outerDiv.style.height = h+"px";
-        outerDiv.style.position = "relative";
-        outerDiv.style.cursor = "pointer";
+        var outerDiv = createElement('div', {
+            width: h+"px",
+            height: h+"px",
+            position: "relative",
+            cursor: "pointer"
+        });
 
 
-        var overflowDiv = document.createElement('div');
-        overflowDiv.style.width="100%";
-        overflowDiv.style.height="100%";
-        overflowDiv.style.position = "absolute";
-        overflowDiv.style.overflow = "hidden";
-        outerDiv.appendChild(overflowDiv);
+
+        var overflowDiv = createElement('div', outerDiv, {
+            width: "100%",
+            height: "100%",
+            position: "absolute",
+            overflow: "hidden"
+        });
 
 
         var barWidth = 22;
@@ -329,14 +332,12 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
         var barSpacing = 3;
 
         for (var i=0; i<3; i++){
-
-            var bar = document.createElement('div');
-            bar.style.width=barWidth+"px";
-            bar.style.height=barHeight+"px";
-            bar.style.background="#FFFFFF";
-            bar.style.marginBottom=barSpacing+"px";
-            overflowDiv.appendChild(bar);
-
+            createElement('div', overflowDiv, {
+                width: barWidth+"px",
+                height: barHeight+"px",
+                background: "#FFFFFF",
+                marginBottom: barSpacing+"px"
+            });
         }
 
 
@@ -365,23 +366,23 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
   //**************************************************************************
     var createTitle = function(){
 
-        var outerDiv = document.createElement('div');
-        outerDiv.style.width="100%";
-        outerDiv.style.height="100%";
-        outerDiv.style.position = "relative";
+        var outerDiv = createElement('div', {
+            width: "100%",
+            height: "100%",
+            position: "relative"
+        });
 
 
-        var overflowDiv = document.createElement('div');
-        overflowDiv.style.width="100%";
-        overflowDiv.style.height="100%";
-        overflowDiv.style.position = "absolute";
-        overflowDiv.style.overflow = "hidden";
-        outerDiv.appendChild(overflowDiv);
+        var overflowDiv = createElement('div', outerDiv, {
+            width: "100%",
+            height: "100%",
+            position: "absolute",
+            overflow: "hidden"
+        });
 
-        titleDiv = document.createElement('div');
-        setStyle(titleDiv, "title");
+
+        titleDiv = createElement('div', overflowDiv, config.style.title);
         me.setTitle(title);
-        overflowDiv.appendChild(titleDiv);
 
         return outerDiv;
     };
@@ -590,18 +591,15 @@ javaxt.dhtml.MenuLayout = function(parent, config) {
     };
 
 
-
   //**************************************************************************
   //** Utils
   //**************************************************************************
     var merge = javaxt.dhtml.utils.merge;
     var onRender = javaxt.dhtml.utils.onRender;
     var createTable = javaxt.dhtml.utils.createTable;
+    var createElement = javaxt.dhtml.utils.createElement;
     var addResizeListener = javaxt.dhtml.utils.addResizeListener;
     var isElement = javaxt.dhtml.utils.isElement;
-    var setStyle = function(el, style){
-        javaxt.dhtml.utils.setStyle(el, config.style[style]);
-    };
 
 
     init();
