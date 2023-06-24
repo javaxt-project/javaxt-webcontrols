@@ -807,8 +807,15 @@ javaxt.dhtml.Carousel = function(parent, config) {
   //**************************************************************************
   //** getPanels
   //**************************************************************************
-  /** Returns an array with information for each panel in the carousel
-   *  including whether the panel is visible and the panel content.
+  /** Returns an array with information for each panel in the carousel. Each
+   *  element in the array contains the following information:
+   * <ul>
+   *  <li>div: DOM element associated with the panel</li>
+   *  <li>isVisible: Used to indicate whether the panel is intersects the
+   *  parent container</li>
+   *  <li>visibleArea: Total area that the panel covers in the parent
+   *  container</li>
+   * </ul>
    */
     this.getPanels = function(){
         var arr = [];
@@ -819,15 +826,32 @@ javaxt.dhtml.Carousel = function(parent, config) {
         for (var i=0; i<innerDiv.childNodes.length; i++){
             var panel = innerDiv.childNodes[i];
             var r2 = _getRect(panel);
-            var isVisible = intersects(r1, r2);
+
+            var isVisible = false; //intersects(r1, r2);
+            var leftOverlap = 0;
+            var rightOverlap = 0;
+
+            if (r2.right > r1.left && r2.left < r1.right){
+                isVisible = true;
+                if (r2.right < r1.right){
+                    leftOverlap = r2.right - r1.left;
+                }
+                else{
+                    rightOverlap = r1.right - r2.left;
+                }
+            }
+
             if (isVisible){
-                var visibleArea = getAreaOfIntersection(r1, r2);
-                if (visibleArea<=config.padding) isVisible = false;
+                var n = config.padding;
+                if (leftOverlap-n<1 || rightOverlap-n<1){
+                    isVisible = false;
+                }
             }
 
             arr.push({
                div: panel.childNodes[0].childNodes[0],
-               isVisible: isVisible
+               isVisible: isVisible,
+               visibleArea: getAreaOfIntersection(r1, r2)
             });
         }
         return arr;
