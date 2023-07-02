@@ -95,7 +95,7 @@ javaxt.dhtml.Slider = function(parent, config) {
             xOffset = -(handleWidth/2);
             yOffset = -(handleHeight/2) + (sliderHeight/2);
 
-            updateSlider(0);
+            updateSlider(0, true);
             handle.style.left = xOffset + 'px';
             handle.style.top = yOffset + 'px';
 
