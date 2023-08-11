@@ -237,7 +237,7 @@ javaxt.dhtml.Form = function (parent, config) {
   //**************************************************************************
   /** Called whenever a field changes value in the form
    */
-    this.onChange = function(formField){};
+    this.onChange = function(input, value){};
 
 
   //**************************************************************************
@@ -625,6 +625,7 @@ javaxt.dhtml.Form = function (parent, config) {
             span.innerHTML = options[i].label;
             span.input = input;
             span.onclick = function(){
+                if (this.input.disabled==true) return;
                 this.input.checked = true;
                 this.input.focus();
                 dispatchEvent(this.input, "change");
@@ -658,6 +659,18 @@ javaxt.dhtml.Form = function (parent, config) {
         };
 
         formInput = addInput(name, label, table, getValue, setValue, item.icon);
+
+        formInput.enable = function(){
+            for (var i=0; i<arr.length; i++) arr[i].disabled=false;
+            var rows = table.getRows();
+            for (var i=0; i<rows.length; i++) rows[i].style.opacity = "";
+        };
+
+        formInput.disable = function(){
+            for (var i=0; i<arr.length; i++) arr[i].disabled=true;
+            var rows = table.getRows();
+            for (var i=0; i<rows.length; i++) rows[i].style.opacity = "0.6";
+        };
     };
 
 
@@ -715,6 +728,7 @@ javaxt.dhtml.Form = function (parent, config) {
             span.innerHTML = options[i].label;
             span.input = input;
             span.onclick = function(){
+                if (this.input.disabled==true) return;
                 this.input.checked = !this.input.checked;
                 //this.input.focus();
                 dispatchEvent(this.input, "change");
@@ -756,7 +770,7 @@ javaxt.dhtml.Form = function (parent, config) {
             for (var i=0; i<arr.length; i++){
                 var input = arr[i];
 
-                
+
                 var val = null;
                 for (var x=0; x<value.length; x++){
                     if ((input.value+"")==(value[x]+"")){
@@ -779,6 +793,18 @@ javaxt.dhtml.Form = function (parent, config) {
         };
 
         formInput = addInput(name, label, table, getValue, setValue, item.icon);
+
+        formInput.enable = function(){
+            for (var i=0; i<arr.length; i++) arr[i].disabled=false;
+            var rows = table.getRows();
+            for (var i=0; i<rows.length; i++) rows[i].style.opacity = "";
+        };
+
+        formInput.disable = function(){
+            for (var i=0; i<arr.length; i++) arr[i].disabled=true;
+            var rows = table.getRows();
+            for (var i=0; i<rows.length; i++) rows[i].style.opacity = "0.6";
+        };
     };
 
 
