@@ -224,7 +224,9 @@ javaxt.dhtml.ComboBox = function(parent, config) {
                 if (d) d.focus();
             }
             else{
-                me.filter();
+                if (config.typeAhead===true){
+                    me.filter();
+                }
             }
         };
 
@@ -319,7 +321,8 @@ javaxt.dhtml.ComboBox = function(parent, config) {
 
       //Create menu options
         menuOptions = createElement("div", overflowDiv, {
-            position: "relative"
+            position: "relative",
+            width: "100%"
         });
 
 
@@ -422,8 +425,8 @@ javaxt.dhtml.ComboBox = function(parent, config) {
   /** Used to enable the input allowing users to interact with the component.
    */
     this.enable = function(){
+        var outerDiv = me.el;
         if (mask){
-            var outerDiv = me.el;
             outerDiv.style.opacity = "";
             mask.style.visibility = "hidden";
         }
@@ -783,8 +786,15 @@ javaxt.dhtml.ComboBox = function(parent, config) {
 
 
               //Scroll to top
-                if (me.iScroll) me.iScroll.scrollTo(0,0);
-                else overflowDiv.scrollTop = 0;
+                if (me.iScroll){
+                    setTimeout(function () {
+                        me.iScroll.scrollTo(0,0);
+                        me.iScroll.refresh();
+                    }, 0);
+                }
+                else{
+                    overflowDiv.scrollTop = 0;
+                }
 
 
               //Fire event
@@ -925,14 +935,30 @@ javaxt.dhtml.ComboBox = function(parent, config) {
    */
     var scroll = function(){
 
+
+        var scrollToElement = function(el){
+            if (true) return;
+            if (me.iScroll){
+                setTimeout(function () {
+                    me.iScroll.scrollToElement(el);
+                    me.iScroll.refresh();
+                    el.focus();
+                }, 100);
+            }
+            else{
+                overflowDiv.scrollTop = el.offsetTop;
+                el.focus();
+            }
+        };
+
+
       //Scroll to a menu item that matches the text in the input
         for (var i=0; i<menuOptions.childNodes.length; i++){
             var div = menuOptions.childNodes[i];
             var text = div.text;
             if (!text) text = div.innerText;
             if (text===input.value){
-                overflowDiv.scrollTop = div.offsetTop;
-                div.focus();
+                scrollToElement(div);
                 return;
             }
         }
@@ -959,8 +985,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
         }
 
         if (d){
-            overflowDiv.scrollTop = d.offsetTop;
-            d.focus();
+            scrollToElement(d);
             return;
         }
     };
