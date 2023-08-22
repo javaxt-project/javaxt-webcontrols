@@ -536,8 +536,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             var div = menuOptions.childNodes[i];
             var text = div.text;
             if (!text) text = div.innerText;
-            if (isString(text)) text = text.toLowerCase();
-            if (text === filter){
+            if ((isString(text) && text.toLowerCase() === filter) || text === filter){
                 setValue(text, div.value, div);
                 return;
             }
