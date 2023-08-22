@@ -820,7 +820,8 @@ javaxt.dhtml.Carousel = function(parent, config) {
     this.getPanels = function(){
         var arr = [];
         var r1 = _getRect(outerDiv);
-
+        var n = parseInt(config.padding);
+        if (isNaN(n)) n = 0;
 
 
         for (var i=0; i<innerDiv.childNodes.length; i++){
@@ -842,8 +843,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
             }
 
             if (isVisible){
-                var n = config.padding;
-                if (leftOverlap-n<1 || rightOverlap-n<1){
+                if ((leftOverlap-n>0 && leftOverlap-n<1) || (rightOverlap-n>0 && rightOverlap-n<1)){
                     isVisible = false;
                 }
             }
