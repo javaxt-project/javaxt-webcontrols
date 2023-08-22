@@ -522,6 +522,7 @@ javaxt.dhtml.Window = function(parent, config) {
 
 
         if (!visible){
+            me.update();
             visible = true;
             me.onOpen();
             if (config.shrinkToFit===true){
@@ -611,6 +612,7 @@ javaxt.dhtml.Window = function(parent, config) {
         else{
             mainDiv.style.width = width + "px";
         }
+        me.update();
         me.onResize();
     };
 
@@ -640,7 +642,37 @@ javaxt.dhtml.Window = function(parent, config) {
         else{
             mainDiv.style.height = height + "px";
         }
+        me.update();
         me.onResize();
+    };
+
+
+  //**************************************************************************
+  //** update
+  //**************************************************************************
+  /** Used to update the size of the window. Called internally whenever the
+   *  window is resized to insure that the window contents fit inside the
+   *  window. If you are updating DOM elements within the window dynamically,
+   *  you may need to call this method.
+   */
+    this.update = function(){
+        setTimeout(function(){
+            try{
+                var minWidth = Math.max(header.offsetWidth, body.offsetWidth, footer.offsetWidth);
+                if (mainDiv.offsetWidth<minWidth){
+                    mainDiv.style.width = minWidth+"px";
+                }
+            }
+            catch(e){}
+
+            try{
+                var minHeight = header.offsetHeight + body.offsetHeight + footer.offsetHeight;
+                if (mainDiv.offsetHeight<minHeight){
+                    mainDiv.style.height = minHeight+"px";
+                }
+            }
+            catch(e){}
+        }, 0);
     };
 
 
@@ -722,6 +754,23 @@ javaxt.dhtml.Window = function(parent, config) {
         };
 
 
+        var setWidth = function(w){
+            parent.style.width = w + "px";
+            var minWidth = Math.max(header.offsetWidth, body.offsetWidth, footer.offsetWidth);
+            if (parent.offsetWidth<minWidth){
+                parent.style.width = minWidth+"px";
+            }
+        };
+
+        var setHeight = function(h){
+            parent.style.height = h + "px";
+            var minHeight = header.offsetHeight + body.offsetHeight + footer.offsetHeight;
+            if (parent.offsetHeight<minHeight){
+                parent.style.height = minHeight+"px";
+            }
+        };
+
+
       //Add vertical resizer to the top of the window (buggy!)
         var resizeHandle = createElement("div", parent);
         resizeHandle.style.position = "absolute";
@@ -736,7 +785,7 @@ javaxt.dhtml.Window = function(parent, config) {
             onDrag: function(x,y){
                 var top = (yOffset-y);
                 parent.style.top = (y) + "px";
-                parent.style.height = ((orgHeight+top)-dy) + "px";
+                setHeight((orgHeight+top)-dy);
                 me.onResize();
             },
             onDragEnd: onDragEnd
@@ -752,7 +801,7 @@ javaxt.dhtml.Window = function(parent, config) {
             onDragStart: onDragStart,
             onDrag: function(x,y){
                 var top = -(yOffset-y);
-                parent.style.height = (top+dy) + "px";
+                setHeight(top+dy);
                 me.onResize();
             },
             onDragEnd: onDragEnd
@@ -773,7 +822,7 @@ javaxt.dhtml.Window = function(parent, config) {
             onDrag: function(x,y){
                 var top = (xOffset-x);
                 parent.style.left = x + 'px';
-                parent.style.width = ((orgWidth+top)) + "px";
+                setWidth((orgWidth+top));
                 me.onResize();
             },
             onDragEnd: onDragEnd
@@ -792,11 +841,11 @@ javaxt.dhtml.Window = function(parent, config) {
             onDrag: function(x,y){
                 var top = (xOffset-x);
                 parent.style.left = x + 'px';
-                parent.style.width = ((orgWidth+top)) + "px";
+                setWidth((orgWidth+top));
 
                 var top = (yOffset-y);
                 parent.style.top = (y) + "px";
-                parent.style.height = ((orgHeight+top)-dy) + "px";
+                setHeight((orgHeight+top)-dy);
                 me.onResize();
             },
             onDragEnd: onDragEnd
@@ -814,10 +863,10 @@ javaxt.dhtml.Window = function(parent, config) {
             onDrag: function(x,y){
                 var top = (xOffset-x);
                 parent.style.left = x + 'px';
-                parent.style.width = ((orgWidth+top)) + "px";
+                setWidth((orgWidth+top));
 
                 var top = -(yOffset-y);
-                parent.style.height = (top+dy) + "px";
+                setHeight(top+dy);
                 me.onResize();
             },
             onDragEnd: onDragEnd
@@ -836,7 +885,7 @@ javaxt.dhtml.Window = function(parent, config) {
             onDragStart: onDragStart,
             onDrag: function(x,y){
                 var d = -(xOffset-x);
-                parent.style.width = (d+dx) + "px";
+                setWidth(d+dx);
                 me.onResize();
             },
             onDragEnd: onDragEnd
@@ -853,10 +902,10 @@ javaxt.dhtml.Window = function(parent, config) {
             onDragStart: onDragStart,
             onDrag: function(x,y){
                 var d = -(xOffset-x);
-                parent.style.width = (d+dx) + "px";
+                setWidth(d+dx);
                 var top = (yOffset-y);
                 parent.style.top = (y) + "px";
-                parent.style.height = ((orgHeight+top)-dy) + "px";
+                setHeight((orgHeight+top)-dy);
                 me.onResize();
             },
             onDragEnd: onDragEnd
@@ -874,9 +923,9 @@ javaxt.dhtml.Window = function(parent, config) {
                 onDragStart: onDragStart,
                 onDrag: function(x,y){
                     var d = -(xOffset-x);
-                    parent.style.width = (d+dx) + "px";
+                    setWidth(d+dx);
                     var top = -(yOffset-y);
-                    parent.style.height = (top+dy) + "px";
+                    setHeight(top+dy);
                     me.onResize();
                 },
                 onDragEnd: onDragEnd
@@ -890,9 +939,9 @@ javaxt.dhtml.Window = function(parent, config) {
                 onDragStart: onDragStart,
                 onDrag: function(x,y){
                     var d = -(xOffset-x)+20;
-                    parent.style.width = (d+dx) + "px";
+                    setWidth(d+dx);
                     var top = -(yOffset-y)+20;
-                    parent.style.height = (top+dy) + "px";
+                    setHeight(top+dy);
                     me.onResize();
                 },
                 onDragEnd: onDragEnd
