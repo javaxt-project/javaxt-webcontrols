@@ -16,7 +16,7 @@ javaxt.dhtml.DateInput = function(parent, config) {
 
 
     var me = this;
-    var datePicker, menu, input, button;
+    var datePicker, menu, input, button, mask;
     var formatDate;
 
     var defaultConfig = {
@@ -113,25 +113,24 @@ javaxt.dhtml.DateInput = function(parent, config) {
 
 
       //Create main div
-        var mainDiv = document.createElement("div");
+        var mainDiv = createElement("div", parent, {
+            position: "relative",
+            display: "inline-block"
+        });
         mainDiv.setAttribute("desc", me.className);
-        mainDiv.style.position = "relative";
+        me.el = mainDiv;
 
 
       //Create table with 2 columns
-        var table = createTable();
+        var table = createTable(mainDiv);
+        table.style.height = "";
         var tr = table.addRow();
 
 
       //Create input in the first column
-        var td = tr.addColumn();
-        td.style.width="100%";
-        input = document.createElement('input');
-        input.type = "text";
-        me.setDate(config.date);
-        setStyle(input, config.style.input);
+        input = createElement('input', tr.addColumn({width: "100%"}), config.style.input);
         input.style.width="100%";
-        td.appendChild(input);
+        input.type = "text";
 
         input.onkeydown = function(e){
             if (e.keyCode===9){
@@ -155,16 +154,33 @@ javaxt.dhtml.DateInput = function(parent, config) {
         }
 
 
+        me.setDate(config.date, true);
+
+
+        input.oninput = function(){
+            if (me.isDisabled()===true) return;
+
+            var val = this.value;
+            if (isDate(val)){
+                var date = new Date(val);
+                if (menu){
+                    if (menu.style.visibility === "hidden"){}
+                    else{
+                        datePicker.setDate(date);
+                    }
+                }
+                me.onChange(date);
+            }
+        };
+        input.onpaste = input.oninput;
+        input.onpropertychange = input.oninput;
+
+
 
 
       //Create button in the second column
-        td = tr.addColumn();
-        button = document.createElement('input');
+        button = createElement('input', tr.addColumn(), config.style.button);
         button.type = "button";
-        setStyle(button, config.style.button);
-        td.appendChild(button);
-
-
         button.onclick = function(){
 
             if (menu){
@@ -181,38 +197,93 @@ javaxt.dhtml.DateInput = function(parent, config) {
         };
 
 
-
-        mainDiv.appendChild(table);
-        parent.appendChild(mainDiv);
-        me.el = mainDiv;
+      //Add public show/hide methods
+        addShowHide(me);
     };
+
+
+  //**************************************************************************
+  //** isDisabled
+  //**************************************************************************
+  /** Returns true if the compnentent has been disabled.
+   */
+    this.isDisabled = function(){
+        return me.el.disabled;
+    };
+
+
+  //**************************************************************************
+  //** enable
+  //**************************************************************************
+  /** Used to enable the input allowing users to interact with the component.
+   */
+    this.enable = function(){
+        var outerDiv = me.el;
+        if (mask){
+            outerDiv.style.opacity = "";
+            mask.style.visibility = "hidden";
+        }
+        outerDiv.disabled = false;
+    };
+
+
+  //**************************************************************************
+  //** disable
+  //**************************************************************************
+  /** Used to disable the input preventing users from interacting with the
+   *  component.
+   */
+    this.disable = function(){
+        me.hideMenu();
+
+        var outerDiv = me.el;
+        outerDiv.style.opacity = "0.6";
+
+        if (mask){
+            mask.style.visibility = "visible";
+        }
+        else{
+            mask = createElement('div', {
+                width: "100%",
+                height: "100%",
+                position: "absolute",
+                zIndex: 1
+            });
+            mask.setAttribute("desc", "mask");
+            outerDiv.insertBefore(mask, outerDiv.firstChild);
+        }
+        outerDiv.disabled = true;
+    };
+
+
+  //**************************************************************************
+  //** onChange
+  //**************************************************************************
+    this.onChange = function(currDate, prevDate){};
 
 
   //**************************************************************************
   //** showMenu
   //**************************************************************************
     this.showMenu = function(){
-        if (datePicker){
 
-            var date = new Date(input.value);
-            if (isNaN( date.getTime() )) date = new Date();
+        var date = me.getValue();
+        if (!date) date = new Date();
+
+        if (datePicker){
             datePicker.setDate(date);
             menu.style.visibility = '';
-
         }
         else{
 
             var mainDiv = me.el;
 
-
-            menu = document.createElement('div');
+            menu = createElement('div', mainDiv, config.style.menu);
             menu.setAttribute("desc", "menu");
-            setStyle(menu, config.style.menu);
             menu.style.width = "100%";
             menu.style.position = "absolute";
             menu.style.zIndex = 1;
             //menu.style.visibility = "hidden";
-            mainDiv.appendChild(menu);
 
 
 
@@ -231,18 +302,21 @@ javaxt.dhtml.DateInput = function(parent, config) {
             }
 
 
-            var date = new Date(input.value);
-            if (isNaN( date.getTime() )) date = new Date();
+
             datePicker = new javaxt.dhtml.DatePicker(menu, {
                 date: date,
                 style: config.style.datePicker
             });
             datePicker.select();
             datePicker.onClick = function(date){
-                input.value = formatDate(date);
-                menu.style.visibility = "hidden";
+                me.hideMenu();
+                me.setValue(date);
             };
         }
+
+
+        //TODO: adjust position of the menu if it's not visible
+
     };
 
 
@@ -257,23 +331,20 @@ javaxt.dhtml.DateInput = function(parent, config) {
   //**************************************************************************
   //** setValue
   //**************************************************************************
-    this.setValue = function(date){
-        if (date){
-            if (typeof parent === "string"){
-                date = new Date(date);
-                if (isNaN( date.getTime() )) date = null;
-            }
-            else{
-                if (date.getTime){
-                    if (isNaN( date.getTime() )) date = null;
-                }
-                else{
-                    date = null;
-                }
-            }
+    this.setValue = function(date, silent){
+        var prevDate = me.getValue();
+
+        if (isDate(date)){
+            if (!date.getTime) date = new Date(date);
+            input.value = formatDate(date);
+        }
+        else{
+            date = null;
+            input.value = "";
         }
 
-        if (date) input.value = formatDate(date);
+        if (silent===true) return;
+        me.onChange(date, prevDate);
     };
 
 
@@ -290,8 +361,8 @@ javaxt.dhtml.DateInput = function(parent, config) {
   //**************************************************************************
   //** setDate
   //**************************************************************************
-    this.setDate = function(date){
-        me.setValue(date);
+    this.setDate = function(date, silent){
+        me.setValue(date, silent);
     };
 
 
@@ -325,8 +396,10 @@ javaxt.dhtml.DateInput = function(parent, config) {
   //** Utils
   //**************************************************************************
     var merge = javaxt.dhtml.utils.merge;
+    var createElement = javaxt.dhtml.utils.createElement;
     var createTable = javaxt.dhtml.utils.createTable;
-    var setStyle = javaxt.dhtml.utils.setStyle;
+    var addShowHide = javaxt.dhtml.utils.addShowHide;
+    var isDate = javaxt.dhtml.utils.isDate;
 
     init();
 };
