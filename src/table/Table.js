@@ -1050,12 +1050,13 @@ javaxt.dhtml.Table = function(parent, config) {
    */
     this.scrollTo = function(x, y){
 
+        var bodyRect = javaxt.dhtml.utils.getRect(bodyDiv);
+
 
       //If x is a row, compute the y offset
         if (isElement(x)){
-            var bodyRect = javaxt.dhtml.utils.getRect(bodyDiv);
-            var rowRect = javaxt.dhtml.utils.getRect(x);
 
+            var rowRect = javaxt.dhtml.utils.getRect(x);
             var padding = rowRect.height/2;
             var padRect = {
                 left: bodyRect.left,
@@ -1088,8 +1089,8 @@ javaxt.dhtml.Table = function(parent, config) {
             }
         }
 
-
-        if (isNaN(y)) return;
+        
+        if (!isNumber(y)) return;
 
 
       //Update the scroll position
@@ -1285,6 +1286,7 @@ javaxt.dhtml.Table = function(parent, config) {
     var onRender = javaxt.dhtml.utils.onRender;
     var addResizeListener = javaxt.dhtml.utils.addResizeListener;
     var isArray = javaxt.dhtml.utils.isArray;
+    var isNumber = javaxt.dhtml.utils.isNumber;
     var isElement = javaxt.dhtml.utils.isElement;
     var createElement = javaxt.dhtml.utils.createElement;
     var createTable = javaxt.dhtml.utils.createTable;
