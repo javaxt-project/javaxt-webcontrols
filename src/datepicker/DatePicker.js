@@ -73,7 +73,7 @@ javaxt.dhtml.DatePicker = function(parent, config) {
                 fontWeight: "bold",
                 color: "#555555",
                 textAlign: "center",
-                cursor: "pointer"
+                cursor: "default"
             },
 
             next: {
@@ -198,10 +198,8 @@ javaxt.dhtml.DatePicker = function(parent, config) {
 
 
       //Create container
-        mainDiv = document.createElement('div');
-        addStyle(mainDiv, "panel");
+        mainDiv = createElement('div', parent, config.style.panel);
         mainDiv.style.display = "table";
-        parent.appendChild(mainDiv);
         me.el = mainDiv;
 
 
@@ -212,8 +210,7 @@ javaxt.dhtml.DatePicker = function(parent, config) {
 
 
       //Create highlight div
-        todayHighlightDiv = document.createElement('div');
-        addStyle(todayHighlightDiv, "today");
+        todayHighlightDiv = createElement('div', config.style.today);
         todayHighlightDiv.style.position = "absolute";
 
 
@@ -292,33 +289,30 @@ javaxt.dhtml.DatePicker = function(parent, config) {
 
 
       //Create header
-        var headerDiv = document.createElement('div');
-        addStyle(headerDiv, "header");
+        var headerDiv = createElement('div', mainDiv, config.style.header);
         headerDiv.style.position = "relative";
-        mainDiv.appendChild(headerDiv);
 
-        var titleDiv = document.createElement('div');
-        addStyle(titleDiv, "title");
+
+        var titleDiv = createElement('div', headerDiv, config.style.title);
         titleDiv.innerHTML = config.months[currMonth] + " " + currDate.getFullYear();
         titleDiv.onclick = function(e){
             me.onHeaderClick(headerDiv, e);
         };
-        headerDiv.appendChild(titleDiv);
 
-        var backDiv = document.createElement('div');
-        addStyle(backDiv, "back");
-        backDiv.onclick = function(){
+
+        var backDiv = createElement('div', headerDiv, config.style.back);
+        backDiv.onclick = function(e){
+            e.preventDefault();
+            e.stopPropagation();
             me.back();
         };
-        headerDiv.appendChild(backDiv);
 
-        var nextDiv = document.createElement('div');
-        addStyle(nextDiv, "next");
-        nextDiv.onclick = function(){
+        var nextDiv = createElement('div', headerDiv, config.style.next);
+        nextDiv.onclick = function(e){
+            e.preventDefault();
+            e.stopPropagation();
             me.next();
         };
-        headerDiv.appendChild(nextDiv);
-
 
 
       //Create main table
@@ -355,21 +349,19 @@ javaxt.dhtml.DatePicker = function(parent, config) {
 
 
               //Create cell
-                var cell = document.createElement('div');
+                var cell = createElement('div', td);
                 cell.style.position = "relative";
                 cell.style.fontFamily = "inherit";
                 cell.date = new Date(d);
                 cell.selected = false;
-                td.appendChild(cell);
                 cells.push(cell);
 
 
 
               //Create div inside the cell to render the date
-                var div1 = document.createElement('div');
+                var div1 = createElement('div', cell);
                 div1.style.fontFamily = "inherit";
                 div1.innerHTML = d.getDate();
-                cell.appendChild(div1);
 
 
 
@@ -820,10 +812,8 @@ javaxt.dhtml.DatePicker = function(parent, config) {
   //** Utils
   //**************************************************************************
     var merge = javaxt.dhtml.utils.merge;
+    var createElement = javaxt.dhtml.utils.createElement;
     var createTable = javaxt.dhtml.utils.createTable;
-    var setStyle = function(el, style){
-        javaxt.dhtml.utils.setStyle(el, config.style[style]);
-    };
     var addStyle = function(el, style){
         javaxt.dhtml.utils.addStyle(el, config.style[style]);
     };
