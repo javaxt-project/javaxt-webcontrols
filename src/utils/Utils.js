@@ -172,6 +172,12 @@ javaxt.dhtml.utils = {
     merge: function(settings, defaults) {
         var merge = function(settings, defaults) {
             if (settings==null) return;
+
+          //Check if the settings is an array. Do not merge arrays!
+            if (javaxt.dhtml.utils.isArray(settings)){
+                return;
+            }
+
             for (var p in defaults) {
                 if (defaults.hasOwnProperty(p) && typeof settings[p] !== "undefined") {
                     if (p!=0) //<--Added this as a bug fix
