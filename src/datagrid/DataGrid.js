@@ -636,7 +636,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
   /** Used to traverse all the rows in the table and extract contents of each
    *  cell. Example:
    *  grid.forEachRow(function (row, content) {
-   *      console.log(content);
+   *      console.log(row, row.record, content);
    *  });
    *
    *  Optional: return true in the callback function if you wish to stop
@@ -768,16 +768,16 @@ javaxt.dhtml.DataGrid = function(parent, config) {
   //**************************************************************************
   //** scrollTo
   //**************************************************************************
-  /** Scrolls to the top of a given page.
+  /** Scrolls to the top of a page or to a row in the table
+   *  @param obj Page number (integer) or row in the grid (DOM element)
    */
-    this.scrollTo = function(page){
+    this.scrollTo = function(obj){
 
-        if (isElement(page)){
-            var r = page;
+        if (isElement(obj)){
             var y = 0;
             table.forEachRow(function (row) {
 
-                if (row==r){
+                if (row==obj){
                     return true;
                 }
 
@@ -787,6 +787,9 @@ javaxt.dhtml.DataGrid = function(parent, config) {
             table.scrollTo(0, y);
             return;
         }
+
+        if (!isNumber(obj)) return;
+        var page = parseInt(obj);
 
 
       //Calculate scroll
@@ -1576,6 +1579,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
     var merge = javaxt.dhtml.utils.merge;
     var _getRect = javaxt.dhtml.utils.getRect;
     var isArray = javaxt.dhtml.utils.isArray;
+    var isNumber = javaxt.dhtml.utils.isNumber;
     var isElement = javaxt.dhtml.utils.isElement;
 
     init();
