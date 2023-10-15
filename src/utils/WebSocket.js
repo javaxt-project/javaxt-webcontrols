@@ -9,6 +9,18 @@ if(!javaxt.dhtml) javaxt.dhtml={};
  *   read-only listener designed to get updates and status messages from the
  *   server. The listener will automatically reconnect to the server if the
  *   network connnection is interrupted.
+ <pre>
+    var ws = new javaxt.dhtml.WebSocket({
+        url: "/live/stats",
+        onMessage: function(msg){
+            console.log(msg);
+        }
+    });
+
+    var logout = function(){
+        ws.stop(); //stop listening to events and disconnect from the server
+    };
+ </pre>
  *
  ******************************************************************************/
 
@@ -23,7 +35,7 @@ javaxt.dhtml.WebSocket = function(config) {
         url: "",
 
       /** Interval used to check whether the websocket is still alive and send
-       *  pink messages. Value is in milliseconds. Default is 15000 (15 seconds).
+       *  ping messages. Value is in milliseconds. Default is 15000 (15 seconds).
        */
         keepAlive: 15000,
 
