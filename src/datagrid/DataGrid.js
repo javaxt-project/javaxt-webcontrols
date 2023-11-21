@@ -635,9 +635,11 @@ javaxt.dhtml.DataGrid = function(parent, config) {
   //**************************************************************************
   /** Used to traverse all the rows in the table and extract contents of each
    *  cell. Example:
-   *  grid.forEachRow(function (row, content) {
-   *      console.log(row, row.record, content);
-   *  });
+   <pre>
+    grid.forEachRow(function(row, content){
+        console.log(row, row.record, content);
+    });
+   </pre>
    *
    *  Optional: return true in the callback function if you wish to stop
    *  processing rows.
@@ -1201,6 +1203,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
               //Parse response
                 var records = config.parseResponse.apply(me, [request]);
                 if (records.length===0){
+                    table.clear();
                     eof = true;
                 }
                 else{
