@@ -441,6 +441,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
    *  component.
    */
     this.disable = function(){
+        me.hideMenu();
 
         var outerDiv = me.el;
         outerDiv.style.opacity = "0.6";
