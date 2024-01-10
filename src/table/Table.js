@@ -17,6 +17,7 @@ javaxt.dhtml.Table = function(parent, config) {
     var deferUpdate = false;
     var header, body; //tbody elements
     var bodyDiv; //overflow div
+    var mask;
     var prevSelection;
     var template;
     var cntrlIsPressed = false;
@@ -123,6 +124,9 @@ javaxt.dhtml.Table = function(parent, config) {
                 marginRight: "-2px"
             },
 
+            mask: {
+                backgroundColor: "rgba(0,0,0,0.5)"
+            },
 
           /** Style for iScroll (if present). If the style is set to null or
            *  false, uses inline style. If a "custom" keyword is given, will
@@ -189,6 +193,7 @@ javaxt.dhtml.Table = function(parent, config) {
         setStyle(table, "table");
         me.el = table;
 
+        addMask(parent);
 
 
       //Create header
@@ -398,6 +403,7 @@ javaxt.dhtml.Table = function(parent, config) {
 
           //Watch for resize events
             addResizeListener(parent, function(){
+                mask.resize();
                 me.update();
             });
         });
@@ -1089,7 +1095,7 @@ javaxt.dhtml.Table = function(parent, config) {
             }
         }
 
-        
+
         if (!isNumber(y)) return;
 
 
@@ -1280,6 +1286,64 @@ javaxt.dhtml.Table = function(parent, config) {
 
 
   //**************************************************************************
+  //** addMask
+  //**************************************************************************
+    var addMask = function(parent){
+
+        mask = createElement("div", parent, config.style.mask);
+        mask.style.position = "absolute";
+        mask.style.top = 0;
+        mask.style.left = 0;
+
+        var resize = function(){
+            var rect = javaxt.dhtml.utils.getRect(me.el);
+            mask.style.top = rect.top;
+            mask.style.left = rect.left;
+            mask.style.width = rect.width + "px";
+            mask.style.height = rect.height + "px";
+        };
+
+        mask.show = function(){
+            resize();
+            var highestElements = getHighestElements(parent);
+            var zIndex = highestElements.zIndex;
+            if (!highestElements.contains(mask)) zIndex++;
+            mask.zIndex = zIndex;
+            mask.style.visibility = '';
+            mask.style.display = '';
+        };
+        mask.hide = function(){
+            mask.style.visibility = 'hidden';
+            mask.style.display = 'none';
+        };
+        mask.isVisible = function(){
+            return !(mask.style.visibility === 'hidden' && mask.style.display === 'none');
+        };
+        mask.resize = function(){
+            if (mask.isVisible()){
+                resize();
+            }
+        };
+        mask.hide();
+    };
+
+
+  //**************************************************************************
+  //** getMask
+  //**************************************************************************
+  /** Returns the mask element associated with the table. A mask is a simple
+   *  DOM element with custom show() and hide() methods and is rendered over
+   *  the grid control. The mask is typically used to prevent users from
+   *  interacting with the grid during load events (e.g. show mask before
+   *  load and hide after data is rendered) or to indicate that the table is
+   *  disabled.
+   */
+    this.getMask = function(){
+        return mask;
+    };
+
+
+  //**************************************************************************
   //** Utils
   //**************************************************************************
     var merge = javaxt.dhtml.utils.merge;
@@ -1290,6 +1354,7 @@ javaxt.dhtml.Table = function(parent, config) {
     var isElement = javaxt.dhtml.utils.isElement;
     var createElement = javaxt.dhtml.utils.createElement;
     var createTable = javaxt.dhtml.utils.createTable;
+    var getHighestElements = javaxt.dhtml.utils.getHighestElements;
 
     var setStyle = function(el, style){
         javaxt.dhtml.utils.setStyle(el, config.style[style]);
