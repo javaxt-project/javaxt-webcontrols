@@ -15,8 +15,13 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
     var me = this;
     var table;
+    var mask;
+
     var currPage = 1;
     var eof = false;
+    var pageRequests = {};
+    var loading = false;
+
     var checkboxHeader;
     var columns;
     var rowHeight; //<-- Assumes all the rows are the same height!
@@ -65,13 +70,11 @@ javaxt.dhtml.DataGrid = function(parent, config) {
        */
         payload: null,
 
-
       /** If true, and if the payload is empty, will sent params as a URL
        *  encoded string in a POST request. Otherwise the params will be
        *  appended to the query string in the request URL.
        */
         post: false,
-
 
       /** Used to specify the page size (i.e. the maximum number records to
        *  fetch from the server at a time)
@@ -147,7 +150,16 @@ javaxt.dhtml.DataGrid = function(parent, config) {
             for (var i=0; i<record.length; i++){
                 row.set(i, record[i]);
             }
-        }
+        },
+
+      /** DOM element with custom show() and hide() methods. The mask is
+       *  typically rendered over the grid control to prevent users from
+       *  interacting with the grid during load events. It is rendered before
+       *  load and is hidden after data is rendered. If a mask is not defined,
+       *  a simple mask will be created automatically using the "mask" style
+       *  config.
+       */
+        mask: null
     };
 
 
@@ -245,6 +257,11 @@ javaxt.dhtml.DataGrid = function(parent, config) {
             style: config.style
         });
         me.el = table.el;
+
+
+      //Get mask
+        mask = config.mask;
+        if (!mask) mask = table.getMask();
 
 
       //Add load function to the table
@@ -687,6 +704,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
     this.clear = function(){
         table.clear();
         currPage = 1;
+        pageRequests = {};
     };
 
 
@@ -1093,6 +1111,14 @@ javaxt.dhtml.DataGrid = function(parent, config) {
   //**************************************************************************
     var load = function(page, callback){
 
+        if (pageRequests[page+""]) return;
+        if (loading) return;
+        loading = true;
+
+        mask.show();
+        pageRequests[page+""] = page;
+
+
       //Parse page
         if (page){
             page = parseInt(page);
@@ -1215,10 +1241,13 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                 }
 
                 if (callback) callback.apply(me, []);
-
+                loading = false;
+                mask.hide();
                 me.onLoad();
             }
             else{
+                loading = false;
+                mask.hide();
                 me.onError(request);
             }
         });
