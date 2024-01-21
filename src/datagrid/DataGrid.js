@@ -266,7 +266,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
       //Add load function to the table
         table.load = function(records, append){
-            if (!append) table.clear();
+            if (!append) me.clear();
             var rows = table.addRows(records.length);
 
 
@@ -1229,7 +1229,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
               //Parse response
                 var records = config.parseResponse.apply(me, [request]);
                 if (records.length===0){
-                    table.clear();
+                    //table.clear();
                     eof = true;
                 }
                 else{
@@ -1524,7 +1524,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         }
         else{
             if (colConfig.field!=null){
-                table.clear();
+                me.clear();
                 if (!filter) filter = {};
                 filter.orderby = (colConfig.field + " " + sort).trim();
                 me.onSort(idx, sortDirection);
