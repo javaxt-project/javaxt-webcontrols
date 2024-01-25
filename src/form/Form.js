@@ -518,7 +518,16 @@ javaxt.dhtml.Form = function (parent, config) {
         };
         var setValue = function(value, silent){
             if (typeof value === "undefined") value = "";
-            if (input.value!=value){
+            var updateValue = input.value!=value;
+
+          //Special case for zeros
+            if (!updateValue){
+                if (value===0 && parseInt(input.value+"")!==0){
+                    updateValue = true;
+                }
+            }
+
+            if (updateValue){
                 input.value = value;
                 if (silent===true) return;
                 input.oninput(); //fire onchange event
@@ -1319,6 +1328,14 @@ javaxt.dhtml.Form = function (parent, config) {
   //**************************************************************************
   /** Used to find a row in the form.
    *  @param name Input name or label associated with the input.
+   *  @return An object with the following properties:
+   *  <ul>
+   *  <li>name (string)</li>
+   *  <li>label (string)</li>
+   *  <li>row (DOM object)</li>
+   *  <li>getValue (function)</li>
+   *  <li>setValue (function)</li>
+   *  </ul>
    */
     this.findField = function(name){
 
