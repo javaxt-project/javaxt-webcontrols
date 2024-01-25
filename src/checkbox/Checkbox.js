@@ -128,17 +128,15 @@ javaxt.dhtml.Checkbox = function(parent, config) {
 
 
       //Create container
-        outerDiv = document.createElement('div');
-        setStyle(outerDiv, "panel");
+        outerDiv = createElement('div', parent, config.style.panel);
         if (config.display){
             console.warn(
             "The 'display' config in the javaxt.dhtml.Checkbox " +
             "class has been deprecated. Use panel style instead");
             outerDiv.style.display = config.display;
         }
-        parent.appendChild(outerDiv);
         me.el = outerDiv;
-
+        addShowHide(me);
 
 
       //Create checkbox
@@ -151,33 +149,23 @@ javaxt.dhtml.Checkbox = function(parent, config) {
             table.style.textAlign = "inherit";
             table.style.color = "inherit";
             var tr = table.addRow();
-            var td;
 
-            td = tr.addColumn();
-            box = document.createElement('div');
-            setStyle(box, "box");
-            td.appendChild(box);
 
-            td = tr.addColumn();
-            label = document.createElement("div");
-            setStyle(label, "label");
-
+            box = createElement('div', tr.addColumn(), config.style.box);
+            label = createElement("div", tr.addColumn(), config.style.label);
             if (isElement(config.label)){
                 label.appendChild(config.label);
             }
             else{
                 label.innerHTML = config.label;
             }
-            td.appendChild(label);
 
             addEventHandlers(table);
         }
         else{
 
           //Create checkbox with no label
-            box = document.createElement('div');
-            setStyle(box, "box");
-            outerDiv.appendChild(box);
+            box = createElement('div', outerDiv, config.style.box);
             addEventHandlers(box);
         }
 
@@ -272,22 +260,6 @@ javaxt.dhtml.Checkbox = function(parent, config) {
 
 
   //**************************************************************************
-  //** show
-  //**************************************************************************
-    this.show = function(){
-        outerDiv.style.display = '';
-    };
-
-
-  //**************************************************************************
-  //** hide
-  //**************************************************************************
-    this.hide = function(){
-        outerDiv.style.display = "none";
-    };
-
-
-  //**************************************************************************
   //** onClick
   //**************************************************************************
   /** Called whenever the checkbox is clicked.
@@ -298,15 +270,15 @@ javaxt.dhtml.Checkbox = function(parent, config) {
   //**************************************************************************
   //** onChange
   //**************************************************************************
-  /** Called whenever the checkbox is clicked.
+  /** Called whenever the checkbox value is changed.
    */
-    this.onChange = function(){};
+    this.onChange = function(checked){};
 
 
   //**************************************************************************
   //** enable
   //**************************************************************************
-  /** Used to enable the button.
+  /** Used to enable the checkbox.
    */
     this.enable = function(){
         mask.style.visibility = "hidden";
@@ -316,6 +288,8 @@ javaxt.dhtml.Checkbox = function(parent, config) {
   //**************************************************************************
   //** disable
   //**************************************************************************
+  /** Used to disable the checkbox.
+   */
     this.disable = function(){
 
         if (mask){
@@ -323,8 +297,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
         }
         else{
 
-            mask = document.createElement('div');
-            setStyle(mask, "disable");
+            mask = createElement('div', config.style.disable);
             mask.style.position = "absolute";
             mask.style.zIndex = "1";
             mask.style.width = "100%";
@@ -339,7 +312,9 @@ javaxt.dhtml.Checkbox = function(parent, config) {
   //**************************************************************************
   //** select
   //**************************************************************************
-    this.select = function(){
+  /** Used to add a check to the checkbox.
+   */
+    this.select = function(silent){
         if (box.checked===true) return;
         box.checked = true;
         addStyle(box,"select");
@@ -348,21 +323,27 @@ javaxt.dhtml.Checkbox = function(parent, config) {
             check.style.visibility = "visible";
         }
         else{
-            check = document.createElement('div');
-            setStyle(check, "check");
-            box.appendChild(check);
+            check = createElement('div', box, config.style.check);
         }
+
+        if (silent===true) return;
+        me.onChange(true);
     };
 
 
   //**************************************************************************
   //** deselect
   //**************************************************************************
-    this.deselect = function(){
+  /** Used to remove the check from the checkbox.
+   */
+    this.deselect = function(silent){
         if (box.checked===true){
             box.checked = false;
             setStyle(box,"box");
             check.style.visibility = "hidden";
+
+            if (silent===true) return;
+            me.onChange(false);
         }
     };
 
@@ -370,16 +351,14 @@ javaxt.dhtml.Checkbox = function(parent, config) {
   //**************************************************************************
   //** toggle
   //**************************************************************************
-  /** Used to toggle the button's selection state.
+  /** Used to toggle the checkbox state.
    */
     this.toggle = function(){
         if (box.checked===true){
             me.deselect();
-            me.onChange(false, true);
         }
         else{
             me.select();
-            me.onChange(true, false);
         }
     };
 
@@ -387,7 +366,9 @@ javaxt.dhtml.Checkbox = function(parent, config) {
   //**************************************************************************
   //** getValue
   //**************************************************************************
-  /** Returns the value associated with the checkbox. The value is defined in
+  /** Returns the value associated with the checkbox. Note that this is
+   *  different than the checkbox state. Use the isChecked() method to
+   *  determine whether the checkbox is checked. The value is defined in
    *  the config used to instantiate this class.
    */
     this.getValue = function(){
@@ -409,9 +390,12 @@ javaxt.dhtml.Checkbox = function(parent, config) {
   //**************************************************************************
   //** Utils
   //**************************************************************************
-    var merge = javaxt.dhtml.utils.merge;
+    var createElement = javaxt.dhtml.utils.createElement;
     var createTable = javaxt.dhtml.utils.createTable;
+    var addShowHide = javaxt.dhtml.utils.addShowHide;
     var isElement = javaxt.dhtml.utils.isElement;
+    var merge = javaxt.dhtml.utils.merge;
+
     var setStyle = function(el, style){
         javaxt.dhtml.utils.setStyle(el, config.style[style]);
     };
