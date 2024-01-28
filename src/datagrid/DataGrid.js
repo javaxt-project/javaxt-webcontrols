@@ -729,10 +729,14 @@ javaxt.dhtml.DataGrid = function(parent, config) {
   //**************************************************************************
   //** refresh
   //**************************************************************************
-    this.refresh = function(){
+  /** Used to clear the grid and reload the first page.
+   *  @param callback Optional callback function called after the grid has
+   *  been refreshed and loaded with data.
+   */
+    this.refresh = function(callback){
         //eof = false;
         setPage(1);
-        load();
+        load(1, callback);
     };
 
 
@@ -778,9 +782,9 @@ javaxt.dhtml.DataGrid = function(parent, config) {
   //**************************************************************************
   //** setLimit
   //**************************************************************************
-  /** Used to update the number of records to lead per page.
+  /** Used to update the number of records to load per page.
    */
-    this.setLimit = function(limit, update){
+    this.setLimit = function(limit){
         config.limit = limit;
     };
 
