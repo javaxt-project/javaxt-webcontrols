@@ -719,6 +719,26 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
 
   //**************************************************************************
+  //** show
+  //**************************************************************************
+  /** Used to unhide the grid if it is hidden
+   */
+    this.show = function(){
+        table.show();
+    };
+
+
+  //**************************************************************************
+  //** hide
+  //**************************************************************************
+  /** Used to hide the grid
+   */
+    this.hide = function(){
+        table.hide();
+    };
+    
+
+  //**************************************************************************
   //** focus
   //**************************************************************************
     this.focus = function(){
@@ -734,6 +754,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
    *  been refreshed and loaded with data.
    */
     this.refresh = function(callback){
+        me.clear();
         //eof = false;
         setPage(1);
         load(1, callback);

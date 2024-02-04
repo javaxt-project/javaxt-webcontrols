@@ -192,6 +192,7 @@ javaxt.dhtml.Table = function(parent, config) {
         table.setAttribute("desc", me.className);
         setStyle(table, "table");
         me.el = table;
+        addShowHide(me);
 
         addMask(parent);
 
@@ -1348,6 +1349,7 @@ javaxt.dhtml.Table = function(parent, config) {
   //**************************************************************************
     var merge = javaxt.dhtml.utils.merge;
     var onRender = javaxt.dhtml.utils.onRender;
+    var addShowHide = javaxt.dhtml.utils.addShowHide;
     var addResizeListener = javaxt.dhtml.utils.addResizeListener;
     var isArray = javaxt.dhtml.utils.isArray;
     var isNumber = javaxt.dhtml.utils.isNumber;
