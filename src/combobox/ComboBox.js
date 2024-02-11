@@ -57,6 +57,29 @@ javaxt.dhtml.ComboBox = function(parent, config) {
        */
         readOnly: false,
 
+
+      /** A static list of options to put in the dropdown menu. Example:
+       <pre>
+        [
+            {
+                label: "Previous Year",
+                value: "prevYear"
+            },
+            {
+                label: "Current Year",
+                value: "currYear"
+            },
+            {
+                label: "Next Year",
+                value: "nextYear"
+            }
+        ]
+       </pre>
+       *  Use the add() method to add items dynamically.
+       */
+        options: [],
+
+
       /** If true, will display a static menu item at the bottom of the drop
        *  down menu. This extra menu option is commonly used to render a popup
        *  menu/dialog. The onAddNewOption() method can be overridden to handle
@@ -324,6 +347,13 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             position: "relative",
             width: "100%"
         });
+
+        if (config.options){
+            for (var i=0; i<config.options.length; i++){
+                var o = config.options[i];
+                me.add(o.label, o.value);
+            }
+        }
 
 
         if (config.addNewOption===true){
@@ -776,6 +806,13 @@ javaxt.dhtml.ComboBox = function(parent, config) {
                 resizeMenu(numVisibleItems, h);
 
 
+              //Set zIndex
+                var highestElements = getHighestElements();
+                var zIndex = highestElements.zIndex;
+                if (!highestElements.contains(menuDiv)) zIndex++;
+                menuDiv.style.zIndex = zIndex;
+
+
               //Show the menu
                 menuDiv.style.visibility = '';
 
@@ -824,6 +861,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
 
           //Hide menu
             menuDiv.style.visibility = "hidden";
+            menuDiv.style.zIndex = 1;
 
 
           //Focus or hide input
@@ -1251,6 +1289,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
     var createElement = javaxt.dhtml.utils.createElement;
     var createTable = javaxt.dhtml.utils.createTable;
     var addShowHide = javaxt.dhtml.utils.addShowHide;
+    var getHighestElements = javaxt.dhtml.utils.getHighestElements;
     var setStyle = function(el, style){
         javaxt.dhtml.utils.setStyle(el, config.style[style]);
         if (el.type === "text"){
