@@ -122,9 +122,14 @@ input, select, textarea { /* Allows overriding native style of form elements on 
     border: 1px solid rgba(0,0,0,0);
 }
 
+.toolbar-label,
 .toolbar-button-label {
     white-space: nowrap;
     color: #272727;
+}
+
+.toolbar-label{
+    padding: 0 5px;
 }
 
 .toolbar-button-hover {
