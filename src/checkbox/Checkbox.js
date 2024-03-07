@@ -383,7 +383,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
   /** Returns true if the checkbox is checked.
    */
     this.isChecked = function(){
-        return box.checked;
+        return box.checked===true;
     };
 
 
