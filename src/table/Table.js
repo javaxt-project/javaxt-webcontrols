@@ -732,7 +732,6 @@ javaxt.dhtml.Table = function(parent, config) {
    */
     var selectRows = function(event){
         var row = this;
-        me.onRowClick(row, event);
         var rows = [row];
 
         var selectRow = function(){
@@ -853,6 +852,7 @@ javaxt.dhtml.Table = function(parent, config) {
         }
 
 
+        me.onRowClick(row, event);
         me.onSelectionChange(rows);
         prevSelection = row;
     };
