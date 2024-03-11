@@ -159,14 +159,14 @@ javaxt.dhtml.Button = function(parent, config) {
 
 
       //Get icon alignment
-        var iconAlignment = config.iconAlign;
-        if (!iconAlignment) iconAlignment = config.style.iconAlign; //legacy
+        var iconAlignment = config.style.iconAlign; //legacy
+        if (!iconAlignment) iconAlignment = config.iconAlign; //preferred
         if (iconAlignment!=="right") iconAlignment = "left";
 
 
       //Get menu alignment
-        var menuAlignment = config.menuAlign;
-        if (!menuAlignment) menuAlignment = config.style.menuAlignment; //legacy
+        var menuAlignment = config.style.menuAlignment; //legacy
+        if (!menuAlignment) menuAlignment = config.menuAlign; //preferred
         if (menuAlignment!=="right") menuAlignment = "bottom";
 
 
