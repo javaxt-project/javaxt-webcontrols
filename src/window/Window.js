@@ -180,7 +180,7 @@ javaxt.dhtml.Window = function(parent, config) {
         me.el = mainDiv;
 
         if (config.resizable===true){
-            addResizeHandle(mainDiv);
+            addResizeHandles();
         }
 
 
@@ -261,7 +261,7 @@ javaxt.dhtml.Window = function(parent, config) {
 
                 var rect = _getRect(div);
                 var rect2 = _getRect(parent);
-                var xOffset = x-rect.x;
+                var xOffset = (x-rect.x)+rect2.x;
                 var yOffset = (y-rect.y)+rect2.y;
 
 
@@ -271,7 +271,7 @@ javaxt.dhtml.Window = function(parent, config) {
                 div.height = rect.height;
 
 
-                div.style.left = rect.x + 'px';
+                div.style.left = (x-xOffset) + 'px';
                 div.style.top = (y-yOffset) + 'px';
                 dragHandle.style.cursor = 'move';
 
@@ -685,8 +685,8 @@ javaxt.dhtml.Window = function(parent, config) {
 
        var w = mainDiv.offsetWidth;
        var h = mainDiv.offsetHeight;
-       var x = document.body.clientWidth;
-       var y = document.body.clientHeight;
+       var x = parent.clientWidth;
+       var y = parent.clientHeight;
 
      //Update x if >1 monitor in use
        if (screen.width>(2*screen.height)) x=x/2;
@@ -714,36 +714,39 @@ javaxt.dhtml.Window = function(parent, config) {
 
 
   //**************************************************************************
-  //** addResizeHandle
+  //** addResizeHandles
   //**************************************************************************
-    var addResizeHandle = function(parent){
+    var addResizeHandles = function(){
 
-        var xOffset, yOffset;
-        var orgHeight, orgWidth;
+
+        var parentRect, windowRect;
         var dx, dy;
-        var onDragStart = function(x,y){
-            var div = this;
 
-            mask.style.cursor = div.style.cursor;
+        var onDragStart = function(x,y){
+            var resizeHandle = this;
+
+            mask.style.cursor = resizeHandle.style.cursor;
             mask.style.display = "";
             mask.style.visibility = "";
 
-            var rect = _getRect(div);
-            var rect2 = _getRect(parent);
 
-            xOffset = (x-rect.x)+rect2.x;
-            yOffset = (y-rect.y)+rect2.y;
-            orgHeight = rect2.height;
-            orgWidth = rect2.width;
+            parentRect = _getRect(parent);
+            windowRect = _getRect(mainDiv);
 
-            dx = parseFloat(parent.style.width);
+
+            var orgWidth = windowRect.width;
+            dx = parseFloat(mainDiv.style.width);
             if (dx<orgWidth) dx = orgWidth-dx;
             else dx = 0;
 
-            dy = parseFloat(parent.style.height);
+
+            var orgHeight = windowRect.height;
+            dy = parseFloat(mainDiv.style.height);
             if (dy<orgHeight) dy = orgHeight-dy;
             else dy = 0;
         };
+
+
         var onDragEnd = function(){
             if (config.modal!==true){
                 mask.style.display = "none";
@@ -755,24 +758,87 @@ javaxt.dhtml.Window = function(parent, config) {
 
 
         var setWidth = function(w){
-            parent.style.width = w + "px";
+            mainDiv.style.width = w + "px";
             var minWidth = Math.max(header.offsetWidth, body.offsetWidth, footer.offsetWidth);
-            if (parent.offsetWidth<minWidth){
-                parent.style.width = minWidth+"px";
+            if (mainDiv.offsetWidth<minWidth){
+                mainDiv.style.width = minWidth+"px";
             }
         };
+
 
         var setHeight = function(h){
-            parent.style.height = h + "px";
+            mainDiv.style.height = h + "px";
             var minHeight = header.offsetHeight + body.offsetHeight + footer.offsetHeight;
-            if (parent.offsetHeight<minHeight){
-                parent.style.height = minHeight+"px";
+            if (mainDiv.offsetHeight<minHeight){
+                mainDiv.style.height = minHeight+"px";
             }
         };
 
 
-      //Add vertical resizer to the top of the window (buggy!)
-        var resizeHandle = createElement("div", parent);
+        var pullDown = function(y){
+
+          //Update height
+            var top = windowRect.top-parentRect.top;
+            if (y>parentRect.bottom) y = parentRect.bottom;
+            var bottom = y-parentRect.top;
+            var height = (bottom-top)-dx;
+            setHeight(height);
+        };
+
+
+        var pullUp = function(y){
+
+          //Set top position
+            var top = y-parentRect.top;
+            if (top<0) top = 0;
+            var minY = (windowRect.bottom-parentRect.top)-50;
+            if (top>minY) top = minY;
+            mainDiv.style.top = top + 'px';
+
+
+          //Update height
+            var bottom = windowRect.bottom-parentRect.top;
+            var height = (bottom-top)-dy;
+            setHeight(height);
+            var d = _getRect(mainDiv).bottom-windowRect.bottom;
+            if (d>0) setHeight(height-d);
+        };
+
+
+        pullLeft = function(x){
+
+          //Set left position
+            if (x<parentRect.left) x = parentRect.left;
+            var left = x-parentRect.left;
+
+            var maxX = (windowRect.right-parentRect.left)-75;
+            if (left>maxX) left = maxX;
+            mainDiv.style.left = left + 'px';
+
+
+          //Update width
+            var right = windowRect.right-parentRect.left;
+            var width = (right-left)-dx;
+            setWidth(width);
+            var d = _getRect(mainDiv).right-windowRect.right;
+            if (d>0) setWidth(width-d);
+        };
+
+
+        var pullRight = function(x){
+          //Set width
+            var left = windowRect.left-parentRect.left;
+            if (x>parentRect.right) x = parentRect.right;
+            var right = x-parentRect.left;
+
+            var width = (right-left)-dx;
+            setWidth(width);
+        };
+
+
+
+      //Add vertical resizer to the top of the window
+        var resizeHandle = createElement("div", mainDiv);
         resizeHandle.style.position = "absolute";
         resizeHandle.style.width = "100%";
         resizeHandle.style.height = "10px";
@@ -783,9 +849,7 @@ javaxt.dhtml.Window = function(parent, config) {
         javaxt.dhtml.utils.initDrag(resizeHandle, {
             onDragStart: onDragStart,
             onDrag: function(x,y){
-                var top = (yOffset-y);
-                parent.style.top = (y) + "px";
-                setHeight((orgHeight+top)-dy);
+                pullUp(y);
                 me.onResize();
             },
             onDragEnd: onDragEnd
@@ -796,12 +860,11 @@ javaxt.dhtml.Window = function(parent, config) {
         resizeHandle = resizeHandle.cloneNode();
         resizeHandle.style.top = "";
         resizeHandle.style.bottom = "-5px";
-        parent.appendChild(resizeHandle);
+        mainDiv.appendChild(resizeHandle);
         javaxt.dhtml.utils.initDrag(resizeHandle, {
             onDragStart: onDragStart,
             onDrag: function(x,y){
-                var top = -(yOffset-y);
-                setHeight(top+dy);
+                pullDown(y);
                 me.onResize();
             },
             onDragEnd: onDragEnd
@@ -816,13 +879,11 @@ javaxt.dhtml.Window = function(parent, config) {
         resizeHandle.style.height = "100%";
         resizeHandle.style.width = "10px";
         resizeHandle.style.cursor = "ew-resize";
-        parent.appendChild(resizeHandle);
+        mainDiv.appendChild(resizeHandle);
         javaxt.dhtml.utils.initDrag(resizeHandle, {
             onDragStart: onDragStart,
             onDrag: function(x,y){
-                var top = (xOffset-x);
-                parent.style.left = x + 'px';
-                setWidth((orgWidth+top));
+                pullLeft(x);
                 me.onResize();
             },
             onDragEnd: onDragEnd
@@ -835,17 +896,12 @@ javaxt.dhtml.Window = function(parent, config) {
         resizeHandle.style.right = "";
         resizeHandle.style.height = "10px";
         resizeHandle.style.cursor = "se-resize";
-        parent.appendChild(resizeHandle);
+        mainDiv.appendChild(resizeHandle);
         javaxt.dhtml.utils.initDrag(resizeHandle, {
             onDragStart: onDragStart,
             onDrag: function(x,y){
-                var top = (xOffset-x);
-                parent.style.left = x + 'px';
-                setWidth((orgWidth+top));
-
-                var top = (yOffset-y);
-                parent.style.top = (y) + "px";
-                setHeight((orgHeight+top)-dy);
+                pullLeft(x);
+                pullUp(y);
                 me.onResize();
             },
             onDragEnd: onDragEnd
@@ -857,16 +913,12 @@ javaxt.dhtml.Window = function(parent, config) {
         resizeHandle.style.top = "";
         resizeHandle.style.bottom = "-5px";
         resizeHandle.style.cursor = "ne-resize";
-        parent.appendChild(resizeHandle);
+        mainDiv.appendChild(resizeHandle);
         javaxt.dhtml.utils.initDrag(resizeHandle, {
             onDragStart: onDragStart,
             onDrag: function(x,y){
-                var top = (xOffset-x);
-                parent.style.left = x + 'px';
-                setWidth((orgWidth+top));
-
-                var top = -(yOffset-y);
-                setHeight(top+dy);
+                pullLeft(x);
+                pullDown(y);
                 me.onResize();
             },
             onDragEnd: onDragEnd
@@ -880,12 +932,11 @@ javaxt.dhtml.Window = function(parent, config) {
         resizeHandle.style.top = "0px";
         resizeHandle.style.height = "100%";
         resizeHandle.style.cursor = "ew-resize";
-        parent.appendChild(resizeHandle);
+        mainDiv.appendChild(resizeHandle);
         javaxt.dhtml.utils.initDrag(resizeHandle, {
             onDragStart: onDragStart,
             onDrag: function(x,y){
-                var d = -(xOffset-x);
-                setWidth(d+dx);
+                pullRight(x);
                 me.onResize();
             },
             onDragEnd: onDragEnd
@@ -897,15 +948,12 @@ javaxt.dhtml.Window = function(parent, config) {
         resizeHandle.style.top = "-5px";
         resizeHandle.style.height = "10px";
         resizeHandle.style.cursor = "ne-resize";
-        parent.appendChild(resizeHandle);
+        mainDiv.appendChild(resizeHandle);
         javaxt.dhtml.utils.initDrag(resizeHandle, {
             onDragStart: onDragStart,
             onDrag: function(x,y){
-                var d = -(xOffset-x);
-                setWidth(d+dx);
-                var top = (yOffset-y);
-                parent.style.top = (y) + "px";
-                setHeight((orgHeight+top)-dy);
+                pullRight(x);
+                pullUp(y);
                 me.onResize();
             },
             onDragEnd: onDragEnd
@@ -922,10 +970,8 @@ javaxt.dhtml.Window = function(parent, config) {
             javaxt.dhtml.utils.initDrag(resizeHandle, {
                 onDragStart: onDragStart,
                 onDrag: function(x,y){
-                    var d = -(xOffset-x);
-                    setWidth(d+dx);
-                    var top = -(yOffset-y);
-                    setHeight(top+dy);
+                    pullRight(x);
+                    pullDown(y);
                     me.onResize();
                 },
                 onDragEnd: onDragEnd
@@ -938,16 +984,14 @@ javaxt.dhtml.Window = function(parent, config) {
             javaxt.dhtml.utils.initDrag(resizeHandle, {
                 onDragStart: onDragStart,
                 onDrag: function(x,y){
-                    var d = -(xOffset-x)+20;
-                    setWidth(d+dx);
-                    var top = -(yOffset-y)+20;
-                    setHeight(top+dy);
+                    pullRight(x);
+                    pullDown(y);
                     me.onResize();
                 },
                 onDragEnd: onDragEnd
             });
         }
-        parent.appendChild(resizeHandle);
+        mainDiv.appendChild(resizeHandle);
     };
 
 
