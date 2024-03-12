@@ -43,6 +43,8 @@ var demo1 = function() {
 };
 </script>
 
+
+<!--
 <h2>Simple Pop-up Window</h2>
 <p>Simple pop-up window initialized using contents of an existing element.</p>
 <div style="height: 50px;width: 150px;background-color: aliceblue;border: 1px solid #a4d5ff;padding: 7px;margin: 15px 0;">
@@ -51,24 +53,49 @@ var demo1 = function() {
 <input type="button" value="Open" onclick="demo2()"></input>
 
 <script type="text/javascript">
+var win2;
 var demo2 = function() {
 
-    var body = document.getElementsByTagName("body")[0];
     var msg = document.getElementById("msg");
     var msgContainer = msg.parentNode;
-    var win2 = new javaxt.dhtml.Window(body, {
-        width: 400,
-        height: 100,
-        title: "demo2",
-        body: msg
-    });
 
-    win2.onClose = function(){
-        msgContainer.appendChild(msg);
-    };
+    if (!win2){
+        var body = document.getElementsByTagName("body")[0];
+        var win2 = new javaxt.dhtml.Window(body, {
+            width: 300,
+            height: 100,
+            title: "Demo 2",
+            body: msg
+        });
 
-    win2.show();
+        win2.onClose = function(){
+            msgContainer.appendChild(msg);
+        };
+    }
+
+    var rect = javaxt.dhtml.utils.getRect(msgContainer);
+    win2.showAt(rect.right+25, rect.top);
 };
+</script>
+-->
+
+
+
+<h2>Pop-up Inside Div</h2>
+<p>So far we've seen windows opened inside the browser window.
+  The following will constrain the window inside a specific div.</p>
+<div id="div-test" style="height: 600px;width: 700px;background-color: aliceblue;border: 1px solid #a4d5ff;"></div>
+
+<script type="text/javascript">
+
+  new javaxt.dhtml.Window("div-test", {
+      width: 300,
+      height: 100,
+      closable: false,
+      title: "Demo 3"
+  }).show();
+
+
 </script>
 
 </body>
