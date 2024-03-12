@@ -225,7 +225,9 @@ javaxt.dhtml.Table = function(parent, config) {
         bodyDiv.setAttribute("desc", "body-div");
         bodyDiv.tabIndex = -1; //allows the div to have focus
         bodyDiv.onmouseover = function(){
+            var x = window.scrollX, y = window.scrollY;
             this.focus();
+            window.scrollTo(x, y);
         };
         bodyDiv.addEventListener("keydown", function(e){
             if (e.keyCode===16){
@@ -239,6 +241,14 @@ javaxt.dhtml.Table = function(parent, config) {
             if (e.keyCode===18){
                 altIsPressed = true;
             }
+
+
+          //Prevent window from scrolling
+            if (e.keyCode===38 || e.keyCode===40){
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
         });
         bodyDiv.addEventListener("keyup", function(e){
             if (e.keyCode===16){
@@ -986,7 +996,9 @@ javaxt.dhtml.Table = function(parent, config) {
   /** Used to set browser focus on the table.
    */
     this.focus = function(){
+        var x = window.scrollX, y = window.scrollY;
         bodyDiv.parentNode.focus();
+        window.scrollTo(x, y);
     };
 
 
