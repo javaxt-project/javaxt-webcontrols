@@ -91,95 +91,84 @@ javaxt.dhtml.BarGraph = function (parent, config) {
 
 
       //Create relative div used to bound the horizontal bars
-        var mainDiv = document.createElement('div');
-        mainDiv.style.position = "relative";
-        mainDiv.style.height = "100%";
+        var mainDiv = createElement('div', parent, {
+            height: "100%",
+            position: "relative"
+        });
         mainDiv.setAttribute("desc", me.className);
         me.el = mainDiv;
-        parent.appendChild(mainDiv);
 
 
 
       //Create table with one cell with a "bottom" vertical alignment
       //used for animation purposes
-        var table = createTable();
-        mainDiv.appendChild(table);
-        var tbody = table.firstChild;
-        var tr = document.createElement('tr');
-        tbody.appendChild(tr);
-        var td = document.createElement('td');
-        td.style.width = "100%";
-        td.style.height = "100%";
-        td.style.verticalAlign = "bottom";
-        tr.appendChild(td);
+        var table = createTable(mainDiv);
+        var td = table.addRow().addColumn({
+            width: "100%",
+            height: "100%",
+            verticalAlign: "bottom"
+        });
 
 
       //Create table with 2 columns. The first column is used for y-axis labels
       //and the second column is used for the bar graphs and x-axis labels.
-        innerTable = createTable();
-        td.appendChild(innerTable);
-        tbody = innerTable.firstChild;
-        tr = document.createElement('tr');
-        tbody.appendChild(tr);
-        td = document.createElement('td');
-        td.style.height = "100%";
-        td.style.width = "1px";
-        td.style.verticalAlign = "top";
-        yAxis = createTable();
+        innerTable = createTable(td);
+        var tr = innerTable.addRow();
+        td = tr.addColumn({
+            width: "1px",
+            height: "100%",
+            verticalAlign: "top"
+        });
+        yAxis = createTable(td);
         yAxis.setAttribute("desc", "yAxis");
-        td.appendChild(yAxis);
-        tr.appendChild(td);
-        td = document.createElement('td');
-        td.style.height = "100%";
-        td.style.width = "100%";
-        tr.appendChild(td);
+        td = tr.addColumn({
+            width: "100%",
+            height: "100%"
+        });
 
 
       //Create relative div for the second column
-        var outerDiv = document.createElement('div');
-        outerDiv.style.position = "relative";
-        outerDiv.style.width = "100%";
-        outerDiv.style.height = "100%";
-        td.appendChild(outerDiv);
+        var outerDiv = createElement('div', td, {
+            width: "100%",
+            height: "100%",
+            position: "relative"
+        });
 
 
       //Add horizontal lines in the second column as an absolute div
-        var div = document.createElement('div');
-        div.style.position = "absolute";
-        div.style.width = "100%";
-        div.style.height = "100%";
-        div.style.top = 0;
-        div.style.overflow = 'hidden';
-        div.style.padding = "0 1px"; //hack for chrome and safari
-        outerDiv.appendChild(div);
-        var innerDiv = document.createElement('div');
-        innerDiv.style.position = "relative";
-        innerDiv.style.width = "100%";
-        div.appendChild(innerDiv);
-        horizontalLines = createTable();
-        innerDiv.appendChild(horizontalLines);
+        var div = createElement('div', outerDiv, {
+            width: "100%",
+            height: "100%",
+            position: "absolute",
+            top: 0,
+            overflow: "hidden",
+            padding: "0 1px" //hack for chrome and safari
+        });
+
+        var innerDiv = createElement('div', div, {
+            width: "100%",
+            position: "relative"
+        });
+        horizontalLines = createTable(innerDiv);
 
 
 
       //Add vertical bars in the second column as an absolute div
-        var div2 = document.createElement('div');
-        div2.style.position = "absolute";
-        div2.style.width = "100%";
-        div2.style.height = "100%";
-        div2.style.overflow = 'auto';
-        div2.style.overflowY = 'hidden';
-        div2.style.padding = "0 1px"; //hack for chrome and safari
-        outerDiv.appendChild(div2);
-        dataTable = createTable();
+        var div2 = createElement('div', outerDiv, {
+            width: "100%",
+            height: "100%",
+            position: "absolute",
+            overflow: "auto",
+            overflowY: "hidden",
+            padding: "0 1px" //hack for chrome and safari
+        });
+
+
+        dataTable = createTable(div2);
         dataTable.setAttribute("desc", "dataTable");
-        tbody = dataTable.firstChild;
-        chartRow = document.createElement('tr');
-        tbody.appendChild(chartRow);
-        tickRow = document.createElement('tr');
-        tbody.appendChild(tickRow);
-        labelRow = document.createElement('tr');
-        tbody.appendChild(labelRow);
-        div2.appendChild(dataTable);
+        chartRow = dataTable.addRow();
+        tickRow = dataTable.addRow();
+        labelRow = dataTable.addRow();
 
 
 
@@ -228,25 +217,24 @@ javaxt.dhtml.BarGraph = function (parent, config) {
 
 
           //Add column
-            td = document.createElement('td');
+            td = createElement('td');
             setStyle(td, "cell");
             td.style.height = "100%";
             td.style.verticalAlign = "bottom";
 
-            var div = document.createElement('div');
-            div.style.position = "relative";
-            div.style.height = "100%";
-            td.appendChild(div);
+            var div = createElement('div', td, {
+                height: "100%",
+                position: "relative"
+            });
 
 
           //Add bar
-            bar = document.createElement('div');
+            bar = createElement('div', div);
             setStyle(bar, "bar");
             bar.style.position = "absolute";
             bar.style.bottom = 0;
             bar.style.width = "100%";
 
-            div.appendChild(bar);
             template.cell = td;
         }
         else{
@@ -289,7 +277,7 @@ javaxt.dhtml.BarGraph = function (parent, config) {
         else{
             if (typeof config.style.cell === "string"){
                 if (!cellWidth){
-                    var temp = document.createElement("div");
+                    var temp = createElement('div');
                     setStyle(temp, "cell");
                     temp.style.position = "absolute";
                     temp.style.visibility = 'hidden';
@@ -316,27 +304,26 @@ javaxt.dhtml.BarGraph = function (parent, config) {
 
 
       //Add tick
-        var td = document.createElement('td');
+        var td = tickRow.addColumn();
         setStyle(td, "tick");
-        tickRow.appendChild(td);
 
 
       //Add label
-        td = document.createElement('td');
+        td = labelRow.addColumn();
         setStyle(td, "labelX");
         if (label!=null){
 
-            var outerDiv = document.createElement('div');
-            outerDiv.style.position = "relative";
-            outerDiv.style.width = "100%";
-            outerDiv.style.height = "100%";
-            td.appendChild(outerDiv);
+            var outerDiv = createElement('div', td, {
+                width: "100%",
+                height: "100%",
+                position: "relative"
+            });
 
-            var innerDiv = document.createElement('div');
-            innerDiv.style.position = "absolute";
-            innerDiv.style.width = "100%";
-            innerDiv.style.height = "100%";
-            outerDiv.appendChild(innerDiv);
+            var innerDiv = createElement('div', outerDiv, {
+                width: "100%",
+                height: "100%",
+                position: "absolute"
+            });
 
             if (typeof label === "string" || isNumber(label)){
                 innerDiv.innerHTML = label;
@@ -345,7 +332,7 @@ javaxt.dhtml.BarGraph = function (parent, config) {
                 label.apply(me, [innerDiv]);
             }
         }
-        labelRow.appendChild(td);
+
     };
 
 
@@ -421,41 +408,27 @@ javaxt.dhtml.BarGraph = function (parent, config) {
 
 
           //Add label and tick on the y-axis
-            var tr = document.createElement('tr');
-            t1.appendChild(tr);
+            var tr = yAxis.addRow();
 
-
-            var td = document.createElement('td');
-            td.style.verticalAlign = "top";
-            tr.appendChild(td);
-            var div = document.createElement('div');
+            var td = tr.addColumn({verticalAlign: "top"});
+            var div = createElement('div', td);
             setStyle(div, "labelY");
-            td.appendChild(div);
             td.label = div;
 
-            var td = document.createElement('td');
-            td.style.verticalAlign = "top";
-            tr.appendChild(td);
-
-            var div = document.createElement('div');
+            var td = tr.addColumn({verticalAlign: "top"});
+            var div = createElement('div', td);
             setStyle(div, "hline");
             div.style.width = "100%";
-            td.appendChild(div);
-
 
 
 
           //Add horizontal line
-            tr = document.createElement('tr');
-            t2.appendChild(tr);
-            td = document.createElement('td');
-            td.style.verticalAlign = "top";
-            tr.appendChild(td);
-            var div = document.createElement('div');
+            tr = horizontalLines.addRow();
+            td = tr.addColumn({verticalAlign: "top"});
+            var div = createElement('div', td);
             setStyle(div, "hline");
             div.style.width = "100%";
             div.style.position = "absolute";
-            td.appendChild(div);
         }
 
 
@@ -738,6 +711,7 @@ javaxt.dhtml.BarGraph = function (parent, config) {
     var merge = javaxt.dhtml.utils.merge;
     var onRender = javaxt.dhtml.utils.onRender;
     var createTable = javaxt.dhtml.utils.createTable;
+    var createElement = javaxt.dhtml.utils.createElement;
     var setStyle = function(el, style){
         javaxt.dhtml.utils.setStyle(el, config.style[style]);
     };

@@ -135,20 +135,21 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
 
       //Create overflow divs
-        outerDiv = document.createElement("div");
+        outerDiv = createElement('div', parent, {
+            width: "100%",
+            height: "100%",
+            position: "relative"
+        });
         outerDiv.setAttribute("desc", me.className);
-        outerDiv.style.position = "relative";
-        outerDiv.style.width = "100%";
-        outerDiv.style.height = "100%";
-        parent.appendChild(outerDiv);
         me.el = outerDiv;
 
 
-        var overflowDiv = document.createElement("div");
-        overflowDiv.style.position = "absolute";
-        overflowDiv.style.overflow = "hidden";
-        overflowDiv.style.width = "100%";
-        overflowDiv.style.height = "100%";
+        var overflowDiv = createElement('div', outerDiv, {
+            width: "100%",
+            height: "100%",
+            position: "absolute",
+            overflow: "hidden"
+        });
         var padding = config.padding;
         if (padding>0){
             overflowDiv.style.padding = "0 " + padding + "px";
@@ -158,11 +159,11 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
 
       //Create main div used to store panels. This div will move horizontally
-        innerDiv = document.createElement("div");
-        innerDiv.style.position = "absolute";
-        innerDiv.style.left = "0px";
-        innerDiv.style.height = "100%";
-        overflowDiv.appendChild(innerDiv);
+        innerDiv = createElement('div', overflowDiv, {
+            left: "0px",
+            height: "100%",
+            position: "absolute"
+        });
 
 
         if (config.drag===true){
@@ -281,27 +282,27 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
 
       //Create divs (for overflow purposes)
-        var div = document.createElement('div');
-        div.style.width=outerDiv.offsetWidth+"px";
-        div.style.height="100%";
-        div.style.position="relative";
-        div.style.display="inline-block";
+        var div = createElement('div', innerDiv, {
+            width: outerDiv.offsetWidth+"px",
+            height: "100%",
+            position: "relative",
+            display: "inline-block"
+        });
         var padding = config.padding;
         if (padding>0){
             div.style.width=(outerDiv.offsetWidth + (padding*2))+"px";
         }
-        innerDiv.appendChild(div);
 
-        var overflowDiv = document.createElement('div');
-        overflowDiv.style.width="100%";
-        overflowDiv.style.height="100%";
-        overflowDiv.style.position="absolute";
-        overflowDiv.style.overflow="hidden";
+        var overflowDiv = createElement('div', div, {
+            width: "100%",
+            height: "100%",
+            position: "absolute",
+            overflow: "hidden"
+        });
         if (padding>0){
             overflowDiv.style.padding = "0 " + padding + "px";
             overflowDiv.style.width=outerDiv.offsetWidth+"px";
         }
-        div.appendChild(overflowDiv);
 
 
       //Add element to the overflow div
@@ -1147,6 +1148,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
     var onRender = javaxt.dhtml.utils.onRender;
     var _getRect = javaxt.dhtml.utils.getRect;
     var intersects = javaxt.dhtml.utils.intersects;
+    var createElement = javaxt.dhtml.utils.createElement;
     var getAreaOfIntersection = javaxt.dhtml.utils.getAreaOfIntersection;
     var addResizeListener = javaxt.dhtml.utils.addResizeListener;
     var addShowHide = javaxt.dhtml.utils.addShowHide;

@@ -305,8 +305,7 @@ javaxt.dhtml.Tree = function (parent, config) {
 
 
           //Create node
-            var li = document.createElement("li");
-            li.className = config.style.li;
+            var li = createElement("li", parent, config.style.li);
             li.node = node;
             li.onclick = function(){
                 if (this.nextSibling){
@@ -324,7 +323,6 @@ javaxt.dhtml.Tree = function (parent, config) {
                 }
                 me.onClick(getItem(this));
             };
-            parent.appendChild(li);
 
 
 
@@ -476,33 +474,29 @@ javaxt.dhtml.Tree = function (parent, config) {
   //**************************************************************************
     var createLabel = function(label, icon, li){
 
-        var outerDiv = document.createElement("div");
+        var outerDiv = createElement("div", li);
         outerDiv.style.width = "100%";
         outerDiv.style.backgroundColor = config.style.backgroundColor;
         outerDiv.style.position = "relative";
         outerDiv.style.overflow = "hidden";
         outerDiv.style.height = config.style.rowHeight;
-        li.appendChild(outerDiv);
+
 
         var iconDiv;
         if (icon){
-            iconDiv = document.createElement("div");
-            iconDiv.className = icon;
+            iconDiv = createElement("div", outerDiv, icon);
             iconDiv.style.display = "inline-block";
             iconDiv.style.position = "absolute";
-            outerDiv.appendChild(iconDiv);
         }
 
         var labelDiv;
         if (label){
-            var labelDiv = document.createElement("div");
-            addStyle(labelDiv, config.style.label);
+            var labelDiv = createElement("div", outerDiv, config.style.label);
             labelDiv.style.display = "inline-block";
             labelDiv.style.position = "absolute";
             labelDiv.style.paddingLeft = config.style.colWidth;
             labelDiv.style.lineHeight = config.style.rowHeight;
             labelDiv.innerHTML = label.replace(/^\s*/, "").replace(/\s*$/, ""); //trim()
-            outerDiv.appendChild(labelDiv);
         }
 
 
@@ -604,12 +598,12 @@ javaxt.dhtml.Tree = function (parent, config) {
   //** createUL
   //**************************************************************************
     var createUL = function(){
-        var ul = document.createElement("ul");
-        ul.style.listStyleType = "none";
-        ul.style.padding=0;
-        ul.style.margin=0;
-        ul.style.backgroundColor = config.style.backgroundColor;
-        return ul;
+        return createElement("ul", {
+            listStyleType: "none",
+            padding: 0,
+            margin: 0,
+            backgroundColor: config.style.backgroundColor
+        });
     };
 
 
@@ -619,6 +613,7 @@ javaxt.dhtml.Tree = function (parent, config) {
     var merge = javaxt.dhtml.utils.merge;
     var addStyle = javaxt.dhtml.utils.addStyle;
     var isArray = javaxt.dhtml.utils.isArray;
+    var createElement = javaxt.dhtml.utils.createElement;
 
     init();
 };

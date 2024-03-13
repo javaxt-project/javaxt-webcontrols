@@ -9,7 +9,6 @@ if(!javaxt.dhtml) javaxt.dhtml={};
  *
  ******************************************************************************/
 
-
 javaxt.dhtml.Accordion = function(parent, config) {
     this.className = "javaxt.dhtml.Accordion";
 
@@ -100,41 +99,37 @@ javaxt.dhtml.Accordion = function(parent, config) {
       //Create table to hold the accordion control. At the time of this writing,
       //the table was the only thing I could use that would correctly maintain
       //100% height...
-        var table = createTable();
+        var table = createTable(parent);
         table.setAttribute("desc", me.className);
         setStyle(table, "accordion");
         table.style.borderCollapse = "collapse";
-        var tbody = table.firstChild;
-        var row = document.createElement('tr');
-        var td = document.createElement('td');
-        td.style.width="100%";
-        td.style.height="100%";
-        td.style.verticalAlign = "top";
-        row.appendChild(td);
-        tbody.appendChild(row);
-        parent.appendChild(table);
+        var td = table.addRow().addColumn({
+            width: "100%",
+            height: "100%",
+            verticalAlign: "top"
+        });
         me.el = table;
 
 
       //Create overflow divs inside the table
-        var div = document.createElement('div');
-        div.style.width="100%";
-        div.style.height="100%";
-        div.style.position = "relative";
-        td.appendChild(div);
+        var div = createElement('div', td, {
+            width: "100%",
+            height: "100%",
+            position: "relative"
+        });
 
-        var overflowDiv = document.createElement('div');
-        overflowDiv.style.width="100%";
-        overflowDiv.style.height="100%";
-        overflowDiv.style.position = "absolute";
-        overflowDiv.style.overflow = "hidden";
-        div.appendChild(overflowDiv);
+        var overflowDiv = createElement('div', div, {
+            width: "100%",
+            height: "100%",
+            position: "absolute",
+            overflow: "hidden"
+        });
 
-        innerDiv = document.createElement('div');
-        innerDiv.style.width="100%";
-        innerDiv.style.height="100%";
-        innerDiv.style.position = "relative";
-        overflowDiv.appendChild(innerDiv);
+        innerDiv = createElement('div', overflowDiv, {
+            width: "100%",
+            height: "100%",
+            position: "relative"
+        });
 
 
 
@@ -198,7 +193,7 @@ javaxt.dhtml.Accordion = function(parent, config) {
         if (header){
             if (typeof header == "string"){
                 title = header;
-                header = createHeader(title);
+                header = createHeader(title, innerDiv);
             }
             else{
                 //Assume that we have an html dom element...
@@ -207,9 +202,8 @@ javaxt.dhtml.Accordion = function(parent, config) {
         }
         else{
             title = el.title;
-            header = createHeader(title);
+            header = createHeader(title, innerDiv);
         }
-        innerDiv.appendChild(header);
 
 
 
@@ -252,8 +246,8 @@ javaxt.dhtml.Accordion = function(parent, config) {
   //**************************************************************************
   //** createHeader
   //**************************************************************************
-    var createHeader = function(title){
-        var header = document.createElement("div");
+    var createHeader = function(title, parent){
+        var header = createElement("div", parent);
         header.innerHTML = title;
         //header.onmouseover = mouseOver;
         //header.onmouseout = mouseOut;
@@ -653,6 +647,7 @@ javaxt.dhtml.Accordion = function(parent, config) {
   //**************************************************************************
     var merge = javaxt.dhtml.utils.merge;
     var createTable = javaxt.dhtml.utils.createTable;
+    var createElement = javaxt.dhtml.utils.createElement;
     var addResizeListener = javaxt.dhtml.utils.addResizeListener;
     var setStyle = function(el, style){
         javaxt.dhtml.utils.setStyle(el, config.style[style]);

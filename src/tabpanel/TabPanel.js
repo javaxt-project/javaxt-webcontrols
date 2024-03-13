@@ -77,45 +77,38 @@ javaxt.dhtml.TabPanel = function(parent, config) {
 
 
       //Create main table
-        var table = createTable();
+        var table = createTable(parent);
         table.setAttribute("desc", me.className);
-        var tbody = table.firstChild;
+
 
 
       //Row 1
-        var tr = document.createElement('tr');
-        tbody.appendChild(tr);
-        var td = document.createElement('td');
+        var td = table.addRow().addColumn();
         setStyle(td, "tabBar");
         td.style.width = "100%";
-        tr.appendChild(td);
 
-        tabList = document.createElement('ul');
-        tabList.style.listStyle = "none outside none";
-        tabList.style.padding = 0;
-        tabList.style.margin = 0;
-        tabList.style.height = "100%";
-        td.appendChild(tabList);
+        tabList = createElement("ul", td, {
+            listStyle: "none outside none",
+            height: "100%",
+            padding: 0,
+            margin: 0
+        });
+
 
 
       //Row 2
-        tr = document.createElement('tr');
-        tbody.appendChild(tr);
-        var td = document.createElement('td');
+        var td = table.addRow().addColumn();
         setStyle(td, "tabBody");
         td.style.width = "100%";
         td.style.height = "100%";
-        tr.appendChild(td);
+
+        tabContent = createElement("div", td, {
+            width: "100%",
+            height: "100%",
+            position: "relative"
+        });
 
 
-        tabContent = document.createElement('div');
-        tabContent.style.width = "100%";
-        tabContent.style.height = "100%";
-        tabContent.style.position = "relative";
-        td.appendChild(tabContent);
-
-
-        parent.appendChild(table);
         me.el = table;
     };
 
@@ -129,15 +122,16 @@ javaxt.dhtml.TabPanel = function(parent, config) {
    */
     this.addTab = function(name, _el){
 
-        var el = document.createElement('div');
-        el.style.width = "100%";
-        el.style.height = "100%";
-        el.style.position = "absolute";
+        var el = createElement("div", tabContent, {
+            width: "100%",
+            height: "100%",
+            position: "absolute"
+        });
         el.appendChild(_el);
 
 
 
-        var tab = document.createElement('li');
+        var tab = createElement("li", tabList);
         setStyle(tab, "inactiveTab");
         tab.style.position = "relative";
         tab.style.float = "left";
@@ -149,7 +143,6 @@ javaxt.dhtml.TabPanel = function(parent, config) {
         };
         tab.onselectstart = function () {return false;};
         tab.onmousedown = function () {return false;};
-        tabList.appendChild(tab);
         for (var i=0; i<tabList.childNodes.length; i++){
             var t = tabList.childNodes[i];
             if (t!==tab){
@@ -162,8 +155,6 @@ javaxt.dhtml.TabPanel = function(parent, config) {
         }
 
         el.style.display='none'; //<-- style used to test whether the tab is visible (see raiseTab)
-
-        tabContent.appendChild(el);
 
         raiseTab(tab);
     };
@@ -359,6 +350,7 @@ javaxt.dhtml.TabPanel = function(parent, config) {
   //**************************************************************************
     var merge = javaxt.dhtml.utils.merge;
     var createTable = javaxt.dhtml.utils.createTable;
+    var createElement = javaxt.dhtml.utils.createElement;
     var setStyle = function(el, style){
         javaxt.dhtml.utils.setStyle(el, config.style[style]);
     };
