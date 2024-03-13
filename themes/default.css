@@ -230,6 +230,13 @@ input, select, textarea { /* Allows overriding native style of form elements on 
     outline: 0 none;
 }
 
+.form-input:disabled,
+.form-input[disabled]{
+    opacity:0.75;
+    color: #939393;
+    cursor:default;
+}
+
 .form-label {
     color: #636363;
     font-size: 14px;
