@@ -632,9 +632,10 @@ javaxt.dhtml.utils = {
    *  a datagrid
    *  @param records A two-dimensional array representing rows and columns
    *  @param pixelsPerChar Approximate, average width of a character
+   *  @param maxWidth Optional. The available width for the table/grid control
    *  @returns JSON object with various stats and suggestedWidths
    */
-    getSuggestedColumnWidths: function(records, pixelsPerChar){
+    getSuggestedColumnWidths: function(records, pixelsPerChar, maxWidth){
 
         var widths = [];
         var zscores = [];
@@ -687,7 +688,7 @@ javaxt.dhtml.utils = {
             }
 
 
-          //Check if any columns are super wide using z-scores
+          //Check if any columns are super wide (or very narrow) using z-scores
             var outliers = [];
             zscores = javaxt.dhtml.utils.getZScores(widths, true);
             for (var i=0; i<zscores.length; i++){
@@ -695,20 +696,72 @@ javaxt.dhtml.utils = {
             }
 
 
-          //Come up with suggestedWidths
-            if (outliers.length==1){
+          //Compute suggestedWidths. If we have one column that's really wide,
+          //we'll make it 100% and use pixels for the other columns. Otherwise,
+          //we'll use percentages for everything
+            var usePercentages = true;
+            if (outliers.length===1){
 
-
-              //If we have one column that's really wide, let's make it 100%
-              //width and use pixels for the other columns
                 var outlier = outliers[0];
+                var outlierWidth = widths[outlier];
+
+
+              //Check if the outlier is really wider than all the other fields
+                var updateOutlier = true;
                 for (var i=0; i<widths.length; i++){
-                    var colWidth = i==outlier ? "100%" : widths[i] + "px";
-                    suggestedWidths.push(colWidth);
+                    if (i===outlier) continue;
+                    if (widths[i]>outlierWidth){
+                        updateOutlier = false;
+                        break;
+                    }
+                }
+
+
+              //Check if the outlier should be converted to 100% width
+                if (updateOutlier){
+                    maxWidth = parseFloat(maxWidth+"");
+                    if (!isNaN(maxWidth)){
+
+                        if (totalWidth-outlierWidth>maxWidth){
+
+                          //If all the other columns add up to more than the
+                          //available area, don't use 100%
+                            updateOutlier = false;
+
+                        }
+                        else{
+
+                          //If the column were to be set to 100%, compute the
+                          //max width that would be allotted. If the computed
+                          //width is less than one of the other columns, don't
+                          //use 100%
+                            var r = maxWidth-(totalWidth-outlierWidth);
+                            for (var i=0; i<widths.length; i++){
+                                if (i===outlier) continue;
+                                if (widths[i]>r){
+                                    updateOutlier = false;
+                                    break;
+                                }
+                            }
+
+                        }
+                    }
+                }
+
+
+
+              //Set outlier to 100% width and use pixels for the other columns
+                if (updateOutlier){
+                    usePercentages = false;
+                    for (var i=0; i<widths.length; i++){
+                        var colWidth = i==outlier ? "100%" : widths[i] + "px";
+                        suggestedWidths.push(colWidth);
+                    }
                 }
 
             }
-            else{
+
+            if (usePercentages) {
 
               //Use percentages for all the fields
                 for (var i=0; i<widths.length; i++){
