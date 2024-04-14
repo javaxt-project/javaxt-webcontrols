@@ -7,6 +7,33 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 /**
  *   Custom grid control based on javaxt.dhtml.Table. Supports remote loading,
  *   sorting, and infinite scroll.
+ *   <br/>
+ *   Here's a simple example of how to instantiate a DataGrid that will render
+ *   a list of users returned from a REST endpoint:
+ <pre>
+    var grid = new javaxt.dhtml.DataGrid(parent, {
+        style: config.style.table,
+        url: "/manage/users",
+        parseResponse: function(request){
+            return JSON.parse(request.responseText);
+        },
+        columns: [
+            {header: 'ID', hidden:true},
+            {header: 'Name', width:'100%'},
+            {header: 'Role', width:'240'},
+            {header: 'Enabled', width:'75', align:'center'},
+            {header: 'Last Active', width:'175', align:'right'}
+        ]
+    });
+ </pre>
+ *   Once the grid is instantiated you can add event listeners by overriding
+ *   any of the public "on" or "before" methods like this:
+ <pre>
+    grid.onSelectionChange = function(){
+        var records = grid.getSelectedRecords();
+        console.log(records.length);
+    };
+ </pre>
  *
  ******************************************************************************/
 
@@ -110,7 +137,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         getResponse: function(url, payload, callback){
 
 
-          //Transform GET request into POST request if possbile. This will
+          //Transform GET request into POST request if possible. This will
           //tidy up the URLs and reduce log size
             if (!payload && config.post==true){
                 var idx = url.indexOf("?");
@@ -1357,6 +1384,10 @@ javaxt.dhtml.DataGrid = function(parent, config) {
   //**************************************************************************
   //** setSortIndicator
   //**************************************************************************
+  /** Used to update the sort indicator for a given column
+   *  @param idx Column number, starting with 0
+   *  @param sortDirection "ASC" or "DESC"
+   */
     this.setSortIndicator = function(idx, sortDirection){
         for (var i=0; i<columns.length; i++){
             var colHeader = columns[i].header;
@@ -1554,6 +1585,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         }
 
     };
+
 
   //**************************************************************************
   //** wrap
