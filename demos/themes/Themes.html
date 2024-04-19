@@ -10,6 +10,8 @@
 
 <link href="../style.css" rel="stylesheet" type="text/css" />
 
+
+<script src="../../src/tabpanel/TabPanel.js"></script>
 <script src="../../src/window/Window.js"></script>
 <script src="../../src/utils/Utils.js"></script>
 
@@ -94,6 +96,7 @@ window.onload = function(){
                 l.href = this.theme;
             }
             var b = this.contentWindow.document.getElementsByTagName("body")[0];
+            b.style.padding = 0; //override demos/style.css
             renderComponents(b, this.theme ? javaxt.dhtml.style.default : false);
         };
         iframe.contentWindow.document.open();
