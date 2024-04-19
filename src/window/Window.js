@@ -18,17 +18,62 @@ javaxt.dhtml.Window = function(parent, config) {
 
     var defaultConfig = {
 
+      /** DOM element or string rendered in the header. Note that this config
+       *  is optional and can be set after the Window has been instantiated.
+       *  See setTitle().
+       */
         title: false,
+
+      /** DOM element or string rendered in the body. Note that this config is
+       *  optional and can be set after the Window has been instantiated. See
+       *  setBody().
+       */
         body: null,
+
+      /** DOM element or string rendered in the footer. Note that this config
+       *  is optional and can be set after the Window has been instantiated.
+       *  See setFooter().
+       */
         footer: null,
 
-
+      /** Initial width of the window, in pixels.
+       */
         width: null,
+
+      /** Initial height of the window, in pixels. 
+       */
         height: null,
+
+      /** If true, will render a mask directly behind the window to prevent
+       *  users from interacting with any other part of the window's parent.
+       *  Default is false.
+       */
         modal: false,
+
+      /** If true, users can resize the window using resize handles along the
+       *  border of the window. Default is true.
+       */
         resizable: true,
+
+      /** If true, will add a button to the header that will close the window
+       *  when clicked. Default is true.
+       */
         closable: true,
+
+      /** If true, will allow users to move the window around by dragging the
+       *  window header. Default is true.
+       */
+        movable: true,
+
+
+      /** If true, will resize window if it is larger that the parent. Default
+       *  is false.
+       */
         shrinkToFit: false,
+
+      /** Vertical align hint used when rendering the window. Options include
+       *  "top" and "middle" (default).
+       */
         valign: "middle",
 
 
@@ -255,49 +300,51 @@ javaxt.dhtml.Window = function(parent, config) {
 
 
       //Initialize drag
-        initDrag(dragHandle, {
-            onDragStart: function(x,y){
-                var div = mainDiv;
+        if (config.movable===true){
+            initDrag(dragHandle, {
+                onDragStart: function(x,y){
+                    var div = mainDiv;
 
-                var rect = _getRect(div);
-                var rect2 = _getRect(parent);
-                var xOffset = (x-rect.x)+rect2.x;
-                var yOffset = (y-rect.y)+rect2.y;
-
-
-                div.xOffset = xOffset;
-                div.yOffset = yOffset;
-                div.width = rect.width;
-                div.height = rect.height;
+                    var rect = _getRect(div);
+                    var rect2 = _getRect(parent);
+                    var xOffset = (x-rect.x)+rect2.x;
+                    var yOffset = (y-rect.y)+rect2.y;
 
 
-                div.style.left = (x-xOffset) + 'px';
-                div.style.top = (y-yOffset) + 'px';
-                dragHandle.style.cursor = 'move';
-
-            },
-            onDrag: function(x,y){
-                var div = mainDiv;
-
-                var left = (x-div.xOffset);
-                if (left<0) left = 0;
+                    div.xOffset = xOffset;
+                    div.yOffset = yOffset;
+                    div.width = rect.width;
+                    div.height = rect.height;
 
 
-                if (left+div.width>parent.offsetWidth) left=parent.offsetWidth-div.width;
+                    div.style.left = (x-xOffset) + 'px';
+                    div.style.top = (y-yOffset) + 'px';
+                    dragHandle.style.cursor = 'move';
 
-                var top = (y-div.yOffset);
-                if (top<0) top = 0;
+                },
+                onDrag: function(x,y){
+                    var div = mainDiv;
 
-                if (top+div.height>parent.offsetHeight) top=parent.offsetHeight-div.height;
+                    var left = (x-div.xOffset);
+                    if (left<0) left = 0;
 
-                div.style.left = left + 'px';
-                div.style.top = top + 'px';
 
-            },
-            onDragEnd: function(){
-                this.style.cursor = 'default';
-            }
-        });
+                    if (left+div.width>parent.offsetWidth) left=parent.offsetWidth-div.width;
+
+                    var top = (y-div.yOffset);
+                    if (top<0) top = 0;
+
+                    if (top+div.height>parent.offsetHeight) top=parent.offsetHeight-div.height;
+
+                    div.style.left = left + 'px';
+                    div.style.top = top + 'px';
+
+                },
+                onDragEnd: function(){
+                    this.style.cursor = 'default';
+                }
+            });
+        }
 
 
       //Watch for resize events
