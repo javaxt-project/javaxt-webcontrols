@@ -18,6 +18,7 @@ javaxt.dhtml.style.default = {
         title: "panel-title window-title",
         button: "window-header-button",
         buttonBar: "window-header-button-bar",
+        body: "window-body",
         mask: "window-mask"
     },
 
@@ -87,7 +88,10 @@ javaxt.dhtml.style.default = {
     },
 
     tabPanel: {
-
+        tabBar: "tab-bar",
+        activeTab: "tab-active",
+        inactiveTab: "tab-inactive",
+        tabBody: "tab-body"
     },
 
     switch: {

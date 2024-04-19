@@ -645,6 +645,67 @@ select:focus, textarea:focus, input:focus{
 }
 
 
+
+/**************************************************************************/
+/** Tab Panel
+/**************************************************************************/
+/** The following classes are used to define the style for the tab panel.
+ */
+
+.tab-panel {
+    padding: 0 5px;
+}
+
+.tab-bar {
+    background-color: #0f6391; /* same as windows header */
+    height: 30px;
+    color: #fff;
+    border: 1px solid #6393bf;
+    border-width: 0 1px;
+}
+
+.tab-active, .tab-inactive {
+    padding: 0 12px;
+    line-height: 30px;
+    cursor: default;
+}
+
+.tab-active {
+    background-color: #379ad1;
+}
+
+.tab-inactive {
+    background: none;
+}
+
+.tab-inactive:hover {
+    background-color: #3dabe9;
+}
+
+.tab-body {
+    padding: 0;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    vertical-align: top;
+}
+
+/** Special case when tab is the first component inside a window  **/
+
+.window-body table:first-child .tab-bar {
+    background-color: #208EC9;
+}
+
+.window-body table:first-child .tab-active {
+    background-color: #379ad1;
+    border-top: 2px solid #69b9ff;
+    margin-top: -2px;
+}
+
+.window-body table:first-child .tab-body {
+    border: 0 none;
+    border-radius: 0 0 8px 8px;
+}
+
 /**************************************************************************/
 /** Table
 /**************************************************************************/

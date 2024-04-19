@@ -528,6 +528,72 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 
 
 /**************************************************************************/
+/** Tab Panel
+/**************************************************************************/
+/** The following classes are used to define the style for the tab panel.
+ */
+
+.tab-panel {
+    padding: 0 5px;
+}
+
+.tab-bar {
+    background-color: #335177; /* same as windows header */
+    height: 30px;
+    color: #fff;
+    border: 1px solid #2e588d;
+    border-width: 0 1px;
+    color: #bdbdbd;
+}
+
+.tab-active, .tab-inactive {
+    padding: 0 12px;
+    line-height: 30px;
+    cursor: default;
+}
+
+.tab-active {
+    background-color: #256d95;
+    color: #fff;
+}
+
+.tab-inactive {
+    background: none;
+}
+
+.tab-inactive:hover {
+    background-color: #3387b7;
+    color: #fff;
+}
+
+.tab-body {
+    padding: 7px;
+    vertical-align: top;
+    background-color: #3e4453;
+    border: 1px solid #4f5669;
+}
+
+
+
+/** Special case when tab is the first component inside a window  **/
+
+.window-body table:first-child .tab-bar {
+    background-color: #405672;
+}
+
+.window-body table:first-child .tab-active {
+    border-top: 2px solid #4a84b7;
+    margin-top: -2px;
+}
+
+.window-body table:first-child .tab-body {
+    border: 0 none;
+    border-radius: 0 0 8px 8px;
+}
+
+
+
+/**************************************************************************/
 /** Checkbox
 /**************************************************************************/
 /** The following classes are used to define the style for checkboxes
