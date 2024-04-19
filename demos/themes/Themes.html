@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Themes Demo</title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+<link href="../style.css" rel="stylesheet" type="text/css" />
+
+<script src="../../src/window/Window.js"></script>
+<script src="../../src/utils/Utils.js"></script>
+
+<script src="../../themes/default.js"></script>
+
+<script src="demo.js"></script>
+
+</head>
+<body>
+<div class="demo-container">
+
+
+
+<h1>Themes Demo</h1>
+<p>A sampling of various JavaXT components in different styles/themes.</p>
+
+<h2>No Theme</h2>
+<p>
+  All JavaXT components have embedded style rules so you can use them out of-the-box.
+  In other words, you don't need to define any classes or style rules or include
+  any CSS file in order to render the components. This is what the components
+  look like with no styling.
+</p>
+<div id="demo1"></div>
+
+
+<h2>Default Theme</h2>
+<p>
+  You can customize the look and feel of any component by providing your own
+  style rules when you instantiate the JavaXT components via the "style" config.
+  In the themes folder, there is a CSS file called "default.css". This is
+  what the components look like with the "default.css" theme.
+</p>
+<div id="demo2"></div>
+
+
+<h2>Dark Theme</h2>
+<p>
+  And of course, we have a dark mode! In the themes folder, there is a CSS file
+  called "dark.css". This is what the components look like with the "dark.css" theme.
+</p>
+<div id="demo3"></div>
+
+
+
+
+<script>
+window.onload = function(){
+
+    var html = document.getElementsByTagName("html")[0].cloneNode(true);
+    html.getElementsByTagName("body")[0].innerHTML = "";
+
+
+    for (var i=0; i<3; i++){
+        var div = document.getElementById("demo"+(i+1));
+        div.style.height = "400px";
+
+
+      //Define a theme
+        var theme = "";
+        if (i===1){
+            theme = "../../themes/default.css";
+        }
+        else if (i===2){
+            theme = "../../themes/dark.css";
+        }
+
+
+      //Create iFrame
+        var iframe = document.createElement("iframe");
+        iframe.style.width = "100%";
+        iframe.style.height = "100%";
+        iframe.theme = theme;
+        div.appendChild(iframe);
+
+
+      //Update iFrame and render components
+        iframe.onload = function() {
+            if (this.theme){
+                var h = this.contentWindow.document.getElementsByTagName("head")[0];
+                var l = h.getElementsByTagName("link")[0];
+                l.href = this.theme;
+            }
+            var b = this.contentWindow.document.getElementsByTagName("body")[0];
+            renderComponents(b, this.theme ? javaxt.dhtml.style.default : false);
+        };
+        iframe.contentWindow.document.open();
+        iframe.contentWindow.document.write(html.innerHTML);
+        iframe.contentWindow.document.close();
+
+    }
+};
+</script>
+
+</div>
+</body>
+</html>
