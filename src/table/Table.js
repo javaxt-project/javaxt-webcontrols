@@ -67,6 +67,11 @@ javaxt.dhtml.Table = function(parent, config) {
         overflow: true,
 
 
+      /** If true, will hide the header row. Default is false.
+       */
+        hideHeader: false,
+
+
       /** Style for individual elements within the component. Note that you can
        *  provide CSS class names instead of individual style definitions.
        */
@@ -205,6 +210,10 @@ javaxt.dhtml.Table = function(parent, config) {
         td.style.width = "100%";
         td.style.height = "inherit";
         header = createTable(td);
+        if (config.hideHeader===true){
+            tr.style.visibility = 'hidden';
+            tr.style.display = 'none';
+        }
 
 
 
@@ -922,12 +931,14 @@ javaxt.dhtml.Table = function(parent, config) {
    */
     this.deselectAll = function(){
         var rows = [];
-        var childNodes = body.getRows();
-        for (var i=1; i<childNodes.length; i++){
-            var tr = childNodes[i];
-            if (tr.selected){
-                me.deselect(tr);
-                rows.push(tr);
+        if (body){
+            var childNodes = body.getRows();
+            for (var i=1; i<childNodes.length; i++){
+                var tr = childNodes[i];
+                if (tr.selected){
+                    me.deselect(tr);
+                    rows.push(tr);
+                }
             }
         }
         prevSelection = null;
@@ -1008,6 +1019,7 @@ javaxt.dhtml.Table = function(parent, config) {
   /** Removes all the rows from the table
    */
     this.clear = function(){
+        if (!body) return;
         me.deselectAll();
         var childNodes = body.getRows();
         while (childNodes.length>1){

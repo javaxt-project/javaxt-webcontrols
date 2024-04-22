@@ -23,15 +23,23 @@ if(!javaxt.dhtml) javaxt.dhtml={};
             {header: 'Role', width:'240'},
             {header: 'Enabled', width:'75', align:'center'},
             {header: 'Last Active', width:'175', align:'right'}
-        ]
+        ],
+        update: function(row, user){
+            row.set('Name', user.fullname);
+            row.set('Role', user.role);
+            var status = user.status;
+            if (status===1){
+                row.set('Enabled', createElement("i", "fas fa-check"));
+            }
+        },
+        autoload: true
     });
  </pre>
  *   Once the grid is instantiated you can add event listeners by overriding
  *   any of the public "on" or "before" methods like this:
  <pre>
-    grid.onSelectionChange = function(){
-        var records = grid.getSelectedRecords();
-        console.log(records.length);
+    grid.onRowClick = function(row, e){
+        console.log(row.record);
     };
  </pre>
  *
@@ -130,6 +138,10 @@ javaxt.dhtml.DataGrid = function(parent, config) {
        *  of fields are merged into a unique list.
        */
         fields: [],
+
+      /** If true, will hide the header row. Default is false.
+       */
+        hideHeader: false,
 
       /** Default method used to get responses from the server. Typically, you
        *  do not need to override this method.
@@ -279,6 +291,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
       //Create table
         table = new javaxt.dhtml.Table(parent, {
             multiselect: multiselect,
+            hideHeader: config.hideHeader,
             columns: columns,
             style: config.style
         });
