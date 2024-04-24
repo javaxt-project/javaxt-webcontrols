@@ -1243,13 +1243,13 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                         }
                     }
                     else{
-                        var str = filter[key];
-                        str = str+"";
-                        str = str.trim();
-                        if (str.length>0){
+                        var val = filter[key];
+                        if (!isArray(val)){
+                            val = (val+"").trim();
+                        }
+                        if (val.length>0){
                             if (!hasParam(key, params)){
-                                params[key] = str;
-                                //url += "&" + key + "=" + encodeURIComponent(str);
+                                params[key] = val;
                             }
                         }
                     }
