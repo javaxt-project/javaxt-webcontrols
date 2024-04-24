@@ -478,6 +478,16 @@ javaxt.dhtml.Button = function(parent, config) {
 
 
   //**************************************************************************
+  //** click
+  //**************************************************************************
+  /** Used to click the button and fire onClick event
+   */
+    this.click = function(){
+        mainDiv.click();
+    };
+
+
+  //**************************************************************************
   //** onClick
   //**************************************************************************
   /** Called whenever the button is clicked.
@@ -559,6 +569,8 @@ javaxt.dhtml.Button = function(parent, config) {
   //**************************************************************************
   //** select
   //**************************************************************************
+  /** Used to update the "selected" state of the button.
+   */
     this.select = function(){
         if (mainDiv.selected===true) return;
         mainDiv.selected = true;
@@ -574,6 +586,8 @@ javaxt.dhtml.Button = function(parent, config) {
   //**************************************************************************
   //** deselect
   //**************************************************************************
+  /** Used to update the "selected" state of the button.
+   */
     this.deselect = function(){
         if (mainDiv.selected===true){
             mainDiv.selected = false;
