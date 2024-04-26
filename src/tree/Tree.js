@@ -5,7 +5,9 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 //**  Tree View
 //******************************************************************************
 /**
- *   Used to create a simple tree control.
+ *   Used to create a hierarchical tree control with nodes and leaves. The
+ *   nodes and leaves are "left-justified". Root nodes appear on the left and
+ *   nested elements appear below and to the right of the parent nodes.
  *
  ******************************************************************************/
 
@@ -13,10 +15,14 @@ javaxt.dhtml.Tree = function (parent, config) {
     this.className = "javaxt.dhtml.Tree";
 
     var me = this;
-
-
     var defaultConfig = {
 
+
+      /** Style for individual elements within the component. The nodes and
+       *  leaves in the tree are constructed using "ul" and "li" elements.
+       *  Note that unlike most of the other components, you should provide
+       *  CSS class names nodes, leaves, and path.
+       */
         style:{
 
             rowHeight: "20px",
@@ -72,6 +78,15 @@ javaxt.dhtml.Tree = function (parent, config) {
     };
 
 
+  /** The following sets up the "display" style for the li and ul elements.
+   *  This was added in 2024, after the tree demo stopped working on chrome.
+   */
+    var display = {
+        ul: "grid",
+        li: "inline-table"
+    };
+
+
   //**************************************************************************
   //** Constructor
   //**************************************************************************
@@ -96,12 +111,11 @@ javaxt.dhtml.Tree = function (parent, config) {
 
 
       //Create main ul
-        var ul = createUL();
+        var ul = createUL(parent);
         ul.style.cursor = config.style.cursor;
         ul.style.padding = config.style.padding;
         ul.onselectstart = function () {return false;};
         ul.onmousedown = function () {return false;};
-        parent.appendChild(ul);
         ul.setAttribute("desc", me.className);
         me.el = ul;
 
@@ -114,30 +128,100 @@ javaxt.dhtml.Tree = function (parent, config) {
 
 
   //**************************************************************************
+  //** clear
+  //**************************************************************************
+  /** Used to remove all the nodes in the tree
+   */
+    this.clear = function(){
+        me.el.innerHTML = "";
+    };
+
+
+  //**************************************************************************
   //** addNodes
   //**************************************************************************
-    this.addNodes = function(nodes){
+  /** Used to add nodes to the tree.
+   *  @param An array of nodes (string or json with name, children, and
+   *  expand properties) Example:
+   <pre>
+    var nodes = [
+        {
+            name: "javaxt-core", //root node
+            nodes: [
+                {
+                    name: "javaxt.io",
+                    nodes: ["Directory", "File", "Image", "Jar", "Shell"]
+                },
+                {
+                    name: "javaxt.sql",
+                    nodes:["Column", "Connection", "Recordset"],
+                    expand: false
+                }
+            ]
+        },
+        {
+            name: "javaxt-server", //root node
+            nodes: [
+
+            ]
+        }
+    ];
+   </pre>
+   *  @param expandAll If true, will render all the nodes and leaves. Default
+   *  is false.
+   */
+    this.addNodes = function(nodes, expandAll){
         var hiddenNodes = [];
         addNodes(nodes, me.el, hiddenNodes);
+        if (expandAll===true) return;
         for (var i=0; i<hiddenNodes.length; i++){
-            hide(hiddenNodes[i]);
+            hide(hiddenNodes[i], true);
         }
     };
 
 
   //**************************************************************************
-  //** Events
+  //** onClick
   //**************************************************************************
-
+  /** Called whenever an item is clicked in the tree.
+   *  @param item The item that was clicked. See getItem() for more
+   *  information.
+   */
     this.onClick = function(item){};
+
+
+  //**************************************************************************
+  //** onExpand
+  //**************************************************************************
+  /** Called whenever a node is expanded in the tree.
+   *  @param item The node that was expanded. See getItem() for more
+   *  information.
+   */
     this.onExpand = function(item){};
+
+
+  //**************************************************************************
+  //** onCollapse
+  //**************************************************************************
+  /** Called whenever a node is collapsed in the tree.
+   *  @param item The node that was collapsed. See getItem() for more
+   *  information.
+   */
     this.onCollapse = function(item){};
 
 
   //**************************************************************************
   //** getItem
   //**************************************************************************
-  /** Returns an item in a given path.
+  /** Returns a simple json object used to represent an item in the tree for a
+   *  given path.
+   *  <ul>
+   *  <li>type: Item type (e.g. "node" or "leaf")</li>
+   *  <li>name: Text/Label associated with the item</li>
+   *  <li>el: DOM element used to render the item(e.g. "li")</li>
+   *  </ul>
+   *  @param path Path to an element in the tree, Accepts either a string
+   *  array or a "/" delimited string.
    */
     this.getItem = function(path){
 
@@ -153,8 +237,14 @@ javaxt.dhtml.Tree = function (parent, config) {
         var findNode = function(key, nodes){
             if (nodes){
                 for (var i=0; i<nodes.length; i++){
-                    if (nodes[i].tagName.toLowerCase()==="li"){
+                    if (isLI(nodes[i])){
                         var li = nodes[i];
+
+                        if (!li.getText){
+                            continue;
+                        }
+
+
                         if (key===li.getText()){
                             return li;
                         }
@@ -163,6 +253,8 @@ javaxt.dhtml.Tree = function (parent, config) {
             }
             return null;
         };
+
+
 
         var target;
         var nodes = me.el.childNodes;
@@ -173,8 +265,19 @@ javaxt.dhtml.Tree = function (parent, config) {
                 if (i==path.length-1) target = node;
                 else{
                     var nextSibling = node.nextSibling;
-                    if (nextSibling){ //check if ul?
-                        nodes = nextSibling.childNodes;
+                    if (nextSibling){
+                        nodes = [];
+                        for (var j=0; j<nextSibling.childNodes.length; j++){
+                            var ul = nextSibling.childNodes[j];
+                            if (isUL(ul)){
+                                for (var k=0; k<ul.childNodes.length; k++){
+                                    var li = ul.childNodes[k];
+                                    if (isLI(li)){
+                                        nodes.push(li);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -208,7 +311,7 @@ javaxt.dhtml.Tree = function (parent, config) {
           //If the item is a node, expand children
             if (getNodeType(li)!="leaf"){
                 var nextNode = li.nextSibling;
-                if (nextNode.tagName.toLowerCase()=="ul"){
+                if (isUL(nextNode)){
                     show(nextNode);
                 }
             }
@@ -220,6 +323,8 @@ javaxt.dhtml.Tree = function (parent, config) {
               //Move up the tree
                 while (li.offsetParent===null){
                     ul = ul.parentNode;
+                    if (isLI(ul)) ul = ul.parentNode;
+
                     show(ul);
                     if (me.el === ul){
                         break;
@@ -260,20 +365,20 @@ javaxt.dhtml.Tree = function (parent, config) {
     this.getPath = function(item){
         var arr = [];
         if (item){
-            var li = item.el;
-            if (li){
-                var ul = li.parentNode;
+            arr.push(item);
 
-                while (ul!==me.el){
-                    li = ul.previousSibling;
-                    if (li){
-                        arr.push(getItem(li));
-                        ul = li.parentNode;
-                    }
-                    else{
-                        break;
-                    }
+            var el = item.el;
+
+            while (el!==me.el){
+                el = el.parentNode;
+                if (!el || el===me.el) break;
+
+                if (isUL(el)){
+                    el = el.parentNode.previousSibling;
                 }
+                if (!el || el===me.el) break;
+
+                if (isLI(el)) arr.push(getItem(el));
             }
         }
         return arr;
@@ -298,21 +403,60 @@ javaxt.dhtml.Tree = function (parent, config) {
   //**************************************************************************
   //** addNodes
   //**************************************************************************
+  /** Used to add nodes under a given node (ul) in the tree. Node that this
+   *  method will be called recursively for any nodes that have children.
+   *  @param An array of nodes (string or json with name, children, and
+   *  expand properties).
+   *  @param parent DOM element. Accepts either "ul" (preferred) or "li".
+   *  @param hiddenNodes An array of "ul" nodes to hide.
+   */
     var addNodes = function(nodes, parent, hiddenNodes){
+        if (!nodes || nodes.length===0) return;
+        var lastNode;
+
         for (var i=0; i<nodes.length; i++){
+
+          //Get node
             var node = nodes[i];
+            if (isString(node)){
+                var name = node;
+                node = {
+                    name: name,
+                    expand: false,
+                    children: false
+                };
+            }
+
+
+          //Get children
             var children = node.nodes;
+            if (!children) children = node.leaves;
+
+
+          //Create new parent as needed
+            if (isLI(parent)) parent = createUL(parent);
+
 
 
           //Create node
-            var li = createElement("li", parent, config.style.li);
+            var li = createLI(parent);
             li.node = node;
             li.onclick = function(){
-                if (this.nextSibling){
-                    var nextNode = this.nextSibling;
-                    var tagName = nextNode.tagName.toLowerCase();
-                    if (tagName==="ul"){
-                        var ul = nextNode;
+                var li = this;
+                if (li.nextSibling){
+
+                    var ul;
+                    if (li.nextSibling){
+                        for (var j=0; j<li.nextSibling.childNodes.length; j++){
+                            if (isUL(li.nextSibling.childNodes[j])){
+                                ul = li.nextSibling.childNodes[j];
+                                break;
+                            }
+                        }
+                    }
+
+
+                    if (ul) {
                         if (ul.style.visibility === "hidden"){
                             show(ul);
                         }
@@ -328,21 +472,15 @@ javaxt.dhtml.Tree = function (parent, config) {
 
           //Create container for child nodes as needed. Do this before calling
           //the getNodeType() method.
+            var ul;
             if (children){
-                var ul = createUL();
+                ul = createUL(createLI(parent));
                 ul.style.width = "100%";
-                ul.style.height = "100%";
-                parent.appendChild(ul);
+
+
 
               //Add "join_line" to previous ul
-                var previousSibling = ul.previousSibling;
-                while (previousSibling){
-                    if (previousSibling.tagName.toLowerCase()==="ul"){
-                        addStyle(previousSibling, config.style.path.line);
-                        break;
-                    }
-                    previousSibling = previousSibling.previousSibling;
-                }
+                addLine(ul.parentNode);
             }
 
 
@@ -387,20 +525,12 @@ javaxt.dhtml.Tree = function (parent, config) {
 
 
           //Add icon and label
-            li.style.width = "100%"; //<-- For label
-            if (typeof node === "string"){
-                createLabel(node, icon, li);
-            }
-            else{
-                var name = node.name;
-                createLabel(name, icon, li);
-            }
+            createLabel(node.name, icon, li);
 
 
 
-          //Add children
+
             if (children){
-                var ul = li.nextSibling;
 
                 if (nodeType!=="root"){
                     ul.style.paddingLeft = config.style.colWidth;
@@ -413,7 +543,46 @@ javaxt.dhtml.Tree = function (parent, config) {
 
 
                 addNodes(children, ul, hiddenNodes);
+
             }
+
+
+            lastNode = li;
+        }
+
+
+
+      //Special case for leaves that fall alongside nodes. Add "join_line"
+      //to previous ul
+        if (lastNode){
+            var nodeType = getNodeType(lastNode);
+            if (nodeType==="leaf"){
+                addLine(lastNode);
+            }
+        }
+
+    };
+
+
+  //**************************************************************************
+  //** addLine
+  //**************************************************************************
+  /** Used to add "join_line" to previous ul.
+   */
+    var addLine = function(li){
+        var previousSibling = li.previousSibling;
+        while (previousSibling){
+
+            for (var j=0; j<previousSibling.childNodes.length; j++){
+                if (isUL(previousSibling.childNodes[j])){
+                    var _ul = previousSibling.childNodes[j];
+                    addStyle(_ul, config.style.path.line);
+                    _ul.style.height = "100%";
+                    break;
+                }
+            }
+
+            previousSibling = previousSibling.previousSibling;
         }
     };
 
@@ -423,20 +592,30 @@ javaxt.dhtml.Tree = function (parent, config) {
   //**************************************************************************
   /** Used to expand a node and make its contents visible.
    */
-    var show = function(ul){
+    var show = function(ul, silent){
 
         if (ul===me.el) return;
 
+
+        ul.parentNode.style.visibility = "";
+        ul.parentNode.style.display = display.li;
+
+
         ul.style.visibility = "";
-        ul.style.display = "";
+        ul.style.display = display.ul;
+
+
 
       //Update icons
-        var li = ul.previousSibling;
+        var li = ul.parentNode.previousSibling;
         if (li){
             var nodeType = getNodeType(li);
-            var style = getJoinStyle(nodeType, true, isLast(li));
+            var style = getJoinStyle(nodeType, true, isLast(ul.parentNode));
             if (style) li.className = style;
             if (nodeType!=="leaf") li.setIcon(config.style[nodeType].open);
+
+          //Fire onExpand event
+            if (silent===true) return;
             me.onExpand(getItem(li));
         }
     };
@@ -447,7 +626,7 @@ javaxt.dhtml.Tree = function (parent, config) {
   //**************************************************************************
   /** Used to collapse a node and hide its contents.
    */
-    var hide = function(ul){
+    var hide = function(ul, silent){
 
         if (ul===me.el) return;
 
@@ -455,18 +634,23 @@ javaxt.dhtml.Tree = function (parent, config) {
         ul.style.display = "none";
 
 
+        ul.parentNode.style.visibility = "hidden";
+        ul.parentNode.style.display = "none";
+
+
       //Update icons
-        var li = ul.previousSibling;
+        var li = ul.parentNode.previousSibling;
         if (li){
             var nodeType = getNodeType(li);
-            var style = getJoinStyle(nodeType, false, isLast(li));
+            var style = getJoinStyle(nodeType, false, isLast(ul.parentNode));
             if (style) li.className = style;
             if (nodeType!=="leaf") li.setIcon(config.style[nodeType].closed);
+
+          //Fire onCollapse event
+            if (silent===true) return;
             me.onCollapse(getItem(li));
         }
     };
-
-
 
 
   //**************************************************************************
@@ -527,8 +711,11 @@ javaxt.dhtml.Tree = function (parent, config) {
 
             var hasChildren = false;
             if (li.nextSibling){
-                if (li.nextSibling.tagName.toLowerCase()==="ul"){
-                    hasChildren = true;
+                for (var i=0; i<li.nextSibling.childNodes.length; i++){
+                    if (isUL(li.nextSibling.childNodes[i])){
+                        hasChildren = true;
+                        break;
+                    }
                 }
             }
 
@@ -549,7 +736,7 @@ javaxt.dhtml.Tree = function (parent, config) {
             if (siblings[i]===li){
                 var foundSibling = false;
                 for (var j=i+1; j<siblings.length; j++){
-                    if (siblings[j].tagName.toLowerCase()==="li"){
+                    if (isLI(siblings[j])){
                         foundSibling = true;
                         break;
                     }
@@ -597,13 +784,49 @@ javaxt.dhtml.Tree = function (parent, config) {
   //**************************************************************************
   //** createUL
   //**************************************************************************
-    var createUL = function(){
-        return createElement("ul", {
+  /** Used to create a "ul" element for the tree
+   */
+    var createUL = function(parent){
+
+        if (parent.tagName.toLowerCase()==="ul"){
+            parent = createLI(parent);
+        }
+
+        return createElement("ul", parent, {
             listStyleType: "none",
             padding: 0,
             margin: 0,
+            display: display.ul,
             backgroundColor: config.style.backgroundColor
         });
+    };
+
+
+  //**************************************************************************
+  //** createLI
+  //**************************************************************************
+  /** Used to create a "li" element for the tree
+   */
+    var createLI = function(parent){
+        var li = createElement("li", parent, config.style.li);
+        li.style.width = "100%";
+        li.style.display = display.li;
+        li.setIcon = function(icon){};
+        li.getText = function(){};
+        return li;
+    };
+
+
+    var isLI = function(el){
+        return isTag(el, "li");
+    };
+
+    var isUL = function(el){
+        return isTag(el, "ul");
+    };
+
+    var isTag = function(el, tag){
+        return el.tagName.toLowerCase()===tag;
     };
 
 
@@ -613,6 +836,7 @@ javaxt.dhtml.Tree = function (parent, config) {
     var merge = javaxt.dhtml.utils.merge;
     var addStyle = javaxt.dhtml.utils.addStyle;
     var isArray = javaxt.dhtml.utils.isArray;
+    var isString = javaxt.dhtml.utils.isString;
     var createElement = javaxt.dhtml.utils.createElement;
 
     init();
