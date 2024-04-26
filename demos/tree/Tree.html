@@ -1,6 +1,12 @@
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
+<!DOCTYPE html>
+<html>
 
+  <!--
+ Replace the previous 2 lines with this to see if the behaviour changes in any way
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  -->
+
+<head>
 <title>Tree Demo</title>
 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -9,8 +15,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
 <link  href="../style.css" rel="stylesheet" type="text/css" />
 
-<script type="text/javascript" src="../../src/tree/Tree.js"></script>
-<script type="text/javascript" src="../../src/utils/Utils.js"></script>
+<script src="../../src/tree/Tree.js"></script>
+<script src="../../src/utils/Utils.js"></script>
 
 <style>
 
@@ -74,7 +80,7 @@
 
 
 
-<script type="text/javascript">
+<script>
 window.onload = function() {
 
 
@@ -94,9 +100,30 @@ window.onload = function() {
             ]
         },
         {
-            name: "javaxt-server",
+            name: "javaxt-server", //root node
             nodes: [
-
+                {
+                    name: "http",
+                    nodes: [
+                        {
+                            name: "servlet",
+                            nodes: ["HttpServlet", "HttpServletRequest", "HttpServletResponse"]
+                        },
+                        {
+                            name: "websocket",
+                            nodes:[
+                                "WebSocketServer",
+                                "WebSocketListener",
+                                {
+                                    name: "test",
+                                    nodes: ["Message", "File", "Image"]
+                                }
+                            ],
+                            expand: false
+                        },
+                        "Server"
+                    ]
+                }
             ]
         }
     ];
@@ -170,7 +197,9 @@ window.onload = function() {
 <body>
 
 <h1>Tree Demo</h1>
-
+<p>Simple demo of the tree control. See the source code for this page for more
+information on how the component is instantiated and stylized. Open the web
+console to see some of the events.</p>
 
 
 <div id="demo1"></div>
