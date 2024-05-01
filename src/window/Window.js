@@ -5,9 +5,28 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 //**  Window
 //******************************************************************************
 /**
- *   Simple window control that can be used to create dialogs, alert, messages,
- *   etc. Window consists of a header, body, footer, and mask. All elements
- *   are optional.
+ *   Window control that can be used to create dialogs, alerts, etc. The window
+ *   consists of a header, body, footer, and mask.
+ *   <br/>
+ *   Here's a simple example of how to instantiate a resizable window:
+ <pre>
+    var window = new javaxt.dhtml.Window(document.body, {
+        title: "Window Test",
+        width: 400,
+        height: 200,
+        modal: false,
+        resizable: true
+    });
+ </pre>
+ *   Once the window is instantiated you can call any of the public methods.
+ *   You can also add event listeners by overriding any of the public "on" or
+ *   "before" methods like this:
+ <pre>
+    window.open();
+    window.onResize = function(){
+        console.log(window.getWidth(), window.getHeight());
+    };
+ </pre>
  *
  ******************************************************************************/
 
@@ -40,7 +59,7 @@ javaxt.dhtml.Window = function(parent, config) {
        */
         width: null,
 
-      /** Initial height of the window, in pixels. 
+      /** Initial height of the window, in pixels.
        */
         height: null,
 
@@ -434,7 +453,7 @@ javaxt.dhtml.Window = function(parent, config) {
   //**************************************************************************
   //** onHeaderClick
   //**************************************************************************
-  /** Override to capture this header click events.
+  /** Called whenever the header is clicked.
    */
     this.onHeaderClick = function(){};
 
@@ -442,7 +461,7 @@ javaxt.dhtml.Window = function(parent, config) {
   //**************************************************************************
   //** onResize
   //**************************************************************************
-  /** Override to capture resize events.
+  /** Called whenever the window is resized
    */
     this.onResize = function(){};
 
@@ -463,7 +482,7 @@ javaxt.dhtml.Window = function(parent, config) {
   /** Used to update/replace window's body (main content panel)
    *  @param obj Accepts strings, DOM elements, and nulls
    */
-    this.setBody = this.setContent = function(obj){
+    this.setBody = function(obj){
         if (obj==null) body.innerHTML = "";
         else{
             if (isElement(obj)){
@@ -478,6 +497,16 @@ javaxt.dhtml.Window = function(parent, config) {
                 }
             }
         }
+    };
+
+
+  //**************************************************************************
+  //** setContent
+  //**************************************************************************
+  /** Exactly the same as setBody()
+   */
+    this.setContent = function(obj){
+        me.setBody(obj);
     };
 
 
@@ -510,12 +539,22 @@ javaxt.dhtml.Window = function(parent, config) {
 
 
   //**************************************************************************
-  //** show/open
+  //** open
   //**************************************************************************
   /** Used to make the window visible.
    */
-    this.show = this.open = function(animation){
-        me.showAt(null,null,animation);
+    this.open = function(animation){
+        me.show(animation);
+    };
+
+
+  //**************************************************************************
+  //** show
+  //**************************************************************************
+  /** Exactly the same as open()
+   */
+    this.show = function(animation){
+        me.showAt(null, null, animation);
     };
 
 
@@ -524,7 +563,7 @@ javaxt.dhtml.Window = function(parent, config) {
   //**************************************************************************
   /** Used to make the window visible at a given location on the screen.
    */
-    this.showAt = function(x, y){
+    this.showAt = function(x, y, animation){
 
 
       //Set zIndex
@@ -579,14 +618,13 @@ javaxt.dhtml.Window = function(parent, config) {
     };
 
 
-
   //**************************************************************************
-  //** hide
+  //** close
   //**************************************************************************
   /** Used to close/hide the window
    *  @param silent If true, will not fire the onClose event
    */
-    this.hide = this.close = function(silent){
+    this.close = function(silent){
 
         if (visible){
 
@@ -605,6 +643,16 @@ javaxt.dhtml.Window = function(parent, config) {
 
             if (silent!==true) me.onClose();
         }
+    };
+
+
+  //**************************************************************************
+  //** hide
+  //**************************************************************************
+  /** Exactly the same as close()
+   */
+    this.hide = function(silent){
+        me.close(silent);
     };
 
 
