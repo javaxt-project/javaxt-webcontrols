@@ -35,8 +35,9 @@ if(!javaxt.dhtml) javaxt.dhtml={};
         autoload: true
     });
  </pre>
- *   Once the grid is instantiated you can add event listeners by overriding
- *   any of the public "on" or "before" methods like this:
+ *   Once the grid is instantiated you can call any of the public methods. You
+ *   can also add event listeners by overriding any of the public "on" or
+ *   "before" methods like this:
  <pre>
     grid.onRowClick = function(row, e){
         console.log(row.record);
@@ -151,7 +152,9 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
           //Transform GET request into POST request if possible. This will
           //tidy up the URLs and reduce log size
+            var contentType;
             if (!payload && config.post==true){
+                contentType = "application/x-www-form-urlencoded";
                 var idx = url.indexOf("?");
                 if (idx>-1){
                     payload = url.substring(idx+1);
@@ -163,6 +166,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
           //Get response
             javaxt.dhtml.utils.get(url, {
                 payload: payload,
+                contentType: contentType,
                 success: function(text, xml, url, request){
                     callback.apply(me, [request]);
                 },
@@ -1290,7 +1294,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
               //Parse response
                 var records = config.parseResponse.apply(me, [request]);
                 if (records.length===0){
-                    //table.clear();
+                    if (page===1) table.clear();
                     eof = true;
                 }
                 else{
