@@ -126,6 +126,12 @@ javaxt.dhtml.utils = {
 
         if (!cache) request.setRequestHeader("Cache-Control", "no-cache, no-transform");
 
+
+        if (config.contentType){ //Example: 'application/x-www-form-urlencoded'
+            request.setRequestHeader("Content-Type", config.contentType);
+        }
+
+
         request.onreadystatechange = function(){
             if (request.readyState === 4) {
                 if (request.status>=200 && request.status<300){
