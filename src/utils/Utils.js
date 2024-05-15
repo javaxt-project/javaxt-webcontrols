@@ -142,6 +142,8 @@ javaxt.dhtml.utils = {
                 else{
                     if (failure) failure.apply(scope, [request]);
                 }
+
+                if (config.finally) config.finally.apply(scope, [request]);
             }
         };
 
