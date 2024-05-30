@@ -1261,6 +1261,94 @@ javaxt.dhtml.Form = function (parent, config) {
     };
 
 
+  //**************************************************************************
+  //** showError
+  //**************************************************************************
+  /** Renders a popup error message over a given field
+   */
+    this.showError = function(errorMessage, field){
+        if (!field) return;
+        if (isString(field)){
+            field = me.findField(field);
+            if (!field) return;
+        }
+
+        var tr = field.row;
+        var td;
+        if (tr){
+            if (tr.childNodes.length===1){//special case for inputs inserted into forms
+                td = tr.childNodes[0];
+            }
+            else{
+                td = tr.childNodes[2];
+            }
+        }
+        else{
+            td = field.el.parentNode;
+        }
+
+        if (td == null){
+            td = field.el.parentNode;
+        }
+
+        var getRect = javaxt.dhtml.utils.getRect;
+        var rect = getRect(td);
+
+        var inputs = td.getElementsByTagName("input");
+        if (inputs.length==0) inputs = td.getElementsByTagName("textarea");
+        if (inputs.length>0){
+            inputs[0].blur();
+            var cls = "form-input-error";
+            if (inputs[0].className){
+                if (inputs[0].className.indexOf(cls)==-1) inputs[0].className += " " + cls;
+            }
+            else{
+                inputs[0].className = cls;
+            }
+            rect = getRect(inputs[0]);
+            field.resetColor = function(){
+                if (inputs[0].className){
+                    inputs[0].className = inputs[0].className.replace(cls,"");
+                }
+            };
+        }
+
+        var callout = javaxt.dhtml.Form.Error;
+        if (!callout){
+            callout = new javaxt.dhtml.Callout(document.body,{
+                style:{
+                    panel: "error-callout-panel",
+                    arrow: "error-callout-arrow"
+                }
+            });
+            javaxt.dhtml.Form.Error = callout;
+        }
+
+        callout.getInnerDiv().innerHTML = errorMessage;
+
+        var x = rect.x + (rect.width/2);
+        var y = rect.y;
+        callout.showAt(x, y, "above", "center");
+    };
+
+
+  //**************************************************************************
+  //** hideError
+  //**************************************************************************
+  /** Hides a popup error message over a given field
+   */
+    this.hideError = function(field){
+        if (!field) return;
+        if (isString(field)){
+            field = me.findField(field);
+            if (!field) return;
+        }
+
+        if (field.resetColor) field.resetColor();
+        var callout = javaxt.dhtml.Form.Error;
+        if (callout) callout.hide();
+    };
+
 
 
 
@@ -1540,6 +1628,7 @@ javaxt.dhtml.Form = function (parent, config) {
     var onRender = javaxt.dhtml.utils.onRender;
     var createElement = javaxt.dhtml.utils.createElement;
     var addResizeListener = javaxt.dhtml.utils.addResizeListener;
+    var isString = javaxt.dhtml.utils.isString;
     var isArray = javaxt.dhtml.utils.isArray;
 
     init();
