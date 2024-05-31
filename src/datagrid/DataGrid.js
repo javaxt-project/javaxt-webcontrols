@@ -674,6 +674,36 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
 
   //**************************************************************************
+  //** enableScroll
+  //**************************************************************************
+  /** Used to enable scrolling.
+   */
+    this.enableScroll = function(){
+        table.enableScroll();
+    };
+
+
+  //**************************************************************************
+  //** disableScroll
+  //**************************************************************************
+  /** Used to disable scrolling.
+   */
+    this.disableScroll = function(){
+        table.disableScroll();
+    };
+
+    
+  //**************************************************************************
+  //** isScrollEnabled
+  //**************************************************************************
+  /** Returns true if scrolling is enabled.
+   */
+    this.isScrollEnabled = function(){
+        return table.isScrollEnabled();
+    };
+
+
+  //**************************************************************************
   //** Events
   //**************************************************************************
     this.onScroll = function(){};
