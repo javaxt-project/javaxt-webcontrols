@@ -14,6 +14,7 @@ javaxt.dhtml.Table = function(parent, config) {
     this.className = "javaxt.dhtml.Table";
 
     var me = this;
+
     var deferUpdate = false;
     var header, body; //tbody elements
     var bodyDiv; //overflow div
@@ -23,6 +24,8 @@ javaxt.dhtml.Table = function(parent, config) {
     var cntrlIsPressed = false;
     var shiftIsPressed = false;
     var altIsPressed = false;
+    var scrollEnabled = true;
+
 
     var defaultConfig = {
 
@@ -70,6 +73,12 @@ javaxt.dhtml.Table = function(parent, config) {
       /** If true, will hide the header row. Default is false.
        */
         hideHeader: false,
+
+
+      /** If true, will set browser focus on the table when the mouse is
+       *  detected over the table. Default is false.
+       */
+        focusOnMouseover: false,
 
 
       /** Style for individual elements within the component. Note that you can
@@ -234,9 +243,11 @@ javaxt.dhtml.Table = function(parent, config) {
         bodyDiv.setAttribute("desc", "body-div");
         bodyDiv.tabIndex = -1; //allows the div to have focus
         bodyDiv.onmouseover = function(){
-            var x = window.scrollX, y = window.scrollY;
-            this.focus();
-            window.scrollTo(x, y);
+            if (config.focusOnMouseover===true){
+                var x = window.scrollX, y = window.scrollY;
+                this.focus();
+                window.scrollTo(x, y);
+            }
         };
         bodyDiv.addEventListener("keydown", function(e){
             if (e.keyCode===16){
@@ -399,6 +410,14 @@ javaxt.dhtml.Table = function(parent, config) {
 
 
                 me.iScroll.on('scrollStart', function(){
+
+                    if (!scrollEnabled){
+                      //Stop iscroll! Not sure how to do this but throwing an
+                      //error seems to work...
+                        throw new Error('IScroll disabled');
+                        return;
+                    }
+
                     onScroll(-me.iScroll.y);
                 });
 
@@ -408,7 +427,13 @@ javaxt.dhtml.Table = function(parent, config) {
             }
             else{
                 if (config.overflow===false) bodyDiv.style.overflowY = 'hidden';
-                bodyDiv.onscroll = function(){
+                bodyDiv.onscroll = function(e){
+
+                    if (!scrollEnabled){ //not tested...
+                        e.preventDefault();
+                        return;
+                    }
+
                     onScroll(bodyDiv.scrollTop);
                 };
             }
@@ -1150,8 +1175,39 @@ javaxt.dhtml.Table = function(parent, config) {
             y: me.iScroll ? -me.iScroll.y : bodyDiv.scrollTop,
             w: bodyDiv.offsetWidth,
             h: bodyDiv.offsetHeight,
-            maxY: bodyDiv.scrollHeight - bodyDiv.clientHeight
+            maxY: bodyDiv.scrollHeight - bodyDiv.clientHeight,
+            enabled: scrollEnabled
         };
+    };
+
+
+  //**************************************************************************
+  //** enableScroll
+  //**************************************************************************
+  /** Used to enable scrolling.
+   */
+    this.enableScroll = function(){
+        scrollEnabled = true;
+    };
+
+
+  //**************************************************************************
+  //** disableScroll
+  //**************************************************************************
+  /** Used to disable scrolling.
+   */
+    this.disableScroll = function(){
+        scrollEnabled = false;
+    };
+
+
+  //**************************************************************************
+  //** isScrollEnabled
+  //**************************************************************************
+  /** Returns true if scrolling is enabled.
+   */
+    this.isScrollEnabled = function(){
+        return scrollEnabled;
     };
 
 
