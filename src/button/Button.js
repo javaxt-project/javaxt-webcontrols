@@ -498,10 +498,30 @@ javaxt.dhtml.Button = function(parent, config) {
   //**************************************************************************
   //** getText
   //**************************************************************************
-  /** Returns the button label.
+  /** Returns the button label. Same as getLabel().
    */
     this.getText = function(){
-        return label.innerHTML;
+        return me.getLabel();
+    };
+
+
+  //**************************************************************************
+  //** getLabel
+  //**************************************************************************
+  /** Returns the button label.
+   */
+    this.getLabel = function(){
+        return label.innerText;
+    };
+
+
+  //**************************************************************************
+  //** setLabel
+  //**************************************************************************
+  /** Used to update the button label.
+   */
+    this.setLabel = function(str){
+        label.innerText = str+"";
     };
 
 
