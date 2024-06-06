@@ -5,9 +5,25 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 //**  Slider
 //*****************************************************************************/
 /**
- *   Basic horizontal slide control. Can be used as a range slider, play
- *   control, etc. Supports touch devices. Credit:
- *   http://css3wizardry.com/2010/09/14/range-slider-with-css-and-javascript/
+ *   Horizontal slide control. Can be used as a range slider, play control, etc.
+ *   <br/>
+ *   Here's a simple example of how to instantiate the slider using an existing
+ *   div (DOM element) and a minimal config. See config settings for a full
+ *   range of options.
+ <pre>
+    var checkbox = new javaxt.dhtml.Slider(div, {
+        units: "percent"
+    });
+ </pre>
+ *   Once the slider is instantiated you can call any of the public methods.
+ *   You can also add event listeners by overriding any of the public "on" or
+ *   "before" methods like this:
+ <pre>
+    slider.onChange = function(value){
+        console.log(Math.round(value)+"%");
+    };
+    slider.setValue("50%");
+</pre>
  *
  ******************************************************************************/
 
@@ -27,12 +43,38 @@ javaxt.dhtml.Slider = function(parent, config) {
         disabled: false,
 
 
+      /** Used to define the unit of measure for values returned by the
+       *  getValue(), onChange(), and onDrag() events. Options are "pixels"
+       *  (default) and "percent".
+       */
+        units: "pixels",
+
+
       /** Style for individual elements within the component. Note that you can
        *  provide CSS class names instead of individual style definitions.
        */
         style: {
-            groove: "sliderGrove",
-            handle: "sliderHandle"
+            groove: {
+                position: "relative",
+                display: "inline-block",
+
+                backgroundColor: "#fff",
+                backgroundImage: "linear-gradient(#4ea7ff, #6d72a5)",
+                backgroundRepeat: "no-repeat",
+
+                height: "9px",
+                border: "1px solid #dcdcdc",
+                borderRadius: "4px"
+            },
+            handle: {
+                position: "absolute",
+                display: "inline-block",
+                width: "20px",
+                height: "20px",
+                borderRadius: "50%",
+                backgroundColor: "#dcdcdc",
+                backgroundImage: "linear-gradient(#aaa, #ddd, #ccc)"
+            }
         }
     };
 
@@ -43,8 +85,6 @@ javaxt.dhtml.Slider = function(parent, config) {
     var sliderHeight = 0;
     var handleWidth = 0;
     var handleHeight = 0;
-    var xOffset = 0;
-    var yOffset = 0;
 
 
   //**************************************************************************
@@ -89,45 +129,48 @@ javaxt.dhtml.Slider = function(parent, config) {
 
             handleWidth = handleRect.width;
             handleHeight = handleRect.height;
-            var sliderWidth = getWidth(slider);
             sliderHeight = sliderRect.height;
 
-            xOffset = -(handleWidth/2);
-            yOffset = -(handleHeight/2) + (sliderHeight/2);
 
             updateSlider(0, true);
-            handle.style.left = xOffset + 'px';
-            handle.style.top = yOffset + 'px';
+            handle.style.left = -(handleWidth/2) + 'px';
+            handle.style.top = (-(handleHeight/2) + (sliderHeight/2)) + 'px';
 
 
+            var xOffset = 0;
+
+            initDrag(handle, {
+                onDragStart: function(mouseX, mouseY){
+                    sliderRect = javaxt.dhtml.utils.getRect(slider);
+                    handleRect = javaxt.dhtml.utils.getRect(handle);
+                    xOffset = mouseX-handleRect.left;  //pixels from left side of handle
+                },
+                onDrag: function(mouseX, mouseY){
+
+                    var w2 = handleWidth/2;
+                    var minX = -w2;
+                    var maxX = sliderRect.width-w2;
 
 
-            var top = yOffset; //-6;
-            Drag.init(handle, null, 0, sliderWidth-handleWidth, top, top);
+                    var x = (mouseX-sliderRect.left)-xOffset;
+                    if (x<minX) x = minX;
+                    else if (x>maxX) x = maxX;
+                    this.style.left = x + 'px';
 
 
-            handle.onDrag = function() {
-                updateSlider(Drag.x);
-                me.onDrag(me.getValue());
-            };
-
-            handle.onDragEnd = function() {
-
-            };
+                  //Update the slider
+                    var val = x+w2;
+                    updateSlider(val);
 
 
-          //Bind to 'touchmove' events (touch devices only)
-            handle.addEventListener('touchmove', function(event) {
-                event.preventDefault();
-                var touch = event.touches[0];
-                var x = touch.pageX - this.parentNode.offsetLeft;
-                if (x<0) x = 0;
-                if (x>(sliderWidth-(handleWidth))) x = (sliderWidth-(handleWidth));
-                this.style.left = x + 'px';
-
-                updateSlider(x);
-                me.onDrag(me.getValue());
-            }, false);
+                  //Fire the onDrag event
+                    if (config.units==="percent") val = (value/sliderRect.width) * 100;
+                    me.onDrag(val);
+                },
+                onDragEnd: function(){
+                    this.style.cursor = 'default';
+                }
+            });
 
 
             if (config.disabled===true) me.disable();
@@ -165,13 +208,13 @@ javaxt.dhtml.Slider = function(parent, config) {
         }
         else{
 
-            mask = document.createElement('div');
+            mask = createElement('div');
             mask.setAttribute("desc", "mask");
             mask.style.position = "absolute";
             mask.style.zIndex = 1;
             mask.style.width = "100%";
             mask.style.height = handleHeight + "px";
-            mask.style.top = yOffset + "px";
+            mask.style.top = handle.style.top;
             mask.style.left = -(handleWidth/2) + "px";
             var m2 = mask.cloneNode();
             m2.style.top = "";
@@ -235,35 +278,41 @@ javaxt.dhtml.Slider = function(parent, config) {
   //** getValue
   //**************************************************************************
   /** Returns the value of the slider.
-   *  @param returnPercentage Optional. If true, returns a percentage value.
-   *  Otherwise, returns the current position of the slider in pixels.
    */
-    this.getValue = function(returnPercentage){
-        var w = me.getWidth();
+    this.getValue = function(){
 
-        var val = value;
-        if (val>=(w-(handleWidth/2))) val = w;
+        var returnPercentage =
+            (arguments.length>0 && arguments[0]===true) ||
+            config.units==="percent";
 
         if (returnPercentage===true){
-            var p = Math.round((val/w) * 100) / 100;
-            if (p>1) p = 1;
-            if (p<0) p = 0;
+            var w = me.getWidth();
+            var p = (value/w) * 100;
             return p;
         }
         else{
-            return val;
+            return value;
         }
+    };
+
+
+  //**************************************************************************
+  //** getPosition
+  //**************************************************************************
+  /** Returns the current position of the slider, in pixels.
+   */
+    this.getPosition = function(){
+        return value;
     };
 
 
   //**************************************************************************
   //** getWidth
   //**************************************************************************
-  /** Returns the width of the slider. This, together with the getValue()
-   *  method, can be used to compute a percentage value.
+  /** Returns the width of the slider, in pixels.
    */
     this.getWidth = function(){
-        return getWidth(slider)-(handleWidth/2);
+        return javaxt.dhtml.utils.getRect(slider).width;
     };
 
 
@@ -298,230 +347,41 @@ javaxt.dhtml.Slider = function(parent, config) {
 
 
   //**************************************************************************
-  //** getStyle
-  //**************************************************************************
-  /** Returns the computed style for a given element.
-   */
-    var getStyle = function(element){
-        return document.defaultView.getComputedStyle(element, null);
-    };
-
-
-  //**************************************************************************
-  //** getProperty
-  //**************************************************************************
-    var getProperty = function(style, property){
-        return style.getPropertyValue(property.toLowerCase());
-    };
-
-
-  //**************************************************************************
   //** updateSlider
   //**************************************************************************
   /** Updates the background of the slider and fires the onChange event.
+   *  @param x Pixels from the left side of the slider
    *  @param silent If true, will not fire the onChange event
    */
     var updateSlider = function(x, silent){
         if (x===value) return;
-
         value = x;
 
-        var sz = (x+(handleWidth/2)) + "px " + sliderHeight + "px, 100% " + sliderHeight + "px";
+
+      //Update the position of the background image
+        var w = me.getWidth();
+        var p = (x/w)*100;
+        var sz = p + "% auto, 100% auto";
         slider.style.MozBackgroundSize = sz; //-moz-background-size
         slider.style.backgroundSize = sz; //background-size
 
-        if (silent!==true) me.onChange(value);
+
+      //Fire onChange event as needed
+        if (silent===true) return;
+        var val = value;
+        if (config.units==="percent") val = p;
+        me.onChange(val);
     };
-
-
-  //**************************************************************************
-  //** getWidth
-  //**************************************************************************
-    var getWidth = function(slider){
-        var style = getStyle(slider);
-        var sliderWidth = parseInt(getProperty(style, "width"));
-        var padding = parseInt(getProperty(style, "padding-right"));
-        var border = parseInt(getProperty(style, "border-right-width"));
-        sliderWidth -= padding;
-        sliderWidth -= border;
-        return sliderWidth;
-    };
-
-
-
-  //**************************************************************************
-  //** Drag
-  //**************************************************************************
-  /** Class used to manage the slider. */
-
-    var Drag = {
-
-        // The current element being dragged.
-        obj: null,
-
-        // The initalization function for the object to be dragged.
-        // elem is an element to use as a handle while dragging (optional).
-        // elemParent is the element to be dragged, if not specified,
-        // the handle will be the element dragged.
-        // minX, maxX, minY, maxY  are the min and max coordinates
-        // allowed for the element while dragging.
-        // bSwapHorzRef will toggle the horizontal coordinate system from referencing
-        // the left of the element to the right of the element.
-        // bSwapVertRef will toggle the vertical coordinate system from referencing
-        // the top of the element to the bottom of the element.
-        init: function(elem, elemParent, minX, maxX, minY, maxY, bSwapHorzRef, bSwapVertRef) {
-
-            // Watch for the drag event to start.
-            elem.onmousedown = Drag.start;
-            // Figure out which coordinate system is being used.
-            elem.hmode = bSwapHorzRef ? false : true ;
-            elem.vmode = bSwapVertRef ? false : true ;
-            // Figure out which element is acting as the draggable "handle."
-            elem.root = elemParent && elemParent != null ? elemParent : elem ;
-
-            var style = getStyle(elem.root);
-
-            // Initalize the specified coordinate system.
-            // In order to keep track of the position of the dragged element,
-            // we need to query the inline position values.
-            // Therefore we query the element's style properties
-            // to get those values and attach them inline on the element.
-            if (elem.hmode && isNaN(parseInt(elem.root.style.left ))) {
-               elem.root.style.left = getProperty(style, "left");
-            }
-            if (elem.vmode && isNaN(parseInt(elem.root.style.top ))) {
-               elem.root.style.top = getProperty(style, "top");
-            }
-            if (!elem.hmode && isNaN(parseInt(elem.root.style.right ))) {
-               elem.root.style.right = getProperty(style, "right");
-            }
-            if (!elem.vmode && isNaN(parseInt(elem.root.style.bottom))) {
-               elem.root.style.bottom = getProperty(style, "bottom");
-            }
-            // Look to see if the user provided min/max x/y coordinates.
-            elem.minX = typeof minX != 'undefined' ? minX : null;
-            elem.minY = typeof minY != 'undefined' ? minY : null;
-            elem.maxX = typeof maxX != 'undefined' ? maxX : null;
-            elem.maxY = typeof maxY != 'undefined' ? maxY : null;
-
-            // Add methods for user-defined functions.
-            elem.root.onDragStart = new Function();
-            elem.root.onDragEnd  = new Function();
-            // The following will fire continuously while the element
-            // is being dragged. Useful if you want to create a slider that
-            // can update some type of data as it is being dragged.
-            elem.root.onDrag = new Function();
-        },
-
-        start: function(e) {
-            // Figure out which object is being dragged.
-            var elem = Drag.obj = this;
-            // Normalize the event object.
-            e = Drag.fixE(e);
-            // Get the current x and y coordinates.
-            Drag.y = parseInt(elem.vmode ? elem.root.style.top  : elem.root.style.bottom);
-            Drag.x = parseInt(elem.hmode ? elem.root.style.left : elem.root.style.right );
-            // Call the user's function with the current x and y coordinates.
-            elem.root.onDragStart(Drag.x, Drag.y);
-            // Remember the starting mouse position.
-            elem.lastMouseX = e.clientX;
-            elem.lastMouseY = e.clientY;
-            // Do the following if the CSS coordinate system is being used.
-            if (elem.hmode) {
-                    // Set the min and max coordiantes, where applicable.
-                    if (elem.minX != null) elem.minMouseX    = e.clientX - Drag.x + elem.minX;
-                    if (elem.maxX != null) elem.maxMouseX    = elem.minMouseX + elem.maxX - elem.minX;
-            // Otherwise, use a traditional mathematical coordinate system.
-            } else {
-                    if (elem.minX != null) elem.maxMouseX = -elem.minX + e.clientX + Drag.x;
-                    if (elem.maxX != null) elem.minMouseX = -elem.maxX + e.clientX + Drag.x;
-            }
-            // Do the following if the CSS coordinate system is being used.
-            if (elem.vmode) {
-                    // Set the min and max coordiantes, where applicable.
-                    if (elem.minY != null) elem.minMouseY    = e.clientY - Drag.y + elem.minY;
-                    if (elem.maxY != null) elem.maxMouseY    = elem.minMouseY + elem.maxY - elem.minY;
-            // Otherwise, we're using a traditional mathematical coordinate system.
-            } else {
-                    if (elem.minY != null) elem.maxMouseY = -elem.minY + e.clientY + Drag.y;
-                    if (elem.maxY != null) elem.minMouseY = -elem.maxY + e.clientY + Drag.y;
-            }
-            // Watch for "drag" and "end" events.
-            document.onmousemove = Drag.drag;
-            document.onmouseup = Drag.end;
-            return false;
-        },
-
-        // A function to watch for all movements of the mouse during the drag event.
-        drag: function(e) {
-            // Normalize the event object.
-            e = Drag.fixE(e);
-            // Get our reference to the element being dragged.
-            var elem = Drag.obj;
-            // Get the position of the mouse within the window.
-            var ey = e.clientY;
-            var ex = e.clientX;
-            // Get the current x and y coordinates.
-            Drag.y = parseInt(elem.vmode ? elem.root.style.top  : elem.root.style.bottom);
-            Drag.x = parseInt(elem.hmode ? elem.root.style.left : elem.root.style.right );
-            var nx, ny;
-            // If a minimum X position was set, make sure it doesn't go past that.
-            if (elem.minX != null) ex = elem.hmode ?
-                    Math.max(ex, elem.minMouseX) : Math.min(ex, elem.maxMouseX);
-            // If a maximum X position was set, make sure it doesn't go past that.
-            if (elem.maxX != null) ex = elem.hmode ?
-                    Math.min(ex, elem.maxMouseX) : Math.max(ex, elem.minMouseX);
-            // If a minimum Y position was set, make sure it doesn't go past that.
-            if (elem.minY != null) ey = elem.vmode ?
-                    Math.max(ey, elem.minMouseY) : Math.min(ey, elem.maxMouseY);
-            // If a maximum Y position was set, make sure it doesn't go past that.
-            if (elem.maxY != null) ey = elem.vmode ?
-                    Math.min(ey, elem.maxMouseY) : Math.max(ey, elem.minMouseY);
-            // Figure out the newly translated x and y coordinates.
-            nx = Drag.x + ((ex - elem.lastMouseX) * (elem.hmode ? 1 : -1));
-            ny = Drag.y + ((ey - elem.lastMouseY) * (elem.vmode ? 1 : -1));
-            // Set the new x and y coordinates onto the element.
-            Drag.obj.root.style[elem.hmode ? "left" : "right"] = nx + "px";
-            Drag.obj.root.style[elem.vmode ? "top" : "bottom"] = ny + "px";
-            // Remember  the last position of the mouse.
-            Drag.obj.lastMouseX = ex;
-            Drag.obj.lastMouseY = ey;
-            // Call the user's onDrag function with the current x and y coordinates.
-            Drag.obj.root.onDrag(nx, ny);
-            return false;
-        },
-
-        // Function that handles the end of a drag event.
-        end: function() {
-            // No longer watch for mouse events (as the drag is done).
-            document.onmousemove = null;
-            document.onmouseup = null;
-            // Call our special onDragEnd function with the x and y coordinates
-            // of the element at the end of the drag event.
-            Drag.obj.root.onDragEnd(
-                    parseInt(Drag.obj.root.style[Drag.obj.hmode ? "left" : "right"]),
-                    parseInt(Drag.obj.root.style[Drag.obj.vmode ? "top" : "bottom"]));
-            // No longer watch the object for drags.
-            Drag.obj = null;
-        },
-
-        // A function for normalizing the event object.
-        fixE: function(e) {
-            // If the element's properties aren't set, get the values from the equivalent offset properties.
-            if (typeof e.elemX == 'undefined') e.elemX = e.offsetX;
-            if (typeof e.elemY == 'undefined') e.elemY = e.offsetY;
-            return e;
-        }
-    };
-
 
 
   //**************************************************************************
   //** Utils
   //**************************************************************************
-    var merge = javaxt.dhtml.utils.merge;
-    var onRender = javaxt.dhtml.utils.onRender;
     var createElement = javaxt.dhtml.utils.createElement;
+    var initDrag = javaxt.dhtml.utils.initDrag;
+    var onRender = javaxt.dhtml.utils.onRender;
+    var merge = javaxt.dhtml.utils.merge;
+
 
     init();
 };
