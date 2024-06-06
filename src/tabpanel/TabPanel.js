@@ -5,11 +5,9 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 //**  TabPanel
 //******************************************************************************
 /**
- *   Standard tab control used to show/hide individual panels, one panel at a
- *   time.
+ *   Standard tab control used to show/hide individual panels.
  *
  ******************************************************************************/
-
 
 javaxt.dhtml.TabPanel = function(parent, config) {
     this.className = "javaxt.dhtml.TabPanel";
@@ -19,7 +17,15 @@ javaxt.dhtml.TabPanel = function(parent, config) {
     var tabContent;
 
     var defaultConfig = {
+
+      /** If true, will insert a "close" icon into the tab that will allow
+       *  users to close/remove the tab from the tab panel.
+       */
         closable: false,
+
+      /** Style for individual elements within the component. Note that you can
+       *  provide CSS class names instead of individual style definitions.
+       */
         style : {
             tabBar: {
                 border: "1px solid #ccc",
@@ -56,8 +62,6 @@ javaxt.dhtml.TabPanel = function(parent, config) {
   //**************************************************************************
   //** Constructor
   //**************************************************************************
-  /** Creates a new instance of this class. */
-
     var init = function(){
 
         if (typeof parent === "string"){
@@ -117,18 +121,32 @@ javaxt.dhtml.TabPanel = function(parent, config) {
   //** addTab
   //**************************************************************************
   /** Used to add a new tab to the panel.
-   *  @param name Title or name associated with the tab.
-   *  @param _el DOM element rendered when the tab is active.
+   *  @param label Tab title.
+   *  @param el Tab contents. Rendered when the tab is active. Accepts strings,
+   *  DOM elements, and nulls
    */
-    this.addTab = function(name, _el){
+    this.addTab = function(label, el){
 
-        var el = createElement("div", tabContent, {
+        var div = createElement("div", tabContent, {
             width: "100%",
             height: "100%",
             position: "absolute"
         });
-        el.appendChild(_el);
 
+
+        if (el==null) div.innerHTML = "";
+        else{
+            if (isElement(el)){
+                var p = el.parentNode;
+                if (p) p.removeChild(el);
+                div.appendChild(el);
+            }
+            else{
+                if (typeof el === "string"){
+                    div.innerHTML = el;
+                }
+            }
+        }
 
 
         var tab = createElement("li", tabList);
@@ -136,8 +154,8 @@ javaxt.dhtml.TabPanel = function(parent, config) {
         tab.style.position = "relative";
         tab.style.float = "left";
         tab.style.height = "100%";
-        tab.innerHTML = name;
-        tab.el = el;
+        tab.innerHTML = label;
+        tab.el = div;
         tab.onclick = function(){
             raiseTab(this);
         };
@@ -154,7 +172,7 @@ javaxt.dhtml.TabPanel = function(parent, config) {
             }
         }
 
-        el.style.display='none'; //<-- style used to test whether the tab is visible (see raiseTab)
+        div.style.display='none'; //<-- style used to test whether the tab is visible (see raiseTab)
 
         raiseTab(tab);
     };
@@ -163,7 +181,15 @@ javaxt.dhtml.TabPanel = function(parent, config) {
   //**************************************************************************
   //** getTabs
   //**************************************************************************
-  /** Returns a list of tabs in the tab panel.
+  /** Returns an of tabs in the tab panel. Each entry in the array will
+   *  include the following:
+   *  <ul>
+   *  <li>name: Name of the tab and tab label</li>
+   *  <li>header: DOM element for the tab header</li>
+   *  <li>body: DOM element for the tab content</li>
+   *  <li>hidden: Boolean</li>
+   *  <li>active: Boolean</li>
+   *  </ul>
    */
     this.getTabs = function(){
         var tabs = [];
@@ -178,6 +204,9 @@ javaxt.dhtml.TabPanel = function(parent, config) {
   //**************************************************************************
   //** raiseTab
   //**************************************************************************
+  /** Used to raise a tab
+   *  @param id Accepts a tab index (stating at 0) or a tab name
+   */
     this.raiseTab = function(id){
         var tab = findTab(id);
         if (tab) raiseTab(tab);
@@ -240,7 +269,9 @@ javaxt.dhtml.TabPanel = function(parent, config) {
         var active = (tab.el.style.display !== 'none');
         return {
             name: tab.innerText,
-            el: tab.el,
+            el: tab.el, //should be renamed to body or content
+            header: tab,
+            body: tab.el,
             hidden: hidden,
             active: active
         };
@@ -250,18 +281,26 @@ javaxt.dhtml.TabPanel = function(parent, config) {
   //**************************************************************************
   //** setActiveTab
   //**************************************************************************
+  /** Same as raiseTab()
+   *  @param id Accepts a tab index (stating at 0) or a tab name
+   */
     this.setActiveTab = this.raiseTab;
 
 
   //**************************************************************************
   //** onTabChange
   //**************************************************************************
+  /** Called whenever a tab is raised.
+   */
     this.onTabChange = function(currTab, prevTab){};
 
 
   //**************************************************************************
   //** removeTab
   //**************************************************************************
+  /** Used to remove a tab from the tab panel.
+   *  @param id Accepts a tab index (stating at 0) or a tab name
+   */
     this.removeTab = function(id){
         var tab = findTab(id);
         if (tab){
@@ -279,6 +318,10 @@ javaxt.dhtml.TabPanel = function(parent, config) {
   //**************************************************************************
   //** hideTab
   //**************************************************************************
+  /** Used to hide a tab in the tab panel. Unlike the removeTab() method, the
+   *  tab will remain in the tab panel, but in a hidden state.
+   *  @param id Accepts a tab index (stating at 0) or a tab name
+   */
     this.hideTab = function(id){
         var tab = findTab(id);
         if (tab){
@@ -300,6 +343,9 @@ javaxt.dhtml.TabPanel = function(parent, config) {
   //**************************************************************************
   //** showTab
   //**************************************************************************
+  /** Used to make a hidden tab visible. See hideTab()
+   *  @param id Accepts a tab index (stating at 0) or a tab name
+   */
     this.showTab = function(id){
         var tab = findTab(id);
         if (tab) tab.style.display = '';
@@ -351,6 +397,7 @@ javaxt.dhtml.TabPanel = function(parent, config) {
     var merge = javaxt.dhtml.utils.merge;
     var createTable = javaxt.dhtml.utils.createTable;
     var createElement = javaxt.dhtml.utils.createElement;
+    var isElement = javaxt.dhtml.utils.isElement;
     var setStyle = function(el, style){
         javaxt.dhtml.utils.setStyle(el, config.style[style]);
     };
