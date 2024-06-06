@@ -147,7 +147,21 @@ javaxt.dhtml.utils = {
             }
         };
 
-        if (config.payload) request.send(config.payload);
+        if (config.payload){
+            var payload = config.payload;
+
+          //Stringify the payload as needed
+            if (javaxt.dhtml.utils.isArray(payload)){
+                payload = JSON.stringify(payload);
+            }
+            else{
+                if (payload != null && typeof payload == 'object'){
+                    payload = JSON.stringify(payload);
+                }
+            }
+
+            request.send(payload);
+        }
         else request.send();
         return request;
     },
