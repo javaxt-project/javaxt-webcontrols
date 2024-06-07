@@ -6,10 +6,11 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 //******************************************************************************
 /**
  *   Used to render a slider that can be used a part of a audio or video
- *   controller. Provides basic functions like play, pause, and stop. Users
- *   can interact with the slider while its running and get back elapsed time.
- *   This class requires the javaxt.dhtml.Slider class which, in turn requires
- *   a css file but has no other dependencies.
+ *   controller. This class builds upon the javaxt.dhtml.Slider class by
+ *   providing basic functions like play, pause, and stop. However, this class
+ *   does not provide any buttons or any other components to perform these
+ *   operations - this is just a fancy slider :-) Users can interact with the
+ *   slider while its running and get back elapsed time.
  *
  ******************************************************************************/
 
@@ -23,12 +24,28 @@ javaxt.dhtml.PlayControl = function(parent, config) {
     var loop = false;
 
     var defaultConfig = {
-        startTime: 0, //seconds
-        speed: 0.2, //seconds
-        totalTime: 60, //seconds
+
+      /** Used to specify the start time, in seconds. Default is 0.
+       */
+        startTime: 0,
+
+
+      /** Refresh rate, in seconds. Default is 0.2.
+       */
+        speed: 0.2,
+
+
+      /** Used to specify the total run time, in seconds. Default is 60.
+       */
+        totalTime: 60,
+
+
+      /** Style for individual elements within the component. Uses the style
+       *  defined in the javaxt.dhtml.Slider class by default.
+       */
         style: {
-            groove: "sliderGrove",
-            handle: "sliderHandle"
+            groove: {},
+            handle: {}
         }
     };
 
@@ -36,7 +53,6 @@ javaxt.dhtml.PlayControl = function(parent, config) {
   //**************************************************************************
   //** Constructor
   //**************************************************************************
-
     var init = function(){
 
       //Clone the config so we don't modify the original config object
@@ -75,7 +91,9 @@ javaxt.dhtml.PlayControl = function(parent, config) {
   //**************************************************************************
   //** setRunTime
   //**************************************************************************
-  /** @param runTime in seconds
+  /** Used to update the total run time. This value is originally set in the
+   *  config settings (see totalTime).
+   *  @param runTime Total run time, in seconds
    */
     this.setRunTime = function(runTime){
         if (runTime===config.totalTime) return;
@@ -92,6 +110,8 @@ javaxt.dhtml.PlayControl = function(parent, config) {
   //**************************************************************************
   //** play
   //**************************************************************************
+  /** Used to start the player
+   */
     this.play = function(_loop){
         if (playing===true) return;
 
@@ -102,7 +122,7 @@ javaxt.dhtml.PlayControl = function(parent, config) {
 
         playing = true;
         var startDate = new Date().getTime();
-        var currVal = slider.getValue();
+        var currVal = slider.getPosition();
         if (currVal>0){
             startDate = startDate - ((currVal/slider.getWidth()) * config.totalTime)*1000;
         }
@@ -138,6 +158,8 @@ javaxt.dhtml.PlayControl = function(parent, config) {
   //**************************************************************************
   //** pause
   //**************************************************************************
+  /** Used to pause the player.
+   */
     this.pause = function(){
         clearInterval(timerId);
         playing = false;
@@ -147,6 +169,8 @@ javaxt.dhtml.PlayControl = function(parent, config) {
   //**************************************************************************
   //** stop
   //**************************************************************************
+  /** Used to stop the player and set the start time to 0 seconds.
+   */
     this.stop = function(){
         me.pause();
         slider.setValue(0);
@@ -156,6 +180,8 @@ javaxt.dhtml.PlayControl = function(parent, config) {
   //**************************************************************************
   //** isPlaying
   //**************************************************************************
+  /** Returns true if the player is playing.
+   */
     this.isPlaying = function(){
         return playing;
     };
@@ -165,13 +191,16 @@ javaxt.dhtml.PlayControl = function(parent, config) {
   //** getElapsedTime
   //**************************************************************************
     this.getElapsedTime = function(){
-        return (slider.getValue()/slider.getWidth()) * config.totalTime;
+        return (slider.getPosition()/slider.getWidth()) * config.totalTime;
     };
 
 
   //**************************************************************************
   //** setElapsedTime
   //**************************************************************************
+  /** Used to update the elapsed time time.
+   *  @param elapsedTime Time in seconds
+   */
     this.setElapsedTime = function(elapsedTime){
         if (elapsedTime==null || elapsedTime<0) return;
 
@@ -183,24 +212,24 @@ javaxt.dhtml.PlayControl = function(parent, config) {
         if (x>w) x = 0;
 
 
-
         slider.setValue(x);
-
     };
 
 
   //**************************************************************************
   //** onChange
   //**************************************************************************
+  /** Called whenever the player is updated.
+   */
     this.onChange = function(elapsedTime){};
 
 
   //**************************************************************************
   //** onEnd
   //**************************************************************************
+  /** Called whenever the elapsed time equals the total run time.
+   */
     this.onEnd = function(){};
-
-
 
 
   //**************************************************************************
@@ -210,5 +239,4 @@ javaxt.dhtml.PlayControl = function(parent, config) {
 
 
     init();
-
 };
