@@ -11,7 +11,7 @@ if(!javaxt.dhtml) javaxt.dhtml={};
  *   div (DOM element) and a minimal config. See config settings for a full
  *   range of options.
  <pre>
-    var checkbox = new javaxt.dhtml.Slider(div, {
+    var slider = new javaxt.dhtml.Slider(div, {
         units: "percent"
     });
  </pre>
@@ -35,6 +35,7 @@ javaxt.dhtml.Slider = function(parent, config) {
       /** Initial value for the slider
        */
         value: 0,
+
 
       /** If true, the slider will be disabled when it is initialized. The
        *  slider can be enabled and disabled using the enable() and disable()
@@ -79,6 +80,7 @@ javaxt.dhtml.Slider = function(parent, config) {
     };
 
 
+    var isRendered = false;
     var handle, slider, mask;
     var value; //number - leave undefined initially
 
@@ -175,6 +177,7 @@ javaxt.dhtml.Slider = function(parent, config) {
 
             if (config.disabled===true) me.disable();
 
+            isRendered = true;
             me.setValue(config.value, true);
             me.onRender();
         });
@@ -320,29 +323,44 @@ javaxt.dhtml.Slider = function(parent, config) {
   //** setValue
   //**************************************************************************
   /** Used to set the position of the slider.
-   *  @param x Accepts a number representing pixels from the left or a string
-   *  representing a percentage value (e.g. '50%')
+   *  @param x A number or a string representing a percentage value (e.g. '50%').
+   *  If a number is provided and the "units" config is set to "percent", then
+   *  the number will be interpreted as a percent value from 0-100. Otherwise,
+   *  the number will be interpreted as pixels from the left of the slider.
    *  @param silent If true, will not fire the onChange event
    */
     this.setValue = function(x, silent){
 
-        if (javaxt.dhtml.utils.isString(x)){
-            if (x.lastIndexOf("%")===x.length-1){
-                x = parseInt(x.substring(0,x.length-1));
-                if (isNaN(x) || x<0 || x>100) return;
-                x = me.getWidth() * (x/100);
-            }
-        }
-
-        if (javaxt.dhtml.utils.isNumber(x)){
-            x = parseFloat(x);
-        }
-        else {
+        if (!isRendered){
+            config.value = x;
             return;
         }
 
-        handle.style.left = (x-(handleWidth/2)) + 'px';
-        updateSlider(x, silent);
+
+
+        var setValue = function(x){
+            handle.style.left = (x-(handleWidth/2)) + 'px';
+            updateSlider(x, silent);
+        };
+
+        if (javaxt.dhtml.utils.isString(x)){
+            if (x.lastIndexOf("%")===x.length-1){
+                x = parseFloat(x.substring(0,x.length-1));
+                if (isNaN(x) || x<0 || x>100) return;
+                x = me.getWidth() * (x/100);
+                setValue(x);
+            }
+        }
+        else{
+            x = parseFloat(x+"");
+            if (x<0) return;
+            if (config.units==="percent"){
+                if (x>100) return;
+                x = me.getWidth() * (x/100);
+            }
+            setValue(x);
+        }
+
     };
 
 
