@@ -322,7 +322,8 @@ javaxt.dhtml.Slider = function(parent, config) {
   //**************************************************************************
   //** setValue
   //**************************************************************************
-  /** Used to set the position of the slider.
+  /** Used to set the position of the slider. Note that the update will be
+   *  deferred until the slider is rendered.
    *  @param x A number or a string representing a percentage value (e.g. '50%').
    *  If a number is provided and the "units" config is set to "percent", then
    *  the number will be interpreted as a percent value from 0-100. Otherwise,
@@ -337,30 +338,31 @@ javaxt.dhtml.Slider = function(parent, config) {
         }
 
 
+        onRender(slider, function(){
 
-        var setValue = function(x){
-            handle.style.left = (x-(handleWidth/2)) + 'px';
-            updateSlider(x, silent);
-        };
+            var setValue = function(x){
+                handle.style.left = (x-(handleWidth/2)) + 'px';
+                updateSlider(x, silent);
+            };
 
-        if (javaxt.dhtml.utils.isString(x)){
-            if (x.lastIndexOf("%")===x.length-1){
-                x = parseFloat(x.substring(0,x.length-1));
-                if (isNaN(x) || x<0 || x>100) return;
-                x = me.getWidth() * (x/100);
+            if (javaxt.dhtml.utils.isString(x)){
+                if (x.lastIndexOf("%")===x.length-1){
+                    x = parseFloat(x.substring(0,x.length-1));
+                    if (isNaN(x) || x<0 || x>100) return;
+                    x = me.getWidth() * (x/100);
+                    setValue(x);
+                }
+            }
+            else{
+                x = parseFloat(x+"");
+                if (x<0) return;
+                if (config.units==="percent"){
+                    if (x>100) return;
+                    x = me.getWidth() * (x/100);
+                }
                 setValue(x);
             }
-        }
-        else{
-            x = parseFloat(x+"");
-            if (x<0) return;
-            if (config.units==="percent"){
-                if (x>100) return;
-                x = me.getWidth() * (x/100);
-            }
-            setValue(x);
-        }
-
+        });
     };
 
 
