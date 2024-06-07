@@ -55,6 +55,11 @@ javaxt.dhtml.Window = function(parent, config) {
        */
         footer: null,
 
+      /** Buttons to put in the footer. Only rendered if no "footer" config is
+       *  defined.
+       */
+        buttons: [],
+
       /** Initial width of the window, in pixels.
        */
         width: null,
@@ -182,6 +187,31 @@ javaxt.dhtml.Window = function(parent, config) {
 
             },
 
+            footerButtonBar: {
+                display: "inline-block",
+                float: "right",
+                padding: "7px 7px 14px 7px"
+            },
+
+          //Style for individual buttons in the button bar (footer)
+            footerButton: {
+                borderRadius: "3px",
+                color: "#363636",
+                display: "inline-block",
+                fontSize: "14px",
+                width: "80px",
+                height: "26px",
+                lineHeight: "26px",
+                verticalAlign: "middle",
+                textAlign: "center",
+                backgroundColor: "#e4e4e4",
+                border: "1px solid #b4b4b4",
+                boxShadow: "0 2px 4px 0 rgba(0, 0, 0, 0.2)",
+                textShadow: "1px 1px 0px rgb(255, 255, 255)",
+                cursor: "pointer",
+                marginLeft: "7px"
+            },
+
             resizeHandle: {
                 //should be about 20x20 px with rounded corner to match window
             },
@@ -198,7 +228,7 @@ javaxt.dhtml.Window = function(parent, config) {
 
     };
 
-    var mainDiv, header, body, footer, mask;
+    var mainDiv, header, body, footer, buttonRow, mask;
     var titleDiv, iconDiv, buttonDiv; //header elements
     var recenter = true;
     var visible = false;
@@ -298,8 +328,25 @@ javaxt.dhtml.Window = function(parent, config) {
 
 
         me.setContent(config.body);
-        me.setFooter(config.footer);
 
+
+      //Populate the footer
+        if (config.footer){
+            me.setFooter(config.footer);
+        }
+        else{
+            if (config.buttons){
+                for (var i=0; i<config.buttons.length; i++){
+
+                    var button = config.buttons[i];
+                    var name = button.name;
+                    var enabled = true;
+                    var onclick = button.onclick;
+
+                    addButton(name, enabled, onclick);
+                }
+            }
+        }
 
 
       //Create mask (used for modal dialogs and resize)
@@ -805,6 +852,30 @@ javaxt.dhtml.Window = function(parent, config) {
        mainDiv.style.left = x + "px";
        mainDiv.style.top = y + "px";
 
+    };
+
+
+  //**************************************************************************
+  //** addButton
+  //**************************************************************************
+    addButton = function (name, enabled, onclick){
+
+        if (!buttonRow){
+            var buttonDiv = createElement('div', footer, config.style.footerButtonBar);
+            buttonRow = createTable(buttonDiv).addRow();
+        }
+
+        var td = buttonRow.addColumn();
+        if (name.toLowerCase()==="spacer"){
+            td.style.width="100%";
+        }
+        else{
+            var input = createElement('input', td, config.style.footerButton);
+            input.type = "button";
+            input.name = name;
+            input.value = name;
+            input.onclick = onclick;
+        }
     };
 
 
