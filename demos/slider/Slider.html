@@ -20,7 +20,7 @@
 <script src="../../src/utils/Utils.js"></script>
 
 <style>
-  
+
 .pink-slider {
     position: relative;
     display: inline-block;
@@ -34,7 +34,7 @@
     transition: height 200ms cubic-bezier(0.52, 0.075, 0.47, 0.895);
 }
 
-.pink-slider:hover {
+.pink-slider:hover, .pink-slider:active {
     height: 8px;
 }
 
@@ -50,7 +50,8 @@
     transition-property: width, height, margin;
 }
 
-.white-dot:hover {
+.pink-slider:hover .white-dot,
+.white-dot:hover, .white-dot:active {
     width: 20px;
     height: 20px;
     margin-top: -4px;
