@@ -40,6 +40,13 @@ javaxt.dhtml.WebSocket = function(config) {
         keepAlive: 15000,
 
 
+      /** Max amount of time to wait for the websocket to reconnect with the
+       *  server after a disconnect. Value is in milliseconds. Default is
+       *  300000 (5 minutes).
+       */
+        timeout: 5*60*1000,
+
+
       /** Class used to debug the websocket. This config is not required to use
        *  this class. Implementations must implement an append() method.
        */
@@ -51,9 +58,11 @@ javaxt.dhtml.WebSocket = function(config) {
     };
 
 
+    var url;
     var socket;
     var timer;
     var connectionSuccess = false;
+    var connectionStartTime;
 
 
   //**************************************************************************
@@ -85,15 +94,11 @@ javaxt.dhtml.WebSocket = function(config) {
 
 
 
-      //Get debugger
-        var debugr = config.debugr;
-
-
       //Set url to websocket endpoint
         var protocol = window.location.protocol.toLowerCase();
         if (protocol.indexOf("https")===0) protocol = "wss";
         else protocol = "ws";
-        var url = protocol + '://' + window.location.host;
+        url = protocol + '://' + window.location.host;
         if (config.url.indexOf("/")!==0) url += "/";
 
         var path = config.url;
@@ -108,80 +113,90 @@ javaxt.dhtml.WebSocket = function(config) {
         }
 
 
+        connect();
+    };
 
 
+  //**************************************************************************
+  //** connect
+  //**************************************************************************
+    var connect = function(){
+        var connectionStatusTimer;
+        var debugr = config.debugr;
 
-        var connect = function(){
-            var connectionStatusTimer;
 
-
-            if (timer) clearInterval(timer);
-            timer = setInterval(function() {
-                if (socket){
-                    if (socket.readyState === WebSocket.OPEN) {
-                        socket.send('');
-                    }
-                    else if (socket.readyState === WebSocket.CLOSED){
-                        connect();
-                    }
+        if (timer) clearInterval(timer);
+        timer = setInterval(function() {
+            if (socket){
+                if (socket.readyState === WebSocket.OPEN) {
+                    socket.send('');
                 }
-            }, config.keepAlive);
-
-
-            socket = new WebSocket(url);
-            socket.onopen = function(){
-                debugr.append("onopen");
-
-              //Update the connectionSuccess variable after a small delay. This
-              //gives us a chance to see if the socket closes immediately after
-              //open (see onclose)
-                connectionStatusTimer = setTimeout(function(){
-                    connectionSuccess = true;
-                }, 500);
-
-
-                me.onConnect();
-            };
-
-
-          //Handle messages sent by the server
-            socket.onmessage = function(event) {
-                connectionSuccess = true;
-                var msg = event.data;
-                debugr.append(msg);
-                me.onMessage(msg);
-            };
-
-
-          //Reconnect on disconnect
-            socket.onclose = function(event){
-                debugr.append("onclose");
-                debugr.append(event.code + ": " + event.reason);
-
-
-                if (connectionSuccess){ //Reconnect!
-                    me.onDisconnect();
+                else if (socket.readyState === WebSocket.CLOSED){
                     connect();
                 }
-                else{ //Websocket failed!
-                    debugr.append("Websocket failed");
-                    socket = null;
-                    clearTimeout(timer);
-                    clearTimeout(connectionStatusTimer);
-                    me.onFailure(event.code, event.reason);
-                    me.onDisconnect();
-                }
-            };
+            }
+        }, config.keepAlive);
 
 
-            socket.onerror = function(){
-                debugr.append("error!");
-            };
+        socket = new WebSocket(url);
+        socket.onopen = function(){
+            debugr.append("onopen");
+
+          //Update the connectionSuccess variable after a small delay. This
+          //gives us a chance to see if the socket closes immediately after
+          //open (see onclose)
+            connectionStatusTimer = setTimeout(function(){
+                connectionSuccess = true;
+                connectionStartTime = new Date().getTime();
+            }, 500);
+
+
+            me.onConnect();
         };
 
 
+      //Handle messages sent by the server
+        socket.onmessage = function(event) {
+            connectionSuccess = true;
+            var msg = event.data;
+            debugr.append(msg);
+            me.onMessage(msg);
+        };
 
-        connect();
+
+      //Reconnect on disconnect
+        socket.onclose = function(event){
+            debugr.append("onclose");
+            debugr.append(event.code + ": " + event.reason);
+
+
+            if (connectionSuccess){ //Reconnect!
+                if ((new Date().getTime()-connectionStartTime)<config.timeout){
+                    me.onDisconnect();
+                    connect();
+                }
+                else{
+                    console.log("hanging up...");
+                    me.stop();
+                    clearTimeout(connectionStatusTimer);
+                    me.onTimeout();
+                    me.onDisconnect();
+                }
+            }
+            else{ //Websocket failed!
+                debugr.append("Websocket failed");
+                socket = null;
+                clearTimeout(timer);
+                clearTimeout(connectionStatusTimer);
+                me.onFailure(event.code, event.reason);
+                me.onDisconnect();
+            }
+        };
+
+
+        socket.onerror = function(){
+            debugr.append("error!");
+        };
     };
 
 
@@ -221,6 +236,29 @@ javaxt.dhtml.WebSocket = function(config) {
 
 
   //**************************************************************************
+  //** onTimeout
+  //**************************************************************************
+  /** Called when a websocket is disconnected from the server for an extended
+   *  period of time. See timeout config.
+   */
+    this.onTimeout = function(){};
+
+
+  //**************************************************************************
+  //** start
+  //**************************************************************************
+  /** Used to open a websocket connection to the server and start listening to
+   *  events. Note that the websocket listener is started automatically when
+   *  this class is first initialized. This method is only intended to be used
+   *  after calling stop().
+   */
+    this.start = function(){
+        if (socket) return;
+        connect();
+    };
+
+
+  //**************************************************************************
   //** stop
   //**************************************************************************
   /** Used to stop listening to events and close the websocket
@@ -228,8 +266,29 @@ javaxt.dhtml.WebSocket = function(config) {
     this.stop = function(){
         connectionSuccess = false;
         if (timer) clearInterval(timer);
-        if (socket) socket.close();
+        if (socket){
+            socket.close();
+            socket = null;
+        }
     };
+
+
+  //**************************************************************************
+  //** send
+  //**************************************************************************
+  /** Used to send a message to the server via the websocket.
+   */
+    this.send = function(message){
+        if (socket){
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.send(message);
+            }
+            else if (socket.readyState === WebSocket.CLOSED){
+                //Maybe queue the messages and send on reconnect?
+            }
+        }
+    };
+
 
     init();
 };
