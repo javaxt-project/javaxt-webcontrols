@@ -1,5 +1,11 @@
+<!DOCTYPE html>
+<html>
+
+  <!--
+ Replace the previous 2 lines with this to see if the behaviour changes in any way
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
+  -->
+
 <title>Slider Demo</title>
 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -10,34 +16,94 @@
 
 
 <!-- JavaXT Includes -->
-<script type="text/javascript" src="../../src/slider/Slider.js"></script>
-<script type="text/javascript" src="../../src/utils/Utils.js"></script>
+<script src="../../src/slider/Slider.js"></script>
+<script src="../../src/utils/Utils.js"></script>
+
+<style>
+  
+.pink-slider {
+    position: relative;
+    display: inline-block;
+
+    background-color: #fff;
+    background-image: linear-gradient(#ec567c, #ec567c);
+    background-repeat: no-repeat;
+
+    height: 4px;
+    border: 1px solid #dcdcdc;
+    transition: height 200ms cubic-bezier(0.52, 0.075, 0.47, 0.895);
+}
+
+.pink-slider:hover {
+    height: 8px;
+}
+
+.white-dot {
+    position: absolute;
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #fff;
+    border: 1px solid #dcdcdc;
+    transition: all 200ms cubic-bezier(0.52, 0.075, 0.47, 0.895);
+    transition-property: width, height, margin;
+}
+
+.white-dot:hover {
+    width: 20px;
+    height: 20px;
+    margin-top: -4px;
+    margin-left: -5px;
+}
+</style>
+
+</head>
+
+<body>
+  <div class="demo-container">
+
+    <h1>Slider Demos</h1>
+
+    <h2>Default Slider</h2>
+    <p>Simple slider with no style rules defined. As the slider is moved, the value below is updated.</p>
+    <div id="value"></div>
+    <div id="slider" style="margin:20px 0px 20px 0;width:600px;"></div>
 
 
-<link type="text/css" rel="stylesheet" href="Slider.css"/>
+    <h2>Custom Slider</h2>
+    <p>Simple slider with custom pink style. The height of the slider and handle are updated on mouseover.</p>
 
-<script type="text/javascript">
+    <div id="slider2" style="margin:20px 0px 20px 0;width:600px;"></div>
+  </div>
+
+
+<script>
 window.onload = function() {
 
     var value = document.getElementById("value");
 
-    var slider = new javaxt.dhtml.Slider(document.getElementById("slider"));
+    var slider = new javaxt.dhtml.Slider(document.getElementById("slider"), {
+        units: "percent"
+    });
     slider.onChange = function(val){
-        var percentage = Math.round(slider.getValue(true)*100) + "%";
-        value.innerHTML = val + "/" + slider.getWidth() + " " + percentage;
+        var percentage = Math.round(val) + "%";
+        value.innerHTML = Math.round(slider.getPosition()) + "/" + slider.getWidth() + " " + percentage;
     };
+    slider.setValue("50%");
 
 
-    slider.setValue(100);
+
+    new javaxt.dhtml.Slider(document.getElementById("slider2"), {
+        units: "percent",
+        value: "30%",
+        style: {
+            groove: "pink-slider",
+            handle: "white-dot"
+        }
+    });
 
 };
 </script>
-</head>
-
-<body>
-
-    <div id="value"></div>
-    <div id="slider" style="margin:20px 0px 20px 20px;width:600px;"></div>
-
 </body>
 </html>
