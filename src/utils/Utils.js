@@ -1037,6 +1037,24 @@ javaxt.dhtml.utils = {
   //**************************************************************************
   //** initDrag
   //**************************************************************************
+  /** Used to update a DOM element and enable dragging. It is up to the caller
+   *  to process the drag events and update the DOM element via event handlers
+   *  defined in the config. Example:
+   <pre>
+    initDrag(div, {
+        onDragStart: function(mouseX, mouseY){
+            //Do something, like compute x/y offsets, update cursor, etc
+        },
+        onDrag: function(mouseX, mouseY){
+            this.style.left = x + 'px';
+            this.style.top = y + 'px';
+        },
+        onDragEnd: function(){
+            //Do something, like repost position, update cursor, etc
+        }
+    });
+   </pre>
+   */
     initDrag : function(dragHandle, config){
         javaxt.dhtml.utils.addNoSelectRule();
 
@@ -1245,10 +1263,16 @@ javaxt.dhtml.utils = {
   //**************************************************************************
   //** addResizeListener
   //**************************************************************************
-  /** Used to watch for resize events for a given element. Credit:
-   *  http://www.backalleycoder.com/2013/03/18/cross-browser-event-based-element-resize-detection/
+  /** Used to watch for resize events for a given element.
    */
     addResizeListener: function(element, fn){
+
+        /* This is a really old hack from 2013 when there were limited
+         * cross-browser options to watch for resize events. The code was
+         * lifted directly from this link:
+         * http://www.backalleycoder.com/2013/03/18/cross-browser-event-based-element-resize-detection/
+         */
+
 
         var destroy, isDestroyed = false;
 

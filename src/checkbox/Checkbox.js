@@ -6,7 +6,25 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 //******************************************************************************
 /**
  *   Form input that can be either checked or unchecked. The input consists of
- *   a square box with a checkmark when activated and text label.
+ *   a square box with a checkmark when selected.
+ *   <br/>
+ *   Here's a simple example of how to instantiate a checkbox using an existing
+ *   div (DOM element) and a minimal config. See config settings for a full
+ *   range of options.
+ <pre>
+    var checkbox = new javaxt.dhtml.Checkbox(div, {
+        label: "I Agree",
+        checked: false
+    });
+ </pre>
+ *   Once the checkbox is instantiated you can call any of the public methods.
+ *   You can also add event listeners by overriding any of the public "on" or
+ *   "before" methods like this:
+ <pre>
+    checkbox.onClick = function(checked){
+        console.log("I Agree", checked);
+    };
+</pre>
  *
  ******************************************************************************/
 

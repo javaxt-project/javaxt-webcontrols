@@ -16,7 +16,16 @@ javaxt.dhtml.Form = function (parent, config) {
 
     var defaultConfig = {
         onsubmit: null,
+
+      /** An array of items that make up the form (e.g. form inputs and labels).
+       */
         items: [],
+
+
+      /** An array of buttons that will be placed at the bottom of the form
+       * (e.g. submit, cancel, reset).
+       */
+        buttons: [],
 
 
       /** Style for individual elements within the component. Note that you can
