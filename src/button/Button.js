@@ -363,7 +363,8 @@ javaxt.dhtml.Button = function(parent, config) {
 
 
       //Create onclick function
-        var onclick = function(){
+        var onclick = function(e){
+            e.stopPropagation();
             if (config.sound!=null) config.sound.play();
 
 
@@ -426,7 +427,7 @@ javaxt.dhtml.Button = function(parent, config) {
 
             if ((duration <= 500 && distance <= 10) || //Quick tap
                 (duration > 500 && distance <= 10)) {  //Long press
-                onclick();
+                onclick(e);
             }
             else{
                 setStyle(div, "button");
@@ -452,8 +453,8 @@ javaxt.dhtml.Button = function(parent, config) {
 
                 //return false;
             };
-            div.onclick = function(){
-                onclick();
+            div.onclick = function(e){
+                onclick(e);
             };
             div.onmouseover = function(){
 
