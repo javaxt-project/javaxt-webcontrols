@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Effects Demo</title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+<link href="../style.css" rel="stylesheet" type="text/css" />
+
+
+
+<script src="../../src/utils/Utils.js"></script>
+<script src="../../src/utils/Effects.js"></script>
+<script src="../../themes/default.js"></script>
+
+
+<style>
+
+.demo {
+    display:flex;
+    flex-wrap:nowrap;
+}
+
+
+.menu {
+    border: 1px solid #dcdcdc;
+    width: 145px;
+    padding: 5px;
+}
+
+.menu:focus{
+    outline:0;
+}
+
+.menu ul {
+    margin: 5px 0 0 0;
+    padding: 0 0 0 0;
+    list-style-type: none;
+}
+
+.menu li {
+    margin: 0 0 0 0;
+    padding: 0 12px 2px 0;
+    white-space: nowrap;
+    color: #777;
+    cursor: pointer;
+}
+
+.menu li:hover {
+    background-color: aliceblue;
+}
+
+.menu li.active {
+    background-color: #c8e5ff;
+}
+
+
+
+.preview {
+    width:100%;
+    border: 1px solid #dcdcdc;
+    padding: 5px;
+    position: relative;
+}
+
+.preview .circle{
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #ff8f8f;
+}
+
+.middle {
+    position: relative;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+}
+
+.center {
+    margin: 0 auto;
+}
+
+
+</style>
+
+</head>
+<body>
+<div class="demo-container">
+
+
+  <h1>Effects Demo</h1>
+  <p>A sampling of various JavaXT effects found in the javaxt.dhtml.Effects class.
+     Transitions effects are defined for individual elements using the setTransition()
+     method.
+  </p>
+
+  <div class="demo">
+    <div class="menu">
+      Demo
+      <ul>
+        <li>Slide In</li>
+        <li>Fade In</li>
+        <li>Drop</li>
+        <li>Grow</li>
+        <li>Expand</li>
+        <li>Expand Left</li>
+        <li>Expand Right</li>
+      </ul>
+    </div>
+    <div class="menu">
+      Effect
+      <ul></ul>
+    </div>
+    <div class="preview">
+      Demo
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+window.onload = function(){
+    var createElement = javaxt.dhtml.utils.createElement;
+
+
+  //Instantiate the Effects class
+    var fx = new javaxt.dhtml.Effects();
+    var demo, effect, preview;
+
+
+  //Get menus
+    var demoMenu, effectMenu;
+    var menus = document.getElementsByClassName("menu");
+    for (var i=0; i<menus.length; i++){
+
+        var ul = menus[i].getElementsByTagName("ul")[0];
+        if (i==0) demoMenu = ul;
+        else effectMenu = ul;
+
+        menus[i].tabIndex = -1; //allows the div to have focus
+        menus[i].addEventListener("keyup", function(e){
+
+            if (e.keyCode===38 || e.keyCode===40){
+
+
+                var rows = [];
+                var lastSelectedRow = -1;
+                var ul = this.getElementsByTagName("ul")[0];
+                for (var i=0; i<ul.childNodes.length; i++){
+                    var li = ul.childNodes[i];
+                    if (li.nodeType==1){
+                        rows.push(li);
+                        if (li.classList.has("active")){
+                            lastSelectedRow = rows.length-1;
+                        }
+                    }
+                }
+
+                if (lastSelectedRow>-1){
+                    var row;
+                    if (e.keyCode===40){ //down arrow
+                        row = rows[lastSelectedRow+1];
+                    }
+                    else{ //up arrow
+                        row = rows[lastSelectedRow-1];
+                    }
+                    if (row) row.click();
+                }
+            }
+        });
+
+
+    }
+
+
+  //Add event listeners to the "Demo" menu
+    for (var i=0; i<demoMenu.childNodes.length; i++){
+        var li = demoMenu.childNodes[i];
+        if (li.nodeType!=1) continue;
+
+
+        li.classList.has = function(className){
+            for (var i=0; i<this.length; i++){
+                if (this[i]===className) return true;
+            }
+            return false;
+        };
+
+
+        li.onclick = function(){
+            if (this.classList.has("active")) return;
+
+            for (var i=0; i<demoMenu.childNodes.length; i++){
+                if (demoMenu.childNodes[i].nodeType!=1) continue;
+                demoMenu.childNodes[i].classList.remove("active");
+            }
+
+            this.classList.add("active");
+            demo = this.innerText;
+            runDemo();
+        };
+    }
+
+
+  //Populate the "Effects" menu and add event listeners
+    Object.keys(javaxt.dhtml.Transitions).forEach((key)=>{
+        var li = createElement("li", effectMenu, "a");
+        li.innerText = key;
+        li.classList.has = function(className){
+            for (var i=0; i<this.length; i++){
+                if (this[i]===className) return true;
+            }
+            return false;
+        };
+
+        li.onclick = function(){
+            if (!demo || this.classList.has("active")) return;
+
+            for (var i=0; i<effectMenu.childNodes.length; i++){
+                if (effectMenu.childNodes[i].nodeType!=1) continue;
+                effectMenu.childNodes[i].classList.remove("active");
+            }
+
+            this.classList.add("active");
+            effect = this.innerText;
+            runDemo();
+        };
+    });
+
+
+
+
+
+  //Create function to run the demos
+    var runDemo = function(){
+        if (!demo || !effect) return;
+        if (!preview) preview = document.getElementsByClassName("preview")[0];
+        preview.innerHTML = "";
+
+        var div = createElement("div", preview, "circle middle center");
+        div.style.opacity = 0;
+
+
+        if (demo==="Slide In"){
+            div.style.position = "absolute";
+            div.className = "circle middle";
+            div.style.width = "40px";
+            div.style.height = "40px";
+            div.style.left = "90%";
+            div.style.opacity = 1;
+            setTransition(div, ()=>{
+                div.style.transitionProperty = "left";
+                div.style.left = "20px";
+            });
+        }
+        else if (demo==="Fade In"){
+            div.style.width = "200px";
+            div.style.height = "200px";
+            setTransition(div, ()=>{
+                div.style.transitionProperty = "opacity";
+                div.style.opacity = 1;
+            });
+        }
+        else if (demo==="Drop"){
+            div.style.position = "absolute";
+            div.className = "circle";
+            div.style.top = 0;
+            div.style.left = "50%";
+            div.style.width = "40px";
+            div.style.height = "40px";
+            div.style.opacity = 1;
+            setTransition(div, ()=>{
+                div.style.transitionProperty = "top";
+                div.style.top = "90%";
+            });
+        }
+        else if (demo==="Grow"){
+            div.style.borderRadius = "50%";
+            div.style.opacity = 1;
+            setTransition(div, ()=>{
+                div.style.transitionProperty = "width, height";
+                div.style.width = "100px";
+                div.style.height = "100px";
+            });
+        }
+        else if (demo==="Expand"){
+            div.style.width = "80px";
+            div.style.height = "40px";
+            div.style.borderRadius = "20px";
+            div.style.opacity = 1;
+            setTransition(div, ()=>{
+                div.style.transitionProperty = "width";
+                div.style.width = "200px";
+            });
+        }
+        else if (demo==="Expand Left"){
+            div.style.height = "40px";
+            div.style.borderRadius = "20px";
+            div.style.position = "absolute";
+            div.style.right = "50%";
+            div.style.opacity = 1;
+            setTransition(div, ()=>{
+                div.style.transitionProperty = "padding";
+                div.style.paddingLeft = "400px";
+            });
+        }
+        else if (demo==="Expand Right"){
+            div.style.height = "40px";
+            div.style.borderRadius = "20px";
+            div.style.position = "absolute";
+            div.style.left = "50%";
+            div.style.opacity = 1;
+            setTransition(div, ()=>{
+                div.style.transitionProperty = "padding";
+                div.style.paddingRight = "400px";
+            });
+        }
+    };
+
+
+    var timer;
+    var duration = 1000;
+    var setTransition = function(div, callback){
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(()=>{
+            fx.setTransition(div, effect, duration);
+            callback();
+        }, 200);
+    };
+
+
+};
+</script>
+
+
+</body>
+</html>
