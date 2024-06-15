@@ -23,7 +23,24 @@ javaxt.dhtml.Form = function (parent, config) {
 
 
       /** An array of buttons that will be placed at the bottom of the form
-       * (e.g. submit, cancel, reset).
+       * (e.g. submit, cancel, reset). Example:
+       <pre>
+            buttons: [
+                {
+                    name: "Submit",
+                    onclick: function(){
+                        var values = form.getData();
+                        //TODO: validate form data
+                    }
+                },
+                {
+                    name: "Reset",
+                    onclick: function(){
+                        form.clear();
+                    }
+                }
+            ]
+       </pre>
        */
         buttons: [],
 

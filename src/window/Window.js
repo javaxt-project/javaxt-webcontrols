@@ -56,7 +56,17 @@ javaxt.dhtml.Window = function(parent, config) {
         footer: null,
 
       /** Buttons to put in the footer. Only rendered if no "footer" config is
-       *  defined.
+       *  defined. Example:
+       <pre>
+            buttons: [
+                {
+                    name: "OK",
+                    onclick: function(){
+                        win.close();
+                    }
+                }
+            ]
+       </pre>
        */
         buttons: [],
 
