@@ -281,8 +281,6 @@ javaxt.dhtml.utils = {
         var d2 = diff(obj2, obj1);
 
         return merge(d1,d2);
-
-
     },
 
 
@@ -644,6 +642,38 @@ javaxt.dhtml.utils = {
         if (parent) parent.appendChild(table);
 
         return table;
+    },
+
+
+  //**************************************************************************
+  //** createClipboard
+  //**************************************************************************
+  /** Used to create a hidden clipboard in a given parent. Text and other data
+   *  can be inserted into the clipboard via the insert() method on the DOM
+   *  object returned by this method. Once data is inserted into the clipboard,
+   *  clients can retrieve the data via the browser "paste" event (e.g. ctrl+v
+   *  on windows).
+   *  @param parent DOM element used to hold the clipboard (required)
+   *  @returns DOM object (dov) with a custom insert() method
+   */
+    createClipboard: function(parent){
+        var createElement = javaxt.dhtml.utils.createElement;
+
+        var clipboard = createElement("textarea");
+        clipboard.insert = function(str){
+            clipboard.value = str;
+            clipboard.select();
+            clipboard.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+        };
+        var clipboardDiv = createElement("div", parent, {
+            position: "absolute",
+            left: "-9999px",
+            width: "0px",
+            height: "0px"
+        });
+        clipboardDiv.appendChild(clipboard);
+        return clipboard;
     },
 
 
@@ -1471,6 +1501,201 @@ javaxt.dhtml.utils = {
         else{
             return Math.round(number);
         }
+    },
+
+
+  //**************************************************************************
+  //** alert
+  //**************************************************************************
+  /** Used to render an alert dialog using the javaxt.dhtml.Window class.
+   *  @param msg Message to display in the alert. Supports strings and XHR
+   *  responses with "responseText".
+   *  @param config Optional config used to instantiate the
+   *  javaxt.dhtml.Window class.
+   */
+    alert: function(msg, config){
+        var win = javaxt.dhtml.utils.Alert;
+        if (win && win.isOpen()) return;
+
+
+        if (msg==null) msg = "";
+
+
+      //Special case for ajax request
+        if (!(typeof(msg) === 'string' || msg instanceof String)){
+            if (typeof msg.responseText !== 'undefined'){
+                msg = (msg.responseText.length>0 ? msg.responseText : msg.statusText);
+                if (!msg) msg = "Unknown Server Error";
+            }
+        }
+
+
+        var win = javaxt.dhtml.utils.Alert;
+        if (!win){
+            var createElement = javaxt.dhtml.utils.createElement;
+
+
+            var outerDiv = createElement('div', {
+                position: "relative",
+                width: "100%",
+                height: "100%",
+                cursor: "inherit"
+            });
+
+            var innerDiv = createElement('div', outerDiv, {
+                position: "absolute",
+                width: "100%",
+                height: "100%",
+                overflowX: "hidden",
+                cursor: "inherit"
+            });
+
+
+            if (!config) config = {};
+            javaxt.dhtml.utils.merge(config, {
+                width: 450,
+                height: 200,
+                valign: "top",
+                modal: true,
+                title: "Alert",
+                body: outerDiv,
+                style: {
+                    panel: "window",
+                    header: "window-header alert-header",
+                    title: "window-title",
+                    buttonBar: "window-header-button-bar",
+                    button: "window-header-button",
+                    body: "window-body alert-body"
+                }
+            });
+
+
+            win = new javaxt.dhtml.Window(document.body, config);
+            win.div = innerDiv;
+            javaxt.dhtml.utils.Alert = win;
+        }
+
+
+        win.div.innerHTML = msg;
+
+        win.show();
+        return win;
+    },
+
+
+  //**************************************************************************
+  //** confirm
+  //**************************************************************************
+  /** Used to render a confirm dialog using the javaxt.dhtml.Window class.
+   *  Example:
+   <pre>
+    javaxt.dhtml.utils.confirm({
+        title: "Quit Game?",
+        text: "Are you sure you want to quit the game?",
+        leftButton: {
+            label: "Yes",
+            value: true
+        },
+        rightButton: {
+            label: "No",
+            value: false
+        },
+        callback: function(answer){
+            if (answer===true) console.log("quit game");
+            else console.log("continue game");
+        }
+    });
+   </pre>
+    @param msg String with question/prompt or a JSON config like the example
+    above. If passing a string, a default config is used which can be
+    overridden using the optional "config" parameter.
+    @param config JSON config like the example above. This parameter is
+    optional.
+   */
+    confirm: function(msg, config){
+        var win = javaxt.dhtml.utils.Confirm;
+        if (win && win.isOpen()) return;
+
+
+        if (!(typeof(msg) === 'string' || msg instanceof String)){
+            config = msg;
+        }
+
+        if (!config) config = {};
+        javaxt.dhtml.utils.merge(config, {
+            title: "Confirm",
+            text: msg
+        });
+
+
+      //Create new window as needed
+        if (!win){
+            var createElement = javaxt.dhtml.utils.createElement;
+
+
+            var buttonDiv = createElement("div", "button-div");
+
+
+            var createButton = function(label, result){
+                var input = createElement("input", buttonDiv, "form-button");
+                input.type = "button";
+
+                input.onclick = function(){
+                    win.result = this.result;
+                    win.close();
+                };
+                input.setLabel = function(label){
+                    if (label) this.name = this.value = label;
+                };
+                input.setValue = function(b){
+                    if (b===true || b===false) this.result = b;
+                };
+                input.update = function(config){
+                    if (config){
+                        this.setLabel(config.label);
+                        this.setValue(config.value);
+                    }
+                };
+                input.setLabel(label);
+                input.setValue(result);
+                return input;
+            };
+
+
+            win = new javaxt.dhtml.Window(document.body, {
+                width: 450,
+                height: 150,
+                valign: "top",
+                modal: true,
+                footer: buttonDiv,
+                style: {
+                    panel: "window",
+                    header: "window-header",
+                    title: "window-title",
+                    buttonBar: "window-header-button-bar",
+                    button: "window-header-button",
+                    body: "window-body confirm-body"
+                }
+            });
+            javaxt.dhtml.utils.Confirm = win;
+
+
+            win.leftButton = createButton("OK", true);
+            win.rightButton = createButton("Cancel", false);
+        }
+
+
+        win.setTitle(config.title);
+        win.setContent(config.text.replace("\n","<p></p>"));
+        win.leftButton.update(config.leftButton);
+        win.rightButton.update(config.rightButton);
+        win.result = false;
+        win.onClose = function(){
+            var callback = config.callback;
+            if (callback) callback.apply(win, [win.result]);
+        };
+        win.show();
+        return win;
     }
 
 };
