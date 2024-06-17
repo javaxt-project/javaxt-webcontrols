@@ -39,6 +39,10 @@ javaxt.dhtml.WebSocket = function(config) {
        */
         keepAlive: 15000,
 
+      /** Message to send to the server. This message is periodically sent to
+       *  the server to test whether it is still alive. See keepAlive config.
+       */
+        pingMessage: "",
 
       /** Max amount of time to wait for the websocket to reconnect with the
        *  server after a disconnect. Value is in milliseconds. Default is
@@ -62,7 +66,7 @@ javaxt.dhtml.WebSocket = function(config) {
     var socket;
     var timer;
     var connectionSuccess = false;
-    var connectionStartTime;
+    var connectionStartTime, connectionEndTime;
 
 
   //**************************************************************************
@@ -129,7 +133,7 @@ javaxt.dhtml.WebSocket = function(config) {
         timer = setInterval(function() {
             if (socket){
                 if (socket.readyState === WebSocket.OPEN) {
-                    socket.send('');
+                    socket.send(config.pingMessage);
                 }
                 else if (socket.readyState === WebSocket.CLOSED){
                     connect();
@@ -148,6 +152,7 @@ javaxt.dhtml.WebSocket = function(config) {
             connectionStatusTimer = setTimeout(function(){
                 connectionSuccess = true;
                 connectionStartTime = new Date().getTime();
+                connectionEndTime = 0;
             }, 500);
 
 
@@ -169,14 +174,17 @@ javaxt.dhtml.WebSocket = function(config) {
             debugr.append("onclose");
             debugr.append(event.code + ": " + event.reason);
 
+          //Record timestamp of the disconnect
+            if (!connectionEndTime) connectionEndTime = new Date().getTime();
 
+
+          //Try to reconnect
             if (connectionSuccess){ //Reconnect!
-                if ((new Date().getTime()-connectionStartTime)<config.timeout){
+                if ((new Date().getTime()-connectionEndTime)<config.timeout){
                     me.onDisconnect();
                     connect();
                 }
-                else{
-                    console.log("hanging up...");
+                else{ //Hang up...
                     me.stop();
                     clearTimeout(connectionStatusTimer);
                     me.onTimeout();
