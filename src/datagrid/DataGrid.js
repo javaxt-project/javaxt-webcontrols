@@ -692,7 +692,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         table.disableScroll();
     };
 
-    
+
   //**************************************************************************
   //** isScrollEnabled
   //**************************************************************************
@@ -776,6 +776,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         table.clear();
         currPage = 1;
         pageRequests = {};
+        if (checkboxHeader) checkboxHeader.uncheck();
     };
 
 
@@ -1188,6 +1189,8 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                     else{
                         checkbox.deselect();
                     }
+
+                    me.onCheckbox(row.record, checked, checkbox);
 
                 });
                 //me.onSelectionChange();
