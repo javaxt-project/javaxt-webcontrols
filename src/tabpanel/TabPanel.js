@@ -168,7 +168,7 @@ javaxt.dhtml.TabPanel = function(parent, config) {
                 t.style.position = "relative";
                 t.style.float = "left";
                 t.style.height = "100%";
-                t.el.style.display = 'none';
+                hideTabContent(t);
             }
         }
 
@@ -251,7 +251,7 @@ javaxt.dhtml.TabPanel = function(parent, config) {
 
           //Display tab content
             tab.el.style.display = 'block';
-
+            tab.el.style.zIndex = 1; //this was added so groupboxes in forms would render correctly
 
           //Call onTabChange
             me.onTabChange(getTabInfo(tab), getTabInfo(currTab));
@@ -332,8 +332,7 @@ javaxt.dhtml.TabPanel = function(parent, config) {
 
             setInactive(tab);
             tab.style.display = 'none';
-            tab.el.style.display = 'none';
-
+            hideTabContent(tab);
 
             if (nextTab) raiseTab(nextTab);
         }
@@ -385,10 +384,19 @@ javaxt.dhtml.TabPanel = function(parent, config) {
         tab.style.position = "relative";
         tab.style.float = "left";
         tab.style.height = "100%";
-        tab.el.style.display = 'none';
+        hideTabContent(tab);
     };
 
 
+  //**************************************************************************
+  //** hideTabContent
+  //**************************************************************************
+  /** Used to hide the element/panel associated with a tab
+   */
+    var hideTabContent = function(tab){
+        tab.el.style.display = 'none';
+        tab.el.style.zIndex = '';
+    };
 
 
   //**************************************************************************
