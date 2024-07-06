@@ -33,6 +33,7 @@ javaxt.dhtml.utils = {
    *  http() method for a full range of options.
    */
     get: function(url, config){
+        if (!config) config = {};
 
         if (config.payload!=null){ //convert to post request
             var payload = config.payload;
@@ -77,6 +78,7 @@ javaxt.dhtml.utils = {
   /** Used to execute an HTTP DELETE request.
    */
     delete: function(url, config){
+        if (!config) config = {};
         config.method = "DELETE";
         return javaxt.dhtml.utils.http(url, config);
     },
@@ -88,6 +90,9 @@ javaxt.dhtml.utils = {
   /** Used to execute an HTTP request.
    */
     http: function(url, config){
+        if (!config) config = {
+            method: "GET"
+        };
 
         var cache = false; //no caching by default!
         if (config.cache){
@@ -1662,7 +1667,7 @@ javaxt.dhtml.utils = {
             };
 
 
-            win = new javaxt.dhtml.Window(document.body, {
+            javaxt.dhtml.utils.merge(config, {
                 width: 450,
                 height: 150,
                 valign: "top",
@@ -1677,6 +1682,9 @@ javaxt.dhtml.utils = {
                     body: "window-body confirm-body"
                 }
             });
+
+
+            win = new javaxt.dhtml.Window(document.body, config);
             javaxt.dhtml.utils.Confirm = win;
 
 
