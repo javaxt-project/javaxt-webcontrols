@@ -140,6 +140,16 @@ javaxt.dhtml.Form = function (parent, config) {
                 backgroundColor: "white",
                 padding: "0 5px 0 5px",
                 color: "rgb(0, 70, 138)"
+            },
+
+
+          //Style for the error popup
+            error: {
+                input: "form-input-error",
+                callout: {
+                    panel: "error-callout-panel",
+                    arrow: "error-callout-arrow"
+                }
             }
         }
     };
@@ -563,6 +573,7 @@ javaxt.dhtml.Form = function (parent, config) {
         var formInput = addInput(name, label, input, getValue, setValue, icon);
 
         input.oninput = function(){
+            me.hideError(formInput);
             me.onChange(formInput, input.value);
         };
         input.onpaste = input.oninput;
@@ -1324,7 +1335,7 @@ javaxt.dhtml.Form = function (parent, config) {
         if (inputs.length==0) inputs = td.getElementsByTagName("textarea");
         if (inputs.length>0){
             inputs[0].blur();
-            var cls = "form-input-error";
+            var cls = config.style.error.input;
             if (inputs[0].className){
                 if (inputs[0].className.indexOf(cls)==-1) inputs[0].className += " " + cls;
             }
@@ -1342,10 +1353,7 @@ javaxt.dhtml.Form = function (parent, config) {
         var callout = javaxt.dhtml.Form.Error;
         if (!callout){
             callout = new javaxt.dhtml.Callout(document.body,{
-                style:{
-                    panel: "error-callout-panel",
-                    arrow: "error-callout-arrow"
-                }
+                style: config.style.error.callout
             });
             javaxt.dhtml.Form.Error = callout;
         }
