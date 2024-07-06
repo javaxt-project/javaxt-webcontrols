@@ -15,9 +15,10 @@ javaxt.dhtml.style.default = {
     window : {
         panel: "window",
         header: "panel-header window-header",
-        title: "panel-title window-title",
+        title: "window-title",
         button: "window-header-button",
         buttonBar: "window-header-button-bar",
+        footerButton: "form-button noselect",
         body: "window-body",
         mask: "window-mask"
     },
@@ -39,7 +40,14 @@ javaxt.dhtml.style.default = {
         radio: "form-radio noselect",
         checkbox: "form-checkbox",
         groupbox: "form-groupbox",
-        grouplabel: "form-grouplabel noselect"
+        grouplabel: "form-grouplabel noselect",
+        error: {
+            input: "form-input-error",
+            callout: {
+                panel: "error-callout-panel",
+                arrow: "error-callout-arrow"
+            }
+        }
     },
 
 
@@ -60,6 +68,13 @@ javaxt.dhtml.style.default = {
         select: "checkbox-select",
         disable: "checkbox-disable",
         hover: "checkbox-hover"
+    },
+
+
+    button: {
+        button: "button",
+        select: "button-selected",
+        label: "button-label"
     },
 
 
