@@ -116,6 +116,10 @@ javaxt.dhtml.style.default = {
         handleActive: "switch-handle-active"
     },
 
+    slider: {
+        groove: "slider-groove",
+        handle: "slider-handle"
+    },
 
     datePicker: {
         panel: "date-picker-panel",
