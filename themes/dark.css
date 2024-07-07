@@ -18,8 +18,9 @@ body {
 }
 
 body, textarea, input, select, td, th {
-    font-family:helvetica,arial,verdana,sans-serif;
-    font-size:14px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI Variable Text',
+    helvetica,arial,verdana,sans-serif;
+    font-size:13px;
 }
 
 input, select, textarea { /* Allows overriding native style of form elements on iPad */
@@ -176,7 +177,6 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 
     color: #97989c; /*#7e7f84;*/
     display: inline-block;
-    font-size: 14px;
     height: 28px;
     line-height: 28px;
     padding: 2px 4px;
@@ -206,7 +206,6 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 
 .form-label {
     color: #bfc0c3;
-    font-size: 14px;
     white-space: nowrap;
     cursor: default;
     vertical-align: top;
@@ -293,7 +292,6 @@ input, select, textarea { /* Allows overriding native style of form elements on 
     border-radius: 3px;
     color: #97989c;
     display: inline-block;
-    font-size: 14px;
     width: 80px;
     height: 26px;
     /*line-height: 24px;*/
@@ -394,7 +392,6 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 
 .form-input-menu-item {
     color: #b3b3b3;
-    font-size: 14px;
     height: 28px;
     line-height: 28px;
     padding: 0px 6px;
@@ -420,6 +417,26 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 
 
 /**************************************************************************/
+/** Form Error
+/**************************************************************************/
+
+.form-input-error {
+    background: #4e3434;
+    border-color: #8c0000;
+}
+
+
+/**************************************************************************/
+/** Form placeholder
+/**************************************************************************/
+
+.form-input::placeholder {
+  color: #757575;
+  font-style: italic;
+}
+
+
+/**************************************************************************/
 /** Form Group
 /**************************************************************************/
 /** The following classes are used to define the style for group boxes in
@@ -437,6 +454,52 @@ input, select, textarea { /* Allows overriding native style of form elements on 
     background-color: #3e4453;
     padding: 0 5px 0 5px;
     color: #eaeaea;
+}
+
+
+/**************************************************************************/
+/** Callout
+/**************************************************************************/
+
+.callout-panel, .callout-arrow {
+    border: 1px solid #383b41;
+    background: #3e4453; /*same as window*/
+}
+.callout-panel {
+    border-radius: 4px;
+    box-shadow: 0 12px 14px 0 rgba(0, 0, 0, 0.2), 0 13px 20px 0 rgba(0, 0, 0, 0.2)
+}
+.callout-arrow {
+    width: 10px;
+    height: 10px;
+    padding: 10px;
+}
+
+
+/**************************************************************************/
+/** Error Popup
+/**************************************************************************/
+/** The following classes are used to define the style for pop-up callouts
+ *  generated using the javaxt.dhtml.Callout class.
+ */
+
+.error-callout-panel, .error-callout-arrow {
+    border: 1px solid #8c0000;
+    background: #921d1d;
+    color: #fff;
+    cursor: pointer;
+}
+
+.error-callout-panel {
+    border-radius: 3px;
+    padding: 5px !important;
+    box-shadow: 0 12px 14px 0 rgba(0, 0, 0, 0.2), 0 13px 20px 0 rgba(0, 0, 0, 0.2);
+}
+
+.error-callout-arrow {
+    width: 7px;
+    height: 7px;
+    padding: 12px;
 }
 
 
@@ -474,7 +537,6 @@ input, select, textarea { /* Allows overriding native style of form elements on 
     line-height: 36px; /*Should match window-header height*/
 
     position: absolute;
-    font-size: 14px;
     text-align: left;
     cursor: default;
     padding-left: 9px;
@@ -578,7 +640,7 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 /** Special case when tab is the first component inside a window  **/
 
 .window-body table:first-child .tab-bar {
-    background-color: #405672;
+    background-color: #4c5468;
 }
 
 .window-body table:first-child .tab-active {
@@ -612,7 +674,6 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 
 .checkbox-label {
     color: #bfc0c3;
-    font-size: 14px;
     white-space: nowrap;
     cursor: default;
     vertical-align: top;
@@ -649,25 +710,6 @@ input, select, textarea { /* Allows overriding native style of form elements on 
     border-color: rgba(82, 168, 236, 0.8);
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6);
     outline: 0 none;
-}
-
-
-/**************************************************************************/
-/** Callout
-/**************************************************************************/
-
-.callout-panel, .callout-arrow {
-    border: 1px solid #383b41;
-    background: #3e4453; /*same as window*/
-}
-.callout-panel {
-    border-radius: 4px;
-    box-shadow: 0 12px 14px 0 rgba(0, 0, 0, 0.2), 0 13px 20px 0 rgba(0, 0, 0, 0.2)
-}
-.callout-arrow {
-    width: 10px;
-    height: 10px;
-    padding: 10px;
 }
 
 
@@ -711,8 +753,7 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 }
 
 .table-col, .table-header-col {
-    font-family: helvetica,arial,verdana,sans-serif;
-    font-size: 14px;
+
     white-space: nowrap;
 
     height: 35px;
@@ -813,7 +854,7 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 /** Slider
 /**************************************************************************/
 
-.sliderGrove {
+.slider-groove {
     display: inline-block;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: padding-box;
@@ -843,7 +884,7 @@ input, select, textarea { /* Allows overriding native style of form elements on 
     background-repeat: no-repeat, repeat-x;
 }
 
-.sliderHandle {
+.slider-handle {
     position:relative;
     height:20px;
     width:20px;
@@ -867,7 +908,7 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 }
 
 
-.sliderHandle:hover, .sliderHandle.hover {
+.slider-handle:hover, .slider-handle.hover {
     background-image:
        -webkit-gradient(linear, left top, left bottom,
                from(#6297f2),
