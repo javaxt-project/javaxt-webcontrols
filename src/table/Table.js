@@ -5,8 +5,7 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 //**  Table Class
 //******************************************************************************
 /**
- *   Scrollable table with fixed header. Built-in support for iScroll (just
- *   include it - no configuration required).
+ *   Scrollable table with fixed header.
  *
  ******************************************************************************/
 
@@ -409,15 +408,20 @@ javaxt.dhtml.Table = function(parent, config) {
                 if (config.style.iscroll) setStyle(me.iScroll, "iscroll");
 
 
+              //Override the iscroll's translate method so we can catch all
+              //scroll movements and prevent scrolling as needed
+                var translate = me.iScroll._translate;
+                me.iScroll._translate = function(x, y){
+                    if (!scrollEnabled) return;
+                    translate.apply(me.iScroll, arguments);
+                    onScroll(-me.iScroll.y);
+                };
+
+                me.iScroll.on('beforeScrollStart', function(){
+                    onScroll(-me.iScroll.y);
+                });
+
                 me.iScroll.on('scrollStart', function(){
-
-                    if (!scrollEnabled){
-                      //Stop iscroll! Not sure how to do this but throwing an
-                      //error seems to work...
-                        throw new Error('IScroll disabled');
-                        return;
-                    }
-
                     onScroll(-me.iScroll.y);
                 });
 
