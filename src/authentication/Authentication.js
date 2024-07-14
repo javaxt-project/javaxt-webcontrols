@@ -5,9 +5,7 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 //**  Http Authentication
 //*****************************************************************************/
 /**
- *   Used to perform BASIC HTTP authentication using a technique outlined in
- *   the following article:
- *   http://www.javaxt.com/Tutorials/Javascript/Form_Based_HTTP_Authentication
+ *   Used to perform BASIC HTTP authentication
  *
  ******************************************************************************/
 

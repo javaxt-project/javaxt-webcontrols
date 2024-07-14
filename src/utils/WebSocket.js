@@ -35,7 +35,7 @@ javaxt.dhtml.WebSocket = function(config) {
         url: "",
 
       /** Interval used to check whether the websocket is still alive and send
-       *  ping messages. Value is in milliseconds. Default is 15000 (15 seconds).
+       *  ping messages. Value is in milliseconds. Default is 15000 (1.5 seconds).
        */
         keepAlive: 15000,
 
