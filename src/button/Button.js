@@ -201,7 +201,7 @@ javaxt.dhtml.Button = function(parent, config) {
 
       //Create outer div used to hold the button, mask, and menu
         var outerDiv = createElement('div', parent);
-        outerDiv.setAttribute("desc", me.className);
+        outerDiv.className = "javaxt-button";
         outerDiv.style.display = config.display;
         if (config.width){
             if (typeof config.width === "string"){
