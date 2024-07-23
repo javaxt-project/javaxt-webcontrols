@@ -199,7 +199,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
 
       //Create main div
         var mainDiv = createElement("div", parent);
-        mainDiv.setAttribute("desc", me.className);
+        mainDiv.className = "javaxt-combobox";
         mainDiv.style.width = config.style.width;
         mainDiv.style.position = "relative";
         me.el = mainDiv;
@@ -501,6 +501,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
    *  dropdown menu.
    */
     this.reset = function(){
+        me.hideMenu();
 
       //Remove everything that's not an input
         var a = [];
@@ -515,7 +516,8 @@ javaxt.dhtml.ComboBox = function(parent, config) {
 
       //Ensure the input is visible
         input.show();
-
+        
+        input.blur();
     };
 
 
