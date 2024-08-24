@@ -202,7 +202,7 @@ javaxt.dhtml.Table = function(parent, config) {
       //Create main table
         var table, tr, td;
         table = createTable(parent);
-        table.setAttribute("desc", me.className);
+        table.className = "javaxt-table";
         setStyle(table, "table");
         me.el = table;
         addShowHide(me);
@@ -648,6 +648,10 @@ javaxt.dhtml.Table = function(parent, config) {
         row.get = getRowContent;
         row.set = setRowContent;
         row.onclick = selectRows;
+        row.oncontextmenu = function(e){
+            if (this.selected) this.selected = false;
+            selectRows.apply(this, [e]);
+        };
 
 
       //Create template as needed. The template is a collection of cells that
