@@ -89,7 +89,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
       /** Style config. See default styles in javaxt.dhtml.Table for a list of
        *  options. In addition to the table styles, you can also specify a
-       *  checkbox style
+       *  checkbox style.
        */
         style: defaultStyle,
 
@@ -108,22 +108,25 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
       /** If true, and if the payload is empty, will sent params as a URL
        *  encoded string in a POST request. Otherwise the params will be
-       *  appended to the query string in the request URL.
+       *  appended to the query string in the request URL. Default is false.
        */
         post: false,
 
       /** Used to specify the page size (i.e. the maximum number records to
-       *  fetch from the server at a time)
+       *  fetch from the server at a time). Default is 50.
        */
         limit: 50,
 
-      /** If true, the server will be asked to return a total record count.
-       *  This is a legacy feature and is NOT required for pagination.
+      /** If true, the server will be asked to return a total record count by
+       *  setting the "count" parameter to true when requesting the first page.
+       *  Otherwise, the count parameter is set to false. Note that the count
+       *  is NOT required for pagination and is not used internally in any way.
+       *  Rather it is for informational purposes only. Default is false.
        */
         count: false,
 
       /** If true, the grid will automatically fetch records from the server
-       *  on start-up
+       *  on start-up. Default is false.
        */
         autoload: false,
 
