@@ -160,7 +160,7 @@ javaxt.dhtml.utils = {
                 payload = JSON.stringify(payload);
             }
             else{
-                if (payload != null && typeof payload == 'object'){
+                if (payload != null && typeof payload == 'object' && !(payload instanceof FormData)){
                     payload = JSON.stringify(payload);
                 }
             }
