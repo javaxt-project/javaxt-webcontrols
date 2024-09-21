@@ -1,20 +1,10 @@
 var renderComponents = function(parent, style){
 
-  //Create main div (can't use parent directly if iframe)
-    var div = document.createElement("div");
-    div.style.width = "100%";
-    div.style.height = "100%";
-    div.style.position = "relative";
-    parent.appendChild(div);
-
 
     javaxt.dhtml.utils.updateDOM();
     var createElement = javaxt.dhtml.utils.createElement;
-    var createTable = javaxt.dhtml.utils.createTable;
-
-
     var createTile = function(){
-        return javaxt.dhtml.utils.createElement("div", div, {
+        return createElement("div", parent, {
             position: "relative",
             width: "600px",
             height: "400px",
@@ -37,7 +27,7 @@ var renderComponents = function(parent, style){
 
 
   //Create tab panel
-    var tabContainer = javaxt.dhtml.utils.createElement("div", createTile(), {
+    var tabContainer = createElement("div", createTile(), {
         width: "300px",
         height: "300px"
     });

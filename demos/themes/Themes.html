@@ -95,9 +95,17 @@ window.onload = function(){
                 var l = h.getElementsByTagName("link")[0];
                 l.href = this.theme;
             }
-            var b = this.contentWindow.document.getElementsByTagName("body")[0];
-            b.style.padding = 0; //override demos/style.css
-            renderComponents(b, this.theme ? javaxt.dhtml.style.default : false);
+
+            var body = this.contentWindow.document.getElementsByTagName("body")[0];
+            body.style.padding = 0; //override demos/style.css
+
+            var div = document.createElement("div");
+            div.style.width = "100%";
+            div.style.height = "100%";
+            div.style.position = "relative";
+            body.appendChild(div);
+
+            renderComponents(div, this.theme ? javaxt.dhtml.style.default : false);
         };
         iframe.contentWindow.document.open();
         iframe.contentWindow.document.write(html.innerHTML);

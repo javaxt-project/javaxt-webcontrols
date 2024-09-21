@@ -359,7 +359,21 @@ javaxt.dhtml.utils = {
   /** Return true if a given object is a DOM element.
    */
     isElement: function(obj){
-        return (obj instanceof Element); //TODO: tighten up the logic...
+        var b = (obj instanceof Element); //should work with 99% of the time
+
+      //Special case for Firefox for DOM elements created in an iFrame (e.g.
+      //JavaXT themes demo)
+        if (!b && (navigator.userAgent.indexOf("Firefox") > -1)){
+
+          //If the object resembles a node, maybe it is a node? Not foolproof
+          //but better than nothing...
+            b = (typeof obj == "object" &&
+                "nodeType" in obj &&
+                obj.nodeType === 1 &&
+                obj.cloneNode);
+        }
+
+        return b;
     },
 
 
