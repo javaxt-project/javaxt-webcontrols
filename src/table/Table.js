@@ -5,7 +5,7 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 //**  Table Class
 //******************************************************************************
 /**
- *   Scrollable table with fixed header.
+ *   Scrollable table with a fixed header.
  *
  ******************************************************************************/
 
@@ -1240,8 +1240,16 @@ javaxt.dhtml.Table = function(parent, config) {
     });
    </pre>
    *
-   *  Optional: return true in the callback function if you wish to stop
-   *  processing rows.
+   *  Note that you can return true in the callback function if you wish to
+   *  stop processing rows. Example:
+   <pre>
+    grid.forEachRow(function(row, content){
+        //Do something with the row
+
+        //Stop iterating once some contition is met
+        if (1>0) return true;
+    });
+   </pre>
    */
     this.forEachRow = function(callback){
         if (callback==null) return;
