@@ -85,6 +85,11 @@ javaxt.dhtml.style.default = {
         label: "toolbar-button-label"
     },
 
+    iscroll: {
+        horizontalScrollbar: "iScrollHorizontalScrollbar",
+        verticalScrollbar: "iScrollVerticalScrollbar",
+        indicator: "iScrollIndicator"
+    },
 
     table: {
         headerRow: "table-header",
@@ -95,11 +100,7 @@ javaxt.dhtml.style.default = {
         resizeHandle: "table-resizeHandle",
         ascendingSortIcon: "table-icon-sort-asc",
         descendingSortIcon: "table-icon-sort-desc",
-        iscroll: {
-            horizontalScrollbar: "iScrollHorizontalScrollbar",
-            verticalScrollbar: "iScrollVerticalScrollbar",
-            indicator: "iScrollIndicator"
-        }
+        iscroll: null //updated below
     },
 
     tabPanel: {
@@ -140,3 +141,5 @@ javaxt.dhtml.style.default = {
         return settings;
     }
 };
+
+javaxt.dhtml.style.default.table.iscroll = javaxt.dhtml.style.default.iscroll;
