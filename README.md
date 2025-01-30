@@ -2,6 +2,30 @@
 The javaxt-webcontrols library is a collection of lightwieght UI components and functions used to build rich web applications. 
 The library is implemented using 100% vanilla javascript and has no external dependencies.
 
+
+
+## Demos
+Below is a list of demos of some of the components. 
+Open the source code in each page for more information on how the component is instantiated and stylized. Open the web console to see some of the events.
+
+- [Themes](https://javaxt-project.github.io/javaxt-webcontrols/demos/themes/Themes.html)
+- [Effects](https://javaxt-project.github.io/javaxt-webcontrols/demos/effects/Effects.html)
+- [Carousel](https://javaxt-project.github.io/javaxt-webcontrols/demos/carousel/Carousel.html)
+- [Slider](https://javaxt-project.github.io/javaxt-webcontrols/demos/slider/Slider.html)
+- [Switch](https://javaxt-project.github.io/javaxt-webcontrols/demos/switch/Switch.html)
+- [Window](https://javaxt-project.github.io/javaxt-webcontrols/demos/window/Window.html)
+- [Callout](https://javaxt-project.github.io/javaxt-webcontrols/demos/callout/Callout.html)
+- [DatePicker](https://javaxt-project.github.io/javaxt-webcontrols/demos/datepicker/DatePicker.html)
+- [DateInput](https://javaxt-project.github.io/javaxt-webcontrols/demos/datepicker/DateInput.html)
+- [ComboBox](https://javaxt-project.github.io/javaxt-webcontrols/demos/combobox/ComboBox.html)
+- [Checkbox](https://javaxt-project.github.io/javaxt-webcontrols/demos/checkbox/Checkbox.html)
+- [Button](https://javaxt-project.github.io/javaxt-webcontrols/demos/button/Button.html)
+- [Tree](https://javaxt-project.github.io/javaxt-webcontrols/demos/tree/Tree.html)
+- [Accordion](https://javaxt-project.github.io/javaxt-webcontrols/demos/accordion/Accordion.html)
+- [MenuLayout](https://javaxt-project.github.io/javaxt-webcontrols/demos/layouts/MenuLayout.html)
+- [BarGraph](https://javaxt-project.github.io/javaxt-webcontrols/demos/bargraph/BarGraph.html)
+
+
 ## General Usage
 Most of the UI components are instantiated using a `parent` and a `config` object. 
 The `parent` is a DOM element in which to render the component and the `config` object is 
