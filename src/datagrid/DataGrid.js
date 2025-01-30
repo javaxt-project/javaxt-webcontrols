@@ -5,18 +5,18 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 //**  DataGrid
 //******************************************************************************
 /**
- *   Custom grid control based on javaxt.dhtml.Table. Supports remote loading,
- *   sorting, and infinite scroll.
+ *   Scrollable table with a fixed header. Supports remote loading, sorting,
+ *   and infinite scroll via HTTP.
  *   <br/>
  *   Here's a simple example of how to instantiate a DataGrid that will render
  *   a list of users returned from a REST endpoint:
  <pre>
     var grid = new javaxt.dhtml.DataGrid(parent, {
+
+      //Set style
         style: config.style.table,
-        url: "/manage/users",
-        parseResponse: function(request){
-            return JSON.parse(request.responseText);
-        },
+
+      //Define columns
         columns: [
             {header: 'ID', hidden:true},
             {header: 'Name', width:'100%'},
@@ -24,6 +24,16 @@ if(!javaxt.dhtml) javaxt.dhtml={};
             {header: 'Enabled', width:'75', align:'center'},
             {header: 'Last Active', width:'175', align:'right'}
         ],
+
+      //Set path to REST endpoint to get list of users
+        url: "/manage/users",
+
+      //Define function used to parse the response
+        parseResponse: function(request){
+            return JSON.parse(request.responseText);
+        },
+
+      //Define function used to render data for individual rows
         update: function(row, user){
             row.set('Name', user.fullname);
             row.set('Role', user.role);
@@ -32,6 +42,8 @@ if(!javaxt.dhtml) javaxt.dhtml={};
                 row.set('Enabled', createElement("i", "fas fa-check"));
             }
         },
+
+      //Set flag to automatically load data once the component is rendered
         autoload: true
     });
  </pre>
@@ -89,9 +101,22 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
       /** Style config. See default styles in javaxt.dhtml.Table for a list of
        *  options. In addition to the table styles, you can also specify a
-       *  checkbox style
+       *  checkbox style.
        */
         style: defaultStyle,
+
+      /** Used to define columns to display. Each entry in the array should
+       *  include a "header" label (see example above) along with a "width".
+       *  Note that one of the columns should have a width of 100%. Additional
+       *  options include "align" and "field". If a "field" is provided it will
+       *  be used to construct a "fields" parameter to that is sent to the
+       *  server (see "fields" config). Fially, you can specify a checkbox
+       *  column by setting the "header" to "x" (e.g. header: 'x'). If a
+       *  checkbox column is defined, a checkbox will be created in the header
+       *  and in individual rows. The checkbox is typically used to support
+       *  multi-select operations.
+       */
+        columns: [],
 
       /** The URL endpoint that this component uses to fetch records
        */
@@ -108,22 +133,25 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
       /** If true, and if the payload is empty, will sent params as a URL
        *  encoded string in a POST request. Otherwise the params will be
-       *  appended to the query string in the request URL.
+       *  appended to the query string in the request URL. Default is false.
        */
         post: false,
 
       /** Used to specify the page size (i.e. the maximum number records to
-       *  fetch from the server at a time)
+       *  fetch from the server at a time). Default is 50.
        */
         limit: 50,
 
-      /** If true, the server will be asked to return a total record count.
-       *  This is a legacy feature and is NOT required for pagination.
+      /** If true, the server will be asked to return a total record count by
+       *  setting the "count" parameter to true when requesting the first page.
+       *  Otherwise, the count parameter is set to false. Note that the count
+       *  is NOT required for pagination and is not used internally in any way.
+       *  Rather it is for informational purposes only. Default is false.
        */
         count: false,
 
       /** If true, the grid will automatically fetch records from the server
-       *  on start-up
+       *  on start-up. Default is false.
        */
         autoload: false,
 
@@ -143,6 +171,12 @@ javaxt.dhtml.DataGrid = function(parent, config) {
       /** If true, will hide the header row. Default is false.
        */
         hideHeader: false,
+
+      /** If true, the table will allow users to select multiple rows using
+       *  control or shift key. Default is false (only one row is selected at
+       *  a time).
+       */
+        multiselect: false,
 
       /** Default method used to get responses from the server. Typically, you
        *  do not need to override this method.
@@ -299,6 +333,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
             columns: columns,
             style: config.style
         });
+        table.el.className = "javaxt-datagrid";
         me.el = table.el;
 
 
@@ -668,6 +703,8 @@ javaxt.dhtml.DataGrid = function(parent, config) {
   //**************************************************************************
   //** getScrollInfo
   //**************************************************************************
+  /** Returns scroll position and dimenstions for the visible area.
+   */
     this.getScrollInfo = function(){
         return table.getScrollInfo();
     };
@@ -706,31 +743,63 @@ javaxt.dhtml.DataGrid = function(parent, config) {
   //**************************************************************************
   //** Events
   //**************************************************************************
+
+    /** Called whenever the client scrolls within the table. */
     this.onScroll = function(){};
+
+    /** Called whenever the table advances to the next page of records or
+     *  scrolls to a previous page. */
     this.onPageChange = function(currPage, prevPage){};
+
     this.onSelectionChange = function(){};
+
+    /** Called immediately before fetching records from the server. */
     this.beforeLoad = function(page){};
+
+    /** Called immediately after fetching records from the server. */
     this.onLoad = function(){};
+
+     /** Called whenever there is an issue fetching records from the server. */
     this.onError = function(request){};
+
+    /** Called whenever the client clicks or taps on a row in the table. */
     this.onRowClick = function(row, e){};
+
+    /** Called whenever a keyboard event is initiated from the table. */
     this.onKeyEvent = function(keyCode, modifiers){};
+
+    /** Called whenever a client clicks on a checkbox, either in the header or
+     *  one of the rows. Columns with checkboxes are defined in the "columns"
+     *  config (e.g. header: 'x'),
+     */
     this.onCheckbox = function(value, checked, checkbox){};
+
+    /** Called whenever a client clicks on a header. */
     this.onSort = function(idx, sortDirection){};
 
 
   //**************************************************************************
   //** forEachRow
   //**************************************************************************
-  /** Used to traverse all the rows in the table and extract contents of each
-   *  cell. Example:
+  /** Used to traverse all the rows in the table using a callback function.
+   *  The first argument in the callback is a DOM element with a record.
+   *  Example:
    <pre>
-    grid.forEachRow(function(row, content){
-        console.log(row, row.record, content);
+    grid.forEachRow(function(row){
+        console.log(row, row.record);
     });
    </pre>
    *
-   *  Optional: return true in the callback function if you wish to stop
-   *  processing rows.
+   *  Note that you can return true in the callback function if you wish to
+   *  stop processing rows. Example:
+   <pre>
+    grid.forEachRow(function(row, content){
+        //Do something with the row
+
+        //Stop iterating once some contition is met
+        if (1>0) return true;
+    });
+   </pre>
    */
     this.forEachRow = function(callback){
         table.forEachRow(callback);
@@ -813,6 +882,8 @@ javaxt.dhtml.DataGrid = function(parent, config) {
   //**************************************************************************
   //** focus
   //**************************************************************************
+  /** Used to set browser focus on the table.
+   */
     this.focus = function(){
         table.focus();
     };

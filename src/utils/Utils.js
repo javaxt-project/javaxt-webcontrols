@@ -160,7 +160,7 @@ javaxt.dhtml.utils = {
                 payload = JSON.stringify(payload);
             }
             else{
-                if (payload != null && typeof payload == 'object'){
+                if (payload != null && typeof payload == 'object' && !(payload instanceof FormData)){
                     payload = JSON.stringify(payload);
                 }
             }
@@ -1392,6 +1392,16 @@ javaxt.dhtml.utils = {
   //** getHighestElements
   //**************************************************************************
   /** Returns an array of elements at the highest z-index in the document
+   *  @param obj DOM element. Optional. If given, will limit search within
+   *  the DOM element. Otherwise, searches the entire document (default).
+   *  @return A JSON object with the following:
+   * <ul>
+   *  <li>zIndex: Number representing the highest z-index</li>
+   *  <li>elements: An array of DOM elements at the highest z-index</li>
+   *  <li>contains: Function that can be used to test whether a DOM object is
+   *  at the highest z-index
+   *  </li>
+   * </ul>
    */
     getHighestElements: function(obj){
         var arr = [];

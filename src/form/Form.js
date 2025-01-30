@@ -200,7 +200,7 @@ javaxt.dhtml.Form = function (parent, config) {
             margin: 0,
             height: "100%"
         });
-        form.setAttribute("desc", me.className);
+        form.className = "javaxt-form";
         if (config.onsubmit) form.onsubmit = config.onsubmit;
         else{
             form.onsubmit = function(e){
@@ -1116,7 +1116,7 @@ javaxt.dhtml.Form = function (parent, config) {
                         }
                     }
                     input.onChange = function(){
-                        me.onChange(formInput, input.getValue());
+                        me.onChange(formInput, formInput.getValue());
                     };
                 }
             }

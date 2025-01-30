@@ -9,6 +9,42 @@ if(!javaxt.dhtml) javaxt.dhtml={};
  *   can cycle through the panels using the back() and next() functions. The
  *   carousel can store a fixed set of panels or you can create the illusion
  *   of having infinite panels by updating panels when they are out of view.
+ *   Example:
+ <pre>
+    var carousel = new javaxt.dhtml.Carousel(parent,{
+        loop: true,
+        animate: true
+    });
+ </pre>
+ *   Once the carousel is instantiated you can call any of the public methods.
+ *   The first thing to do is to add panels. Example:
+ <pre>
+    var p1 = document.createElement('div');
+    p1.style.background = "#f0f8ff";
+    p1.style.height = "100%";
+    carousel.add(p1);
+
+    var p2 = document.createElement('div');
+    p2.style.background = "#96a5b2";
+    p2.style.height = "100%";
+    carousel.add(p2);
+
+    var p3 = document.createElement('div');
+    p3.style.background = "#ffd8d6";
+    p3.style.height = "100%";
+    carousel.add(p3);
+ </pre>
+ *   After panels have been added to the carousel, you can call the back() and
+ *   next() methods to switch panels. Typically these methods are called from
+ *   "onclick" events fired from other DOM elements (e.g. button).
+ *
+ *   Finally, you can also add event listeners by overriding any of the public
+ *   "on" or "before" methods like this:
+ <pre>
+    carousel.onChange = function(currPanel, prevPanel){
+        console.log("currPanel", currPanel);
+    };
+ </pre>
  *
  ******************************************************************************/
 
@@ -140,7 +176,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
             height: "100%",
             position: "relative"
         });
-        outerDiv.setAttribute("desc", me.className);
+        outerDiv.className = "javaxt-carousel";
         me.el = outerDiv;
 
 
@@ -337,6 +373,8 @@ javaxt.dhtml.Carousel = function(parent, config) {
   //**************************************************************************
   //** resize
   //**************************************************************************
+  /** Used to force the component to resize to fit the parent container
+   */
     this.resize = function(){
         var w = outerDiv.offsetWidth;
         if (w===0 || isNaN(w)){
@@ -528,7 +566,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
             nextDiv = nextPanel.childNodes[0].childNodes[0];
 
 
-            me.beforeChange(currDiv, nextDiv);
+            me.beforeChange(currDiv, nextDiv, "next");
 
             var onChange = function(){
                 me.onChange(nextDiv, currDiv);
@@ -574,7 +612,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
                 nextDiv = clone.childNodes[0].childNodes[0];
 
-                me.beforeChange(currDiv, nextDiv);
+                me.beforeChange(currDiv, nextDiv, "next");
 
                 var onChange = function(){
                     innerDiv.style.left = start + "px";
@@ -682,7 +720,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
             nextDiv = nextPanel.childNodes[0].childNodes[0];
 
-            me.beforeChange(currDiv, nextDiv);
+            me.beforeChange(currDiv, nextDiv, "back");
 
             var onChange = function(){
                 me.onChange(nextDiv, currDiv);
@@ -729,7 +767,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
                 nextDiv = clone.childNodes[0].childNodes[0];
 
-                me.beforeChange(currDiv, nextDiv);
+                me.beforeChange(currDiv, nextDiv, "back");
 
                 var onChange = function(){
                     me.onChange(nextDiv, currDiv);
@@ -801,8 +839,9 @@ javaxt.dhtml.Carousel = function(parent, config) {
   /** Called before the carousel switches panels.
    *  @param currPanel Content of the active panel
    *  @param prevPanel Content of the next active panel
+   *  @param direction "back" or "next"
    */
-    this.beforeChange = function(currPanel, nextPanel){};
+    this.beforeChange = function(currPanel, nextPanel, direction){};
 
 
   //**************************************************************************
