@@ -193,10 +193,11 @@ javaxt.dhtml.utils = {
   //**************************************************************************
   //** merge
   //**************************************************************************
-  /** Used to merge properties from one json object into another. Credit:
-   *  https://github.com/stevenleadbeater/JSONT/blob/master/JSONT.js
+  /** Used to merge properties from one json object into another.
+   *  @credit https://github.com/stevenleadbeater/JSONT/blob/master/JSONT.js
    */
     merge: function(settings, defaults) {
+        var isElement = javaxt.dhtml.utils.isElement;
         var merge = function(settings, defaults) {
             if (settings==null) return;
 
@@ -206,7 +207,7 @@ javaxt.dhtml.utils = {
             }
 
             for (var p in defaults) {
-                if (defaults.hasOwnProperty(p) && typeof settings[p] !== "undefined") {
+                if (defaults.hasOwnProperty(p) && typeof settings[p] !== "undefined" && !isElement(settings[p])) {
                     if (p!=0) //<--Added this as a bug fix
                     merge(settings[p], defaults[p]);
                 }
@@ -250,7 +251,7 @@ javaxt.dhtml.utils = {
   //** diff
   //**************************************************************************
   /** Used to compare 2 json objects. Returns a json object with differences.
-   *  Credit: https://stackoverflow.com/a/13389935/
+   *  @credit https://stackoverflow.com/a/13389935/
    */
     diff: function(obj1, obj2){
 
