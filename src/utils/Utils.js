@@ -207,9 +207,15 @@ javaxt.dhtml.utils = {
             }
 
             for (var p in defaults) {
-                if (defaults.hasOwnProperty(p) && typeof settings[p] !== "undefined" && !isElement(settings[p])) {
-                    if (p!=0) //<--Added this as a bug fix
-                    merge(settings[p], defaults[p]);
+                if (defaults.hasOwnProperty(p) && typeof settings[p] !== "undefined") {
+                    if (p!=0){ //<--Added this as a bug fix
+                        if (isElement(settings[p]) || isElement(defaults[p])){
+                            //do nothing...
+                        }
+                        else{
+                            merge(settings[p], defaults[p]);
+                        }
+                    }
                 }
                 else {
                     settings[p] = defaults[p];
