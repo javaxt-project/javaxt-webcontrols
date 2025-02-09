@@ -1569,6 +1569,7 @@ javaxt.dhtml.utils = {
         var win = javaxt.dhtml.utils.Alert;
         if (!win){
             var createElement = javaxt.dhtml.utils.createElement;
+            var merge = javaxt.dhtml.utils.merge;
 
 
             var outerDiv = createElement('div', {
@@ -1588,21 +1589,20 @@ javaxt.dhtml.utils = {
 
 
             if (!config) config = {};
-            javaxt.dhtml.utils.merge(config, {
+            merge(config, {
                 width: 450,
                 height: 200,
                 valign: "top",
                 modal: true,
                 title: "Alert",
                 body: outerDiv,
-                style: {
-                    panel: "window",
-                    header: "window-header alert-header",
-                    title: "window-title",
-                    buttonBar: "window-header-button-bar",
-                    button: "window-header-button",
-                    body: "window-body alert-body"
-                }
+                style: merge(
+                    {
+                        header: "window-header alert-header",
+                        body:   "window-body alert-body"
+                    },
+                    javaxt.dhtml.style.default.window
+                )
             });
 
 
@@ -1645,8 +1645,9 @@ javaxt.dhtml.utils = {
     @param msg String with question/prompt or a JSON config like the example
     above. If passing a string, a default config is used which can be
     overridden using the optional "config" parameter.
-    @param config JSON config like the example above. This parameter is
-    optional.
+    @param config JSON config like the example above. Additional config options
+    are available. See the javaxt.dhtml.Window config for more information.
+    This parameter is optional.
    */
     confirm: function(msg, config){
         var win = javaxt.dhtml.utils.Confirm;
@@ -1667,6 +1668,7 @@ javaxt.dhtml.utils = {
       //Create new window as needed
         if (!win){
             var createElement = javaxt.dhtml.utils.createElement;
+            var merge = javaxt.dhtml.utils.merge;
 
 
             var buttonDiv = createElement("div", "button-div");
@@ -1698,20 +1700,16 @@ javaxt.dhtml.utils = {
             };
 
 
-            javaxt.dhtml.utils.merge(config, {
+            merge(config, {
                 width: 450,
                 height: 150,
                 valign: "top",
                 modal: true,
                 footer: buttonDiv,
-                style: {
-                    panel: "window",
-                    header: "window-header",
-                    title: "window-title",
-                    buttonBar: "window-header-button-bar",
-                    button: "window-header-button",
-                    body: "window-body confirm-body"
-                }
+                style: merge(
+                    { body: "window-body confirm-body" },
+                    javaxt.dhtml.style.default.window
+                )
             });
 
 
