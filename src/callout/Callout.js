@@ -67,8 +67,7 @@ javaxt.dhtml.Callout = function(parent, config) {
 
 
       //Create outer div
-        div = createElement("div", parent);
-        div.setAttribute("desc", me.className);
+        div = createElement("div", parent, "javaxt-callout");
         if (config.position==="absolute"){
             div.style.display = "none";
             div.style.position = "absolute";
@@ -95,12 +94,13 @@ javaxt.dhtml.Callout = function(parent, config) {
 
 
       //Create temporary div to get arrow style
-        var temp = createElement("div", config.style.arrow);
+        var temp = createElement("div", "javaxt-callout");
         temp.style.position = "absolute";
         temp.style.visibility = 'hidden';
         temp.style.display = 'block';
         var body = document.getElementsByTagName("body")[0];
         body.appendChild(temp);
+        temp = createElement("div", temp, config.style.arrow);
         var style = temp.currentStyle || window.getComputedStyle(temp);
         var getStyle = function(prop){
 
@@ -144,7 +144,7 @@ javaxt.dhtml.Callout = function(parent, config) {
         temp.style.margin = 0;
         config.arrow.width = temp.offsetWidth;
         config.arrow.height = temp.offsetHeight;
-        body.removeChild(temp);
+        body.removeChild(temp.parentNode);
         temp = null;
 
 
