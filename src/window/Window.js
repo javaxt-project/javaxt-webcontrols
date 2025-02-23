@@ -271,7 +271,8 @@ javaxt.dhtml.Window = function(parent, config) {
 
 
       //Create container
-        mainDiv = createElement('div', parent, config.style.panel);
+        mainDiv = createElement('div', parent, "javaxt-window");
+        mainDiv.style.display = "inline-block";
         mainDiv.style.position = "absolute";
         mainDiv.style.left = "0px";
         mainDiv.style.top = "0px";
@@ -288,9 +289,15 @@ javaxt.dhtml.Window = function(parent, config) {
         }
 
 
+      //Create inner div
+        var innerDiv = createElement("div", mainDiv, config.style.panel);
+        innerDiv.style.position = "relative";
+        innerDiv.style.display = "inherit";
+        innerDiv.style.height = "100%";
+
 
       //Create table with 3 rows: header, body, and footer
-        var table = createTable(mainDiv);
+        var table = createTable(innerDiv);
         table.style.fontFamily = "inherit";
         table.style.textAlign = "inherit";
         table.style.color = "inherit";
