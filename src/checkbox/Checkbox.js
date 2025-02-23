@@ -32,7 +32,6 @@ javaxt.dhtml.Checkbox = function(parent, config) {
     this.className = "javaxt.dhtml.Checkbox";
 
     var me = this;
-    var outerDiv;
     var box, check, mask, label;
 
 
@@ -69,8 +68,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
         style:{
 
             panel: {
-                display: "inline-block",
-                position: "relative"
+                display: "inline-block"
             },
 
             box: {
@@ -146,15 +144,19 @@ javaxt.dhtml.Checkbox = function(parent, config) {
 
 
       //Create container
-        outerDiv = createElement('div', parent, config.style.panel);
+        me.el = createElement("span", parent, "javaxt-checkbox");
+        addShowHide(me);
+
+
+        var innerDiv = createElement('div', me.el, config.style.panel);
+        innerDiv.style.position = "relative";
         if (config.display){
             console.warn(
             "The 'display' config in the javaxt.dhtml.Checkbox " +
             "class has been deprecated. Use panel style instead");
-            outerDiv.style.display = config.display;
+            innerDiv.style.display = config.display;
         }
-        me.el = outerDiv;
-        addShowHide(me);
+
 
 
       //Create checkbox
@@ -162,10 +164,11 @@ javaxt.dhtml.Checkbox = function(parent, config) {
 
           //Create table with 2 columns - one for the checkbox
           //and a column for the checkbox label.
-            var table = createTable(outerDiv);
+            var table = createTable(innerDiv);
             table.style.fontFamily = "inherit";
             table.style.textAlign = "inherit";
             table.style.color = "inherit";
+            table.style.width = "";
             var tr = table.addRow();
 
 
@@ -183,7 +186,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
         else{
 
           //Create checkbox with no label
-            box = createElement('div', outerDiv, config.style.box);
+            box = createElement('div', innerDiv, config.style.box);
             addEventHandlers(box);
         }
 
@@ -321,8 +324,8 @@ javaxt.dhtml.Checkbox = function(parent, config) {
             mask.style.width = "100%";
             mask.style.height = "100%";
 
-            var outerDiv = me.el;
-            outerDiv.insertBefore(mask, outerDiv.firstChild);
+            var innerDiv = me.el.firstChild;
+            innerDiv.insertBefore(mask, innerDiv.firstChild);
         }
     };
 
