@@ -13,7 +13,7 @@ html, body {
 }
 
 body {
-    background: #272a31; /*Gray*/
+    background-color: #272a31; /*Gray*/
     color: #bfc0c3;
 }
 
@@ -104,8 +104,17 @@ input, select, textarea { /* Allows overriding native style of form elements on 
     height: 36px;
     background-color: #33363f;
     background-image: none;
+    border-bottom: 1px solid #20232b;
 }
 
+/** Set vertical alignment if the panel-toolbar is a div to mimic td */
+div.panel-toolbar > div {
+    position: relative;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+}
 
 /**************************************************************************/
 /** Toolbar Items
@@ -228,7 +237,7 @@ input, select, textarea { /* Allows overriding native style of form elements on 
     height: 16px;
     border: 1px solid #6a7179;
     border-radius: 100%;
-    background: #353a46;
+    background-color: #353a46;
 }
 
 .form-radio:checked:before {
@@ -238,7 +247,7 @@ input, select, textarea { /* Allows overriding native style of form elements on 
     position: relative;
     left: 3px;
     top: 3px;
-    background: #2a79bf;
+    background-color: #2a79bf;
     border-radius: 100%;
     content: '';
 }
@@ -262,7 +271,7 @@ input, select, textarea { /* Allows overriding native style of form elements on 
     width: 18px;
     height: 18px;
     border: 1px solid #4c5258;
-    background: #353a46;
+    background-color: #353a46;
 }
 
 .form-checkbox:checked:before {
@@ -353,7 +362,7 @@ input, select, textarea { /* Allows overriding native style of form elements on 
     height: 28px;
     padding: 0;
     margin: 0;
-    background: #335177; /* Dark blue */
+    background-color: #335177; /* Dark blue */
     border: 1px solid #525252; /* Light gray */
     border-left: 0;
 
@@ -422,7 +431,7 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 /**************************************************************************/
 
 .form-input-error {
-    background: #4e3434;
+    background-color: #4e3434;
     border-color: #8c0000;
 }
 
@@ -461,19 +470,20 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 /**************************************************************************/
 /** Callout
 /**************************************************************************/
-
-.callout-panel, .callout-arrow {
-    border: 1px solid #383b41;
-    background: #3e4453; /*same as window*/
-}
-.callout-panel {
-    border-radius: 4px;
-    box-shadow: 0 12px 14px 0 rgba(0, 0, 0, 0.2), 0 13px 20px 0 rgba(0, 0, 0, 0.2)
-}
-.callout-arrow {
-    width: 10px;
-    height: 10px;
-    padding: 10px;
+.javaxt-callout{
+    .callout-panel, .callout-arrow {
+        border: 1px solid #383b41;
+        background-color: #3e4453; /*same as window*/
+    }
+    .callout-panel {
+        border-radius: 4px;
+        box-shadow: 0 12px 14px 0 rgba(0, 0, 0, 0.2), 0 13px 20px 0 rgba(0, 0, 0, 0.2)
+    }
+    .callout-arrow {
+        width: 10px;
+        height: 10px;
+        padding: 10px;
+    }
 }
 
 
@@ -486,7 +496,7 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 
 .error-callout-panel, .error-callout-arrow {
     border: 1px solid #8c0000;
-    background: #921d1d;
+    background-color: #921d1d;
     color: #fff;
     cursor: pointer;
 }
@@ -508,86 +518,91 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 /** Window
 /**************************************************************************/
 
-.window {
-    background: #3e4453; /*#36373e*/
-    border-radius: 5px;
-    display: inline-block;
-    box-shadow: 0 12px 14px 0 rgba(0, 0, 0, 0.2), 0 13px 20px 0 rgba(0, 0, 0, 0.2);
-    min-width: 150px;
-    min-height: 75px;
-}
+.javaxt-window {
+    .window {
+        background-color: #3e4453; /*#36373e*/
+        border-radius: 5px;
+        box-shadow: 0 12px 14px 0 rgba(0, 0, 0, 0.2), 0 13px 20px 0 rgba(0, 0, 0, 0.2);
+        min-width: 150px;
+        min-height: 75px;
+    }
 
-.window-header {
-    background: #335177;
-    height: 36px;
-    cursor: default;
+    .window-header {
+        background-color: #335177;
+        height: 36px;
+        cursor: default;
 
-    position: relative;
-    border-radius: 4px 4px 0px 0px;
-    border: 1px solid #2e588d;
-    box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 4px 0px;
-    cursor: default;
-    overflow: hidden;
-}
+        position: relative;
+        border-radius: 4px 4px 0px 0px;
+        border: 1px solid #2e588d;
+        box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 4px 0px;
+        cursor: default;
+        overflow: hidden;
+    }
 
-.window-title {
-    color: #bdbdbd;
-    text-align: center;
-    white-space: nowrap;
-    text-transform: uppercase;
-    line-height: 36px; /*Should match window-header height*/
+    .window-title {
+        color: #bdbdbd;
+        text-align: center;
+        white-space: nowrap;
+        text-transform: uppercase;
+        line-height: 36px; /*Should match window-header height*/
 
-    position: absolute;
-    text-align: left;
-    cursor: default;
-    padding-left: 9px;
-}
+        position: absolute;
+        text-align: left;
+        cursor: default;
+        padding-left: 9px;
+    }
 
-.window-header-button-bar {
-    position: absolute;
-    right: 0;
-    padding: 6px 7px 0 0;
-}
+    .window-header-button-bar {
+        position: absolute;
+        right: 0;
+        padding: 6px 7px 0 0;
+    }
 
-.window-header-button {
-    font-size: 18px;
-    border: 0;
-    color: #bdbdbd;
-    cursor: pointer;
-    padding: 5px;
+    .window-header-button {
+        font-size: 18px;
+        border: 0;
+        color: #bdbdbd;
+        cursor: pointer;
+        padding: 5px;
 
-}
+    }
 
-.window-header-button:hover {
-    background-color: #3e70af;
-    transition: 0.1s;
-    border-radius: 3px;
-    color: #ccc;
-}
+    .window-header-button:hover {
+        background-color: #3e70af;
+        transition: 0.1s;
+        border-radius: 3px;
+        color: #ccc;
+    }
 
-.window-body {
-    padding: 7px;
-    vertical-align: top;
-    color: inherit;
-}
+    .window-body {
+        padding: 7px;
+        vertical-align: top;
+        color: inherit;
+    }
 
-.alert-header { /* used in conjunction with window-header */
-    background-color: #6f6235;
-    border: 1px solid #6f6235;
-    border-bottom: 1px solid #a28317;
-}
+    .window-mask {
+        background-color: rgba(0,0,0,0.75);
+    }
 
-.alert-header .window-header-button:hover {
-    background-color: #a28317;
-}
+    .alert-header { /* used in conjunction with window-header */
+        background-color: #6f6235;
+        border: 1px solid #6f6235;
+        border-bottom: 1px solid #a28317;
+    }
 
-.alert { /* used in conjunction with window */
-    background-color: #383727;
-}
+    .alert-header .window-header-button:hover {
+        background-color: #a28317;
+    }
 
-.alert-body, .confirm-body {
-    padding: 10px 10px 15px 15px;
-    line-height: 18px;
+    .alert { /* used in conjunction with window */
+        background-color: #383727;
+    }
+
+    .alert-body, .confirm-body {
+        padding: 10px 10px 15px 15px;
+        line-height: 18px;
+    }
 }
 
 
@@ -596,65 +611,62 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 /**************************************************************************/
 /** The following classes are used to define the style for the tab panel.
  */
+.javaxt-tab-panel{
 
-.tab-panel {
-    padding: 0 5px;
+    .tab-bar {
+        background-color: #335177; /* same as windows header */
+        height: 30px;
+        color: #fff;
+        border: 1px solid #2e588d;
+        border-width: 0 1px;
+        color: #bdbdbd;
+    }
+
+    .tab-active, .tab-inactive {
+        padding: 0 12px;
+        line-height: 30px;
+        cursor: default;
+    }
+
+    .tab-active {
+        background-color: #256d95;
+        color: #fff;
+    }
+
+    .tab-inactive {
+        background-color: none;
+    }
+
+    .tab-inactive:hover {
+        background-color: #3387b7;
+        color: #fff;
+    }
+
+    .tab-body {
+        padding: 7px;
+        vertical-align: top;
+        background-color: #3e4453;
+        border: 1px solid #4f5669;
+    }
 }
-
-.tab-bar {
-    background-color: #335177; /* same as windows header */
-    height: 30px;
-    color: #fff;
-    border: 1px solid #2e588d;
-    border-width: 0 1px;
-    color: #bdbdbd;
-}
-
-.tab-active, .tab-inactive {
-    padding: 0 12px;
-    line-height: 30px;
-    cursor: default;
-}
-
-.tab-active {
-    background-color: #256d95;
-    color: #fff;
-}
-
-.tab-inactive {
-    background: none;
-}
-
-.tab-inactive:hover {
-    background-color: #3387b7;
-    color: #fff;
-}
-
-.tab-body {
-    padding: 7px;
-    vertical-align: top;
-    background-color: #3e4453;
-    border: 1px solid #4f5669;
-}
-
 
 
 /** Special case when tab is the first component inside a window  **/
+.javaxt-window {
+    .window-body table:first-child .tab-bar {
+        background-color: #4c5468;
+    }
 
-.window-body table:first-child .tab-bar {
-    background-color: #4c5468;
+    .window-body table:first-child .tab-active {
+        border-top: 2px solid #4a84b7;
+        margin-top: -2px;
+    }
+
+    .window-body table:first-child .tab-body {
+        border: 0 none;
+        border-radius: 0 0 8px 8px;
+    }
 }
-
-.window-body table:first-child .tab-active {
-    border-top: 2px solid #4a84b7;
-    margin-top: -2px;
-}
-
-.window-body table:first-child .tab-body {
-    border: 0 none;
-    border-radius: 0 0 8px 8px;
-}
-
 
 
 /**************************************************************************/
@@ -663,55 +675,57 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 /** The following classes are used to define the style for checkboxes
  *  generated using the javaxt.dhtml.Checkbox class.
  */
-.checkbox-box {
-    width: 18px;
-    height: 18px;
-    border: 1px solid #4c5258;
-    border-radius: 3px;
-    background-color: #353a46;
-    cursor: pointer;
-    margin: 0px;
-    color: #2b2b2b;
-}
+.javaxt-checkbox {
+    .checkbox-box {
+        width: 18px;
+        height: 18px;
+        border: 1px solid #4c5258;
+        border-radius: 3px;
+        background-color: #353a46;
+        cursor: pointer;
+        margin: 0px;
+        color: #2b2b2b;
+    }
 
-.checkbox-label {
-    color: #bfc0c3;
-    white-space: nowrap;
-    cursor: default;
-    vertical-align: top;
-    padding: 0 0 0 5px;
-}
+    .checkbox-label {
+        color: #bfc0c3;
+        white-space: nowrap;
+        cursor: default;
+        vertical-align: top;
+        padding: 0 0 0 5px;
+    }
 
-.checkbox-check {
-    content: "";
-    display: block;
-    width: 4px;
-    height: 9px;
-    border: solid #ffffff;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-    margin: 2px 0 0 6px;
-}
+    .checkbox-check {
+        content: "";
+        display: block;
+        width: 4px;
+        height: 9px;
+        border: solid #ffffff;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+        margin: 2px 0 0 6px;
+    }
 
-.checkbox-select {
-    background-color: #345994;
-    border: 1px solid #33363f;
-    color: #FFFFFF;
-}
+    .checkbox-select {
+        background-color: #345994;
+        border: 1px solid #33363f;
+        color: #FFFFFF;
+    }
 
-.checkbox-disable {
-    background-color: #353a46;
-    border: 1px solid #ffffff;
-    border-radius: 3px;
-    cursor: pointer;
-    opacity: 0.5;
-}
+    .checkbox-disable {
+        background-color: #353a46;
+        border: 1px solid #ffffff;
+        border-radius: 3px;
+        cursor: pointer;
+        opacity: 0.5;
+    }
 
-.checkbox-hover {
-    /*background-color: #ededed;*/
-    border-color: rgba(82, 168, 236, 0.8);
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6);
-    outline: 0 none;
+    .checkbox-hover {
+        /*background-color: #ededed;*/
+        border-color: rgba(82, 168, 236, 0.8);
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6);
+        outline: 0 none;
+    }
 }
 
 
@@ -720,86 +734,92 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 /**************************************************************************/
 /** Default style for grid controls
  */
-.table-header {
-    border-bottom: 1px solid #383b41;
-    /*background: #3e414a; /*#33363f;  #353a46 */
-    background-color: #3e414a;
-    background-image: none;
-    /*
-    background-image: linear-gradient(to bottom, #f9f9f9, #e4e5e7);
-    */
-    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);
-}
+
+ .javaxt-table,
+ .javaxt-datagrid {
+
+    .table-header {
+        border-bottom: 1px solid #383b41;
+        /*background-color: #3e414a; /*#33363f;  #353a46 */
+        background-color: #3e414a;
+        background-image: none;
+        /*
+        background-image: linear-gradient(to bottom, #f9f9f9, #e4e5e7);
+        */
+        box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);
+    }
 
 
-.table-row, .table-row-selected {
-    border-bottom: 1px solid #383b41;
-    background-color: #23252b;
-    color: #97989c;
-}
+    .table-row, .table-row-selected {
+        border-bottom: 1px solid #383b41;
+        background-color: #23252b;
+        color: #97989c;
+    }
 
 
-.table-row:nth-child(odd) {
-    background-color: #23252b; /*#272a31*/
-}
+    .table-row:nth-child(odd) {
+        background-color: #23252b; /*#272a31*/
+    }
 
 
-.table-row:hover{
-    background-color:#212939;
-}
+    .table-row:hover{
+        background-color:#212939;
+    }
 
-.table-row-selected{
-    /*border-bottom-style:dotted;*/
-    /*border-color:#a3bae9;*/
-    background-color:#25334f;
-    color: #e2e3e7;
-    transition: 0.2s;
-}
+    .table-row-selected{
+        /*border-bottom-style:dotted;*/
+        /*border-color:#a3bae9;*/
+        background-color:#25334f;
+        color: #e2e3e7;
+        transition: 0.2s;
+    }
 
-.table-col, .table-header-col {
+    .table-col, .table-header-col {
 
-    white-space: nowrap;
+        white-space: nowrap;
 
-    height: 35px;
-    line-height: 35px;
-
-
-    border-left: 1px solid #383b41;
-    border-right: 1px solid #383b41;
-    padding: 0 5px;
+        height: 35px;
+        line-height: 35px;
 
 
-    /*
-    text-overflow: ellipsis;
-    -o-text-overflow: ellipsis;
-    -webkit-text-overflow: ellipsis;
-    */
-}
+        border-left: 1px solid #383b41;
+        border-right: 1px solid #383b41;
+        padding: 0 5px;
 
-.table-header-col {
-    cursor: pointer;
-    color: #bfc0c3;
-}
 
-.table-header-col:hover{
-    color: #d2d2d2;
-    background-color: #335177;
-    border-color: #2e588d;
-    transition: 0.2s;
-}
+        /*
+        text-overflow: ellipsis;
+        -o-text-overflow: ellipsis;
+        -webkit-text-overflow: ellipsis;
+        */
+    }
 
-.table-col {
-    border-left: 0;
-    border-right: 0;
-    color: inherit;
-}
+    .table-header-col {
+        cursor: pointer;
+        color: #bfc0c3;
+    }
 
-.table-resizeHandle {
-    width: 5px;
-    height: 100%;
-    cursor: col-resize;
-    margin: 0 -7px 0 0px;
-}
+    .table-header-col:hover{
+        color: #d2d2d2;
+        background-color: #335177;
+        border-color: #2e588d;
+        transition: 0.2s;
+    }
+
+    .table-col {
+        border-left: 0;
+        border-right: 0;
+        color: inherit;
+    }
+
+    .table-resizeHandle {
+        width: 5px;
+        height: 100%;
+        cursor: col-resize;
+        margin: 0 -7px 0 0px;
+    }
+
+ }
 
 
 /**************************************************************************/
@@ -963,7 +983,7 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 
 .iScrollIndicator {
     position: absolute;
-    background: #3e4453;
+    background-color: #3e4453;
     border: 0 none;
     border-radius: 4px;
 }
@@ -978,5 +998,5 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 
 
 .form-input-menu .iScrollIndicator {
-    background: #4f5565;
+    background-color: #4f5565;
 }
