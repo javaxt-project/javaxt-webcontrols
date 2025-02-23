@@ -82,7 +82,7 @@ javaxt.dhtml.TabPanel = function(parent, config) {
 
       //Create main table
         var table = createTable(parent);
-        table.setAttribute("desc", me.className);
+        table.className = "javaxt-tab-panel";
 
 
 
