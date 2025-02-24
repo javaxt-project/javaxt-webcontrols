@@ -71,10 +71,12 @@ javaxt.dhtml.Checkbox = function(parent, config) {
                 display: "inline-block"
             },
 
+          /** Style for the checkbox
+           */
             box: {
                 width: "13px",
                 height: "13px",
-                border: "1px solid #cccccc",
+                border: "1px solid #ccc",
                 borderRadius: "3px",
                 backgroundColor: "#F6F6F6",
                 cursor: "pointer",
@@ -82,6 +84,8 @@ javaxt.dhtml.Checkbox = function(parent, config) {
                 color: "#2b2b2b"
             },
 
+          /** Style for the label next to the checkbox
+           */
             label: {
                 fontFamily: "helvetica,arial,verdana,sans-serif",
                 fontSize: "14px",
@@ -90,31 +94,35 @@ javaxt.dhtml.Checkbox = function(parent, config) {
                 padding: "1px 0 0 5px"
             },
 
+          /** Style for the checkmark inside the checkbox
+           */
             check: {
                 content: "",
                 display: "block",
                 width: "3px",
                 height: "6px",
-                border: "solid #ffffff",
+                border: "solid #fff",
                 borderWidth: "0 2px 2px 0",
                 transform: "rotate(45deg)",
                 margin: "1px 0 0 4px"
             },
 
+          /** Style for the checkbox when it is selected/checked
+           */
             select: {
                 backgroundColor: "#007FFF",
                 border: "1px solid #003EFF",
-                color: "#FFFFFF"
+                color: "#fff"
             },
 
+          /** Style for the mask used to disable the checkbox
+           */
             disable: {
-                backgroundColor: "#ffffff",
-                border: "1px solid #ffffff",
-                borderRadius: "3px",
-                cursor: "pointer",
-                opacity: "0.5"
+                cursor: "default"
             },
 
+          /** Style for the checkbox when mouse hovers over
+           */
             hover: {
                 backgroundColor: "#ededed"
             }
@@ -169,6 +177,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
             table.style.textAlign = "inherit";
             table.style.color = "inherit";
             table.style.width = "";
+            table.style.height = "";
             var tr = table.addRow();
 
 
@@ -303,6 +312,8 @@ javaxt.dhtml.Checkbox = function(parent, config) {
    */
     this.enable = function(){
         mask.style.visibility = "hidden";
+        box.style.opacity = "";
+        label.style.opacity = "";
     };
 
 
@@ -327,6 +338,8 @@ javaxt.dhtml.Checkbox = function(parent, config) {
             var innerDiv = me.el.firstChild;
             innerDiv.insertBefore(mask, innerDiv.firstChild);
         }
+        box.style.opacity = "0.5";
+        label.style.opacity = "0.5";
     };
 
 
