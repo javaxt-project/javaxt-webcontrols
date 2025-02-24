@@ -61,7 +61,6 @@ javaxt.dhtml.style.default = {
 
 
     checkbox : {
-        panel: "checkbox-panel",
         box: "checkbox-box",
         label: "checkbox-label",
         check: "checkbox-check",

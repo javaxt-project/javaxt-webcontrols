@@ -929,15 +929,16 @@ select:focus, textarea:focus, input:focus{
 
     .checkbox-label {
         white-space: nowrap;
-        cursor: default;
-        padding: 1px 0 0 5px;
+        cursor: pointer;
+        padding: 0 0 0 5px;
+        line-height: 20px;
     }
 
     .checkbox-box {
         padding: 0px;
         margin: 0px;
-        width: 14px;
-        height: 14px;
+        width: 18px;
+        height: 18px;
         border: 1px solid #b9b9b9;
         border-radius: 3px;
         background-color: #f8f8f8;
@@ -958,8 +959,8 @@ select:focus, textarea:focus, input:focus{
         height: 9px;
         border: solid #fff;
         border-width: 0 2px 2px 0;
-        transform: rotate(40deg);
-        margin: 1px 0px 0px 4px;
+        transform: rotate(45deg);
+        margin: 2px 0 0 6px;
     }
 
     .checkbox-select {
@@ -967,10 +968,10 @@ select:focus, textarea:focus, input:focus{
         border-color: #2a79bf;
     }
 
-    .checkbox-hover {}
-    .checkbox-panel:hover .checkbox-box {
+    .checkbox-hover {
         border-color: rgba(82, 168, 236, 0.8);
         box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6);
+        outline: 0 none;
     }
 }
 
