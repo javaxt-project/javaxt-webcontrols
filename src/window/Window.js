@@ -238,7 +238,7 @@ javaxt.dhtml.Window = function(parent, config) {
 
     };
 
-    var mainDiv, header, body, footer, buttonRow, mask;
+    var win, header, body, footer, buttonRow, mask;
     var titleDiv, iconDiv, buttonDiv; //header elements
     var recenter = true;
     var visible = false;
@@ -271,15 +271,18 @@ javaxt.dhtml.Window = function(parent, config) {
 
 
       //Create container
-        mainDiv = createElement('div', parent, "javaxt-window");
-        mainDiv.style.display = "inline-block";
-        mainDiv.style.position = "absolute";
-        mainDiv.style.left = "0px";
-        mainDiv.style.top = "0px";
-        mainDiv.style.display = "none";
-        mainDiv.style.visibility = "hidden";
-        //mainDiv.style.overflow = "hidden";
-        mainDiv.tabIndex = -1; //allows the div to have focus
+        var mainDiv = createElement('div', parent, "javaxt-window");
+
+
+      //Create window div
+        win = createElement('div', mainDiv, config.style.panel);
+        win.style.position = "absolute";
+        win.style.left = "0px";
+        win.style.top = "0px";
+        win.style.display = "none";
+        win.style.visibility = "hidden";
+        //win.style.overflow = "hidden";
+        win.tabIndex = -1; //allows the div to have focus
         me.setWidth(config.width);
         me.setHeight(config.height);
         me.el = mainDiv;
@@ -289,15 +292,9 @@ javaxt.dhtml.Window = function(parent, config) {
         }
 
 
-      //Create inner div
-        var innerDiv = createElement("div", mainDiv, config.style.panel);
-        innerDiv.style.position = "relative";
-        innerDiv.style.display = "inherit";
-        innerDiv.style.height = "100%";
-
 
       //Create table with 3 rows: header, body, and footer
-        var table = createTable(innerDiv);
+        var table = createTable(win);
         table.style.fontFamily = "inherit";
         table.style.textAlign = "inherit";
         table.style.color = "inherit";
@@ -367,7 +364,7 @@ javaxt.dhtml.Window = function(parent, config) {
 
 
       //Create mask (used for modal dialogs and resize)
-        mask = createElement('div', parent);
+        mask = createElement('div', mainDiv);
         if (config.modal===true){
             addStyle(mask, "mask");
         }
@@ -376,9 +373,8 @@ javaxt.dhtml.Window = function(parent, config) {
         mask.style.top = "0px";
         mask.style.width = "100%";
         mask.style.height = "100%";
-        mask.style.display = "none";
-        mask.style.visibility = "hidden";
-        //parent.insertBefore(mask, parent.firstChild);
+        addShowHide(mask);
+        mask.hide();
 
 
 
@@ -386,7 +382,7 @@ javaxt.dhtml.Window = function(parent, config) {
         if (config.movable===true){
             initDrag(dragHandle, {
                 onDragStart: function(x,y){
-                    var div = mainDiv;
+                    var div = win;
 
                     var rect = _getRect(div);
                     var rect2 = _getRect(parent);
@@ -406,7 +402,7 @@ javaxt.dhtml.Window = function(parent, config) {
 
                 },
                 onDrag: function(x,y){
-                    var div = mainDiv;
+                    var div = win;
 
                     var left = (x-div.xOffset);
                     if (left<0) left = 0;
@@ -448,12 +444,12 @@ javaxt.dhtml.Window = function(parent, config) {
             resizeListener.destroy();
         }
         me.close();
-        if (mask){
-            mask.innerHTML = "";
-            var parent = mask.parentNode;
-            if (parent) parent.removeChild(mask);
-            mask = null;
-        }
+
+        mask.innerHTML = "";
+        var parent = mask.parentNode;
+        if (parent) parent.removeChild(mask);
+        mask = null;
+
         destroy(me);
         me = null;
         return me;
@@ -637,23 +633,22 @@ javaxt.dhtml.Window = function(parent, config) {
 
 
       //Update mask
-        overflow = mask.parentNode.style.overflow;
-        mask.parentNode.style.overflow = "hidden";
+        overflow = parent.style.overflow;
+        parent.style.overflow = "hidden";
         mask.style.zIndex = zIndex;
         if (config.modal===true){
-            mask.style.display = '';
-            mask.style.visibility = '';
+            mask.show();
         }
 
 
       //Update window
-        mainDiv.style.zIndex = zIndex+1;
-        mainDiv.style.display = '';
-        mainDiv.style.visibility = '';
+        win.style.zIndex = zIndex+1;
+        win.style.display = '';
+        win.style.visibility = '';
 
         if (x!=null & y!=null){
-            mainDiv.style.left = x + "px";
-            mainDiv.style.top = y + "px";
+            win.style.left = x + "px";
+            win.style.top = y + "px";
             recenter = false;
         }
         else{
@@ -692,16 +687,13 @@ javaxt.dhtml.Window = function(parent, config) {
 
         if (visible){
 
-            if (overflow) mask.parentNode.style.overflow = overflow;
-            if (config.modal===true){
-                mask.style.display = "none";
-                mask.style.visibility = "hidden";
-            }
+            parent.style.overflow = overflow;
+            mask.hide();
             mask.style.zIndex = '';
 
-            mainDiv.style.display = "none";
-            mainDiv.style.visibility = "hidden";
-            mainDiv.style.zIndex = '';
+            win.style.display = "none";
+            win.style.visibility = "hidden";
+            win.style.zIndex = '';
 
             visible = false;
 
@@ -752,7 +744,7 @@ javaxt.dhtml.Window = function(parent, config) {
   /** Returns the current width of the window in pixels (number)
    */
     this.getWidth = function(){
-        return mainDiv.offsetWidth;
+        return win.offsetWidth;
     };
 
 
@@ -765,11 +757,11 @@ javaxt.dhtml.Window = function(parent, config) {
     this.setWidth = function(width){
         if (isNaN(width)){
             if (typeof width === "string"){
-                mainDiv.style.width = width;
+                win.style.width = width;
             }
         }
         else{
-            mainDiv.style.width = width + "px";
+            win.style.width = width + "px";
         }
         me.update();
         me.onResize();
@@ -782,7 +774,7 @@ javaxt.dhtml.Window = function(parent, config) {
   /** Returns the current height of the window in pixels (number)
    */
     this.getHeight = function(){
-        return mainDiv.offsetHeight;
+        return win.offsetHeight;
     };
 
 
@@ -795,11 +787,11 @@ javaxt.dhtml.Window = function(parent, config) {
     this.setHeight = function(height){
         if (isNaN(height)){
             if (typeof height === "string"){
-                mainDiv.style.height = height;
+                win.style.height = height;
             }
         }
         else{
-            mainDiv.style.height = height + "px";
+            win.style.height = height + "px";
         }
         me.update();
         me.onResize();
@@ -818,16 +810,16 @@ javaxt.dhtml.Window = function(parent, config) {
         setTimeout(function(){
             try{
                 var minWidth = Math.max(header.offsetWidth, body.offsetWidth, footer.offsetWidth);
-                if (mainDiv.offsetWidth<minWidth){
-                    mainDiv.style.width = minWidth+"px";
+                if (win.offsetWidth<minWidth){
+                    win.style.width = minWidth+"px";
                 }
             }
             catch(e){}
 
             try{
                 var minHeight = header.offsetHeight + body.offsetHeight + footer.offsetHeight;
-                if (mainDiv.offsetHeight<minHeight){
-                    mainDiv.style.height = minHeight+"px";
+                if (win.offsetHeight<minHeight){
+                    win.style.height = minHeight+"px";
                 }
             }
             catch(e){}
@@ -842,8 +834,8 @@ javaxt.dhtml.Window = function(parent, config) {
    */
     this.center = function(){
 
-       var w = mainDiv.offsetWidth;
-       var h = mainDiv.offsetHeight;
+       var w = win.offsetWidth;
+       var h = win.offsetHeight;
        var x = parent.clientWidth;
        var y = parent.clientHeight;
 
@@ -866,8 +858,8 @@ javaxt.dhtml.Window = function(parent, config) {
        if (x<0) x=0;
 
      //Move form
-       mainDiv.style.left = x + "px";
-       mainDiv.style.top = y + "px";
+       win.style.left = x + "px";
+       win.style.top = y + "px";
 
     };
 
@@ -909,22 +901,21 @@ javaxt.dhtml.Window = function(parent, config) {
             var resizeHandle = this;
 
             mask.style.cursor = resizeHandle.style.cursor;
-            mask.style.display = "";
-            mask.style.visibility = "";
+            mask.show();
 
 
             parentRect = _getRect(parent);
-            windowRect = _getRect(mainDiv);
+            windowRect = _getRect(win);
 
 
             var orgWidth = windowRect.width;
-            dx = parseFloat(mainDiv.style.width);
+            dx = parseFloat(win.style.width);
             if (dx<orgWidth) dx = orgWidth-dx;
             else dx = 0;
 
 
             var orgHeight = windowRect.height;
-            dy = parseFloat(mainDiv.style.height);
+            dy = parseFloat(win.style.height);
             if (dy<orgHeight) dy = orgHeight-dy;
             else dy = 0;
         };
@@ -932,28 +923,27 @@ javaxt.dhtml.Window = function(parent, config) {
 
         var onDragEnd = function(){
             if (config.modal!==true){
-                mask.style.display = "none";
-                mask.style.visibility = "hidden";
+                mask.hide();
             }
             mask.style.cursor = "";
-            mainDiv.focus();
+            win.focus();
         };
 
 
         var setWidth = function(w){
-            mainDiv.style.width = w + "px";
+            win.style.width = w + "px";
             var minWidth = Math.max(header.offsetWidth, body.offsetWidth, footer.offsetWidth);
-            if (mainDiv.offsetWidth<minWidth){
-                mainDiv.style.width = minWidth+"px";
+            if (win.offsetWidth<minWidth){
+                win.style.width = minWidth+"px";
             }
         };
 
 
         var setHeight = function(h){
-            mainDiv.style.height = h + "px";
+            win.style.height = h + "px";
             var minHeight = header.offsetHeight + body.offsetHeight + footer.offsetHeight;
-            if (mainDiv.offsetHeight<minHeight){
-                mainDiv.style.height = minHeight+"px";
+            if (win.offsetHeight<minHeight){
+                win.style.height = minHeight+"px";
             }
         };
 
@@ -976,14 +966,14 @@ javaxt.dhtml.Window = function(parent, config) {
             if (top<0) top = 0;
             var minY = (windowRect.bottom-parentRect.top)-50;
             if (top>minY) top = minY;
-            mainDiv.style.top = top + 'px';
+            win.style.top = top + 'px';
 
 
           //Update height
             var bottom = windowRect.bottom-parentRect.top;
             var height = (bottom-top)-dy;
             setHeight(height);
-            var d = _getRect(mainDiv).bottom-windowRect.bottom;
+            var d = _getRect(win).bottom-windowRect.bottom;
             if (d>0) setHeight(height-d);
         };
 
@@ -996,14 +986,14 @@ javaxt.dhtml.Window = function(parent, config) {
 
             var maxX = (windowRect.right-parentRect.left)-75;
             if (left>maxX) left = maxX;
-            mainDiv.style.left = left + 'px';
+            win.style.left = left + 'px';
 
 
           //Update width
             var right = windowRect.right-parentRect.left;
             var width = (right-left)-dx;
             setWidth(width);
-            var d = _getRect(mainDiv).right-windowRect.right;
+            var d = _getRect(win).right-windowRect.right;
             if (d>0) setWidth(width-d);
         };
 
@@ -1021,7 +1011,7 @@ javaxt.dhtml.Window = function(parent, config) {
 
 
       //Add vertical resizer to the top of the window
-        var resizeHandle = createElement("div", mainDiv);
+        var resizeHandle = createElement("div", win);
         resizeHandle.style.position = "absolute";
         resizeHandle.style.width = "100%";
         resizeHandle.style.height = "10px";
@@ -1043,7 +1033,7 @@ javaxt.dhtml.Window = function(parent, config) {
         resizeHandle = resizeHandle.cloneNode();
         resizeHandle.style.top = "";
         resizeHandle.style.bottom = "-5px";
-        mainDiv.appendChild(resizeHandle);
+        win.appendChild(resizeHandle);
         javaxt.dhtml.utils.initDrag(resizeHandle, {
             onDragStart: onDragStart,
             onDrag: function(x,y){
@@ -1062,7 +1052,7 @@ javaxt.dhtml.Window = function(parent, config) {
         resizeHandle.style.height = "100%";
         resizeHandle.style.width = "10px";
         resizeHandle.style.cursor = "ew-resize";
-        mainDiv.appendChild(resizeHandle);
+        win.appendChild(resizeHandle);
         javaxt.dhtml.utils.initDrag(resizeHandle, {
             onDragStart: onDragStart,
             onDrag: function(x,y){
@@ -1079,7 +1069,7 @@ javaxt.dhtml.Window = function(parent, config) {
         resizeHandle.style.right = "";
         resizeHandle.style.height = "10px";
         resizeHandle.style.cursor = "se-resize";
-        mainDiv.appendChild(resizeHandle);
+        win.appendChild(resizeHandle);
         javaxt.dhtml.utils.initDrag(resizeHandle, {
             onDragStart: onDragStart,
             onDrag: function(x,y){
@@ -1096,7 +1086,7 @@ javaxt.dhtml.Window = function(parent, config) {
         resizeHandle.style.top = "";
         resizeHandle.style.bottom = "-5px";
         resizeHandle.style.cursor = "ne-resize";
-        mainDiv.appendChild(resizeHandle);
+        win.appendChild(resizeHandle);
         javaxt.dhtml.utils.initDrag(resizeHandle, {
             onDragStart: onDragStart,
             onDrag: function(x,y){
@@ -1115,7 +1105,7 @@ javaxt.dhtml.Window = function(parent, config) {
         resizeHandle.style.top = "0px";
         resizeHandle.style.height = "100%";
         resizeHandle.style.cursor = "ew-resize";
-        mainDiv.appendChild(resizeHandle);
+        win.appendChild(resizeHandle);
         javaxt.dhtml.utils.initDrag(resizeHandle, {
             onDragStart: onDragStart,
             onDrag: function(x,y){
@@ -1131,7 +1121,7 @@ javaxt.dhtml.Window = function(parent, config) {
         resizeHandle.style.top = "-5px";
         resizeHandle.style.height = "10px";
         resizeHandle.style.cursor = "ne-resize";
-        mainDiv.appendChild(resizeHandle);
+        win.appendChild(resizeHandle);
         javaxt.dhtml.utils.initDrag(resizeHandle, {
             onDragStart: onDragStart,
             onDrag: function(x,y){
@@ -1174,7 +1164,7 @@ javaxt.dhtml.Window = function(parent, config) {
                 onDragEnd: onDragEnd
             });
         }
-        mainDiv.appendChild(resizeHandle);
+        win.appendChild(resizeHandle);
     };
 
 
@@ -1222,6 +1212,7 @@ javaxt.dhtml.Window = function(parent, config) {
     var destroy = javaxt.dhtml.utils.destroy;
     var isEmpty = javaxt.dhtml.utils.isEmpty;
     var isElement = javaxt.dhtml.utils.isElement;
+    var addShowHide = javaxt.dhtml.utils.addShowHide;
     var getHighestElements = javaxt.dhtml.utils.getHighestElements;
     var createElement = javaxt.dhtml.utils.createElement;
     var createTable = javaxt.dhtml.utils.createTable;
