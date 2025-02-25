@@ -366,6 +366,9 @@ javaxt.dhtml.utils = {
   /** Return true if a given object is a DOM element.
    */
     isElement: function(obj){
+        if (obj==null || typeof obj === 'undefined') return false;
+
+
         var b = (obj instanceof Element); //should work with 99% of the time
 
       //Special case for Firefox for DOM elements created in an iFrame (e.g.
