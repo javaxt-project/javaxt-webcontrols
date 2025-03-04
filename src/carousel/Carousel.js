@@ -100,10 +100,16 @@ javaxt.dhtml.Carousel = function(parent, config) {
         slideOver: false,
 
 
-      /** If true, will allow touchscreen users to slide back and forth through
-       *  the panels using touch gestures.
+      /** If true, will allow users to slide back and forth through the panels
+       *  using touch gestures.
        */
         drag: true,
+
+
+      /** Cursor style when dragging. Only applicable when "drag" is set to
+       *  true.
+       */
+        dragCursor: "ew-resize", //grabbing
 
 
       /** Currently unused
@@ -845,6 +851,24 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
 
   //**************************************************************************
+  //** onDragStart
+  //**************************************************************************
+  /** Called when a client begins to drag a panel in the carousel
+   *  @param currPanel Content of the active panel
+   */
+    this.onDragStart = function(currPanel){};
+
+
+  //**************************************************************************
+  //** onDragEnd
+  //**************************************************************************
+  /** Called when a client completes a drag event
+   *  @param currPanel Content of the active panel
+   */
+    this.onDragEnd = function(currPanel){};
+
+
+  //**************************************************************************
   //** getPanels
   //**************************************************************************
   /** Returns an array with information for each panel in the carousel. Each
@@ -932,6 +956,8 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
       //Function called when a drag is initiated
         var onDragStart = function(e){
+            me.onDragStart(currPanel.childNodes[0].childNodes[0]);
+
             startX = e.clientX;
             offsetX = parseInt(innerDiv.style.left);
 
@@ -945,7 +971,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
 
             prevPanel = currPanel;
-            innerDiv.style.cursor = 'move';
+            innerDiv.style.cursor = config.dragCursor;
         };
 
 
@@ -1082,10 +1108,17 @@ javaxt.dhtml.Carousel = function(parent, config) {
             if (animationSteps<0) animationSteps = -animationSteps;
             //console.log(start + "/" + end + " --> move " + (start-end) + "px in " + animationSteps + "ms");
 
+            var direction = (start-end)>0 ? "next" : "back";
+
+
+
             slide(innerDiv, start, end, new Date().getTime(), 100, function(){
                 currPanel = innerDiv.childNodes[visiblePanel];
+                var nextPanel = currPanel.childNodes[0].childNodes[0];
+                me.onDragEnd(nextPanel);
                 if (currPanel!=prevPanel){
-                    me.onChange(currPanel.childNodes[0].childNodes[0], prevPanel.childNodes[0].childNodes[0]);
+                    me.beforeChange(prevPanel.childNodes[0].childNodes[0], nextPanel, direction);
+                    me.onChange(nextPanel, prevPanel.childNodes[0].childNodes[0]);
                 }
             });
 
@@ -1108,6 +1141,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
       //MouseDown
         innerDiv.onmousedown = function(e){
             if (sliding) return;
+            if (e.button>0) return;
 
             // Do not take any immediate action - just set the holdStarter
             // to wait for the predetermined delay, and then begin a hold
@@ -1162,7 +1196,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
                     document.detachEvent("onmousemove", onDrag);
                     document.detachEvent("onmouseup", onMouseUp);
                 }
-                innerDiv.style.cursor = 'pointer';
+                innerDiv.style.cursor = '';
                 onDragEnd();
 
               //Remove the "javaxt-noselect" class
