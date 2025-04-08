@@ -16,8 +16,15 @@ javaxt.dhtml.Effects = function() {
   //**************************************************************************
   //** fadeIn
   //**************************************************************************
-  /** Used to gradually update the opacity of a given element. Assumes the
-   *  element style is initially set to display:none;
+  /** Used to gradually update the opacity of a given element. At the end of
+   *  the animation, the element "opacity" and "display" styles will be
+   *  deleted and the element will be visible.
+   *  @param el DOM element
+   *  @param transitionEffect Name of transition effect (e.g. "easeIn",
+   *  "linear", etc)
+   *  @param duration Transition time, in milliseconds
+   *  @param callback Optional callback function called when the transition is
+   *  complete
    */
     this.fadeIn = function(el, transitionEffect, duration, callback){
         el.style.opacity = 0;
@@ -37,7 +44,14 @@ javaxt.dhtml.Effects = function() {
   //** fadeOut
   //**************************************************************************
   /** Used to gradually update the opacity of a given element until it is no
-   *  longer visible.
+   *  longer visible. At the end of the animation, the element "opacity" style
+   *  will be set to 0 and the "display" style will be set to "none".
+   *  @param el DOM element
+   *  @param transitionEffect Name of transition effect (e.g. "easeOut",
+   *  "linear", etc)
+   *  @param duration Transition time, in milliseconds
+   *  @param callback Optional callback function called when the transition is
+   *  complete
    */
     this.fadeOut = function(el, transitionEffect, duration, callback){
         me.setTransition(el, transitionEffect, duration);
@@ -56,6 +70,9 @@ javaxt.dhtml.Effects = function() {
   //** setTransition
   //**************************************************************************
   /** Used to set the transition style for a given element.
+   *  @param el DOM element
+   *  @param transitionEffect Name of transition effect (e.g. "ease", "linear")
+   *  @param duration Transition time, in milliseconds
    */
     this.setTransition = function(el, transitionEffect, duration){
         if (isNaN(duration) || duration<=0) return;
@@ -127,7 +144,7 @@ javaxt.dhtml.Effects = function() {
 
     };
 
-    
+
   //**************************************************************************
   //** removeTransition
   //**************************************************************************
