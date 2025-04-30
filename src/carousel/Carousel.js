@@ -954,13 +954,13 @@ javaxt.dhtml.Carousel = function(parent, config) {
         var startX, offsetX;
         var prevPanel;
 
+        var notify = true;
+
       //Function called when a drag is initiated
         var onDragStart = function(e){
-            me.onDragStart(currPanel.childNodes[0].childNodes[0]);
 
             startX = e.clientX;
             offsetX = parseInt(innerDiv.style.left);
-
 
 
           //Disable text selection in the entire document - very important!
@@ -971,7 +971,6 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
 
             prevPanel = currPanel;
-            innerDiv.style.cursor = config.dragCursor;
         };
 
 
@@ -981,6 +980,19 @@ javaxt.dhtml.Carousel = function(parent, config) {
             var x = e.clientX;
             var d = startX-x; //If d is positive, client is sliding to the right.
                               //Otherwise, client is sliding to the left.
+
+
+          //Fire onDragStart event once we actually have some movement
+            if (notify){
+                if (d!==0){
+                    me.onDragStart(currPanel.childNodes[0].childNodes[0]);
+                    notify = false;
+                }
+            }
+
+
+          //Update cursor style
+            innerDiv.style.cursor = config.dragCursor;
 
 
             var left = offsetX-d;
@@ -1057,6 +1069,7 @@ javaxt.dhtml.Carousel = function(parent, config) {
 
       //Function called when the user stops dragging the div
         var onDragEnd = function(){
+            notify = true;
 
             var rect = _getRect(outerDiv);
             var minX = rect.x;
