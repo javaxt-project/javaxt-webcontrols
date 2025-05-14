@@ -76,6 +76,12 @@ javaxt.dhtml.Button = function(parent, config) {
         iconAlign: "left",
 
 
+      /** Used to set spacing between the button icon and the button label.
+       *  Default is "5px".
+       */
+        iconPadding: "5px",
+
+
       /** Style for individual elements within the component. Note that you can
        *  provide CSS class names instead of individual style definitions.
        */
@@ -162,6 +168,7 @@ javaxt.dhtml.Button = function(parent, config) {
         var iconAlignment = config.style.iconAlign; //legacy
         if (!iconAlignment) iconAlignment = config.iconAlign; //preferred
         if (iconAlignment!=="right") iconAlignment = "left";
+        config.iconAlign = iconAlignment;
 
 
       //Get menu alignment
@@ -173,10 +180,15 @@ javaxt.dhtml.Button = function(parent, config) {
       //Update arrow style as needed
         if (config.menu===true){
             var arrowDefined = false;
-            for (var key in config.style.arrow){
-                if (config.style.arrow.hasOwnProperty(key)){
-                    arrowDefined = true;
-                    break;
+            if (typeof config.style.arrow === "string"){
+                arrowDefined = true;
+            }
+            else{
+                for (var key in config.style.arrow){
+                    if (config.style.arrow.hasOwnProperty(key)){
+                        arrowDefined = true;
+                        break;
+                    }
                 }
             }
 
@@ -278,7 +290,7 @@ javaxt.dhtml.Button = function(parent, config) {
         td = tr.addColumn({width: "100%"});
         label = createElement("div", td);
         setStyle(label, "label");
-        if (config.label) label.innerHTML = config.label;
+
 
 
       //Add arrow (or icon)
@@ -289,6 +301,31 @@ javaxt.dhtml.Button = function(parent, config) {
         else{
             icon = createElement("div", td, config.style.icon);
         }
+
+
+
+      //Add show/hide to components
+        addShowHide(label);
+        addShowHide(icon);
+        addShowHide(arrow);
+
+
+
+      //Hide icon as needed
+        var hideIcon = true;
+        if (typeof config.style.icon === "string"){
+            hideIcon = false;
+        }
+        else{
+            for (var key in config.style.icon){
+                if (config.style.icon.hasOwnProperty(key)){
+                    hideIcon = false;
+                    break;
+                }
+            }
+        }
+        if (hideIcon) icon.hide();
+
 
 
 
@@ -342,6 +379,10 @@ javaxt.dhtml.Button = function(parent, config) {
         }
 
 
+      //Set button label
+        me.setLabel(config.label);
+
+
       //Set button state
         if (config.disabled===true) me.disable();
         if (config.selected===true) me.select();
@@ -383,9 +424,7 @@ javaxt.dhtml.Button = function(parent, config) {
                 }
             }
             else{
-                setStyle(mainDiv,"button");
-                setStyle(icon,"icon");
-                setStyle(arrow,"arrow");
+                setDefaultStyle(mainDiv);
             }
 
 
@@ -409,9 +448,7 @@ javaxt.dhtml.Button = function(parent, config) {
             touchEndTime = null;
 
             if (div.selected!==true){
-                addStyle(div, "hover");
-                addStyle(icon, "iconHover");
-                addStyle(arrow, "arrowHover");
+                setHoverStyle(div);
             }
         };
 
@@ -430,9 +467,7 @@ javaxt.dhtml.Button = function(parent, config) {
                 onclick(e);
             }
             else{
-                setStyle(div, "button");
-                setStyle(icon, "icon");
-                setStyle(arrow, "arrow");
+                setDefaultStyle(div);
             }
         };
 
@@ -442,9 +477,7 @@ javaxt.dhtml.Button = function(parent, config) {
         if (!isTouch){
             div.onmousedown=function(){
 
-                addStyle(div, "select");
-                addStyle(icon, "iconSelect");
-                addStyle(arrow, "arrowSelect");
+                setSelectStyle(div);
 
                 if (menu){
                     me.toggle();
@@ -457,22 +490,14 @@ javaxt.dhtml.Button = function(parent, config) {
                 onclick(e);
             };
             div.onmouseover = function(){
-
                 if (div.selected!==true){
-                    addStyle(div, "hover");
-                    addStyle(icon, "iconHover");
-                    addStyle(arrow, "arrowHover");
+                    setHoverStyle(div);
                 }
-
             };
             div.onmouseout = function(){
-
                 if (div.selected!==true){
-                    setStyle(div, "button");
-                    setStyle(icon, "icon");
-                    setStyle(arrow, "arrow");
+                    setDefaultStyle(div);
                 }
-
             };
         }
     };
@@ -522,7 +547,14 @@ javaxt.dhtml.Button = function(parent, config) {
   /** Used to update the button label.
    */
     this.setLabel = function(str){
-        label.innerText = str+"";
+        if (typeof str === 'undefined' || str===null || str.length===0){
+            label.hide();
+        }
+        else{
+            label.innerText = str+"";
+            label.show();
+            addLabelPadding();
+        }
     };
 
 
@@ -595,12 +627,8 @@ javaxt.dhtml.Button = function(parent, config) {
     this.select = function(){
         if (mainDiv.selected===true) return;
         mainDiv.selected = true;
-        setStyle(mainDiv,"button");
-        setStyle(icon,"icon");
-        setStyle(arrow,"arrow");
-        addStyle(mainDiv,"select");
-        addStyle(icon,"iconSelect");
-        addStyle(arrow,"arrowSelect");
+        setDefaultStyle(mainDiv);
+        setSelectStyle(mainDiv);
     };
 
 
@@ -612,9 +640,7 @@ javaxt.dhtml.Button = function(parent, config) {
     this.deselect = function(){
         if (mainDiv.selected===true){
             mainDiv.selected = false;
-            setStyle(mainDiv,"button");
-            setStyle(icon,"icon");
-            setStyle(arrow,"arrow");
+            setDefaultStyle(mainDiv);
         }
     };
 
@@ -656,6 +682,57 @@ javaxt.dhtml.Button = function(parent, config) {
    */
     this.getMenuPanel = function(){
         return menu;
+    };
+
+
+  //**************************************************************************
+  //** setDefaultStyle
+  //**************************************************************************
+    var setDefaultStyle = function(div){
+        setStyle(div, "button");
+        setStyle(icon, "icon");
+        setStyle(arrow, "arrow");
+        addLabelPadding();
+    };
+
+
+  //**************************************************************************
+  //** setHoverStyle
+  //**************************************************************************
+    var setHoverStyle = function(div){
+        addStyle(div, "hover");
+        addStyle(icon, "iconHover");
+        addStyle(arrow, "arrowHover");
+        addLabelPadding();
+    };
+
+
+  //**************************************************************************
+  //** setSelectStyle
+  //**************************************************************************
+    var setSelectStyle = function(div){
+        addStyle(div, "select");
+        addStyle(icon, "iconSelect");
+        addStyle(arrow, "arrowSelect");
+        addLabelPadding();
+    };
+
+
+  //**************************************************************************
+  //** addLabelPadding
+  //**************************************************************************
+    var addLabelPadding = function(){
+        if (icon.isVisible()){
+            var str = me.getLabel();
+            if (!(typeof str === 'undefined' || str===null || str.length===0)){
+                if (config.iconAlign==="left"){
+                    icon.style.marginRight = config.iconPadding;
+                }
+                else{
+                    icon.style.marginLeft = config.iconPadding;
+                }
+            }
+        }
     };
 
 
