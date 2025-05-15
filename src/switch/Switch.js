@@ -80,17 +80,21 @@ javaxt.dhtml.Switch = function(parent, config) {
         config = clone;
 
 
-        groove = createElement("div", parent, config.style.groove);
+      //Create container
+        var mainDiv = createElement("span", parent);
+        mainDiv.className = "javaxt-switch";
+        me.el = mainDiv;
+        addShowHide(me);
+
+
+      //Create slider
+        groove = createElement("div", mainDiv, config.style.groove);
         groove.onclick = function(){
             me.setValue(!me.getValue());
         };
 
         handle = createElement("div", groove, config.style.handle);
         me.setValue(config.value, true);
-        me.el = groove;
-
-      //Add public show/hide methods
-        addShowHide(me);
     };
 
 
