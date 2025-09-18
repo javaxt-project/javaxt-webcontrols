@@ -24,6 +24,13 @@ javaxt.dhtml.style.default = {
     },
 
 
+    panel: {
+        header: "panel-header",
+        toolbar: "panel-toolbar",
+        body: "panel-body"
+    },
+
+
     callout : {
         panel: "callout-panel",
         arrow: "callout-arrow"
@@ -56,7 +63,8 @@ javaxt.dhtml.style.default = {
         button: "form-button form-input-button pulldown-button-icon",
         menu: "form-input-menu",
         option: "form-input-menu-item",
-        newOption: "form-input-menu-item form-input-menu-item-new"
+        newOption: "form-input-menu-item form-input-menu-item-new",
+        iscroll: null //updated below
     },
 
 
@@ -109,11 +117,17 @@ javaxt.dhtml.style.default = {
         tabBody: "tab-body"
     },
 
+    accordion: {
+        accordion: "accordion-panel",
+        tabHeader: "accordion-header",
+        tabContent: "accordion-content"
+    },
+
     switch: {
         groove: "switch-groove",
         handle: "switch-handle",
-        grooveActive: "switch-groove-active",
-        handleActive: "switch-handle-active"
+        grooveActive: "switch-groove active",
+        handleActive: "switch-handle active"
     },
 
     slider: {
@@ -141,4 +155,6 @@ javaxt.dhtml.style.default = {
     }
 };
 
+
 javaxt.dhtml.style.default.table.iscroll = javaxt.dhtml.style.default.iscroll;
+javaxt.dhtml.style.default.combobox.iscroll = javaxt.dhtml.style.default.iscroll;

@@ -100,74 +100,100 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 /** The following classes are used to define the style for a panel. Panels
  *  consist of a header, toolbar, body, and footer.
  */
-.panel-toolbar {
-    height: 36px;
-    background-color: #33363f;
-    background-image: none;
-    border-bottom: 1px solid #20232b;
-}
 
-/** Set vertical alignment if the panel-toolbar is a div to mimic td */
-div.panel-toolbar > div {
-    position: relative;
-    top: 50%;
-    -webkit-transform: translateY(-50%);
-    -ms-transform: translateY(-50%);
-    transform: translateY(-50%);
-}
+.javaxt-panel {
 
-/**************************************************************************/
-/** Toolbar Items
-/**************************************************************************/
-/** The following classes are used to define the style for items rendered
- *  in a panel toolbar.
- */
+    .panel-header {
+        background-color: #335177;
+        height: 36px;
+        cursor: default;
+        border-bottom: 1px solid #2e588d;
+    }
 
-.toolbar-button, .toolbar-button-hover, .toolbar-button-selected {
-    width: 72px;
-    height: 26px;
-    cursor: pointer;
-    padding: 0px 7px;
-    margin: 0 0 0 5px;
+    .panel-title {
+        line-height: 36px; /*Should match panel-header height*/
+    }
 
-    background-color: #353a46;
-    border: 1px solid #4c5258;
-    border-radius: 3px;
-    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+    .panel-toolbar {
+        height: 36px;
+        padding: 0 5px;
+        background-color: #33363f;
+        background-image: none;
+        border-bottom: 1px solid #20232b;
 
-    color: #8e8f92;
-}
+        .form-input {
+            margin: 0 5px;
+        }
+    }
 
-.toolbar-button-label {
-    white-space: nowrap;
-    color: inherit;
-}
 
-.toolbar-button-hover {
-    color: #d2d2d2;
-    background-color: #335177;
-    border-color: #2e588d;
-}
+    .toolbar-button,
+    .toolbar-button-selected {
+        height: 26px;
+        padding: 0px 7px;
+        margin: 0 0 0 5px;
+        color: #8e8f92;
+        background-color: #353a46;
+        border: 1px solid #4c5258;
+        border-radius: 3px;
+        box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+    }
 
-.toolbar-button-selected {
-    color: #d2d2d2;
-    background-color: #335177;
-    border-color: #2e588d;
-}
 
-/* Padding for button icons */
-.toolbar-button-icon {
-    margin: 0 6px 0 0px;
-}
+    .toolbar-button:hover {
+        color: #d2d2d2;
+        background-color: #335177;
+        border-color: #2e588d;
+    }
 
-.toolbar-spacer {
-    display: inline-block;
-    position: relative;
-    width: 0px;
-    height: 25px;
-    margin: 0 2px 1px 8px;
-    border-left: 1px solid #4c5258;
-    border-right: 1px solid #232323;
+    .toolbar-button-selected {
+        color: #d2d2d2;
+        background-color: #335177;
+        border-color: #2e588d;
+    }
+
+
+    /* update margin for first button in the toolbar */
+    .panel-toolbar > div:first-child {
+        .toolbar-button,
+        .toolbar-button-selected {
+            margin:0;
+        }
+    }
+
+    
+    .toolbar-label,
+    .toolbar-button-label {
+        white-space: nowrap;
+        color: inherit;
+        min-width: 50px;
+    }
+
+    .toolbar-label {
+        padding: 0 5px;
+    }
+
+
+    .toolbar-button-icon {
+        margin: 0px;
+    }
+
+    .toolbar-spacer {
+        display: inline-block;
+        position: relative;
+        width: 0px;
+        height: 25px;
+        margin: 0 2px 1px 8px;
+        border-left: 1px solid #4c5258;
+        border-right: 1px solid #232323;
+    }
+
+    .panel-body {
+        background-color: #272a31;
+        vertical-align: top;
+    }
+
 }
 
 
@@ -464,6 +490,36 @@ div.panel-toolbar > div {
     background-color: #3e4453;
     padding: 0 5px 0 5px;
     color: #eaeaea;
+}
+
+
+/**************************************************************************/
+/** Pulldown Button Icon
+/**************************************************************************/
+/** Down arrow used in combo boxes
+ */
+.pulldown-button-icon {
+    color: #bdbdbd;
+}
+
+.pulldown-button-icon::after {
+    content:"";
+    position:absolute;
+    border-right: 2px solid;
+    border-bottom: 2px solid;
+    width: 8px;
+    height: 8px;
+    cursor: pointer;
+    transform-origin: 0% 0%;
+    -webkit-transform-origin: 0% 0%;
+
+    transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+    margin-top: -9px;
+}
+
+.pulldown-button-icon:hover {
+    color: #fff;
 }
 
 
@@ -798,7 +854,7 @@ div.panel-toolbar > div {
     }
 
     .table-header-col:hover{
-        color: #d2d2d2;
+        color: #fff; /*#d2d2d2*/
         background-color: #335177;
         border-color: #2e588d;
         transition: 0.2s;
@@ -838,37 +894,28 @@ div.panel-toolbar > div {
 /** Switch
 /**************************************************************************/
 
-.switch-groove{
-    background-color: #727272;
-    width: 40px;
-    height: 24px;
-    border-radius: 12px;
-    position: relative;
-}
-.switch-handle {
-    width: 20px;
-    height: 20px;
-    background-color: #e0e0e2;
-    border-radius: 10px;
-    position: absolute;
-    margin: 2px;
-    box-shadow: 0px 3px 4px rgba(0, 0, 0, 0.2);
-}
-.switch-groove-active {
-    background-color: #379748;
-    width: 40px;
-    height: 24px;
-    border-radius: 12px;
-    position: relative;
-}
-.switch-handle-active {
-    width: 20px;
-    height: 20px;
-    background-color: #e0e0e2;
-    border-radius: 10px;
-    position: absolute;
-    margin: 2px;
-    box-shadow: 0px 3px 4px rgba(0, 0, 0, 0.2);
+.javaxt-switch {
+    .switch-groove{
+        background-color: #727272;
+        width: 40px;
+        height: 24px;
+        border-radius: 12px;
+        position: relative;
+    }
+    .switch-handle {
+        width: 20px;
+        height: 20px;
+        background-color: #e0e0e2;
+        border-radius: 10px;
+        position: absolute;
+        margin: 2px;
+        box-shadow: 0px 3px 4px rgba(0, 0, 0, 0.2);
+    }
+    .switch-groove.active {
+        background-color: #379748;
+    }
+    .switch-handle.active {
+    }
 }
 
 
