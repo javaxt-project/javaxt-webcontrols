@@ -214,7 +214,20 @@ javaxt.dhtml.Button = function(parent, config) {
       //Create outer div used to hold the button, mask, and menu
         var outerDiv = createElement('div', parent);
         outerDiv.className = "javaxt-button";
-        outerDiv.style.display = config.display;
+
+
+      //Only set display if there's a mismatch (cleaner dom)
+        var cs = window.getComputedStyle(outerDiv);
+        if (cs.display!=config.display){
+            outerDiv.style.display = config.display;
+        }
+
+      //Simlarly, only set position as needed
+        if (cs.position!="relative"){
+            outerDiv.style.position = "relative";
+        }
+
+      //Set width/height as needed
         if (config.width){
             if (typeof config.width === "string"){
                 outerDiv.style.width = config.width;
@@ -231,7 +244,6 @@ javaxt.dhtml.Button = function(parent, config) {
                 outerDiv.style.height = config.height + "px";
             }
         }
-        outerDiv.style.position = "relative";
         if (config.hidden===true){ //legacy config...
             outerDiv.style.visibility = 'hidden';
             outerDiv.style.display = 'none';
@@ -254,7 +266,7 @@ javaxt.dhtml.Button = function(parent, config) {
       //to 100% of the available width. As a workaround, it looks like we can
       //wrap the button div in another div with the display style set to "table".
         var tableDiv = createElement('div', outerDiv);
-        if (outerDiv.style.display==="inline-block"){
+        if (outerDiv.style.display==="inline-block" || cs.display==="inline-block"){
             tableDiv.style.display = "table";
             if (config.width) tableDiv.style.width = outerDiv.style.width;
         }
@@ -548,12 +560,14 @@ javaxt.dhtml.Button = function(parent, config) {
    */
     this.setLabel = function(str){
         if (typeof str === 'undefined' || str===null || str.length===0){
+            label.innerText = "";
             label.hide();
         }
         else{
-            label.innerText = str+"";
+            str = str+"";
+            label.innerText = str;
             label.show();
-            addLabelPadding();
+            addLabelPadding(str); //Explicitely pass the label (bug fix)
         }
     };
 
@@ -723,7 +737,7 @@ javaxt.dhtml.Button = function(parent, config) {
   //**************************************************************************
     var addLabelPadding = function(){
         if (icon.isVisible()){
-            var str = me.getLabel();
+            var str = arguments.length>0 ? arguments[0] : me.getLabel();
             if (!(typeof str === 'undefined' || str===null || str.length===0)){
                 if (config.iconAlign==="left"){
                     icon.style.marginRight = config.iconPadding;
@@ -740,11 +754,17 @@ javaxt.dhtml.Button = function(parent, config) {
   //** Utils
   //**************************************************************************
     var merge = javaxt.dhtml.utils.merge;
+    var isEmpty = javaxt.dhtml.utils.isEmpty;
     var createTable = javaxt.dhtml.utils.createTable;
     var createElement = javaxt.dhtml.utils.createElement;
     var addShowHide = javaxt.dhtml.utils.addShowHide;
     var setStyle = function(el, style){
-        javaxt.dhtml.utils.setStyle(el, config.style[style]);
+
+      //Don't set empty style. Especially for hidden elements (e.g. icon)
+        var s = config.style[style];
+        if (isEmpty(s)) return;
+
+        javaxt.dhtml.utils.setStyle(el, s);
     };
     var addStyle = function(el, style){
         javaxt.dhtml.utils.addStyle(el, config.style[style]);
