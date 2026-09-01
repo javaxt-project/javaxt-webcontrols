@@ -302,6 +302,8 @@ javaxt.dhtml.DataGrid = function(parent, config) {
           //Update "header" setting in the column config
             var header = column.header;
             if (header==='x' && !checkboxHeader){
+                clone.sortable = false;
+                clone.align = "center";
                 clone.header = createCheckbox();
                 var checkbox = clone.header.checkbox;
                 checkboxHeader = {
@@ -420,13 +422,15 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                       //Check if the client clicked inside a checkbox
                         var insideCheckbox = false;
                         var checkboxCol = this.childNodes[checkboxHeader.idx];
-                        var checkbox = checkboxCol.getContent().checkbox;
-                        var rect = _getRect(checkbox.el);
-                        var clientX = e.clientX;
-                        var clientY = e.clientY;
-                        if (clientX>=rect.left && clientX<=rect.right){
-                            if (clientY>=rect.top && clientY<=rect.bottom){
-                                insideCheckbox = true;
+                        var checkbox = getCheckbox(checkboxCol.getContent());
+                        if (checkbox){
+                            var rect = _getRect(checkbox.el);
+                            var clientX = e.clientX;
+                            var clientY = e.clientY;
+                            if (clientX>=rect.left && clientX<=rect.right){
+                                if (clientY>=rect.top && clientY<=rect.bottom){
+                                    insideCheckbox = true;
+                                }
                             }
                         }
 
@@ -443,7 +447,8 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                                 for (var i=1; i<rows.length; i++){ //skip phantom row
                                     numRows++;
                                     var checkboxCol = rows[i].childNodes[checkboxHeader.idx];
-                                    if (checkboxCol.getContent().checkbox.isChecked()){
+                                    var rowCheckbox = getCheckbox(checkboxCol.getContent());
+                                    if (rowCheckbox && rowCheckbox.isChecked()){
                                         checkedItems++;
                                     }
                                 }
@@ -1084,27 +1089,26 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         table.forEachRow(function (row, content) {
             if (key){
                 if (useCheckbox){
-                    var checkboxDiv = content[colID];
-                    var checkbox = checkboxDiv.checkbox;
-                    if (checkbox.isChecked()) arr.push(checkbox.getValue());
+                    var checkbox = getCheckbox(content[colID]);
+                    if (checkbox && checkbox.isChecked()) arr.push(checkbox.getValue());
                 }
                 else{
                     if (row.selected) arr.push(row.record[key]);
                 }
             }
             else{
-                if (row.selected) arr.push(row.record);
+                var checked = false;
+                if (useCheckbox){
+                    var checkbox = getCheckbox(content[colID]);
+                    if (checkbox) checked = checkbox.isChecked();
+                }
+                if (checked || row.selected) arr.push(row.record);
             }
         });
 
 
       //Fetch additional records from the server as needed
         if (callback && selectAll && !eof){
-
-
-          //Build URL
-            var url = config.url;
-            if (url.indexOf("?")==-1) url+= "?";
 
 
           //Generate list of fields
@@ -1120,29 +1124,15 @@ javaxt.dhtml.DataGrid = function(parent, config) {
             }
 
 
-            url += "fields=" + fieldNames + "&count=false&offset=" + (currPage*config.limit);
-
-
-          //Add query params
-            url += encodeParams(config.params);
-
-
-          //Add filter
-            if (filter){
-                for (var key in filter) {
-                    if (filter.hasOwnProperty(key)) {
-                        if (key.toLowerCase()!=='orderby'){
-                            var str = filter[key];
-                            if (str){
-                                str = str.trim();
-                                if (str.length>0){
-                                    url += "&" + key + "=" + str;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+          //Build URL using the shared buildURL function so that the params,
+          //filter, and orderby are identical to the URLs used by load().
+          //A consistent orderby is particularly important here because we
+          //use an offset to fetch records beyond what has been loaded.
+            var url = buildURL({
+                fields: fieldNames,
+                count: false,
+                offset: currPage*config.limit
+            });
 
 
           //Execute service request and process response
@@ -1151,10 +1141,25 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                     var arr = [];
                     var records = config.parseResponse.apply(me, [request]);
                     for (var i=0; i<records.length; i++){
-                        var val = records[i][fieldName];
-                        if (val) arr.push(val);
+                        var record = records[i];
+                        if (key){
+
+                          //Return just the key values. Records may be arrays
+                          //(see parseResponse comments) or objects (custom
+                          //parseResponse implementations). Note that in the
+                          //array case, we only requested a single field from
+                          //the server so there should only be one value per
+                          //record.
+                            var val = isArray(record) ? record[0] : record[fieldNames];
+                            if (val!=null) arr.push(val);
+                        }
+                        else{
+
+                          //Return the entire record
+                            arr.push(record);
+                        }
                     }
-                    if (callback) callback.apply(me, arr);
+                    if (callback) callback.apply(me, [arr]);
                 }
                 else{
                     me.onError(request);
@@ -1252,8 +1257,9 @@ javaxt.dhtml.DataGrid = function(parent, config) {
               //Method 2: Select/deselect manually. No rows will highlight.
                 table.forEachRow(function (row, content) {
 
-                    var checkboxDiv = content[checkboxHeader.idx];
-                    var checkbox = checkboxDiv.checkbox;
+                    var checkbox = getCheckbox(content[checkboxHeader.idx]);
+                    if (!checkbox) return;
+
                     if (checked) {
                         checkbox.select();
                     }
@@ -1272,6 +1278,96 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
         div.checkbox = checkbox;
         return div;
+    };
+
+
+  //**************************************************************************
+  //** getCheckbox
+  //**************************************************************************
+  /** Returns the checkbox associated with the content of a cell. Returns
+   *  null if the cell is empty or does not contain a checkbox (e.g. the
+   *  update function never called row.set('x') for the checkbox column).
+   *  Note that cell content may be a string or null (see getContent in the
+   *  Table class) so we need to check for the checkbox property carefully.
+   */
+    var getCheckbox = function(content){
+        if (content && content.checkbox) return content.checkbox;
+        return null;
+    };
+
+
+  //**************************************************************************
+  //** buildURL
+  //**************************************************************************
+  /** Used to construct a URL to fetch records from the server. Merges the
+   *  given params with config.params and the current filter.
+   */
+    var buildURL = function(params){
+        if (!params) params = {};
+
+
+      //Add config.params to the querystring as needed
+        if (config.params){
+            for (var key in config.params) {
+                if (config.params.hasOwnProperty(key)) {
+                    if (!hasParam(key, params)){
+                        if (key.toLowerCase()!=='orderby'){
+                            params[key] = config.params[key];
+                        }
+                    }
+                }
+            }
+        }
+
+
+      //Add filter to the querystring
+        var orderby = "";
+        if (filter){
+            for (var key in filter) {
+                if (filter.hasOwnProperty(key)) {
+                    if (key.toLowerCase()==='orderby'){
+                        if (!hasParam(key, params)){
+                            orderby = filter[key];
+                            orderby = ((orderby!=null && orderby!="") ? "&orderby=" + encodeURIComponent(orderby) : "");
+                        }
+                    }
+                    else{
+                        var val = filter[key];
+                        if (!isArray(val)){
+                            val = (val+"").trim();
+                        }
+                        if (val.length>0){
+                            if (!hasParam(key, params)){
+                                params[key] = val;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+      //Get orderby from config.params only if it is not found in the filter
+        if (orderby.length===0){
+            if (config.params){
+                for (var key in config.params) {
+                    if (config.params.hasOwnProperty(key)) {
+                        if (key.toLowerCase()==='orderby'){
+                            orderby = config.params[key];
+                            orderby = ((orderby!=null && orderby!="") ? "&orderby=" + encodeURIComponent(orderby) : "");
+                        }
+                    }
+                }
+            }
+        }
+
+
+      //Build URL
+        var url = config.url;
+        if (url.indexOf("?")==-1) url+= "?";
+        url += encodeParams(params);
+        url += orderby;
+        return url;
     };
 
 
@@ -1320,73 +1416,13 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         };
 
 
-      //Add config.params to the querystring as needed
-        if (config.params){
-            for (var key in config.params) {
-                if (config.params.hasOwnProperty(key)) {
-                    if (!hasParam(key, params)){
-                        if (key.toLowerCase()!=='orderby'){
-                            params[key] = config.params[key];
-                        }
-                    }
-                }
-            }
-        }
-
-
       //Add count to the querystring
         if (config.count==true && page==1) params.count = true;
         else params.count = false;
 
 
-      //Add filter to the querystring
-        var orderby = "";
-        if (filter){
-            for (var key in filter) {
-                if (filter.hasOwnProperty(key)) {
-                    if (key.toLowerCase()==='orderby'){
-                        if (!hasParam(key, params)){
-                            orderby = filter[key];
-                            orderby = ((orderby!=null && orderby!="") ? "&orderby=" + encodeURIComponent(orderby) : "");
-                        }
-                    }
-                    else{
-                        var val = filter[key];
-                        if (!isArray(val)){
-                            val = (val+"").trim();
-                        }
-                        if (val.length>0){
-                            if (!hasParam(key, params)){
-                                params[key] = val;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-
-      //Get orderby from config.params only if it is not found in the filter
-        if (orderby.length===0){
-            if (config.params){
-                for (var key in config.params) {
-                    if (config.params.hasOwnProperty(key)) {
-                        if (key.toLowerCase()==='orderby'){
-                            orderby = config.params[key];
-                            orderby = ((orderby!=null && orderby!="") ? "&orderby=" + encodeURIComponent(orderby) : "");
-                        }
-                    }
-                }
-            }
-        }
-
-
-
       //Build URL
-        var url = config.url;
-        if (url.indexOf("?")==-1) url+= "?";
-        url += encodeParams(params);
-        url += orderby;
+        var url = buildURL(params);
 
 
 
