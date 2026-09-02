@@ -366,6 +366,27 @@ javaxt.dhtml.DataGrid = function(parent, config) {
               //Override the update method
                 rows[i].update = function(){
                     config.update(this, this.record);
+
+                  //Fill in any empty cells using the column config. Columns
+                  //with a "field" attribute are populated using values from
+                  //the record. This also ensures that the checkbox column is
+                  //rendered, even if the update function never called
+                  //row.set('x').
+                    for (var j=0; j<config.columns.length; j++){
+                        var col = this.childNodes[j];
+                        if (col.getContent()) continue;
+
+                        if (config.columns[j].header==='x'){
+                            this.set('x');
+                        }
+                        else{
+                            var field = config.columns[j].field;
+                            if (field){
+                                var val = this.record[field];
+                                if (val!=null) this.set(j, val);
+                            }
+                        }
+                    }
                 };
 
 
@@ -397,15 +418,46 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                     }
                     else{
 
-                      //Wrap value in an overflow div as requested
-                        for (var j=0; j<config.columns.length; j++){
-                            if (config.columns[j].header===key && config.columns[j].wrap===true){
-                                val = wrap(val);
-                                break;
+                      //Resolve the key to a column index. Numeric keys are
+                      //used as-is. Otherwise, exact header matches take
+                      //precedence. If no header matches, use the first
+                      //non-checkbox column with a matching "field" attribute.
+                        var idx = -1;
+                        if (typeof key === "number"){
+                            if (key>=0 && key<config.columns.length) idx = key;
+                        }
+                        else{
+                            for (var j=0; j<config.columns.length; j++){
+                                if (key===config.columns[j].header){
+                                    idx = j;
+                                    break;
+                                }
+                            }
+                            if (idx<0){
+                                for (var j=0; j<config.columns.length; j++){
+                                    var column = config.columns[j];
+                                    if (column.header!=='x' && key===column.field){
+                                        idx = j;
+                                        break;
+                                    }
+                                }
                             }
                         }
 
-                        this._set(key, val);
+
+                        if (idx>-1){
+
+                          //Wrap value in an overflow div as requested
+                            if (config.columns[idx].wrap===true) val = wrap(val);
+
+                            this._set(idx, val);
+                        }
+                        else{
+
+                          //Pass the key through as-is and let the underlying
+                          //table try to resolve it (e.g. numeric strings)
+                            this._set(key, val);
+                        }
                     }
                 };
 
