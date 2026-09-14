@@ -198,9 +198,13 @@ javaxt.dhtml.DatePicker = function(parent, config) {
 
 
       //Create container
-        mainDiv = createElement('div', parent, config.style.panel);
+        var div = createElement("div", parent, "javaxt-datepicker");
+        me.el = div;
+
+
+      //Create main div
+        mainDiv = createElement("div", div, config.style.panel);
         mainDiv.style.display = "table";
-        me.el = mainDiv;
 
 
       //Disable text selection
