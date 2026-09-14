@@ -27,6 +27,23 @@ javaxt.dhtml.DateInput = function(parent, config) {
         date: null,
 
 
+      /** Used to set the selection mode. Options are "day" or "week".
+       */
+        selectionMode: "day",
+
+
+      /** Day names or abbreviations to use in the column headers
+       */
+        daysOfWeek: ["S","M","T","W","T","F","S"],
+
+
+      /** Month names or abbreviations used in the header
+       */
+        months : ["January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ],
+
+
       /** If true, the calendar menu will appear whenever the text field has
        *  focus (e.g. mouse click). Default is false.
        */
@@ -37,6 +54,7 @@ javaxt.dhtml.DateInput = function(parent, config) {
        *  provide CSS class names instead of individual style definitions.
        */
         style: {
+            width: "100%",
 
             input: {
                 color: "#363636",
@@ -115,9 +133,9 @@ javaxt.dhtml.DateInput = function(parent, config) {
       //Create main div
         var mainDiv = createElement("div", parent, {
             position: "relative",
-            display: "inline-block"
+            width: config.style.width
         });
-        mainDiv.setAttribute("desc", me.className);
+        mainDiv.className = "javaxt-dateinput";
         me.el = mainDiv;
 
 
@@ -179,8 +197,7 @@ javaxt.dhtml.DateInput = function(parent, config) {
 
 
       //Create button in the second column
-        button = createElement('input', tr.addColumn(), config.style.button);
-        button.type = "button";
+        button = createElement('button', tr.addColumn(), config.style.button);
         button.onclick = function(){
 
             if (menu){
@@ -305,6 +322,9 @@ javaxt.dhtml.DateInput = function(parent, config) {
 
             datePicker = new javaxt.dhtml.DatePicker(menu, {
                 date: date,
+                selectionMode: config.selectionMode,
+                daysOfWeek: config.daysOfWeek,
+                months: config.months,
                 style: config.style.datePicker
             });
             datePicker.select();
