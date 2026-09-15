@@ -1,11 +1,6 @@
 <!DOCTYPE html>
 <html>
 
-  <!--
- Replace the previous 2 lines with this to see if the behaviour changes in any way
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-  -->
-
 <head>
 <title>Tree Demo</title>
 
@@ -20,15 +15,43 @@
 
 <style>
 
+  /**************************************************************************/
+  /** Demo layout                                                          */
+  /**************************************************************************/
 
-    #demo1 {
+    .demo-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 40px;
+    }
+
+    .demo-col h2 {
+        font-size: 15px;
+        font-weight: 600;
+        color: #363636;
+        margin: 0 0 4px 0;
+    }
+
+    .demo-col p.hint {
+        font-size: 12px;
+        color: #888;
+        margin: 0 0 12px 0;
+    }
+
+    .tree {
         font-size: 12px;
         color: #363636;
         display: inline-block;
-        width: 500px;
+        width: 340px;
     }
 
 
+  /**************************************************************************/
+  /** Legacy stylesheet (image sprite based).                              */
+  /** This is the "old" way of styling the tree: the nodes, leaves and     */
+  /** connectors are all painted from a single tree.png sprite. This is    */
+  /** ONLY used by the tree on the right (#demo2).                         */
+  /**************************************************************************/
 
     .join_leaf_bottom, .join_leaf_middle, .join_line,
     .join_node_bottom, .join_node_bottom_open,
@@ -40,41 +63,17 @@
         width: 19px;
         height: 20px;
     }
-    .join_leaf_bottom {
-        background-position: -2px 0px;
-    }
-    .join_leaf_middle {
-        background-position: -25px 0px;
-    }
-    .join_line {
-        background-position: -48px 0px;
-        background-repeat: repeat-y;
-    }
-    .join_node_bottom {
-        background-position: -71px 0px;
-    }
-    .join_node_bottom_open {
-        background-position: -94px 0px;
-    }
-    .join_node_middle {
-        background-position: -117px 0px;
-    }
-    .join_node_middle_open {
-        background-position: -140px 0px;
-    }
-    .leaf {
-        background-position: -163px 0px;
-    }
-    .node {
-        background-position: -186px 0px;
-    }
-    .node_open {
-        background-position: -209px 0px;
-    }
-    .root {
-        background-position: -232px 0px;
-    }
-
+    .join_leaf_bottom     { background-position: -2px 0px; }
+    .join_leaf_middle     { background-position: -25px 0px; }
+    .join_line            { background-position: -48px 0px; background-repeat: repeat-y; }
+    .join_node_bottom     { background-position: -71px 0px; }
+    .join_node_bottom_open{ background-position: -94px 0px; }
+    .join_node_middle     { background-position: -117px 0px; }
+    .join_node_middle_open{ background-position: -140px 0px; }
+    .leaf                 { background-position: -163px 0px; }
+    .node                 { background-position: -186px 0px; }
+    .node_open            { background-position: -209px 0px; }
+    .root                 { background-position: -232px 0px; }
 
 </style>
 
@@ -84,6 +83,9 @@
 window.onload = function() {
 
 
+  //**************************************************************************
+  //** Sample data (shared by both trees)
+  //**************************************************************************
     var nodes = [
         {
             name: "javaxt-core", //root node
@@ -128,7 +130,39 @@ window.onload = function() {
         }
     ];
 
-    var tree = new javaxt.dhtml.Tree(document.getElementById("demo1"), {
+
+  //**************************************************************************
+  //** Wire up console logging for a tree
+  //**************************************************************************
+    var addLogging = function(tree, label){
+        tree.onExpand = function(node){ console.log("["+label+"] Expanded " + node.name); };
+        tree.onCollapse = function(node){ console.log("["+label+"] Collapsed " + node.name); };
+        tree.onClick = function(item){ console.log("["+label+"] Clicked " + item.name); };
+    };
+
+
+  //**************************************************************************
+  //** Tree 1 - Default (inline) style
+  //**************************************************************************
+  /** No "style" config is provided, so the tree renders using its built-in,
+   *  inline default styles. No external stylesheet is required - the nodes,
+   *  leaves and connectors are drawn with small inline SVG images.
+   */
+    var tree1 = new javaxt.dhtml.Tree(document.getElementById("demo1"), {
+        nodes: nodes
+    });
+    tree1.show(tree1.getItem(["javaxt-core", "javaxt.sql", "Connection"]));
+    addLogging(tree1, "default");
+
+
+  //**************************************************************************
+  //** Tree 2 - Legacy (stylesheet) style
+  //**************************************************************************
+  /** The style config below maps each element to a CSS class name defined in
+   *  the <style> block above (the tree.png image sprite). This is the original
+   *  way the tree was styled and still works exactly as before.
+   */
+    var tree2 = new javaxt.dhtml.Tree(document.getElementById("demo2"), {
         nodes: nodes,
         style:{
 
@@ -168,26 +202,8 @@ window.onload = function() {
             }
         }
     });
-
-
-
-    var path = ["javaxt-core", "javaxt.sql", "Connection"];
-    var item = tree.getItem(path);
-    tree.show(item);
-
-
-    tree.onExpand = function(node){
-       console.log("Expanded " + node.name);
-    };
-
-    tree.onCollapse = function(node){
-       console.log("Collapsed " + node.name);
-    };
-
-    tree.onClick = function(item){
-       console.log("Clicked " + item.name);
-       console.log(tree.getPath(item));
-    };
+    tree2.show(tree2.getItem(["javaxt-core", "javaxt.sql", "Connection"]));
+    addLogging(tree2, "legacy");
 
 };
 </script>
@@ -197,12 +213,28 @@ window.onload = function() {
 <body>
 
 <h1>Tree Demo</h1>
-<p>Simple demo of the tree control. See the source code for this page for more
-information on how the component is instantiated and stylized. Open the web
-console to see some of the events.</p>
+<p>The tree below is rendered twice with two different styles. The tree on the
+left uses the component's default style, which is defined inline
+(no stylesheet required). The tree on the right uses a <b>stylesheet</b>-based
+style backed by an image sprite (tree.png). Open the
+web console to see the events.</p>
 
 
-<div id="demo1"></div>
+<div class="demo-row">
+
+    <div class="demo-col">
+        <h2>Default style</h2>
+        <p class="hint">Inline SVG icons &mdash; no stylesheet needed</p>
+        <div id="demo1" class="tree"></div>
+    </div>
+
+    <div class="demo-col">
+        <h2>Windows classic style</h2>
+        <p class="hint">CSS classes + tree.png image sprite</p>
+        <div id="demo2" class="tree"></div>
+    </div>
+
+</div>
 
 
 </body>
