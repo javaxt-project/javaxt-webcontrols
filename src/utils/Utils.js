@@ -448,6 +448,9 @@ javaxt.dhtml.utils = {
                     if (key==="content"){
                         el.innerHTML = val;
                     }
+                    else if (key==="class" || key==="className"){
+                        el.className = val;
+                    }
                     else{
                         el.style[key] = val;
                     }
@@ -1592,6 +1595,11 @@ javaxt.dhtml.utils = {
 
 
             if (!config) config = {};
+            var style  = {};
+            if (javaxt.dhtml.style && javaxt.dhtml.style.default){
+                style = javaxt.dhtml.style.default.window;
+            }
+
             merge(config, {
                 width: 450,
                 height: 200,
@@ -1604,7 +1612,7 @@ javaxt.dhtml.utils = {
                         header: "window-header alert-header",
                         body:   "window-body alert-body"
                     },
-                    javaxt.dhtml.style.default.window
+                    style
                 )
             });
 
@@ -1703,6 +1711,11 @@ javaxt.dhtml.utils = {
             };
 
 
+            var style  = {};
+            if (javaxt.dhtml.style && javaxt.dhtml.style.default){
+                style = javaxt.dhtml.style.default.window;
+            }
+
             merge(config, {
                 width: 450,
                 height: 150,
@@ -1711,7 +1724,7 @@ javaxt.dhtml.utils = {
                 footer: buttonDiv,
                 style: merge(
                     { body: "window-body confirm-body" },
-                    javaxt.dhtml.style.default.window
+                    style
                 )
             });
 
