@@ -13,11 +13,26 @@ if(!javaxt.dhtml.calendar) javaxt.dhtml.calendar={};
 javaxt.dhtml.calendar.Event = function(config) {
 
     var me = this;
+    var defaultConfig = {
+        id: null,
+        subject: null,
+        startDate: null,
+        endDate: null,
+        editable: false,
+        style: {
+            event: null,
+            eventContinueLeft: null,
+            eventContinueRight: null
+        }
+    };
+
     var id;
     var subject;
     var startDate, endDate;
     var editable;
+    var style;
     var attr;
+
 
   //**************************************************************************
   //** Constructor
@@ -25,6 +40,18 @@ javaxt.dhtml.calendar.Event = function(config) {
   /** Creates a new instance of an event. */
 
     var init = function(){
+
+
+      //Clone the config so we don't modify the original config object
+        var clone = {};
+        merge(clone, config);
+
+
+      //Merge clone with default config
+        merge(clone, defaultConfig);
+        config = clone;
+
+
         id = config.id;
         subject = config.subject;
         startDate = new Date(config.startDate);
@@ -32,18 +59,28 @@ javaxt.dhtml.calendar.Event = function(config) {
         editable = config.editable;
         if (editable==true) editable = true;
         else editable = false;
-        
+        if (!style) style = {};
+        style = config.style;
+
+
         attr = {};
         for (var key in config) {
             if (config.hasOwnProperty(key)) {
 
+              //Skip the "known" keys (exposed via dedicated getters) and the
+              //style config - these should not end up in attr/toJson/equals.
                 switch(key) {
-                    case 'subject', 'startDate', 'endDate', 'editable':
+                    case 'id':
+                    case 'subject':
+                    case 'startDate':
+                    case 'endDate':
+                    case 'editable':
+                    case 'style':
                         break;
                     default:
                         attr[key] = config[key];
-                }                 
-                
+                }
+
             }
         }
     };
@@ -79,11 +116,21 @@ javaxt.dhtml.calendar.Event = function(config) {
     this.isEditable = function(){
         return editable;
     };
-    
+
     this.setEditable = function(b){
         editable = b;
     };
-    
+
+
+    this.setStyle = function(s){
+        if (!s) s = {};
+        style = s;
+    };
+
+    this.getStyle = function(){
+        return style;
+    };
+
 
     this.get = function(key){
         switch(key) {
@@ -101,39 +148,39 @@ javaxt.dhtml.calendar.Event = function(config) {
                 break;
             default:
                 return attr[key];
-        }  
+        }
     };
-    
+
 
     this.toJson = function(){
         var json = {};
-        
+
       //Add all the original attributes
         for (var key in attr) {
             if (attr.hasOwnProperty(key)) {
                 json[key] = attr[key];
-            }   
+            }
         }
-        
+
       //Update JSON with values retrieved from public "get" and "is" methods
         for (var key in me) {
             if (me.hasOwnProperty(key)) {
-                
+
                 if (key.indexOf("get")==0 && key!="get"){
-                    
+
                   //Get function
                     var fn = me[key];
-                    
+
                   //Update key
                     key = key.substring(3,4).toLowerCase() + key.substring(4);
                     if (key=="iD") key = "id";
-                    
+
                   //Get value
                     var val = fn.apply(me, []);
                     if (val instanceof Date) {
                         val = getISOString(val);
                     }
-                    
+
                   //Update JSON
                     json[key] = val;
                 }
@@ -158,6 +205,9 @@ javaxt.dhtml.calendar.Event = function(config) {
         for (var key in a) {
             if (a.hasOwnProperty(key)) {
 
+              //Style does not affect event identity
+                if (key=="style") continue;
+
                 var x = a[key];
                 var y = b[key];
 
@@ -180,31 +230,35 @@ javaxt.dhtml.calendar.Event = function(config) {
         }
         return true;
     };
-    
-    
-    this.createDiv = function(continueLeft, continueRight){
-        
 
-        var outerDiv = document.createElement('div');
-        outerDiv.className = "javaxt-cal-event" + 
-            (continueLeft==true? " javaxt-cal-event-continue-left" : "") + 
-            (continueRight==true? " javaxt-cal-event-continue-right" : "");
-        outerDiv.style.height = "100%";
-        outerDiv.style.position = "relative";
-        outerDiv.style.overflow = "hidden";
-        
-        
-        var innerDiv = document.createElement('div');
-        innerDiv.style.width = "100%";
-        innerDiv.style.height = "100%";
-        innerDiv.style.position = "absolute";
-        innerDiv.style.overflow = "hidden";
+
+    this.createDiv = function(continueLeft, continueRight){
+
+
+        var outerDiv = createElement('div');
+        setStyle(outerDiv, style.event);
+        addStyle(outerDiv, {
+            height: "100%",
+            position: "relative",
+            overflow: "hidden"
+        });
+        if (continueLeft==true) addStyle(outerDiv, style.eventContinueLeft);
+        if (continueRight==true) addStyle(outerDiv, style.eventContinueRight);
+        if (continueLeft==true && continueRight==true) addStyle(outerDiv, {borderRadius: "0px"});
+
+      //Structural marker used by the drag layer (see Utils.getInnerDiv)
+        outerDiv.isCalEvent = true;
+
+
+        var innerDiv = createElement('div', outerDiv, {
+            width: "100%",
+            height: "100%",
+            position: "absolute",
+            overflow: "hidden"
+        });
         innerDiv.innerHTML = me.getSubject();
-        
-        
-        outerDiv.appendChild(innerDiv);        
-        
-        
+
+
         return outerDiv;
     };
 
@@ -218,6 +272,16 @@ javaxt.dhtml.calendar.Event = function(config) {
             + pad(date.getUTCMinutes()) + ':'
             + pad(date.getUTCSeconds()) + 'Z';
     };
+
+
+
+  //**************************************************************************
+  //** Utils
+  //**************************************************************************
+    var createElement = javaxt.dhtml.utils.createElement;
+    var merge = javaxt.dhtml.utils.merge;
+    var setStyle = javaxt.dhtml.utils.setStyle;
+    var addStyle = javaxt.dhtml.utils.addStyle;
 
 
     init();

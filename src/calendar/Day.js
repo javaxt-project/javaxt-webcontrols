@@ -14,6 +14,9 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
     this.className = "javaxt.dhtml.calendar.Day";
 
     var me = this;
+    var defaultConfig = {
+
+    };
 
 
   //DOM elements
@@ -29,7 +32,6 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
     var startDate, endDate;
     var cells = {};
     var widths = {};
-    var rowHeights = [];
     var scrollWidth;
     var scrollable = true;
 
@@ -58,6 +60,21 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
     var init = function(){
 
+      //Clone the config so we don't modify the original config object
+        var clone = {};
+        merge(clone, config);
+
+
+      //Merge clone with default config
+        merge(clone, defaultConfig);
+        config = clone;
+
+
+      //Ensure the "javaxt-noselect" style rule is present in the document
+        javaxt.dhtml.utils.addNoSelectRule();
+
+
+
       //Call super
         new javaxt.dhtml.calendar.View(me, config);
 
@@ -68,9 +85,9 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         if (config.days!=null) days = config.days;
 
       //Set event size, padding, and spacing
-        function isNumeric(n){ return !isNaN(parseFloat(n)) && isFinite(n); }
-        if (isNumeric(config.eventHeight)) eventHeight = parseInt(config.eventHeight);
-        if (isNumeric(config.eventPadding)) eventPadding = parseInt(config.eventPadding);
+        var isNumber = javaxt.dhtml.utils.isNumber;
+        if (isNumber(config.eventHeight)) eventHeight = parseInt(config.eventHeight);
+        if (isNumber(config.eventPadding)) eventPadding = parseInt(config.eventPadding);
 
 
       //Specify function used to get current date
@@ -115,6 +132,9 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
       //Call the update callback
         listener = me.getListener('update');
         if (listener!=null) listener.callback.apply(listener.scope, [me]);
+
+
+        addResizeListener(parent, onResize);
     };
 
 
@@ -175,10 +195,30 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
 
   //**************************************************************************
+  //** onResize
+  //**************************************************************************
+  /** Recomputes event positions after the view is resized.
+   */
+    var onResize = function(){
+        if (!rendered) return;
+        if (!el || !el.parentNode) return; //view is hidden (not the active view)
+
+      //Re-lay-out the events (their positions are measured from the grid, which
+      //stretches/shrinks with the view). Scroll position is preserved.
+        var scrollTop = bodyDiv ? bodyDiv.scrollTop : null;
+        var events = me.getEvents();
+        me.clear();
+        me.addEvents(events);
+        if (scrollTop!=null) bodyDiv.scrollTop = scrollTop;
+    };
+
+
+
+  //**************************************************************************
   //** renderTable
   //**************************************************************************
-  /** Used to render a new table for the current date. */
-
+  /** Used to render a new table for the current date.
+   */
     var renderTable = function(){
 
 
@@ -196,76 +236,59 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
       //Reset variables
         cells = {};
         widths = {};
-        rowHeights = [];
 
 
 
       //Create main table
-        var div, tbody, tr, td;
-        tbody = createTable();
-        var table = el = tbody.parentNode;
-        table.className = "javaxt-noselect";
-        table.style.cursor = "default";
-        parent.appendChild(table);
+        var div, tr, td;
+        var table = el = createTable(parent);
+        table.className = "javaxt-cal-day javaxt-noselect";
 
 
       //Create header row
-        tr = document.createElement("tr");
+        tr = table.addRow();
+        addStyle(tr, "header");
         tr.setAttribute("desc", "header");
-        tr.className = "javaxt-cal-header";
-        tbody.appendChild(tr);
-        td = document.createElement("td");
-        td.style.width = "100%";
-        td.style.height = "inherit";
-        tr.appendChild(td);
-        var header = td;
+        var header = tr.addColumn({width: "100%", height: "inherit"});
 
 
 
       //Create row for multiday events
-        tr = document.createElement("tr");
+        tr = table.addRow();
+        addStyle(tr, "multidayHeader");
         tr.setAttribute("desc", "multiday events");
-        tr.className = "javaxt-cal-multiday-header";
         tr.style.display = "none";
         tr.style.visibility = "hidden"; //visible
         multidayRow = tr;
-        tbody.appendChild(tr);
-        td = document.createElement("td");
-        td.style.width = "100%";
-        td.style.height = "inherit";
-        tr.appendChild(td);
-        var multidayDiv = document.createElement('div');
+        td = tr.addColumn({width: "100%", height: "inherit"});
+        var multidayDiv = createElement('div', td, {
+            width: "100%",
+            height: "inherit",
+            position: "relative"
+        });
         multidayDiv.setAttribute("desc", "multiday-div");
-        multidayDiv.style.width = "100%";
-        multidayDiv.style.height = "inherit";
-        multidayDiv.style.position = "relative";
-        td.appendChild(multidayDiv);
 
 
 
       //Create body row
-        tr = document.createElement("tr");
+        tr = table.addRow();
+        addStyle(tr, "body");
         tr.setAttribute("desc", "body");
-        tr.className = "javaxt-cal-body";
-        tbody.appendChild(tr);
-        td = document.createElement("td");
-        td.style.width = "100%";
-        td.style.height = "100%";
-        tr.appendChild(td);
+        td = tr.addColumn({width: "100%", height: "100%"});
 
-        bodyDiv = document.createElement('div');
+        bodyDiv = createElement('div', td, {
+            width: "100%",
+            height: "100%",
+            position: "relative"
+        });
         bodyDiv.setAttribute("desc", "body-div");
-        bodyDiv.style.width = "100%";
-        bodyDiv.style.height = "100%";
-        bodyDiv.style.position = "relative";
-        td.appendChild(bodyDiv);
-        div = document.createElement('div');
-        div.style.width = "100%";
-        div.style.height = "100%";
-        div.style.position = "absolute";
-        div.style.overflow = 'scroll';
-        div.style.overflowX = 'hidden';
-        bodyDiv.appendChild(div);
+        div = createElement('div', bodyDiv, {
+            width: "100%",
+            height: "100%",
+            position: "absolute",
+            overflow: 'scroll',
+            overflowX: 'hidden'
+        });
         bodyDiv = div;
 
       //Add logic to enable/disable scroll. This is important for touch devices.
@@ -287,144 +310,102 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
 
       //Create footer row
-        tr = document.createElement("tr");
+        tr = table.addRow();
         tr.setAttribute("desc", "footer");
-        tr.className = "javaxt-cal-footer";
-        tbody.appendChild(tr);
-        td = document.createElement("td");
-        td.style.width = "100%";
-        td.style.height = "inherit";
-        tr.appendChild(td);
         footerRow = tr;
-        var footer = td;
+        var footer = tr.addColumn({width: "100%", height: "inherit"});
 
 
       //Create current time indicator
-        currTimeDiv = document.createElement("div");
-        currTimeDiv.className = "javaxt-cal-current-time-indicator";
-        currTimeDiv.style.position = "absolute";
-        currTimeDiv.style.width = "100%";
-        currTimeDiv.style.display = "none";
-        bodyDiv.appendChild(currTimeDiv);
+        currTimeDiv = createElement("div", bodyDiv, {
+            position: "absolute",
+            width: "100%",
+            display: "none"
+        });
+        addStyle(currTimeDiv, "currentTimeIndicator");
 
 
       //Populate header
-        tbody = createTable();
-        header.appendChild(tbody.parentNode);
-        tr = document.createElement("tr");
-        tbody.appendChild(tr);
-        td = document.createElement("td");
-        tr.appendChild(td);
-        var spacerUL = document.createElement('div');
-        td.appendChild(spacerUL);
+        var headerTable = createTable(header);
+        tr = headerTable.addRow();
+        td = tr.addColumn();
+        var spacerUL = createElement('div', td);
 
         var d = new Date(startDate);
         for (var i=0; i<days; i++){
-            td = document.createElement('td');
-            td.className = "javaxt-cal-header-col";
-            td.style.width = (100/days) + '%';
-            td.style.height = "100%";
+            td = tr.addColumn({width: (100/days) + '%', height: "100%"});
+            addStyle(td, "headerCol");
             td.appendChild(me.createColumnHeader(d.getDay()));
-            tr.appendChild(td);
             d.setDate(d.getDate()+1);
         }
 
-        td = document.createElement("td");
-        tr.appendChild(td);
-        var spacerUR = document.createElement('div');
-        td.appendChild(spacerUR);
+        td = tr.addColumn();
+        var spacerUR = createElement('div', td);
 
 
       //Populate footer
-        tbody = createTable();
-        footer.appendChild(tbody.parentNode);
-        tr = document.createElement("tr");
-        tbody.appendChild(tr);
-        td = document.createElement("td");
-        tr.appendChild(td);
-        var spacerLL = document.createElement('div');
-        td.appendChild(spacerLL);
+        var footerTable = createTable(footer);
+        tr = footerTable.addRow();
+        td = tr.addColumn();
+        var spacerLL = createElement('div', td);
 
         var d = new Date(startDate);
         for (var i=0; i<days; i++){
-            td = document.createElement('td');
-            td.className = "javaxt-cal-footer-col";
-            td.style.width = (100/days) + '%';
-            td.style.height = "100%";
+            td = tr.addColumn({width: (100/days) + '%', height: "100%"});
+            addStyle(td, "footerCol");
             td.appendChild(me.createColumnFooter(d.getDay()));
-            tr.appendChild(td);
             d.setDate(d.getDate()+1);
         }
 
-        td = document.createElement("td");
-        tr.appendChild(td);
-        var spacerLR = document.createElement('div');
-        td.appendChild(spacerLR);
+        td = tr.addColumn();
+        var spacerLR = createElement('div', td);
 
 
 
       //Populate multiday div
-        var multidayContent = document.createElement('div');
+        var multidayContent = createElement('div', multidayDiv, {
+            width: "100%",
+            height: "100%",
+            position: "relative"
+        });
         multidayContent.setAttribute("desc", "multiday-content");
-        multidayContent.style.width = "100%";
-        multidayContent.style.height = "100%";
-        multidayContent.style.position = "relative";
-        multidayDiv.appendChild(multidayContent);
-        div = document.createElement('div');
-        multidayContent.appendChild(div);
-        div.style.width = "100%";
-        div.style.height = "100%";
-        div.style.position = "absolute";
-        div.style.overflow = 'scroll';
-        div.style.overflowX = 'hidden';
-        tbody = createTable();
-        div.appendChild(tbody.parentNode);
-        tr = document.createElement("tr");
-        tbody.appendChild(tr);
-        td = document.createElement("td");
-        tr.appendChild(td);
-        var spacerML = document.createElement('div');
-        td.appendChild(spacerML);
+        div = createElement('div', multidayContent, {
+            width: "100%",
+            height: "100%",
+            position: "absolute",
+            overflow: 'scroll',
+            overflowX: 'hidden'
+        });
+        var multidayTable = createTable(div);
+        tr = multidayTable.addRow();
+        td = tr.addColumn();
+        var spacerML = createElement('div', td);
         for (var i=0; i<days; i++){
-            td = document.createElement('td');
-            td.className = "javaxt-cal-multiday-col";
-            td.style.width = (100/days) + '%';
-            td.style.height = "1px";
-            tr.appendChild(td);
+            td = tr.addColumn({width: (100/days) + '%', height: "1px"});
+            addStyle(td, "multidayCol");
         }
-        multidayEventsTable = tbody;
+        multidayEventsTable = multidayTable.firstChild;
 
 
 
 
 
       //Populate body
-        tbody = createTable();
-        bodyDiv.appendChild(tbody.parentNode);
-        var row = document.createElement('tr');
-        tbody.appendChild(row);
+        var bodyTable = createTable(bodyDiv);
+        var row = bodyTable.addRow();
 
 
 
       //Create left column to render hours
-        var leftCol = document.createElement('td');
-        leftCol.style.verticalAlign = "top";
-        row.appendChild(leftCol);
-        var hours = document.createElement('table');
-        hours.style.borderCollapse = "collapse";
-        hours.cellSpacing = 0;
-        hours.cellPadding = 0;
-        leftCol.appendChild(hours);
-        tbody = document.createElement('tbody');
-        hours.appendChild(tbody);
+        var leftCol = row.addColumn({verticalAlign: "top"});
+        var hours = createTable(leftCol);
         for (var i=0; i<24; i++){
-            var tr = document.createElement('tr');
-            tbody.appendChild(tr);
-            var td = document.createElement('td');
-            td.className = "javaxt-cal-hour" + (i==23 ? " javaxt-cal-hour-last" : "");
+            var tr = hours.addRow();
+            var td = tr.addColumn();
+            addStyle(td, "hour");
+            if (i==23) addStyle(td, "hourLast");
             if (i==0) td.style.borderTop = "0px";
             td.appendChild(me.createHourLabel(i));
-            tr.appendChild(td);
         }
 
 
@@ -433,60 +414,49 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         var d = new Date(startDate);
         for (var i=0; i<days; i++){
 
-            td = document.createElement('td');
-            td.className = 'javaxt-cal-cell';
-            td.style.width = (100/days) + '%';
-            td.style.height = "100%";
-            td.style.verticalAlign = "top";
+            td = row.addColumn({width: (100/days) + '%', height: "100%", verticalAlign: "top"});
+            addStyle(td, "cell");
             td.valign="top";
-            row.appendChild(td);
 
 
           //Create div used to store events and the table grid
-            var outerDiv = document.createElement('div');
-            outerDiv.style.width = "100%";
-            outerDiv.style.height = "100%";
-            outerDiv.style.position = "relative";
-            outerDiv.style.cursor = "inherit";
-            var innerDiv = document.createElement('div');
-            innerDiv.style.width = "100%";
-            innerDiv.style.height = "100%";
-            innerDiv.style.position = "absolute";
-            innerDiv.style.whiteSpace = 'nowrap';
-            innerDiv.style.overflow = 'hidden';
-            innerDiv.style.cursor = "inherit";
-            outerDiv.appendChild(innerDiv);
+            var outerDiv = createElement('div', td, {
+                width: "100%",
+                height: "100%",
+                position: "relative",
+                cursor: "inherit"
+            });
+            var innerDiv = createElement('div', outerDiv, {
+                width: "100%",
+                height: "100%",
+                position: "absolute",
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                cursor: "inherit"
+            });
 
 
             var cell = innerDiv;
             var cellID = (d.getMonth()+1) + "-" + d.getDate() + "-" + d.getFullYear();
             cell.date = new Date(d);
             cells[cellID] = cell;
-            td.appendChild(outerDiv);
 
 
           //Create table
-            var innerTable = document.createElement('table');
-            innerTable.cellSpacing = 0;
-            innerTable.cellPadding = 0;
-            innerTable.style.width = "100%";
-            innerTable.style.borderCollapse = "collapse";
-            tbody = document.createElement('tbody');
-            innerTable.appendChild(tbody);
-            cell.appendChild(innerTable);
+            var innerTable = createTable(cell);
 
 
 
           //Add 1 row for every 30 minutes
             for (var j=0; j<24*2; j++){
-                var tr = document.createElement('tr');
-                tbody.appendChild(tr);
+                var tr = innerTable.addRow();
 
-                var col = document.createElement('td');
-                col.className = "javaxt-cal-half-hour" + (j % 2 == 0 ? "" : " javaxt-cal-half-hour-sep") + (j==47 ? " javaxt-cal-hour-last" : "");
+                var col = tr.addColumn();
+                addStyle(col, "halfHour");
+                if (j % 2 != 0) addStyle(col, "halfHourSep");
+                if (j==47) addStyle(col, "hourLast");
                 if (j==0) col.style.borderTop = "0px";
 
-                tr.appendChild(col);
                 addListeners(tr, holdDelay);
             }
 
@@ -542,8 +512,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   //**************************************************************************
   //** addListeners
   //**************************************************************************
-  /** Used to initialize a cell for click and hold events. */
-
+  /** Used to initialize a cell for click and hold events.
+   */
     var addListeners = function(cell, holdDelay){
 
 
@@ -679,34 +649,35 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
    *  be safely overridden to generate custom headers.
    */
     this.createColumnHeader = function(i){
-        var outerDiv = document.createElement('div');
-        outerDiv.style.width = "100%";
-        outerDiv.style.height = "100%";
-        outerDiv.style.position = "relative";
-        outerDiv.style.cursor = "inherit";
-        var innerDiv = document.createElement('div');
-        innerDiv.style.width = "100%";
-        innerDiv.style.height = "100%";
-        innerDiv.style.position = "absolute";
-        innerDiv.style.whiteSpace = 'nowrap';
-        innerDiv.style.overflow = 'hidden';
-        innerDiv.style.cursor = "inherit";
+        var outerDiv = createElement('div', {
+            width: "100%",
+            height: "100%",
+            position: "relative",
+            cursor: "inherit"
+        });
+        var innerDiv = createElement('div', outerDiv, {
+            width: "100%",
+            height: "100%",
+            position: "absolute",
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            cursor: "inherit"
+        });
 
 
-        var text = javaxt.dhtml.calendar.Utils.dayNames[i];
+        var text = config.dayNames[i];
         if (days>1) text = text.substring(0,3);
-        //else text+= ", " + javaxt.dhtml.calendar.Utils.monthNames[d.getMonth()] + " " + d.getDate();
+        //else text+= ", " + config.monthNames[d.getMonth()] + " " + d.getDate();
         innerDiv.innerHTML = text;
 
 
-        outerDiv.appendChild(innerDiv);
         return outerDiv;
     };
 
 
 
     this.createColumnFooter = function(i){
-        return document.createElement('div');
+        return createElement('div');
     };
 
 
@@ -718,9 +689,10 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
    *  can be safely overridden to generate custom labels for hours.
    */
     this.createHourLabel = function(hour){
-        var div = document.createElement('div');
-        div.style.float = "right";
-        div.style.padding = "0px 7px 0px 7px";
+        var div = createElement('div', {
+            float: "right",
+            padding: "0px 7px 0px 7px"
+        });
 
 
       //Update hour and set meridian
@@ -733,22 +705,14 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         }
 
       //Create table to render the hour and meridian
-        var hdr = document.createElement('table');
-        hdr.cellSpacing = 0;
-        hdr.cellPadding = 0;
-        div.appendChild(hdr);
-        var t = document.createElement('tbody');
-        hdr.appendChild(t);
-        var tr = document.createElement('tr');
-        t.appendChild(tr);
-        var td = document.createElement('td');
-        td.className = "javaxt-cal-label-hour";
+        var hdr = createTable(div);
+        var tr = hdr.addRow();
+        var td = tr.addColumn();
+        addStyle(td, "labelHour");
         td.innerHTML = hour;
-        tr.appendChild(td);
-        td = document.createElement('td');
-        td.className = "javaxt-cal-label-meridian";
+        td = tr.addColumn();
+        addStyle(td, "labelMeridian");
         td.innerHTML = meridian;
-        tr.appendChild(td);
 
         return div;
     };
@@ -807,35 +771,26 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   //**************************************************************************
   //** getVerticalOffset
   //**************************************************************************
-  /** Returns the relative, vertical offset of a row in a cell.
+  /** Returns the vertical offset (relative to the cell) of a given hour. The
+   *  offset is measured directly from the rendered grid rows rather than summed
+   *  from cached row heights - the rows stretch to fill the available space
+   *  (e.g. on large screens) and fractional heights would otherwise accumulate
+   *  rounding error, causing events to drift away from the hour lines.
    */
     var getVerticalOffset = function(hour, cell){
+        var tbody = cell.childNodes[0].childNodes[0];
+        var rows = tbody.childNodes;
+        if (rows.length==0) return 0;
 
-      //Compute row heights and cache the values for subsequent use. Caching
-      //the row heights improves load times by approx 500ms in IE and 1000ms
-      //in FF. Caching assumes that row heights are the same accross all cells
-      //and that the row  heights do not change.
-        if (rowHeights.length==0){
-            var tbody = cell.childNodes[0].childNodes[0];
-            var rows = tbody.childNodes;
-            for (var i=0; i<rows.length; i++){
-                var tr = rows[i];
-                var rect = _getRect(tr);
-                rowHeights.push(rect.height);
-            }
-        }
+        var cellTop = _getRect(cell).top;
 
-      //Compute vertical offset
-        var offset = 0;
-        for (var i=0; i<rowHeights.length; i++){
-            var rowHeight = rowHeights[i];
-            offset += rowHeight;
-            var h = i*0.5;
-            if (h>=hour){
-                return (offset-rowHeight);
-            }
-        }
-        return 0;
+      //There are 2 rows per hour; find the row that starts at (or just after)
+      //the requested hour and return the top of that row relative to the cell.
+        var i = Math.ceil(hour*2);
+        if (i < rows.length) return _getRect(rows[i]).top - cellTop;
+
+      //At/after the end of the day - use the bottom of the last row.
+        return _getRect(rows[rows.length-1]).bottom - cellTop;
     };
 
 
@@ -898,6 +853,9 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
 
       //If we're still here, add the event
+        var style = getStyle(event, config);
+        event.setStyle(style);
+
         if (numDays>=1){
             addMultiDayEvent(event);
         }
@@ -1407,17 +1365,20 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
 
       //Create an absolute div within the cell to render the event
-        var outerDiv = document.createElement('div');
-        outerDiv.style.width = width + "%";
-        outerDiv.style.left = "0px";
+        var outerDiv = createElement('div', {
+            width: width + "%",
+            left: "0px",
+            position: "absolute"
+        });
         updatePadding(outerDiv);
-        outerDiv.style.position = "absolute";
         var startTime = event.getStartDate().getHours() + (event.getStartDate().getMinutes()/60);
         var endTime = event.getEndDate().getHours() + (event.getEndDate().getMinutes()/60);
-        var y = getVerticalOffset(startTime, cell);
-        var h = getVerticalOffset(endTime, cell)-y;
-        outerDiv.style.top = y + "px";
-        outerDiv.style.height = h + 'px';
+
+      //Position the event as a percentage of the day so it scales with the grid
+      //(the grid rows stretch to fill the view). Pixel offsets would drift away
+      //from the hour lines whenever the grid is resized/re-laid-out.
+        outerDiv.style.top = ((startTime/24)*100) + "%";
+        outerDiv.style.height = (((endTime-startTime)/24)*100) + "%";
         outerDiv.event = event;
         cell.appendChild(outerDiv);
 
@@ -1427,16 +1388,14 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
 
       //Wrap event in a table to ensure proper padding (I couldn't figure out how to do it with divs)
-        var tbody = createTable();
-        outerDiv.appendChild(tbody.parentNode);
-        var tr = document.createElement('tr');
-        tbody.appendChild(tr);
-        var td = document.createElement('td');
-        tr.appendChild(td);
-        td.style.verticalAlign = "top";
-        td.style.width = "100%";
-        td.style.height = "100%";
-        td.style.padding = ((eventPadding/2)+1) + "px " + eventPadding + "px " + (eventPadding/2) + "px"; //+1 for half-hour border
+        var eventTable = createTable(outerDiv);
+        var tr = eventTable.addRow();
+        var td = tr.addColumn({
+            verticalAlign: "top",
+            width: "100%",
+            height: "100%",
+            padding: ((eventPadding/2)+1) + "px " + eventPadding + "px " + (eventPadding/2) + "px" //+1 for half-hour border
+        });
         td.appendChild(div);
 
 
@@ -1457,7 +1416,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
 
       //Initialize mouse events
-        if (event.isEditable()) initDrag(outerDiv, me, holdDelay);
+        if (event.isEditable()) initDrag(outerDiv, me, holdDelay, config.style.eventDrag);
         else{
             outerDiv.onclick = function(e){
                 var listener = me.getListener('eventclick');
@@ -1610,11 +1569,9 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
       //Add new row to the multidayEventsTable as needed
         if (!startCol || !endCol){
-            var tr = document.createElement("tr");
-            multidayEventsTable.appendChild(tr);
-            var td = document.createElement("td");
-            td.className = "javaxt-cal-multiday-col-spacer";
-            tr.appendChild(td);
+            var tr = createElement("tr", multidayEventsTable);
+            var td = createElement("td", tr);
+            addStyle(td, "multidayColSpacer");
 
 
           //Remove height from spacer col of previous row and set current col height
@@ -1627,9 +1584,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
           //Add days
             for (var i=0; i<days; i++){
-                td = document.createElement('td');
-                td.className = "javaxt-cal-multiday-col";
-                tr.appendChild(td);
+                td = createElement('td', tr);
+                addStyle(td, "multidayCol");
 
                 if (i==startColID) startCol = td;
                 if (i==endColID) endCol = td;
@@ -1645,18 +1601,19 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
 
       //Add event to the startCol
-        var outerDiv = document.createElement('div');
-        outerDiv.style.width = "100%";
-        outerDiv.style.height = "100%";
-        outerDiv.style.position = "absolute";
+        var outerDiv = createElement('div', {
+            width: "100%",
+            height: "100%",
+            position: "absolute"
+        });
 
-        var innerDiv = document.createElement('div');
-        innerDiv.style.height = "100%";
         var paddingLeft = continueLeft ? "0px" : eventPadding + "px";
         var paddingRight = continueRight ? "0px" : eventPadding + "px";
-        innerDiv.style.padding = "0px " + paddingRight + " 0px " + paddingLeft; //Horizontal padding
-        innerDiv.style.position = "relative";
-        outerDiv.appendChild(innerDiv);
+        var innerDiv = createElement('div', outerDiv, {
+            height: "100%",
+            padding: "0px " + paddingRight + " 0px " + paddingLeft, //Horizontal padding
+            position: "relative"
+        });
 
         var div = event.createDiv(continueLeft, continueRight);
         div.style.height = "100%";
@@ -1664,11 +1621,12 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
 
       //Wrap the outerdiv to ensure proper overflow
-        var wrapper = document.createElement('div');
-        wrapper.style.width = "100%";
-        wrapper.style.height = eventHeight + "px";
-        wrapper.style.position = "relative";
-        wrapper.style.marginTop = (multidayEventsTable.childNodes.length>2 ? (eventPadding*2) : 0) + "px";
+        var wrapper = createElement('div', {
+            width: "100%",
+            height: eventHeight + "px",
+            position: "relative",
+            marginTop: (multidayEventsTable.childNodes.length>2 ? (eventPadding*2) : 0) + "px"
+        });
         wrapper.appendChild(outerDiv);
         wrapper.event = event;
         wrapper.onclick = function(e){
@@ -1814,7 +1772,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
     this.getTitle = function(){
         if (days==1){
-            var month = javaxt.dhtml.calendar.Utils.monthNames[date.getMonth()];
+            var month = config.monthNames[date.getMonth()];
             return (month + " " + date.getDate() + ", " + date.getFullYear());
         }
         else{
@@ -1823,8 +1781,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
             var endDate = range.endDate;
             endDate.setDate(endDate.getDate()-1);
 
-            var startMonth = javaxt.dhtml.calendar.Utils.monthNames[startDate.getMonth()];
-            var endMonth = javaxt.dhtml.calendar.Utils.monthNames[endDate.getMonth()];
+            var startMonth = config.monthNames[startDate.getMonth()];
+            var endMonth = config.monthNames[endDate.getMonth()];
 
             var a = startMonth + " " + startDate.getDate();
             var b = endDate.getDate() + ", " + endDate.getFullYear();
@@ -2125,37 +2083,23 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
 
   //**************************************************************************
-  //** intersects
+  //** Utils
   //**************************************************************************
-  /** Used to test whether two rectangles intersect.
-   */
-    var intersects = function(r1, r2) {
-      return !(r2.left > r1.right ||
-               r2.right < r1.left ||
-               r2.top > r1.bottom ||
-               r2.bottom < r1.top);
+    var _getRect = javaxt.dhtml.utils.getRect;
+    var createElement = javaxt.dhtml.utils.createElement;
+    var createTable = javaxt.dhtml.utils.createTable;
+    var intersects = javaxt.dhtml.utils.intersects;
+    var merge = javaxt.dhtml.utils.merge;
+
+    var addStyle = function(el, style){
+        javaxt.dhtml.utils.addStyle(el, javaxt.dhtml.utils.isString(style) ? config.style[style] : style);
     };
-
-
-  //**************************************************************************
-  //** createTable
-  //**************************************************************************
-    var createTable = function(){
-        var table = document.createElement('table');
-        table.style.width = "100%";
-        table.style.height = "100%";
-        table.cellSpacing = 0;
-        table.cellPadding = 0;
-        table.style.borderCollapse = "collapse";
-        var tbody = document.createElement('tbody');
-        table.appendChild(tbody);
-        return tbody;
-    };
-
-
-    var _getRect = javaxt.dhtml.calendar.Utils.getRect;
-    var initDrag = javaxt.dhtml.calendar.Utils.initDrag;
     var log = function(str){if(debug)console.log(str);};
+
+
+    var getStyle = javaxt.dhtml.calendar.Utils.getStyle;
+    var initDrag = javaxt.dhtml.calendar.Utils.initDrag;
+    var addResizeListener = javaxt.dhtml.utils.addResizeListener;
 
 
     init();

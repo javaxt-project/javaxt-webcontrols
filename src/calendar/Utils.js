@@ -3,28 +3,37 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 if(!javaxt.dhtml.calendar) javaxt.dhtml.calendar={};
 javaxt.dhtml.calendar.Utils = {
 
-    
-    monthNames : ["January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
-    ],
-    
-    dayNames : ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
-    
+
   //**************************************************************************
   //** getDaysBetween
   //**************************************************************************
   /** Returns the number of days between 2 dates. Returns a decimal value.
    */
     getDaysBetween : function(startDate, endDate){
-        
+
         function treatAsUTC(date) {
             var result = new Date(date);
             result.setMinutes(result.getMinutes() - result.getTimezoneOffset());
             return result;
-        }        
-        
+        }
+
         var millisecondsPerDay = 24 * 60 * 60 * 1000;
         return (treatAsUTC(endDate) - treatAsUTC(startDate)) / millisecondsPerDay;
+    },
+
+
+  //**************************************************************************
+  //** getStyle
+  //**************************************************************************
+  /** Used to get or create a style object for a given event
+   */
+    getStyle: function(event, config){
+        var style = event.getStyle();
+        if (!style) style = {};
+        if (!style.event) style.event = config.style.event;
+        if (!style.eventContinueLeft) style.eventContinueLeft = config.style.eventContinueLeft;
+        if (!style.eventContinueRight) style.eventContinueRight = config.style.eventContinueRight;
+        return style;
     },
 
 
@@ -35,7 +44,7 @@ javaxt.dhtml.calendar.Utils = {
    */
     addColSpan : function(td, newSpan){
         if (newSpan<2) return;
-        
+
       //Add colspan
         td.colSpan = newSpan;
 
@@ -59,88 +68,67 @@ javaxt.dhtml.calendar.Utils = {
             for (var i=0; i<del.length; i++){
                 tr.removeChild(del[i]);
             }
-        };   
-    
+        };
+
 
       //Delete cells that we've spanned
         deleteCells(td.nextSibling, newSpan-1);
-        
-    },
 
-
-  //**************************************************************************
-  //** getRect
-  //**************************************************************************
-  /** Returns the geometry of a given element.
-   */
-    getRect : function(el){
-
-        if (el.getBoundingClientRect){
-            return el.getBoundingClientRect();
-        }
-        else{
-            var x = 0;
-            var y = 0;
-            var w = el.offsetWidth;
-            var h = el.offsetHeight;
-
-            function isNumber(n){
-               return n === parseFloat(n);
-            }
-
-            var org = el;
-
-            do{
-                x += el.offsetLeft - el.scrollLeft;
-                y += el.offsetTop - el.scrollTop;
-            } while ( el = el.offsetParent );
-
-
-            el = org;
-            do{
-                if (isNumber(el.scrollLeft)) x -= el.scrollLeft;
-                if (isNumber(el.scrollTop)) y -= el.scrollTop;
-            } while ( el = el.parentNode );
-
-
-            return{
-                left: x,
-                right: x+w,
-                top: y,
-                bottom: y+h,
-                width: w,
-                height: h
-            };
-        }
     },
 
 
   //**************************************************************************
   //** initDrag
   //**************************************************************************
-  /** Used to enable/initialize event dragging. Drag events are initiated 
+  /** Used to enable/initialize event dragging. Drag events are initiated
    *  after a predefined holdDelay.
    *  @param holdDelay Number of milliseconds to wait before recognizing a hold
    */
-    initDrag : function(div, view, holdDelay){
-     
-                
+    initDrag : function(div, view, holdDelay, dragStyle){
+
+        var createElement = javaxt.dhtml.utils.createElement;
+        var addStyle = javaxt.dhtml.utils.addStyle;
+        var isString = javaxt.dhtml.utils.isString;
+
+
+      //Removes a style previously applied via addStyle(). Mirrors how the
+      //style was applied: if it is a CSS class name (string) the class is
+      //removed, otherwise the individual inline properties are cleared. Used
+      //to undo the "drag" style when a drag ends.
+        var removeStyle = function(el, style){
+            if (!el || !style) return;
+            if (isString(style)){
+                var arr = style.split(/\s+/);
+                for (var i=0; i<arr.length; i++){
+                    if (arr[i].length==0) continue;
+                    var re = new RegExp("(?:^|\\s)" + arr[i] + "(?!\\S)", "g");
+                    el.className = el.className.replace(re, "");
+                }
+            }
+            else{
+                for (var key in style){
+                    if (style.hasOwnProperty(key)) el.style[key] = "";
+                }
+            }
+        };
+
+
       //This timeout, started on mousedown, triggers the beginning of a hold
         var holdStarter = null;
 
-        
+
       //This flag indicates the user is currently holding the mouse down
         var holdActive = false;
 
-       
+
       //OnClick
         //div.onclick = NOTHING!! not using onclick at all - onmousedown and onmouseup take care of everything
 
-   
+
       //MouseDown
         div.onmousedown = function(e){
 
-            
+
           //Set the holdStarter and wait for the predetermined delay, and then begin a hold
             holdStarter = setTimeout(function() {
                 holdStarter = null;
@@ -149,43 +137,44 @@ javaxt.dhtml.calendar.Utils = {
 
               //Initiate drag
                 startDrag(e);
-                
-                
+
+
               //Add event listeners
                 if (document.addEventListener) { // For all major browsers, except IE 8 and earlier
                     document.addEventListener("mousemove", onMouseMove);
                     document.addEventListener("mouseup", onMouseUp);
-                } 
+                }
                 else if (document.attachEvent) { // For IE 8 and earlier versions
                     document.attachEvent("onmousemove", onMouseMove);
                     document.attachEvent("onmouseup", onMouseUp);
-                }             
+                }
 
             }, holdDelay);
-            
+
         };
 
 
 
       //MouseUp
         var onMouseUp = function(e){
-            
-            
-          //Remove javaxt-cal-event-drag class from the event div
+
+
+          //Remove the "drag" style from the event div
             var innerDiv = getInnerDiv(div);
-            innerDiv.className = innerDiv.className.replace( /(?:^|\s)javaxt-cal-event-drag(?!\S)/g , '' );
+            removeStyle(innerDiv, dragStyle);
+            innerDiv.style.cursor = "pointer";
 
 
           //Remove z-index
             div.style.zIndex = '';
-            
-            
+
+
           //If the mouse is released immediately (i.e., a click), before the
           //holdStarter runs, then cancel the holdStarter and do the click
             if (holdStarter) {
                 clearTimeout(holdStarter);
-                
-                
+
+
                 var listener = view.getListener('eventclick');
                 if (listener!=null){
                     var callback = listener.callback;
@@ -193,7 +182,7 @@ javaxt.dhtml.calendar.Utils = {
                     callback.apply(scope, [div.event, div, view, e]);
                 }
             }
-            
+
           //Otherwise, if the mouse was being held, end the hold
             else if (holdActive) {
                 holdActive = false;
@@ -206,13 +195,13 @@ javaxt.dhtml.calendar.Utils = {
                     document.detachEvent("onmousemove", onMouseMove);
                     document.detachEvent("onmouseup", onMouseUp);
                 }
-                
+
               //Update cursor
                 div.style.cursor = 'pointer';
-                
+
               //Move div
                 moveDiv(div);
-                
+
               //Remove the "javaxt-noselect" class
                 var body = document.getElementsByTagName('body')[0];
                 body.className = body.className.replace( /(?:^|\s)javaxt-noselect(?!\S)/g , '' );
@@ -222,10 +211,10 @@ javaxt.dhtml.calendar.Utils = {
 
         div.onmouseup = onMouseUp;
 
-        
-        
+
+
       //Touch-specifc variables
-        var x1, x2, y1, y2;        
+        var x1, x2, y1, y2;
         var scrollableDiv, scrollOffset;
         var scroll = function(e){
             x2 = e.changedTouches[0].pageX;
@@ -236,39 +225,39 @@ javaxt.dhtml.calendar.Utils = {
         };
         var endScroll = function(){
             if (document.removeEventListener) {
-                document.removeEventListener("touchmove", scroll); 
-                document.removeEventListener("touchend", endScroll); 
+                document.removeEventListener("touchmove", scroll);
+                document.removeEventListener("touchend", endScroll);
             }
             else if (document.detachEvent) {
                 document.detachEvent("ontouchmove", scroll);
                 document.detachEvent("ontouchend", endScroll);
             }
         };
-        
-        
+
+
 
       //Start touch (similar to "onmousedown")
         div.ontouchstart = function(e) {
 
-          //Prevent default "select" behavior. Also, disables scrolling 
+          //Prevent default "select" behavior. Also, disables scrolling
           //if the client starts scrolling over an event div
             e.preventDefault();
-            
-            
+
+
           //Get coordinates
             var touch = e.touches[0];
             var x = touch.pageX;
             var y = touch.pageY;
             x1 = e.changedTouches[0].pageX;
             y1 = e.changedTouches[0].pageY;
-            
+
 
           //Add logic to manage scroll events
             scrollableDiv = view.getScrollDiv();
             if (scrollableDiv){
                 scrollOffset = scrollableDiv.scrollTop;
-                if (document.addEventListener) { 
-                    document.addEventListener("touchmove", scroll); 
+                if (document.addEventListener) {
+                    document.addEventListener("touchmove", scroll);
                     document.addEventListener("touchend", endScroll);
                 }
                 else if (document.attachEvent) {
@@ -277,18 +266,18 @@ javaxt.dhtml.calendar.Utils = {
                 }
             }
 
-            
+
           //Disable scrolling in the view
             view.disableTouch();
 
-            
-            
+
+
           //Set the holdStarter and wait for the holdDelay before starting the drag
             holdStarter = setTimeout(function() {
                 holdStarter = null;
-                
 
-              //Check whether the client's finger has moved more than 10 pixels. 
+
+              //Check whether the client's finger has moved more than 10 pixels.
               //If so the client is probably scrolling.
                 var distance = Math.sqrt( (x2-=x1)*x2 + (y2-=y1)*y2 );
                 if (distance<0) distance = -distance;
@@ -298,9 +287,9 @@ javaxt.dhtml.calendar.Utils = {
                 }
 
 
-                
+
                 holdActive = true;
-                
+
 
 
 
@@ -309,8 +298,8 @@ javaxt.dhtml.calendar.Utils = {
                     clientX: x,
                     clientY: y
                 });
-                
-                
+
+
               //Add "touchmove" event listener
                 if (document.addEventListener) {
                     div.addEventListener("touchmove", onTouchMove);
@@ -318,8 +307,8 @@ javaxt.dhtml.calendar.Utils = {
                 else if (document.attachEvent) {
                     div.attachEvent("ontouchmove", onTouchMove);
                 }
-                
-                
+
+
             }, holdDelay);
         };
 
@@ -335,35 +324,36 @@ javaxt.dhtml.calendar.Utils = {
           //holdStarter runs, then cancel the holdStarter and do the click
             if (holdStarter) {
                 clearTimeout(holdStarter);
-                
+
               //run click-only operation here
                 //console.log("Click!");
                 var listener = view.getListener('eventclick');
                 if (listener!=null){
                     var callback = listener.callback;
                     var scope = listener.scope;
-                    
+
                     var touch = e.changedTouches[0];
                     var x = touch.pageX;
                     var y = touch.pageY;
-                    
+
                     callback.apply(scope, [div.event, div, view, {
                         clientX: x,
                         clientY: y
                     }]);
                 }
             }
-            
+
           //Otherwise, if the mouse was being held, end the hold
             else if (holdActive) {
                 holdActive = false;
                 moveDiv(div);
-                
-                
-                
-              //Remove javaxt-cal-event-drag class from the event div
+
+
+
+              //Remove the "drag" style from the event div
                 var innerDiv = getInnerDiv(div);
-                innerDiv.className = innerDiv.className.replace( /(?:^|\s)javaxt-cal-event-drag(?!\S)/g , '' );
+                removeStyle(innerDiv, dragStyle);
+                innerDiv.style.cursor = "pointer";
 
 
               //Remove z-index
@@ -376,24 +366,24 @@ javaxt.dhtml.calendar.Utils = {
                 }
                 else if (document.detachEvent) {
                     div.detachEvent("ontouchmove", onTouchMove);
-                }                
-                
+                }
+
             }
-           
+
         };
-        
 
 
 
 
-                
+
+
         var onMouseMove = function(e){
             var x = e.clientX;
             var y = e.clientY;
-            div.style.left = (x-div.xOffset) + 'px';
-            div.style.top = (y-div.yOffset) + 'px';
+            div.style.left = (x-div.xOffset-div.scopeLeft) + 'px';
+            div.style.top = (y-div.yOffset-div.scopeTop) + 'px';
         };
-        
+
         var onTouchMove = function(e) {
             e.preventDefault();
             var touch = e.touches[0];
@@ -405,15 +395,15 @@ javaxt.dhtml.calendar.Utils = {
                 clientY: y
             });
         };
-        
-        
+
+
         var startDrag = function(e){
             var x = e.clientX;
             var y = e.clientY;
 
             var rect = _getRect(div);
             var top = rect.top-parseInt(div.style.marginTop);
-            
+
             var xOffset = x-rect.left;
             var yOffset = view.hasHours() ? (rect.height/2) : y-top;
 
@@ -430,27 +420,42 @@ javaxt.dhtml.calendar.Utils = {
             div.orgParent = parentNode;
             div.xOffset = xOffset;
             div.yOffset = yOffset;
-            
-            
+
+
+          //Find the calendar container to drag within. Dragging within the
+          //container (instead of document.body) keeps any scoped styles (e.g.
+          //".javaxt-calendar .javaxt-cal-event") applied to the event while it
+          //is being dragged. Positions below are made relative to this element.
+            var scope = parentNode;
+            while (scope && !(scope.className && (""+scope.className).indexOf("javaxt-calendar")>-1)){
+                scope = scope.parentNode;
+            }
+            var scopeRect = scope ? _getRect(scope) : {left: 0, top: 0};
+            if (!scope) scope = document.getElementsByTagName('body')[0];
+            div.scopeLeft = scopeRect.left;
+            div.scopeTop = scopeRect.top;
+
+
           //Disable text selection in the entire document - very important!
             var body = document.getElementsByTagName('body')[0];
             if (!body.className.match(/(?:^|\s)javaxt-noselect(?!\S)/) ){
                 body.className += (body.className.length==0 ? "" : " ") + "javaxt-noselect";
-            }            
-            
+            }
 
-          //Remove div from the current cell and append it to the body
+
+          //Remove div from the current cell and append it to the calendar scope
             var nextSibling = div.nextSibling;
             parentNode.removeChild(div);
-            body.appendChild(div);
+            scope.appendChild(div);
 
 
           //Add placeholder div as needed (e.g. month view)
-            if (view.hasHours()==false && nextSibling!=null){ 
-                var placeHolderDiv = document.createElement("div");
-                placeHolderDiv.style.width = "100%";
-                placeHolderDiv.style.height = rect.height + "px";
-                placeHolderDiv.style.marginTop = div.style.marginTop;
+            if (view.hasHours()==false && nextSibling!=null){
+                var placeHolderDiv = createElement("div", {
+                    width: "100%",
+                    height: rect.height + "px",
+                    marginTop: div.style.marginTop
+                });
                 parentNode.insertBefore(placeHolderDiv, nextSibling);
                 placeHolderDiv.event = div.event;
             }
@@ -459,25 +464,25 @@ javaxt.dhtml.calendar.Utils = {
 
             div.style.position = "absolute";
             div.style.width = rect.width + 'px';
-            div.style.left = rect.left + 'px';
-            div.style.top = (y-yOffset) + 'px';
+            div.style.left = (rect.left-div.scopeLeft) + 'px';
+            div.style.top = (y-yOffset-div.scopeTop) + 'px';
             div.style.cursor = 'move';
             div.style.zIndex = getNextHighestZindex();
-            
-            
-            
-          //Add javaxt-cal-event-drag class to the event div
+
+
+
+          //Apply the "drag" style to the event div
             var innerDiv = getInnerDiv(div);
-            innerDiv.className += " javaxt-cal-event-drag";
+            addStyle(innerDiv, dragStyle);
         };
-        
+
 
 
 
         /** Used to move an event from cell to cell.  */
         var moveDiv = function(div){
-            
-            
+
+
           //Compute geometry of the div
             var rect = _getRect(div);
             var minY = rect.top;
@@ -487,7 +492,7 @@ javaxt.dhtml.calendar.Utils = {
             var cells = getCells(rect);
 
 
-          //If the div doesn't intersect any cells in the view, return the div 
+          //If the div doesn't intersect any cells in the view, return the div
           //to its original location.
             if (cells.length==0){
                 returnDiv(div);
@@ -508,7 +513,7 @@ javaxt.dhtml.calendar.Utils = {
                 for (var i=0; i<cells.length; i++){
                     var cell = cells[i];
 
-                    var area = getAreaOfIntersection(rect, cell);
+                    var area = getAreaOfIntersection(rect, cell.rect);
                     keys.push(area);
                     intersections[area] = cell;
                 }
@@ -522,7 +527,7 @@ javaxt.dhtml.calendar.Utils = {
             var d = event.getStartDate();
             var currID = (d.getMonth()+1) + "-" + d.getDate() + "-" + d.getFullYear();
 
-            
+
 
           //Move the div
             if (cell.id==currID){
@@ -540,7 +545,7 @@ javaxt.dhtml.calendar.Utils = {
                         returnDiv(div);
                         return;
                     }
-                    
+
 
 
                   //Update start/end time
@@ -578,26 +583,26 @@ javaxt.dhtml.calendar.Utils = {
 
                 moveEvent(event, startDate, endDate);
             }
-            
-        };
-        
-        
-        
 
-        
+        };
+
+
+
+
+
         /** Used to update the start/end date of an event and render it in a given cell. */
         var moveEvent = function(event, startDate, endDate){
 
             var fn = function(move){
-                
+
                 if (move==true){
-                
+
                     var parentNode = div.parentNode;
                     parentNode.removeChild(div);
 
 
-                  //Remove the event from the current cell. Do this before updating  
-                  //the start/end date. Otherwise, we might end up with holes/gaps 
+                  //Remove the event from the current cell. Do this before updating
+                  //the start/end date. Otherwise, we might end up with holes/gaps
                   //between events in the cell.
                     view.removeEvent(event);
 
@@ -606,16 +611,16 @@ javaxt.dhtml.calendar.Utils = {
                     event.setEndDate(endDate);
 
                   //Add the event to the cell
-                    view.addEvent(event);     
-                
+                    view.addEvent(event);
+
                   //Call the aftermove callback
                     listener = view.getListener('aftermove');
-                    if (listener!=null) listener.callback.apply(listener.scope, [event, view]);      
+                    if (listener!=null) listener.callback.apply(listener.scope, [event, view]);
                 }
                 else{
                     returnDiv(div);
                 }
-                
+
             };
 
 
@@ -637,16 +642,16 @@ javaxt.dhtml.calendar.Utils = {
             div.style.left = orgStyle.left;
             div.style.top = orgStyle.top;
             div.style.width = orgStyle.width;
-            
+
             if (view.hasHours()){
                 div.orgParent.appendChild(div);
             }
             else{
-                
+
               //Make the div relative
                 div.style.position = "relative";
-                
-                
+
+
               //Find placeholder div
                 var placeholderDiv = null;
                 var event = div.event;
@@ -656,14 +661,14 @@ javaxt.dhtml.calendar.Utils = {
                         break;
                     }
                 }
-                
-                
+
+
               //Return div to its original parent
                 if (placeholderDiv==null){
                     div.orgParent.appendChild(div);
                 }
                 else{
-                    
+
                   //Replace placeholder div with the original div
                     var nextDiv = placeholderDiv.nextSibling;
                     if (nextDiv==null){
@@ -677,20 +682,21 @@ javaxt.dhtml.calendar.Utils = {
                 }
             }
 
-            
+
             div.orgParent = null;
             div.orgStyle = null;
         };
-        
-  
-        /** Find the inner div with class="javaxt-cal-event" */
+
+
+        /** Find the inner event div (the div created by Event.createDiv, which
+         *  is tagged with the "isCalEvent" marker). */
         var getInnerDiv = function(div){
 
             var el = div;
             while (el.childNodes.length>0){
                 var firstChild = el.childNodes[0];
-                
-                if (firstChild.className.match(/(?:^|\s)javaxt-cal-event(?!\S)/) ){
+
+                if (firstChild.isCalEvent===true){
                     return firstChild;
                 }
                 else{
@@ -698,15 +704,15 @@ javaxt.dhtml.calendar.Utils = {
                 }
             }
         };
-  
-  
+
+
         /** Returns a list of cells that intersect the four corners of a given rectangle. */
         var getCells = function(rect){
 
             var minX = rect.left;
             var maxX = rect.right;
             var minY = rect.top;
-            var maxY = rect.bottom;        
+            var maxY = rect.bottom;
 
           //Generate list of cells that intersect the four corners of the div
             var cells = [];
@@ -724,8 +730,8 @@ javaxt.dhtml.calendar.Utils = {
 
             return cells;
         };
-        
-        
+
+
 
         /** Returns a cell at a given x,y location within the view. */
         var getCell = function(x,y){
@@ -749,38 +755,13 @@ javaxt.dhtml.calendar.Utils = {
 
 
 
-        /** Returns the total area that a given rectangle intersects a cell. */
-        var getAreaOfIntersection = function(r1, cell){
-
-            var rect = cell.rect;
-            var minX = rect.left;
-            var maxX = rect.right;
-            var minY = rect.top;
-            var maxY = rect.bottom;
-
-            var left = r1.left;
-            var right = r1.right;
-            var top = r1.top;
-            var bottom = r1.bottom;
-
-            if (left<minX) left=minX;
-            if (right>maxX) right=maxX;
-            if (top<minY) top=minY;
-            if (bottom>maxY) bottom=maxY;
-
-            var w = right-left;
-            var h = bottom-top;
-            return w*h;
-        };
-        
-        
 
 
-        /** Returns the time represented by a given y coordinate in the view. 
+        /** Returns the time represented by a given y coordinate in the view.
          *  The returned value is a decimal (e.g. 9.5 representing 9:30 AM). */
         var getTime = function(y, div){
-            
-            
+
+
             var rows = [];
             var parentNode = div.orgParent;
             for (var i=0; i<parentNode.childNodes.length; i++){
@@ -793,7 +774,7 @@ javaxt.dhtml.calendar.Utils = {
                     }
                 }
             }
- 
+
 
             for (var i=0; i<rows.length; i++){
 
@@ -824,29 +805,12 @@ javaxt.dhtml.calendar.Utils = {
             endDate.setHours(endDate.getHours()+h);
             endDate.setMinutes(endDate.getMinutes()+m);
         };
-        
-        
 
-        var _getRect = javaxt.dhtml.calendar.Utils.getRect;   
-  
-  
-  
 
-        var getNextHighestZindex = function(obj){
-           var highestIndex = 0;
-           var currentIndex = 0;
-           var elArray = Array();
-           if(obj){elArray = obj.getElementsByTagName('*');}else{elArray = document.getElementsByTagName('*');}
-           for(var i=0; i < elArray.length; i++){
-              if (elArray[i].currentStyle){
-                 currentIndex = parseFloat(elArray[i].currentStyle['zIndex']);
-              }else if(window.getComputedStyle){
-                 currentIndex = parseFloat(document.defaultView.getComputedStyle(elArray[i],null).getPropertyValue('z-index'));
-              }
-              if(!isNaN(currentIndex) && currentIndex > highestIndex){highestIndex = currentIndex;}
-           }
-           return(highestIndex+1);
-        };
-  
+
+        var _getRect = javaxt.dhtml.utils.getRect;
+        var getNextHighestZindex = javaxt.dhtml.utils.getNextHighestZindex;
+        var getAreaOfIntersection = javaxt.dhtml.utils.getAreaOfIntersection;
+
     }
 };
