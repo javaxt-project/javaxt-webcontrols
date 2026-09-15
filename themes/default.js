@@ -19,6 +19,7 @@ javaxt.dhtml.style.default = {
         button: "window-header-button",
         buttonBar: "window-header-button-bar",
         footerButton: "form-button noselect",
+        footerButtonBar: "button-div",
         body: "window-body",
         mask: "window-mask"
     },
@@ -26,6 +27,7 @@ javaxt.dhtml.style.default = {
 
     panel: {
         header: "panel-header",
+        footer: "panel-footer",
         toolbar: "panel-toolbar",
         body: "panel-body"
     },
@@ -74,7 +76,8 @@ javaxt.dhtml.style.default = {
         check: "checkbox-check",
         select: "checkbox-select",
         disable: "checkbox-disable",
-        hover: "checkbox-hover"
+        hover: "checkbox-hover",
+        panel: "checkbox-panel"
     },
 
 
@@ -119,8 +122,12 @@ javaxt.dhtml.style.default = {
 
     accordion: {
         accordion: "accordion-panel",
-        tabHeader: "accordion-header",
+        tabHeader: "accordion-header noselect",
         tabContent: "accordion-content"
+    },
+
+    tree: {
+
     },
 
     switch: {
@@ -141,6 +148,8 @@ javaxt.dhtml.style.default = {
         title: "date-picker-title",
         cell: "date-picker-cell",
         cellHeader: "date-picker-cell-header",
+        previousMonth: "date-picker-cell-other",
+        nextMonth: "date-picker-cell-other",
         today: "date-picker-cell-today",
         selectedRow: "date-picker-row-selected",
         selectedCell: "date-picker-cell-selected",
@@ -148,6 +157,37 @@ javaxt.dhtml.style.default = {
         back: "date-picker-back"
     },
 
+    dateInput: {
+        input: "form-input form-input-with-button",
+        button: "form-button form-input-button pulldown-button-icon",
+        menu: "form-input-menu",
+        datePicker: null //updated below
+    },
+
+    calendar: {
+        header: "javaxt-cal-header",
+        headerCol: "javaxt-cal-header-col",
+        multidayHeader: "javaxt-cal-multiday-header",
+        multidayCol: "javaxt-cal-multiday-col",
+        multidayColSpacer: "javaxt-cal-multiday-col-spacer",
+        body: "javaxt-cal-body",
+        cell: "javaxt-cal-cell",
+        cellHeader: "javaxt-cal-cell-header",
+        cellFooter: "javaxt-cal-cell-footer",
+        cellPrevMonth: "javaxt-cal-cell-prev-month",
+        cellNextMonth: "javaxt-cal-cell-next-month",
+        hour: "javaxt-cal-hour",
+        halfHour: "javaxt-cal-half-hour",
+        halfHourSep: "javaxt-cal-half-hour-sep",
+        hourLast: "javaxt-cal-hour-last",
+        labelHour: "javaxt-cal-label-hour",
+        labelMeridian: "javaxt-cal-label-meridian",
+        currentTimeIndicator: "javaxt-cal-current-time-indicator",
+        event: "javaxt-cal-event",
+        eventContinueLeft: "javaxt-cal-event-continue-left",
+        eventContinueRight: "javaxt-cal-event-continue-right",
+        eventDrag: "javaxt-cal-event-drag"
+    },
 
     merge : function(settings, defaults) {
         javaxt.dhtml.utils.merge(settings, defaults);
@@ -158,3 +198,4 @@ javaxt.dhtml.style.default = {
 
 javaxt.dhtml.style.default.table.iscroll = javaxt.dhtml.style.default.iscroll;
 javaxt.dhtml.style.default.combobox.iscroll = javaxt.dhtml.style.default.iscroll;
+javaxt.dhtml.style.default.dateInput.datePicker = javaxt.dhtml.style.default.datePicker;
