@@ -13,23 +13,64 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 
 javaxt.dhtml.Tree = function (parent, config) {
     this.className = "javaxt.dhtml.Tree";
-
     var me = this;
+
+
+  //SVG fragments for the default style config
+    var cw = 21, rh = 20;
+    var connectorColor = "#cbd2d8"; //guide lines
+    var nodeColor = "#5f7280";      //collapsed chevron
+    var nodeOpenColor = "#3f5563";  //expanded chevron
+    var leafColor = "#9aa8b2";      //leaf dot
+    var mid = cw/2 - 1; //x-position of the vertical guide line (~center)
+    var midY = rh/2;    //y-position of the horizontal branch
+    var branchMiddle = '<path d="M' + mid + ' 0 V' + rh + ' M' + mid + ' ' + midY + ' H' + cw + '" stroke="' + connectorColor + '" stroke-width="1" fill="none"/>';
+    var branchLast = '<path d="M' + mid + ' 0 V' + midY + ' H' + cw + '" stroke="' + connectorColor + '" stroke-width="1" fill="none"/>';
+    var lineVertical = '<path d="M' + mid + ' 0 V' + rh + '" stroke="' + connectorColor + '" stroke-width="1" fill="none"/>';
+    var chevronClosed = '<path d="M8 6 L13 10 L8 14 Z" fill="' + nodeColor + '"/>';
+    var chevronOpen = '<path d="M6 8 L15 8 L10.5 13 Z" fill="' + nodeOpenColor + '"/>';
+    var leafDot ='<circle cx="10.5" cy="' + midY + '" r="2.5" fill="' + leafColor + '"/>';
+    var svg = function(inner){
+        var s = '<svg xmlns="http://www.w3.org/2000/svg" width="' + cw + '" height="' + rh + '" viewBox="0 0 ' + cw + ' ' + rh + '">' + inner + '</svg>';
+        return 'url("data:image/svg+xml,' + encodeURIComponent(s) + '")';
+    };
+    var join = function(inner, repeat){
+        return {
+            backgroundImage: svg(inner),
+            backgroundRepeat: repeat===true ? "repeat-y" : "no-repeat",
+            backgroundPosition: "left top"
+        };
+    };
+    var icon = function(inner){
+        return {
+            width: cw + "px",
+            height: rh + "px",
+            backgroundImage: svg(inner),
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "left center"
+        };
+    };
+
+
+
     var defaultConfig = {
 
 
-      /** Style for individual elements within the component. The nodes and
-       *  leaves in the tree are constructed using "ul" and "li" elements.
-       *  Note that unlike most of the other components, you should provide
-       *  CSS class names nodes, leaves, and path.
+      /** Style for individual elements within the component. Note that you can
+       *  provide CSS class names instead of individual style definitions.
        */
         style:{
 
-            rowHeight: "20px",
-            colWidth: "21px",
+            rowHeight: rh + "px",
+            colWidth: cw + "px",
             backgroundColor: "white",
             cursor: "default",
             padding: 0,
+
+          /** Background color applied to a row when the mouse hovers over it.
+           *  Set to null to disable the hover effect.
+           */
+            hover: "#eef2f5",
 
             li: "",
 
@@ -38,18 +79,17 @@ javaxt.dhtml.Tree = function (parent, config) {
             },
 
 
-          //The following style are for icons that appear in the tree
-
-            leaf: "leaf",
+          //The following styles are for icons that appear in the tree
+            leaf: icon(leafDot),
 
             node: {
-                open: "node_open",
-                closed: "node"
+                open: icon(chevronOpen),
+                closed: icon(chevronClosed)
             },
 
             root: {
-                open: "root",
-                closed: "root"
+                open: icon(chevronOpen),
+                closed: icon(chevronClosed)
             },
 
             path: {
@@ -57,21 +97,21 @@ javaxt.dhtml.Tree = function (parent, config) {
                 node: {
 
                     open: {
-                        middle: "join_node_middle_open",
-                        last: "join_node_bottom_open"
+                        middle: join(branchMiddle),
+                        last: join(branchLast)
                     },
                     closed: {
-                        middle: "join_node_middle",
-                        last: "join_node_bottom"
+                        middle: join(branchMiddle),
+                        last: join(branchLast)
                     }
                 },
 
                 leaf: {
-                    middle: "join_leaf_middle",
-                    last: "join_leaf_bottom"
+                    middle: join(branchMiddle),
+                    last: join(branchLast)
                 },
 
-                line: "join_line"
+                line: join(lineVertical, true)
 
             }
         }
@@ -112,11 +152,11 @@ javaxt.dhtml.Tree = function (parent, config) {
 
       //Create main ul
         var ul = createUL(parent);
+        ul.className = "javaxt-tree";
         ul.style.cursor = config.style.cursor;
         ul.style.padding = config.style.padding;
         ul.onselectstart = function () {return false;};
         ul.onmousedown = function () {return false;};
-        ul.setAttribute("desc", me.className);
         me.el = ul;
 
 
@@ -496,8 +536,8 @@ javaxt.dhtml.Tree = function (parent, config) {
                 var style = getJoinStyle(nodeType, true, (i===nodes.length-1));
                 if (style){
 
-                  //Set className to display the join icon
-                    li.className = style;
+                  //Apply the join style (CSS class name or inline style)
+                    applyStyle(li, style);
 
                   //Set padding to make the join icon visible
                     li.style.paddingLeft = config.style.colWidth;
@@ -567,9 +607,15 @@ javaxt.dhtml.Tree = function (parent, config) {
   //**************************************************************************
   //** addLine
   //**************************************************************************
-  /** Used to add "join_line" to previous ul.
+  /** Used to add "join_line" to previous ul. The join line is a vertical
+   *  connector that continues down the left side of a node's subtree so it
+   *  visually connects to a sibling below it. Root nodes are not drawn with
+   *  connectors, so we skip the line at the root level (otherwise the line
+   *  would extend down through the last root's subtree - see the Tree demo).
    */
     var addLine = function(li){
+        if (li.parentNode===me.el) return; //root level, no connectors
+
         var previousSibling = li.previousSibling;
         while (previousSibling){
 
@@ -611,7 +657,7 @@ javaxt.dhtml.Tree = function (parent, config) {
         if (li){
             var nodeType = getNodeType(li);
             var style = getJoinStyle(nodeType, true, isLast(ul.parentNode));
-            if (style) li.className = style;
+            if (style) applyStyle(li, style);
             if (nodeType!=="leaf") li.setIcon(config.style[nodeType].open);
 
           //Fire onExpand event
@@ -643,7 +689,7 @@ javaxt.dhtml.Tree = function (parent, config) {
         if (li){
             var nodeType = getNodeType(li);
             var style = getJoinStyle(nodeType, false, isLast(ul.parentNode));
-            if (style) li.className = style;
+            if (style) applyStyle(li, style);
             if (nodeType!=="leaf") li.setIcon(config.style[nodeType].closed);
 
           //Fire onCollapse event
@@ -666,6 +712,18 @@ javaxt.dhtml.Tree = function (parent, config) {
         outerDiv.style.height = config.style.rowHeight;
 
 
+      //Add an optional hover effect for the row
+        var hoverColor = config.style.hover;
+        if (hoverColor){
+            outerDiv.onmouseover = function(){
+                this.style.backgroundColor = hoverColor;
+            };
+            outerDiv.onmouseout = function(){
+                this.style.backgroundColor = config.style.backgroundColor;
+            };
+        }
+
+
         var iconDiv;
         if (icon){
             iconDiv = createElement("div", outerDiv, icon);
@@ -685,7 +743,7 @@ javaxt.dhtml.Tree = function (parent, config) {
 
 
         li.setIcon = function(icon){
-            if (iconDiv) iconDiv.className = icon;
+            if (iconDiv) applyStyle(iconDiv, icon);
         };
 
 
@@ -767,13 +825,11 @@ javaxt.dhtml.Tree = function (parent, config) {
             style = style[joinStyle];
 
 
-            if (typeof style === "string"){
-                return style;
-            }
-            else{
-                //TODO: Create style? We cannot rely on setStyle b/c we need
-                //to update the style whenever we expand/collapse the node.
-            }
+          //Return the join style. This can be either a CSS class name (string)
+          //or an inline style definition (json). The applyStyle() method knows
+          //how to handle both, and re-applies it whenever a node is
+          //expanded/collapsed.
+            if (style!=null) return style;
 
         }
 
@@ -827,6 +883,23 @@ javaxt.dhtml.Tree = function (parent, config) {
 
     var isTag = function(el, tag){
         return el.tagName.toLowerCase()===tag;
+    };
+
+
+  //**************************************************************************
+  //** applyStyle
+  //**************************************************************************
+  /** Used to apply a style to a given element. The style can be either a CSS
+   *  class name (string) or an inline style definition (json).
+   */
+    var applyStyle = function(el, style){
+        if (el==null || style==null) return;
+        if (isString(style)){
+            el.className = style;
+        }
+        else{
+            addStyle(el, style);
+        }
     };
 
 
