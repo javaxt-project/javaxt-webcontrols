@@ -3,7 +3,7 @@
 *******************************************************************************
 *
 *  Common style definitions for JavaXT components and applications. This
-*  stylesheet renders components in a blue and while theme.
+*  stylesheet renders components in a blue and white theme.
 *
 ******************************************************************************/
 
@@ -88,10 +88,21 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 
         /*border-top: 1px solid #f2f7fd;*/
         border-bottom: 1px solid #8f8f8f;
+        vertical-align: middle;
 
         .form-input {
             margin: 0 5px;
         }
+
+        .checkbox-box {
+            width: 18px;
+            height: 18px;
+        }
+
+        .javaxt-button {
+            vertical-align: middle;
+        }
+
     }
 
 
@@ -107,8 +118,6 @@ input, select, textarea { /* Allows overriding native style of form elements on 
     }
 
 
-
-
     .toolbar-button:hover {
         background-color: #d2e3ed;
         border: 1px solid #adadad;
@@ -118,6 +127,7 @@ input, select, textarea { /* Allows overriding native style of form elements on 
         background-color: #d2e3ed;
         border: 1px solid #adadad;
     }
+
 
 
     /* update margin for first button in the toolbar */
@@ -133,7 +143,6 @@ input, select, textarea { /* Allows overriding native style of form elements on 
     .toolbar-button-label {
         white-space: nowrap;
         color: #272727;
-        min-width: 50px;
     }
 
     .toolbar-label {
@@ -180,12 +189,25 @@ input, select, textarea { /* Allows overriding native style of form elements on 
         margin: 0 2px 1px 8px;
         border-left: 1px solid #adadad;
         border-right: 1px solid #fff;
+        vertical-align: middle;
     }
 
 
     .panel-body {
         background-color: #fff;
         vertical-align: top;
+    }
+
+
+    .panel-footer {
+        padding: 0px 5px 1px;
+        font-size: 12px;
+        color: #6a6a6a;
+        background-color: #d4d4d4;
+        border-top: 1px solid #d7dde3;
+        white-space: nowrap;
+        line-height: 18px;
+        height: 18px;
     }
 }
 
@@ -194,6 +216,9 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 /** Button
 /**************************************************************************/
 .javaxt-button {
+
+    display: inline-block;
+    position: relative;
 
     .button {
         border-radius: 3px;
@@ -710,7 +735,7 @@ select:focus, textarea:focus, input:focus{
     .window-header-button {
         font-size: 18px;
         border: 0;
-        color: #ffffff;
+        color: #fff;
         cursor: pointer;
         padding: 5px;
     }
@@ -747,7 +772,7 @@ select:focus, textarea:focus, input:focus{
 
     .button-div {
         padding: 0 12px 12px 12px;
-        text-align: right;
+        float: right;
         position: relative;
     }
 
@@ -759,7 +784,7 @@ select:focus, textarea:focus, input:focus{
 /**************************************************************************/
 /** The following classes are used to define the style for the tab panel.
  */
-.javaxt-tab-panel{
+.javaxt-tabpanel {
 
     .tab-bar {
         background-color: #0f6391; /* same as windows header */
@@ -780,7 +805,7 @@ select:focus, textarea:focus, input:focus{
     }
 
     .tab-inactive {
-        background-color: none;
+        background-color: rgba(0,0,0,0);
     }
 
     .tab-inactive:hover {
@@ -816,6 +841,56 @@ select:focus, textarea:focus, input:focus{
 
 
 /**************************************************************************/
+/** Accordion
+/**************************************************************************/
+/** The following classes are used to define the style for the accordion
+ *  control.
+ */
+
+.javaxt-accordion {
+
+    .accordion-panel {
+        background-color: #eaf1fb;
+        border: 0px solid #6a9ebb;
+    }
+
+    .accordion-header {
+        height: 36px;
+        line-height: 36px;
+        background-color: #0f6391;
+        border-bottom: 1px solid #6a9ebb;
+        font-weight: normal;
+        color: #b7d0de;
+        white-space: nowrap;
+        text-transform: uppercase;
+        padding-left: 7px;
+        cursor: pointer;
+    }
+
+    .accordion-header:hover {
+        color: #fff;
+        background-color: #6fa2bf;
+    }
+
+    .accordion-header-active {
+        color: #fff;
+        cursor: default;
+    }
+
+    .accordion-header-active:hover {
+        background-color: #0f6391;
+    }
+
+    .accordion-content {
+        border: 0px;
+        border-top: 0px none;
+        padding: 0px;
+    }
+
+}
+
+
+/**************************************************************************/
 /** Table
 /**************************************************************************/
 /** Default style for grid controls
@@ -833,8 +908,8 @@ select:focus, textarea:focus, input:focus{
     }
 
     .table-row, .table-row-selected {
-        background-color: #ffffff;
-        border-bottom: 1px solid #cccccc;
+        background-color: #fff;
+        border-bottom: 1px solid #ccc;
     }
 
     /* .table-row:nth-child(even) {background-color: #CCC} */
@@ -868,8 +943,8 @@ select:focus, textarea:focus, input:focus{
     }
 
     .table-header-col {
-        border-left: 1px solid #cccccc;
-        border-right: 1px solid #cccccc;
+        border-left: 1px solid #ccc;
+        border-right: 1px solid #ccc;
         cursor: pointer;
     }
 
@@ -919,6 +994,12 @@ select:focus, textarea:focus, input:focus{
 
 .javaxt-checkbox {
 
+    .checkbox-panel {
+        display: inline-block;
+        position: relative;
+        vertical-align: text-bottom;
+    }
+
     .checkbox-label {
         white-space: nowrap;
         cursor: pointer;
@@ -929,8 +1010,8 @@ select:focus, textarea:focus, input:focus{
     .checkbox-box {
         padding: 0px;
         margin: 0px;
-        width: 18px;
-        height: 18px;
+        width: 16px;
+        height: 16px;
         border: 1px solid #b9b9b9;
         border-radius: 3px;
         background-color: #f8f8f8;
@@ -960,7 +1041,8 @@ select:focus, textarea:focus, input:focus{
         border-color: #2a79bf;
     }
 
-    .checkbox-hover {
+    .checkbox-hover,
+    .checkbox-panel:hover .checkbox-box {
         border-color: rgba(82, 168, 236, 0.8);
         box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6);
         outline: 0 none;
@@ -988,90 +1070,438 @@ select:focus, textarea:focus, input:focus{
 /**************************************************************************/
 /** Date Picker
 /**************************************************************************/
-.date-picker-panel {
-    width: 100%
+
+.javaxt-datepicker {
+
+    .date-picker-panel {
+        background-color: #fff;
+        border: 1px solid #b4cbdd;
+        padding-bottom: 3px;
+        display: inline-block;
+    }
+
+    .date-picker-header {
+        background-color: #b4cbdd;
+        height: 36px;
+        line-height: 36px;
+        position: relative;
+    }
+
+    .date-picker-title {
+        position: absolute;
+        width: 100%;
+        color: #23436e;
+        text-transform: uppercase;
+        white-space: nowrap;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    .date-picker-cell {
+        width: 24px;
+        height: 24px;
+        line-height: 24px;
+        text-align: center;
+        border: 1px solid #fff;
+        margin: 1px;
+        cursor: pointer;
+    }
+
+    .date-picker-cell:hover {
+        font-weight: bold;
+        background-color: #EDF3FE;
+    }
+
+    .date-picker-cell-header {
+        border: 0px;
+        color: #4fa4b3;
+        font-size: 10px;
+        height: 10px;
+        line-height: 8px;
+        padding: 2px 0 0 0;
+        cursor: default;
+    }
+
+    .date-picker-cell-header:hover {
+        font-weight: initial;
+        background-color: initial;
+    }
+
+    .date-picker-cell-today {
+        width: 100%;
+        height: 100%;
+        border: 1px solid #FF7373;
+        top: -1px;
+        left: -1px;
+    }
+
+    .date-picker-cell-other {
+        color: #aaa;
+    }
+
+    .date-picker-cell-selected {
+        color: #000;
+        font-weight: bold;
+        background-color: #fff4bf;
+        border: 1px solid #bfa52f;
+    }
+
+    .date-picker-cell-selected:hover {
+        background-color: #ffffB1;
+    }
+
+    .date-picker-row-selected {
+        background-color: #fff4bf;
+    }
+
+    .date-picker-row-selected
+    .date-picker-cell-selected {
+        border-color: #fff4bf;
+    }
+
+    .date-picker-back,
+    .date-picker-next {
+        width: 9px;
+        height: 9px;
+        cursor: pointer;
+    }
+
+    .date-picker-back {
+        float: left;
+        border-right: 2px solid #23436e;
+        border-bottom: 2px solid #23436e;
+        transform: rotate(135deg);
+        margin: 12px 0 0 12px;
+    }
+
+    .date-picker-next {
+        float: right;
+        border-right: 2px solid #23436e;
+        border-bottom: 2px solid #23436e;
+        transform: rotate(-45deg);
+        margin: 12px 12px 0 0;
+    }
+
 }
 
-.date-picker-header {
-    background-color: #d9e7f8;
-    height: 40px;
-    line-height: 40px;
-    position: relative;
+
+/**************************************************************************/
+/** Date Input
+/**************************************************************************/
+
+.javaxt-dateinput {
+
+    .form-input-menu {
+        width: unset !important;
+        right: 0;
+    }
+
+    .javaxt-datepicker {
+        .date-picker-panel {
+            border: 0 none;
+            padding: 0;
+            margin: 0;
+        }
+    }
+
 }
 
-.date-picker-title {
-    position: absolute;
-    width: 100%;
-    white-space: nowrap;
-    font-size: 16px;
-    font-weight: bold;
-    color: #555555;
-    text-align: center;
-    cursor: pointer;
-}
 
-.date-picker-cell {
-    width: inherit;
-    height: 40px;
-    line-height: 40px;
-    text-align: right;
-    padding: 2px 4px 1px 0px;
-    cursor: pointer;
-    border: 1px solid #ffffff;
-    margin: 1px;
-}
+/**************************************************************************/
+/** Calendar
+/**************************************************************************/
 
-.date-picker-cell-header {
-    padding-bottom: 0px;
-    padding-top: 0px;
-    border: 0px;
-    border-top: 1px solid #bbccff;
-    border-bottom: 1px solid #bbccff;
-}
+.javaxt-calendar {
 
-.date-picker-cell-today {
-    width: 100%;
-    height: 100%;
-    border: 1px solid #FF7373;
-    top: -1px;
-    left: -1px;
-}
+  /**************************************************************************/
+  /** Header
+  /**************************************************************************/
 
-.date-picker-cell-selected {
-    color: #000000;
-    font-weight: bold;
-    background-color: #fff4bf;
-    border: 1px solid #bfa52f;
-}
+    /* style for the header row */
+    .javaxt-cal-header {
+        border: 1px solid #99BBE8;
+        background-color: #EEEEEE;
+        height: 25px;
 
-.date-picker-row-selected {
-    background-color: #fff4bf;
-}
+    }
 
-.date-picker-row-selected .date-picker-cell-selected {
-    border-color: #fff4bf;
-}
+    /* style for individual cells in the header */
+    .javaxt-cal-header-col {
+        border-left: 1px solid #99BBE8;
+        border-right: 1px solid #99BBE8;
+        text-align: center;
+        padding-top: 3px;
+    }
 
-.date-picker-next {
-    float: right;
-    border-right: 2px solid #5e8be0;
-    border-bottom: 2px solid #5e8be0;
-    width: 11px;
-    height: 11px;
-    transform: rotate(-45deg);
-    margin: 14px 14px 0 0;
-    cursor: pointer
-}
 
-.date-picker-back {
-    float: left;
-    border-right: 2px solid #5e8be0;
-    border-bottom: 2px solid #5e8be0;
-    width: 11px;
-    height: 11px;
-    transform: rotate(135deg);
-    margin: 14px 0 0 14px;
-    cursor: pointer
+
+  /**************************************************************************/
+  /** Multiday Event Header
+  /**************************************************************************/
+
+    /* style for the header row */
+    .javaxt-cal-multiday-header {
+        border-bottom: 1px solid #99BBE8;
+        border-left: 1px solid #000;
+        border-right: 1px solid #000;
+        background-color: #fff;
+    }
+
+    /* style for individual cells in the header */
+    .javaxt-cal-multiday-col {
+        border-left: 1px solid #000;
+        border-right: 1px solid #000;
+        padding-top: 0px;
+        vertical-align: top;
+    }
+
+    /* style for the left cell in the multiday header */
+    .javaxt-cal-multiday-col-spacer {
+
+    }
+
+
+  /**************************************************************************/
+  /** Body
+  /**************************************************************************/
+
+    /* style for the body row */
+    .javaxt-cal-body {
+        border-right: 1px solid #000;
+        border-bottom: 1px solid #000;
+        border-left: 1px solid #000;
+    }
+
+
+  /**************************************************************************/
+  /** Cells
+  /**************************************************************************/
+
+    /* Style for individual cells in the body. Note that the cell header and
+       footer are set using seperate css classes
+    */
+    .javaxt-cal-cell {
+        border-right: 1px solid #000;
+        border-left: 1px solid #000;
+        vertical-align: top;
+    }
+
+    /* Style for headers inside individual cells (e.g. numbers inside the month view)*/
+    .javaxt-cal-cell-header {
+        height: 15px;
+        padding:0 2px 0 0;
+        text-align: right;
+    }
+
+    .javaxt-cal-cell-footer {
+        border-bottom: 1px solid #000;
+    }
+
+
+    /* background color for days before and after current month */
+    .javaxt-cal-cell-prev-month, .javaxt-cal-cell-next-month {
+        background-color: #EFF9FC;
+        border-right: 1px solid #000;
+        border-left: 1px solid #000;
+    }
+
+
+
+  /**************************************************************************/
+  /** Hours
+  /**************************************************************************/
+  /** Style for horizonal lines within the cells used to deliniate hours and
+   *  half hours. Note that the heights are very important. Make sure the
+   *  height of the half-hour is exactly 1/2 the height of an hour.
+   */
+
+    .javaxt-cal-hour {
+        height: 55px; /* 56px-1px for border */
+        border-top: 1px solid #99BBE8;
+    }
+
+    .javaxt-cal-half-hour {
+        height: 27px; /* 28px-1px for border */
+        border-top: 1px solid #99BBE8;
+    }
+
+    .javaxt-cal-half-hour-sep {
+        border-top: 1px solid #D7E8FF;
+    }
+
+    .javaxt-cal-hour-last {
+        border-bottom: 1px solid #99BBE8;
+    }
+
+
+  /**************************************************************************/
+  /** Hour Labels
+  /**************************************************************************/
+  /** Style for the hour labels that appear in the left column of the day and
+   *  week views.
+   */
+
+    .javaxt-cal-label-hour {
+        font-family:"Times New Roman", Times, serif;
+        font-size: 18pt;
+        vertical-align: top;
+    }
+
+    .javaxt-cal-label-meridian {
+        font-family: tahoma,arial,verdana,sans-serif;
+        font-size: 11px;
+        padding: 0px 0px 0px 3px;
+        vertical-align: top;
+    }
+
+
+  /**************************************************************************/
+  /** Current Time Indicator
+  /**************************************************************************/
+  /** Style for the horizonal line used to indicate the current time in the
+   *  day and week views.
+   */
+
+    .javaxt-cal-current-time-indicator {
+        border-top: 1px solid #FFA1A1;
+    }
+
+
+  /**************************************************************************/
+  /** Events
+  /**************************************************************************/
+  /** Style for individual events. */
+
+    .javaxt-cal-event {
+
+
+        padding: 2px 4px; /* Padding inside the event div */
+        white-space: nowrap;
+
+        cursor: pointer;
+
+
+        border: 1px solid #803D5E;
+        -webkit-border-radius: 3px;
+        -moz-border-radius: 3px;
+        border-radius: 3px;
+
+        background-color: #E2C0D0;
+        background: linear-gradient(#F1E2E9, #E2C0D0);
+        background: -ms-linear-gradient(#F1E2E9, #E2C0D0);
+        background: -webkit-linear-gradient(#F1E2E9, #E2C0D0);
+        background: -moz-linear-gradient(center top, #F1E2E9, #E2C0D0);
+    }
+
+
+    .javaxt-cal-month {
+        .javaxt-cal-event {
+
+        }
+    }
+
+    .javaxt-cal-day {
+        .javaxt-cal-event {
+            box-sizing: border-box; /* include border + padding in the 100% height */
+        }
+    }
+
+
+
+    /* Left border for multi-day events that extend beyond the first cell in a
+       row or view
+    */
+    .javaxt-cal-event-continue-left {
+        -moz-border-radius: 0px;
+        -webkit-border-radius: 0px 3px 3px 0px;
+        border-radius: 0px 3px 3px 0px;
+        border-left: 0px;
+    }
+
+
+    /* Right border for multi-day events that extend beyond the last cell in a
+       row or view
+    */
+    .javaxt-cal-event-continue-right {
+        -moz-border-radius: 0px;
+        -webkit-border-radius: 3px 0px 0px 3px;
+        border-radius: 3px 0px 0px 3px;
+        border-right: 0px;
+    }
+
+
+    /* Left and Right borders for multi-day events that extend beyond the first and
+       last cell in a row/view
+    */
+    .javaxt-cal-event-continue-left.javaxt-cal-event-continue-right {
+        -webkit-border-radius: 0px;
+        -moz-border-radius: 0px;
+        border-radius: 0px;
+    }
+
+
+    /* Style for events as they are being dragged */
+    .javaxt-cal-event-drag {
+        cursor: move;
+        box-shadow: 0 12px 14px 0 rgba(0, 0, 0, 0.2), 0 13px 20px 0 rgba(0, 0, 0, 0.2);
+    }
+
+
+  /**************************************************************************/
+  /** Alternative Colors for Events
+  /**************************************************************************/
+
+    .javaxt-cal-event-blue {
+        border: 1px solid #6986BE;
+        background-color: #DBE1EF;
+
+        background: linear-gradient(#fff, #DBE1EF);
+        background: -ms-linear-gradient(#fff, #DBE1EF);
+        background: -webkit-linear-gradient(#fff, #DBE1EF);
+        background: -moz-linear-gradient(center top, #fff, #DBE1EF);
+    }
+
+    .javaxt-cal-event-red {
+        border: 1px solid #A81D24;
+        background-color: #E55F66;
+        /*background-image: -moz-linear-gradient(center top , #F2B6B6, #E55F66);*/
+
+        background: linear-gradient(#fff, #E55F66);
+        background: -ms-linear-gradient(#fff, #E55F66);
+        background: -webkit-linear-gradient(#fff, #E55F66);
+        background: -moz-linear-gradient(center top, #fff, #E55F66);
+    }
+
+
+    .javaxt-cal-event-yellow {
+        border: 1px solid #9D7925;
+        background-color: #FFFF83;
+        /*background-image: -moz-linear-gradient(center top , #FFFDD6, #FFFF83);*/
+
+        background: linear-gradient(#fff, #FFFF83);
+        background: -ms-linear-gradient(#fff, #FFFF83);
+        background: -webkit-linear-gradient(#fff, #FFFF83);
+        background: -moz-linear-gradient(center top, #fff, #FFFF83);
+    }
+
+    .javaxt-cal-event-green {
+        border: 1px solid #5a9e4f;
+        background-color: #D9EDCF;
+        background: linear-gradient(#fff, #D9EDCF);
+    }
+
+    .javaxt-cal-event-purple {
+        border: 1px solid #8a5fb0;
+        background-color: #E6DCF2;
+        background: linear-gradient(#fff, #E6DCF2);
+    }
+
+    .javaxt-cal-event-teal {
+        border: 1px solid #3a9b9b;
+        background-color: #CFE9E9;
+        background: linear-gradient(#fff, #CFE9E9);
+    }
+
 }
 
 
@@ -1080,6 +1510,9 @@ select:focus, textarea:focus, input:focus{
 /**************************************************************************/
 
 .javaxt-switch {
+
+    display: inline-block;
+
     .switch-groove {
         background-color: #dcdcdc;
         width: 40px;
@@ -1237,4 +1670,45 @@ select:focus, textarea:focus, input:focus{
 
 .iScrollVerticalScrollbar .iScrollIndicator {
     width: 100%;
+}
+
+
+/**************************************************************************/
+/** Scrollbars (native)
+/**************************************************************************/
+/** Native scrollbar styling, used when iScroll is not present (e.g. the
+ *  DataGrid body and other overflow areas). The transparent track lets the
+ *  element's own background show through instead of the browser's default
+ *  track.
+ */
+
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #a7a7a7 transparent;
+}
+
+/* Webkit (Chrome, Safari, Edge) */
+*::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: #a7a7a7;
+    border-radius: 6px;
+    border: 3px solid transparent;   /* inset padding around the thumb */
+    background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background-color: #8f8f8f;
+}
+
+*::-webkit-scrollbar-corner {
+    background: transparent;
 }
