@@ -151,6 +151,9 @@ javaxt.dhtml.Tree = function (parent, config) {
         config = clone;
 
 
+      //Remap user-provided legacy config
+        if (config.style.li) config.style.row = config.style.li;
+
 
       //Create main ul
         var ul = createUL(parent);
@@ -552,13 +555,19 @@ javaxt.dhtml.Tree = function (parent, config) {
 
 
 
+          //A node is rendered "expanded" only if it has children and is set to
+          //expand. Everything else (collapsed nodes and childless roots) is
+          //rendered "closed" so the chevron points right until it is expanded.
+            var expand = (children && node.expand===true);
+
+
           //Select icon to use in the label
             var icon;
             if (nodeType=="leaf"){
                 icon = config.style.leaf;
             }
             else{
-                icon = config.style[nodeType].open;
+                icon = expand ? config.style[nodeType].open : config.style[nodeType].closed;
             }
 
 
@@ -578,8 +587,6 @@ javaxt.dhtml.Tree = function (parent, config) {
                 }
 
 
-                var expand = false;
-                if (node.expand===true) expand = true;
                 if (!expand) hiddenNodes.push(ul); //hide(ul);
 
 
