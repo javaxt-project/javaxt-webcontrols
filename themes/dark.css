@@ -926,6 +926,105 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 
 
 /**************************************************************************/
+/** Tree
+/**************************************************************************/
+
+.javaxt-tree {
+    color: #bfc0c3;
+    cursor: default;
+
+
+  /* Node / leaf icons (drawn in the icon column) */
+    .node,
+    .node-open,
+    .leaf {
+        width: 20px;
+        height: 20px;
+    }
+
+  /* Node: a chevron. Collapsed points right, expanded points down. */
+    .node::before,
+    .node-open::before {
+        content: "";
+        position: absolute;
+        left: 7px;
+        top: 50%;
+        width: 5px;
+        height: 5px;
+        border-right: 2px solid #bdbdbd;
+        border-bottom: 2px solid #bdbdbd;
+    }
+    .node::before {
+        transform: translateY(-50%) rotate(-45deg);
+    }
+    .node-open::before {
+        transform: translateY(-70%) rotate(45deg);
+        border-color: #e6e6e6;
+    }
+
+  /* Leaf: a small dot */
+    .leaf::before {
+        content: "";
+        position: absolute;
+        left: 8px;
+        top: 50%;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background-color: #7f8891;
+        transform: translateY(-50%);
+    }
+
+  /* Connectors (drawn in the padding column, to the left of the icon) */
+    .join-middle,
+    .join-last,
+    .join-line {
+        position: relative;
+    }
+    .join-middle::before,
+    .join-last::before,
+    .join-line::before {
+        content: "";
+        position: absolute;
+        left: 10px;
+        top: 0;
+        width: 1px;
+        background-color: #4b5157;
+    }
+    .join-middle::before { height: 100%; }  /* vertical of "├" */
+    .join-last::before   { height: 50%; }   /* vertical of "└" */
+    .join-line::before   { bottom: 0; }     /* continuous "│"  */
+    .join-middle::after,
+    .join-last::after {
+        content: "";
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        width: 11px;
+        height: 1px;
+        background-color: #4b5157;
+    }
+
+
+  /* Row (label) background + hover */
+    .row {
+        /*height: 20px;*/
+    }
+    .row:hover {
+        background-color: #3a3f4a;
+    }
+
+    .label {
+        /*display: inline-block;
+        position: absolute;*/
+        padding-left: 21px;
+        line-height: 20px;
+        cursor: default;
+    }
+}
+
+
+/**************************************************************************/
 /** Table
 /**************************************************************************/
 /** Default style for grid controls

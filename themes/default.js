@@ -127,7 +127,25 @@ javaxt.dhtml.style.default = {
     },
 
     tree: {
-
+        leaf: "leaf",
+        node: {
+            open: "node-open",
+            closed: "node"
+        },
+        root: {
+            open: "node-open",
+            closed: "node"
+        },
+        path: {
+            node: {
+                open:   { middle: "join-middle", last: "join-last" },
+                closed: { middle: "join-middle", last: "join-last" }
+            },
+            leaf: { middle: "join-middle", last: "join-last" },
+            line: "join-line"
+        },
+        row: "row",
+        label: "label"
     },
 
     switch: {
