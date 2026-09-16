@@ -17,7 +17,8 @@ javaxt.dhtml.Tree = function (parent, config) {
 
 
   //SVG fragments for the default style config
-    var cw = 21, rh = 20;
+    var cw = 21; //node width
+    var rh = 20; //row height
     var connectorColor = "#cbd2d8"; //guide lines
     var nodeColor = "#5f7280";      //collapsed chevron
     var nodeOpenColor = "#3f5563";  //expanded chevron
@@ -61,37 +62,22 @@ javaxt.dhtml.Tree = function (parent, config) {
        */
         style:{
 
-            rowHeight: rh + "px",
-            colWidth: cw + "px",
-            backgroundColor: "white",
-            cursor: "default",
-            padding: 0,
-
-          /** Background color applied to a row when the mouse hovers over it.
-           *  Set to null to disable the hover effect.
-           */
-            hover: "#eef2f5",
-
-            li: "",
-
-            label: {
-
-            },
-
-
-          //The following styles are for icons that appear in the tree
+          //Leaf icon. Leaves have no children.
             leaf: icon(leafDot),
 
+          //Node icon. Nodes have children.
             node: {
                 open: icon(chevronOpen),
                 closed: icon(chevronClosed)
             },
 
+          //Root icon. A top level node.
             root: {
                 open: icon(chevronOpen),
                 closed: icon(chevronClosed)
             },
 
+          //Path icons
             path: {
 
                 node: {
@@ -113,17 +99,33 @@ javaxt.dhtml.Tree = function (parent, config) {
 
                 line: join(lineVertical, true)
 
+            },
+
+          //Row style. Rows span fron the node/leaf icon to the label.
+            row: {
+                height: rh + "px"
+            },
+
+          //Style for node and leaf labels
+            label: {
+                display: "inline-block",
+                position: "absolute",
+                paddingLeft: cw + "px",
+                lineHeight: rh + "px",
+                cursor: "default"
             }
         }
     };
 
-
   /** The following sets up the "display" style for the li and ul elements.
    *  This was added in 2024, after the tree demo stopped working on chrome.
+   *  In 2026, changed the li from "inline-table" to "block". The "inline-table"
+   *  value caused connector padding (paddingLeft) to collapse when the tree
+   *  was rendered in a narrow, width-constrained container (e.g. facet panel).
    */
     var display = {
         ul: "grid",
-        li: "inline-table"
+        li: "block"
     };
 
 
@@ -153,8 +155,6 @@ javaxt.dhtml.Tree = function (parent, config) {
       //Create main ul
         var ul = createUL(parent);
         ul.className = "javaxt-tree";
-        ul.style.cursor = config.style.cursor;
-        ul.style.padding = config.style.padding;
         ul.onselectstart = function () {return false;};
         ul.onmousedown = function () {return false;};
         me.el = ul;
@@ -453,6 +453,7 @@ javaxt.dhtml.Tree = function (parent, config) {
     var addNodes = function(nodes, parent, hiddenNodes){
         if (!nodes || nodes.length===0) return;
         var lastNode;
+        var paddingUpdates = [];
 
         for (var i=0; i<nodes.length; i++){
 
@@ -529,8 +530,6 @@ javaxt.dhtml.Tree = function (parent, config) {
             var nodeType = getNodeType(li);
 
 
-
-
           //Set join icon style
             if (nodeType!=="root"){
                 var style = getJoinStyle(nodeType, true, (i===nodes.length-1));
@@ -539,8 +538,9 @@ javaxt.dhtml.Tree = function (parent, config) {
                   //Apply the join style (CSS class name or inline style)
                     applyStyle(li, style);
 
-                  //Set padding to make the join icon visible
-                    li.style.paddingLeft = config.style.colWidth;
+                  //Update padding to make the join icon visible
+                    if (config.style.colWidth) li.style.paddingLeft = config.style.colWidth;
+                    else paddingUpdates.push(li);
                 }
             }
             else{
@@ -573,7 +573,8 @@ javaxt.dhtml.Tree = function (parent, config) {
             if (children){
 
                 if (nodeType!=="root"){
-                    ul.style.paddingLeft = config.style.colWidth;
+                    if (config.style.colWidth) ul.style.paddingLeft = config.style.colWidth;
+                    else paddingUpdates.push(ul);
                 }
 
 
@@ -601,6 +602,15 @@ javaxt.dhtml.Tree = function (parent, config) {
             }
         }
 
+
+      //Update padding when we can
+        if (paddingUpdates.length>0){
+            getColWidth(function(colWidth){
+                for (var i=0; i<paddingUpdates.length; i++){
+                    paddingUpdates[i].style.paddingLeft = colWidth;
+                }
+            });
+        }
     };
 
 
@@ -704,40 +714,24 @@ javaxt.dhtml.Tree = function (parent, config) {
   //**************************************************************************
     var createLabel = function(label, icon, li){
 
-        var outerDiv = createElement("div", li);
-        outerDiv.style.width = "100%";
-        outerDiv.style.backgroundColor = config.style.backgroundColor;
-        outerDiv.style.position = "relative";
-        outerDiv.style.overflow = "hidden";
-        outerDiv.style.height = config.style.rowHeight;
-
-
-      //Add an optional hover effect for the row
-        var hoverColor = config.style.hover;
-        if (hoverColor){
-            outerDiv.onmouseover = function(){
-                this.style.backgroundColor = hoverColor;
-            };
-            outerDiv.onmouseout = function(){
-                this.style.backgroundColor = config.style.backgroundColor;
-            };
-        }
-
+        var row = createElement("div", li, config.style.row);
 
         var iconDiv;
         if (icon){
-            iconDiv = createElement("div", outerDiv, icon);
+            iconDiv = createElement("div", row, icon);
             iconDiv.style.display = "inline-block";
             iconDiv.style.position = "absolute";
+
+            if (!config.style.colWidth){
+                onRender(iconDiv, function(el){
+                    config.style.colWidth = (el.offsetWidth+1)+"px";
+                });
+            }
         }
 
         var labelDiv;
         if (label){
-            var labelDiv = createElement("div", outerDiv, config.style.label);
-            labelDiv.style.display = "inline-block";
-            labelDiv.style.position = "absolute";
-            labelDiv.style.paddingLeft = config.style.colWidth;
-            labelDiv.style.lineHeight = config.style.rowHeight;
+            var labelDiv = createElement("div", row, config.style.label);
             labelDiv.innerHTML = label.replace(/^\s*/, "").replace(/\s*$/, ""); //trim()
         }
 
@@ -750,8 +744,13 @@ javaxt.dhtml.Tree = function (parent, config) {
         li.getText = function(){
             return labelDiv.innerText;
         };
-    };
 
+        return {
+            el: row,
+            icon: iconDiv,
+            label: labelDiv
+        };
+    };
 
 
   //**************************************************************************
@@ -852,8 +851,7 @@ javaxt.dhtml.Tree = function (parent, config) {
             listStyleType: "none",
             padding: 0,
             margin: 0,
-            display: display.ul,
-            backgroundColor: config.style.backgroundColor
+            display: display.ul
         });
     };
 
@@ -864,9 +862,10 @@ javaxt.dhtml.Tree = function (parent, config) {
   /** Used to create a "li" element for the tree
    */
     var createLI = function(parent){
-        var li = createElement("li", parent, config.style.li);
-        li.style.width = "100%";
-        li.style.display = display.li;
+        var li = createElement("li", parent, {
+            width: "100%",
+            display: display.li
+        });
         li.setIcon = function(icon){};
         li.getText = function(){};
         return li;
@@ -883,6 +882,34 @@ javaxt.dhtml.Tree = function (parent, config) {
 
     var isTag = function(el, tag){
         return el.tagName.toLowerCase()===tag;
+    };
+
+
+  //**************************************************************************
+  //** getColWidth
+  //**************************************************************************
+  /** Returns the colWidth style property. Normally this is set when rendering
+   *  icons for nodes and leaves.
+   */
+    var getColWidth = function(callback){
+        if (!config.style.colWidth){
+            var timer;
+
+            var checkWidth = function(){
+                if (!config.style.colWidth){
+                    timer = setTimeout(checkWidth, 100);
+                }
+                else{
+                    clearTimeout(timer);
+                    if (callback) callback.apply(me, [config.style.colWidth]);
+                }
+            };
+
+            timer = setTimeout(checkWidth, 100);
+        }
+        else{
+            if (callback) callback.apply(me, [config.style.colWidth]);
+        }
     };
 
 
@@ -910,6 +937,7 @@ javaxt.dhtml.Tree = function (parent, config) {
     var addStyle = javaxt.dhtml.utils.addStyle;
     var isArray = javaxt.dhtml.utils.isArray;
     var isString = javaxt.dhtml.utils.isString;
+    var onRender = javaxt.dhtml.utils.onRender;
     var createElement = javaxt.dhtml.utils.createElement;
 
     init();
