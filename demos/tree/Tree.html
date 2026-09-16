@@ -16,7 +16,7 @@
 <style>
 
   /**************************************************************************/
-  /** Demo layout                                                          */
+  /** Demo layout
   /**************************************************************************/
 
     .demo-row {
@@ -38,6 +38,25 @@
         margin: 0 0 12px 0;
     }
 
+
+    /* iframe styles for the javaxt theme demos */
+    .theme-frame {
+        width: 340px;
+        height: 240px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .theme-frame-dark {
+        border-color: #3a3f4a;
+    }
+
+
+  /**************************************************************************/
+  /** Tree
+  /**************************************************************************/
+  /* Custom "Windows" tree style using a sprite icons */
+
     .tree {
         font-size: 12px;
         color: #363636;
@@ -45,19 +64,19 @@
         width: 340px;
     }
 
+    .row {
+        height: 20px;
+        background-color: #fff;
+    }
 
-  /**************************************************************************/
-  /** Legacy stylesheet (image sprite based).                              */
-  /** This is the "old" way of styling the tree: the nodes, leaves and     */
-  /** connectors are all painted from a single tree.png sprite. This is    */
-  /** ONLY used by the tree on the right (#demo2).                         */
-  /**************************************************************************/
+    .row:hover {
+        background-color: #dff0ff;
+    }
 
     .join_leaf_bottom, .join_leaf_middle, .join_line,
     .join_node_bottom, .join_node_bottom_open,
     .join_node_middle, .join_node_middle_open,
-    .leaf, .node, .node_open, .root, .spacer
-    {
+    .leaf, .node, .node_open, .root, .spacer {
         background: white url('tree.png');
         background-repeat: no-repeat;
         width: 19px;
@@ -179,9 +198,7 @@ window.onload = function() {
             },
 
             path: {
-
                 node: {
-
                     open: {
                         middle: "join_node_middle_open",
                         last: "join_node_bottom_open"
@@ -191,15 +208,14 @@ window.onload = function() {
                         last: "join_node_bottom"
                     }
                 },
-
                 leaf: {
                     middle: "join_leaf_middle",
                     last: "join_leaf_bottom"
                 },
-
                 line: "join_line"
+            },
 
-            }
+            row: "row"
         }
     });
     tree2.show(tree2.getItem(["javaxt-core", "javaxt.sql", "Connection"]));
@@ -213,11 +229,10 @@ window.onload = function() {
 <body>
 
 <h1>Tree Demo</h1>
-<p>The tree below is rendered twice with two different styles. The tree on the
+<p>The trees below are rendered with two different styles. The tree on the
 left uses the component's default style, which is defined inline
 (no stylesheet required). The tree on the right uses a <b>stylesheet</b>-based
-style backed by an image sprite (tree.png). Open the
-web console to see the events.</p>
+style backed by an image sprite (tree.png). Open the web console to see events.</p>
 
 
 <div class="demo-row">
@@ -236,6 +251,29 @@ web console to see the events.</p>
 
 </div>
 
+
+<h1 style="margin-top:40px;">JavaXT Themes</h1>
+<p>The same tree styled with the JavaXT themes (themes/default.css and
+themes/dark.css). The nodes, leaves and connectors are drawn entirely with CSS
+(no image sprite) and follow the active theme. Each theme is shown in its own
+iframe so the two stylesheets don't collide.</p>
+
+
+<div class="demo-row">
+
+    <div class="demo-col">
+        <h2>Default theme</h2>
+        <p class="hint">themes/default.css &mdash; javaxt-tree</p>
+        <iframe class="theme-frame" src="tree-theme.html?theme=default"></iframe>
+    </div>
+
+    <div class="demo-col">
+        <h2>Dark theme</h2>
+        <p class="hint">themes/dark.css &mdash; javaxt-tree</p>
+        <iframe class="theme-frame theme-frame-dark" src="tree-theme.html?theme=dark"></iframe>
+    </div>
+
+</div>
 
 </body>
 </html>

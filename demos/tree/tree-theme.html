@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Themed Tree</title>
+
+<!-- The theme stylesheet is swapped at runtime based on the ?theme= param -->
+<link id="theme" href="../../themes/default.css" rel="stylesheet" type="text/css" />
+
+<script src="../../src/tree/Tree.js"></script>
+<script src="../../src/utils/Utils.js"></script>
+<script src="../../themes/default.js"></script>
+
+<style>
+    html, body { height: 100%; margin: 0; }
+    #tree {
+        padding: 0px;
+        box-sizing: border-box;
+        height: 100%;
+    }
+</style>
+
+<script>
+window.onload = function() {
+
+  //Swap in the requested theme stylesheet (default | dark)
+    var theme = (javaxt.dhtml.utils.getParameter("theme") || "default").toLowerCase();
+    if (theme==="dark"){
+        document.getElementById("theme").href = "../../themes/dark.css";
+    }
+    document.body.style.backgroundColor = theme==="dark" ? "#2b2e35" : "#ffffff";
+
+
+    var nodes = [
+        {
+            name: "javaxt-core",
+            nodes: [
+                { name: "javaxt.io", nodes: ["Directory", "File", "Image", "Jar", "Shell"] },
+                { name: "javaxt.sql", nodes:["Column", "Connection", "Recordset"], expand: false }
+            ]
+        },
+        {
+            name: "javaxt-server",
+            nodes: [
+                { name: "http", nodes: [
+                    { name: "servlet", nodes: ["HttpServlet", "HttpServletRequest", "HttpServletResponse"] },
+                    { name: "websocket", nodes:["WebSocketServer","WebSocketListener",
+                        { name: "test", nodes: ["Message", "File", "Image"] }], expand: false },
+                    "Server"
+                ]}
+            ]
+        }
+    ];
+
+
+  //Style the tree using the active theme's "tree" map (CSS class names). This
+  //is exactly what the kitchen sink demo passes, so the two match.
+    var tree = new javaxt.dhtml.Tree(document.getElementById("tree"), {
+        nodes: nodes,
+        style: javaxt.dhtml.style.default.tree
+    });
+    tree.show(tree.getItem(["javaxt-core", "javaxt.sql", "Connection"]));
+};
+</script>
+</head>
+<body>
+<div id="tree"></div>
+</body>
+</html>
