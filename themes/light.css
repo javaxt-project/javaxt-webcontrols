@@ -597,7 +597,6 @@ select:focus, textarea:focus, input:focus{
     .callout-panel, .callout-arrow {
         border: 1px solid #adadad;
         background-color: #f8f8f8;
-        cursor: pointer;
     }
 
     .callout-panel {
@@ -609,6 +608,10 @@ select:focus, textarea:focus, input:focus{
         width: 7px;
         height: 7px;
         padding: 12px;
+
+        width: 10px;
+        height: 10px;
+        padding: 10px;
     }
 }
 
@@ -971,18 +974,16 @@ select:focus, textarea:focus, input:focus{
     }
 
 
-
-  /* Row (label) background + hover */
+  /* Row background + hover */
     .row {
-        /*height: 20px;*/
+        color: #272727;
+        cursor: pointer;
     }
     .row:hover {
         background-color: #eaf1fb;
     }
 
     .label {
-        /*display: inline-block;
-        position: absolute;*/
         padding-left: 21px;
         line-height: 20px;
         cursor: default;
