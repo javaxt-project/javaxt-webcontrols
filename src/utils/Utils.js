@@ -960,10 +960,20 @@ javaxt.dhtml.utils = {
   //**************************************************************************
   //** getStyle
   //**************************************************************************
-  /** Returns computed style for a given element.
+  /** Returns either a full style object or a value for a specific property
+   *  for a given element.
+   *  @param el DOM element to inspect
+   *  @param prop Property key. Optional.
    */
-    getStyle: function(el){
-        return el.currentStyle || window.getComputedStyle(el);
+    getStyle: function(el, prop){
+        if (el.currentStyle){
+            if (prop) return el.currentStyle[prop];
+            else return el.currentStyle;
+        }
+        else if (window.getComputedStyle){
+            if (prop) return document.defaultView.getComputedStyle(el, '').getPropertyValue(prop);
+            else return window.getComputedStyle(el);
+        }
     },
 
 
@@ -1381,7 +1391,7 @@ javaxt.dhtml.utils = {
             };
         }
         else {
-            if (getComputedStyle(element).position == 'static') element.style.position = 'relative';
+            if (javaxt.dhtml.utils.getStyle(element, "position") == 'static') element.style.position = 'relative';
             var obj = element.resizeTrigger = document.createElement('object');
             obj.setAttribute('style', 'display: block; position: absolute; top: 0; left: 0; height: 100%; width: 100%; overflow: hidden; pointer-events: none; z-index: -1;');
             obj.resizeElement = element;
@@ -1434,12 +1444,7 @@ javaxt.dhtml.utils = {
         if(obj){elArray = obj.getElementsByTagName('*');}else{elArray = document.getElementsByTagName('*');}
         for (var i=0; i < elArray.length; i++){
             var el = elArray[i];
-            if (el.currentStyle){
-                currentIndex = parseFloat(el.currentStyle['zIndex']);
-            }
-            else if(window.getComputedStyle){
-                currentIndex = parseFloat(document.defaultView.getComputedStyle(el,null).getPropertyValue('z-index'));
-            }
+            currentIndex = parseFloat(javaxt.dhtml.utils.getStyle(el, "z-index"));
             if(!isNaN(currentIndex)){
                 if (currentIndex > highestIndex){
                     highestIndex = currentIndex;
