@@ -958,6 +958,16 @@ javaxt.dhtml.utils = {
 
 
   //**************************************************************************
+  //** getStyle
+  //**************************************************************************
+  /** Returns computed style for a given element.
+   */
+    getStyle: function(el){
+        return el.currentStyle || window.getComputedStyle(el);
+    },
+
+
+  //**************************************************************************
   //** getRect
   //**************************************************************************
   /** Returns the geometry of a given element.
