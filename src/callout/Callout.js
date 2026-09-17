@@ -93,59 +93,8 @@ javaxt.dhtml.Callout = function(parent, config) {
 
 
 
-      //Create temporary div to get arrow style
-        var temp = createElement("div", "javaxt-callout");
-        temp.style.position = "absolute";
-        temp.style.visibility = 'hidden';
-        temp.style.display = 'block';
-        var body = document.getElementsByTagName("body")[0];
-        body.appendChild(temp);
-        temp = createElement("div", temp, config.style.arrow);
-        var style = temp.currentStyle || window.getComputedStyle(temp);
-        var getStyle = function(prop){
-
-            var _getStyle = function(prop){
-                if (style.getPropertyValue){
-                    var val = style.getPropertyValue(prop);
-                    if (val && val.length>0) return val;
-                    prop = prop.replace( /([a-z])([A-Z])/g, '$1-$2' ).toLowerCase();
-                    return style.getPropertyValue(prop);
-                }
-                else{
-                    return style[prop];
-                }
-            };
-
-            if (prop instanceof Array){
-                var arr = prop;
-                for (var i=0; i<arr.length; i++){
-                    var val = _getStyle(arr[i]);
-                    if (val && val.length>0){
-                        return val;
-                    }
-                }
-            }
-            else{
-                return _getStyle(prop);
-            }
-
-        };
-
-        config.arrow = {
-            backgroundColor: getStyle("backgroundColor"),
-            borderColor: getStyle(["borderColor", "borderLeftColor", "borderRightColor", "borderTopColor", "borderBottomColor"]),
-            paddingTop: parseInt(getStyle("paddingTop")),
-            paddingBottom: parseInt(getStyle("paddingBottom")),
-            paddingLeft: parseInt(getStyle("paddingLeft")),
-            paddingRight: parseInt(getStyle("paddingRight"))
-        };
-        temp.style.border = 0;
-        temp.style.padding = 0;
-        temp.style.margin = 0;
-        config.arrow.width = temp.offsetWidth;
-        config.arrow.height = temp.offsetHeight;
-        body.removeChild(temp.parentNode);
-        temp = null;
+      //Update arrow style config
+        config.arrow = getArrowStyle();
 
 
 
@@ -325,6 +274,10 @@ javaxt.dhtml.Callout = function(parent, config) {
       //Hack to get div width/height BEFORE making the div visible
         div.style.visibility = 'hidden';
         div.style.display = 'block';
+
+
+      //Update arrow style config
+        config.arrow = getArrowStyle();
 
 
         var backgroundColor = config.arrow.backgroundColor;
@@ -518,13 +471,82 @@ javaxt.dhtml.Callout = function(parent, config) {
     this.onHide = function(){};
 
 
+  //**************************************************************************
+  //** getArrowStyle
+  //**************************************************************************
+  /** Reads the arrow's colors, padding, and size from config.style.arrow by
+   *  rendering a temporary element and inspecting its computed style. This is
+   *  called both at construction and each time the callout is opened, so the
+   *  arrow reflects the current theme even when the stylesheet is swapped at
+   *  runtime (config.style.arrow may be a CSS class whose colors change).
+   */
+    var getArrowStyle = function(){
+
+      //Create temporary div to get arrow style
+        var temp = createElement("div", "javaxt-callout");
+        temp.style.position = "absolute";
+        temp.style.visibility = 'hidden';
+        temp.style.display = 'block';
+        var body = document.getElementsByTagName("body")[0];
+        body.appendChild(temp);
+        temp = createElement("div", temp, config.style.arrow);
+        var style = getStyle(temp);
+        var getStyleValue = function(prop){
+
+            var _getStyle = function(prop){
+                if (style.getPropertyValue){
+                    var val = style.getPropertyValue(prop);
+                    if (val && val.length>0) return val;
+                    prop = prop.replace( /([a-z])([A-Z])/g, '$1-$2' ).toLowerCase();
+                    return style.getPropertyValue(prop);
+                }
+                else{
+                    return style[prop];
+                }
+            };
+
+            if (prop instanceof Array){
+                var arr = prop;
+                for (var i=0; i<arr.length; i++){
+                    var val = _getStyle(arr[i]);
+                    if (val && val.length>0){
+                        return val;
+                    }
+                }
+            }
+            else{
+                return _getStyle(prop);
+            }
+
+        };
+
+        var arrow = {
+            backgroundColor: getStyleValue("backgroundColor"),
+            borderColor: getStyleValue(["borderColor", "borderLeftColor", "borderRightColor", "borderTopColor", "borderBottomColor"]),
+            paddingTop: parseInt(getStyleValue("paddingTop")),
+            paddingBottom: parseInt(getStyleValue("paddingBottom")),
+            paddingLeft: parseInt(getStyleValue("paddingLeft")),
+            paddingRight: parseInt(getStyleValue("paddingRight"))
+        };
+        temp.style.border = 0;
+        temp.style.padding = 0;
+        temp.style.margin = 0;
+        arrow.width = temp.offsetWidth;
+        arrow.height = temp.offsetHeight;
+        body.removeChild(temp.parentNode);
+        temp = null;
+
+        return arrow;
+    };
+
 
   //**************************************************************************
   //** Utils
   //**************************************************************************
-    var merge = javaxt.dhtml.utils.merge;
     var getNextHighestZindex = javaxt.dhtml.utils.getNextHighestZindex;
     var createElement = javaxt.dhtml.utils.createElement;
+    var getStyle = javaxt.dhtml.utils.getStyle;
+    var merge = javaxt.dhtml.utils.merge;
 
 
     init();
