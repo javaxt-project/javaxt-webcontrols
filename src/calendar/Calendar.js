@@ -177,7 +177,24 @@ javaxt.dhtml.Calendar = function(parent, config) {
                 cursor: "move",
                 boxShadow: "0 12px 14px 0 rgba(0, 0, 0, 0.2), 0 13px 20px 0 rgba(0, 0, 0, 0.2)"
             }
-        }
+        },
+
+
+      /** Vertical spacing between events, in pixels
+       */
+        eventSpacing: 2,
+
+
+      /** Amount of time, in milliseconds, to wait before a mousedown is
+       *  treated as a "hold" instead of a "click"
+       */
+        holdDelay: 500,
+
+
+      /** If true, enables debug logging to the console
+       */
+        debug: false
+
     };
 
 

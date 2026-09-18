@@ -16,6 +16,25 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
     var me = this;
     var defaultConfig = {
 
+
+      /** Style for individual elements within the component. Note that you can
+       *  provide CSS class names instead of individual style definitions.
+       */
+        style: {
+
+        },
+
+
+      /** Vertical spacing between events, in pixels */
+        eventSpacing: 2,
+
+      /** Amount of time, in milliseconds, to wait before a mousedown is
+       *  treated as a "hold" instead of a "click"
+       */
+        holdDelay: 500,
+
+      /** If true, enables debug logging to the console */
+        debug: false
     };
 
 
@@ -35,15 +54,18 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
     var rendered;
 
 
-  //Config options
+  //Config options (defaults are defined in defaultConfig)
     var date;
     var days;
     var store;
-    var eventHeight = 17;
-    var eventPadding = 2; //padding with a cell
-    var eventSpacing = 2; //vertical spacing between events
-    var holdDelay = 500;
-    var debug = false;
+
+
+  //Event geometry derived from the DOM (see updateEventMetrics). These are
+  //not config options - they are measured from an actual event rendered with
+  //the configured event style so the layout adapts to the current theme
+  //(font size, borders, padding) instead of assuming fixed pixel values.
+    var eventHeight;   //event wrapper height (natural content height), in pixels
+    var eventPadding;  //padding within a cell, in pixels
 
 
 
@@ -79,11 +101,15 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
         store = config.eventStore==null ? new javaxt.dhtml.calendar.EventStore() : config.eventStore;
 
 
-      //Set event size, padding, and spacing
+      //Set config options. Normalize/validate the numeric values back into
+      //the config object so they can be referenced directly (e.g. config.eventSpacing).
+      //Note: eventHeight and eventPadding are NOT config options - they are
+      //measured from the DOM (see updateEventMetrics).
         var isNumber = javaxt.dhtml.utils.isNumber;
-        if (isNumber(config.eventHeight)) eventHeight = parseInt(config.eventHeight);
-        if (isNumber(config.eventPadding)) eventPadding = parseInt(config.eventPadding);
-        if (isNumber(config.eventSpacing)) eventSpacing = parseInt(config.eventSpacing);
+        config.holdDelay = isNumber(config.holdDelay) ? parseInt(config.holdDelay) : defaultConfig.holdDelay;
+        config.debug = config.debug===true;
+        config.eventSpacing = isNumber(config.eventSpacing) ? parseInt(config.eventSpacing) : defaultConfig.eventSpacing;
+        eventSpacer = config.eventSpacing + 1; //desired gap between events (px)
 
 
       //Configure renderers
@@ -117,15 +143,19 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
         me.setDate(config.date);
 
 
-      //Call the afterrender callback
-        listener = me.getListener('afterrender');
-        if (listener!=null) listener.callback.apply(listener.scope, [me]);
-        rendered = true;
+      //Defer the afterrender/update callbacks until the grid has actually
+      //rendered. When the view is already visible this fires synchronously.
+        onRender(table, function(){
 
+          //Call the afterrender callback
+            listener = me.getListener('afterrender');
+            if (listener!=null) listener.callback.apply(listener.scope, [me]);
+            rendered = true;
 
-      //Call the update callback
-        listener = me.getListener('update');
-        if (listener!=null) listener.callback.apply(listener.scope, [me]);
+          //Call the update callback
+            listener = me.getListener('update');
+            if (listener!=null) listener.callback.apply(listener.scope, [me]);
+        });
     };
 
 
@@ -195,11 +225,11 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
         table = createTable(parent);
         table.className = "javaxt-cal-month javaxt-noselect";
         var tr = table.addRow();
-        addStyle(tr, "header");
+        addStyle(tr, config.style.header);
         tr.setAttribute("desc", "header-row");
         var header = tr.addColumn({width: "100%"});
         tr = table.addRow();
-        addStyle(tr, "body");
+        addStyle(tr, config.style.body);
         tr.setAttribute("desc", "body-row");
         var body = tr.addColumn({width: "100%", height: "100%"});
 
@@ -209,7 +239,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
         var th = headerTable.addRow();
         for (var i=0; i<days.length; i++){
             var td = th.addColumn({width: (100/days.length) + '%'});
-            addStyle(td, "headerCol");
+            addStyle(td, config.style.headerCol);
 
 
             //Update left and right border of the first and last days. The
@@ -285,9 +315,9 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
                   //Add columns - one for each day
                     for (var j=0; j<days.length; j++){
                         td = tr.addColumn({width: (100/days.length) + '%'});
-                        if (d.getMonth()<date.getMonth()) addStyle(td, "cellPrevMonth");
-                        else if (d.getMonth()>date.getMonth()) addStyle(td, "cellNextMonth");
-                        else addStyle(td, "cell");
+                        if (d.getMonth()<date.getMonth()) addStyle(td, config.style.cellPrevMonth);
+                        else if (d.getMonth()>date.getMonth()) addStyle(td, config.style.cellNextMonth);
+                        else addStyle(td, config.style.cell);
 
 
 
@@ -367,7 +397,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
 
 
                         if (x==0){
-                            addStyle(td, "cellHeader");
+                            addStyle(td, config.style.cellHeader);
                             td.appendChild(me.createCellHeader(new Date(d), i, j));
                         }
                         else if (x==1){
@@ -386,7 +416,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
                             }
                         }
                         else if (x==2){
-                            addStyle(td, "cellFooter");
+                            addStyle(td, config.style.cellFooter);
                             td.style.height = "1px";
                             td.appendChild(me.createCellFooter(new Date(d), i, j));
                         }
@@ -420,6 +450,10 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
         }
 
 
+
+      //Measure the event geometry now that the grid is in the DOM. This must
+      //happen before events are loaded so the wrappers are sized correctly.
+        updateEventMetrics();
 
 
 
@@ -914,7 +948,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
         var wrapper = createElement('div', {
             width: "100%",
             height: eventHeight + "px",
-            marginTop: (eventSpacing*2) + "px",  //Vertical padding
+            marginTop: (config.eventSpacing*2) + "px",  //Vertical padding
             position: "relative",
             cursor: 'pointer'
         });
@@ -935,7 +969,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
 
 
       //Initialize mouse events
-        if (event.isEditable()) initDrag(wrapper, me, holdDelay, config.style.eventDrag);
+        if (event.isEditable()) initDrag(wrapper, me, config.holdDelay, config.style.eventDrag);
         else{
             wrapper.onclick = function(e){
                 var listener = me.getListener('eventclick');
@@ -1071,7 +1105,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
 
 
           //Add colspan and insert div to render the event
-            javaxt.dhtml.calendar.Utils.addColSpan(col, cols.length);
+            javaxt.dhtml.calendar.utils.addColSpan(col, cols.length);
 
             var continueLeft = i>0 && col.previousSibling==null;
             var continueRight = col.nextSibling==null && (spans.length>1 && i<spans.length-1);
@@ -1102,7 +1136,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
                 height: eventHeight + "px", //"100%"
                 position: "relative"
             });
-            if (k>1) wrapper.style.marginTop = (eventSpacing*2) + "px";  //Vertical padding
+            if (k>1) wrapper.style.marginTop = (config.eventSpacing*2) + "px";  //Vertical padding
             wrapper.appendChild(outerDiv);
             wrapper.event = event;
             wrapper.onclick = function(e){
@@ -1169,7 +1203,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
                 }
                 else{
                     y1 = _getRect(tr.parentNode.childNodes[0]).top;
-                    offset = ((y2-y1)+((eventSpacing*2)-1)); //-1px for spacer row?
+                    offset = ((y2-y1)+((config.eventSpacing*2)-1)); //-1px for spacer row?
                 }
 
 
@@ -1193,7 +1227,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
    *  margin-top so it clears the event above it - including any multiday event
    *  spanning the cell (which the single-day events must sit below).
    */
-    var eventSpacer = eventSpacing + 1; //desired gap between events (px)
+    var eventSpacer; //desired gap between events (px); set in init() from eventSpacing
 
     var nudgeBelow = function(wrapper, aboveRect){
         var curr = getEventDiv(wrapper);
@@ -1219,7 +1253,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
       //Reset to the default vertical padding so the pass is idempotent (also
       //tightens gaps left behind when an event is removed)
         for (var i=0; i<wrappers.length; i++){
-            wrappers[i].style.marginTop = (eventSpacing*2) + "px";
+            wrappers[i].style.marginTop = (config.eventSpacing*2) + "px";
         }
 
       //Ensure the first single-day event clears the lowest multiday event that
@@ -1384,21 +1418,34 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
 
 
   //**************************************************************************
+  //** updateEventMetrics
+  //**************************************************************************
+  /** Used to set eventHeight and eventPadding
+   */
+    var updateEventMetrics = function(){
+        getEventMetrics(table, config.style.event, function(metrics){
+          //Month event divs are content-box; the wrapper height drives the
+          //content and the border+padding are added on top.
+            eventHeight = metrics.contentHeight;
+            eventPadding = metrics.padding;
+        });
+    };
+
+
+  //**************************************************************************
   //** Utils
   //**************************************************************************
-    var _getRect = javaxt.dhtml.utils.getRect;
     var createElement = javaxt.dhtml.utils.createElement;
     var createTable = javaxt.dhtml.utils.createTable;
+    var onRender = javaxt.dhtml.utils.onRender;
+    var addStyle = javaxt.dhtml.utils.addStyle;
+    var _getRect = javaxt.dhtml.utils.getRect;
     var merge = javaxt.dhtml.utils.merge;
-    var addStyle = function(el, style){
-        javaxt.dhtml.utils.addStyle(el, javaxt.dhtml.utils.isString(style) ? config.style[style] : style);
-    };
-    var log = function(str){if(debug)console.log(str);};
 
-
-    var getStyle = javaxt.dhtml.calendar.Utils.getStyle;
-    var initDrag = javaxt.dhtml.calendar.Utils.initDrag;
-
+    var log = function(str){if(config.debug)console.log(str);};
+    var getStyle = javaxt.dhtml.calendar.utils.getStyle;
+    var initDrag = javaxt.dhtml.calendar.utils.initDrag;
+    var getEventMetrics = javaxt.dhtml.calendar.utils.getEventMetrics;
 
     init();
 };

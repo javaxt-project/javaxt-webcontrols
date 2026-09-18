@@ -1,7 +1,7 @@
 if(!javaxt) var javaxt={};
 if(!javaxt.dhtml) javaxt.dhtml={};
 if(!javaxt.dhtml.calendar) javaxt.dhtml.calendar={};
-javaxt.dhtml.calendar.Utils = {
+javaxt.dhtml.calendar.utils = {
 
 
   //**************************************************************************
@@ -34,6 +34,64 @@ javaxt.dhtml.calendar.Utils = {
         if (!style.eventContinueLeft) style.eventContinueLeft = config.style.eventContinueLeft;
         if (!style.eventContinueRight) style.eventContinueRight = config.style.eventContinueRight;
         return style;
+    },
+
+
+  //**************************************************************************
+  //** getEventMetrics
+  //**************************************************************************
+  /** Calculates event height and padding
+   */
+    getEventMetrics : function(grid, eventStyle, callback){
+        if (!grid || !eventStyle || !callback) return;
+
+        javaxt.dhtml.utils.onRender(grid, function(){
+
+            var container = grid.parentNode;
+            if (!container) return;
+
+
+          //Render a throwaway event, off-screen, using the real event style.
+          //Append to the parent container (a div) rather than the table element.
+            var sample = javaxt.dhtml.utils.createElement('div', container, {
+                position: "absolute",
+                visibility: "hidden",
+                top: "-2000px",
+                left: "0px",
+                whiteSpace: "nowrap"
+            });
+
+          //Apply the event style the same way an event does. Note config.style.event
+          //may be a CSS class name (string) or an inline style object; the raw util
+          //addStyle handles both. (A view's local addStyle() wrapper treats strings
+          //as config.style keys, which is not what we want here.)
+            javaxt.dhtml.utils.addStyle(sample, eventStyle);
+            sample.style.height = ""; //let the content drive the height
+            sample.innerHTML = "Ag"; //text with an ascender and a descender
+
+
+          //Measure two heights so callers can match their box-sizing:
+          //  - offsetHeight: the full rendered bar (content + padding + border),
+          //    used by border-box event divs where height:100% == the whole bar.
+          //  - contentHeight: just the text line box, used by content-box event
+          //    divs where the wrapper height drives the content and the border +
+          //    padding are added on top. clientHeight excludes the border, so
+          //    subtracting the vertical padding yields the content height.
+            var getStyle = javaxt.dhtml.utils.getStyle;
+            var padTop = parseInt(getStyle(sample, "padding-top"));
+            var padBottom = parseInt(getStyle(sample, "padding-bottom"));
+            var offsetHeight = Math.round(sample.getBoundingClientRect().height);
+            var contentHeight = sample.clientHeight - (padTop||0) - (padBottom||0);
+
+            container.removeChild(sample);
+
+
+            callback.apply(this, [{
+                contentHeight: contentHeight,
+                offsetHeight: offsetHeight,
+                padding: padTop
+            }]);
+        });
     },
 
 
