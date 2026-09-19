@@ -23,8 +23,22 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
         },
 
+      /** Day names or abbreviations to use in the column headers
+       */
+        dayNames : [],
+
       /** Number of days to render in the view */
         days: 1,
+
+
+      /** Date to render
+       */
+        date: new Date(),
+
+
+      /** Instance of an EventStore
+       */
+        eventStore: null,
 
       /** Amount of time, in milliseconds, to wait before a mousedown is
        *  treated as a "hold" instead of a "click"
@@ -39,32 +53,20 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   //DOM elements
     var el;
     var bodyDiv;
-    var footerRow;
+    var headerRow, footerRow;
     var multidayRow, multidayEventsTable;
     var currTimeDiv, getCurrentDate;
 
 
   //Class variables
-    var rendered;
-    var startDate, endDate;
+    var date, startDate, endDate;
     var cells = {};
     var widths = {};
     var scrollWidth;
     var scrollable = true;
-
-
-  //Config options (defaults are defined in defaultConfig)
-    var days;
-    var date;
-    var store;
-
-
-  //Event geometry derived from the DOM (see updateEventMetrics). These are
-  //not config options - they are measured from an actual event rendered with
-  //the configured event style so the layout adapts to the current theme
-  //(font size, borders, padding) instead of assuming fixed pixel values.
-    var eventHeight;   //event wrapper height (natural content height), in pixels; only applies to multiday events
-    var eventPadding;  //padding around an event, in pixels
+    var eventHeight;
+    var eventPadding;
+    var rendered;
 
 
   //Browser detection used to adjust event padding
@@ -95,19 +97,12 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         javaxt.dhtml.utils.addNoSelectRule();
 
 
-
       //Call super
         new javaxt.dhtml.calendar.View(me, config);
 
-      //Set store
-        store = config.eventStore==null ? new javaxt.dhtml.calendar.EventStore() : config.eventStore;
 
-      //Set config options. Normalize/validate the numeric values back into
-      //the config object so they can be referenced directly (e.g. config.holdDelay).
-      //Note: eventHeight and eventPadding are NOT config options - they are
-      //measured from the DOM (see updateEventMetrics).
-        var isNumber = javaxt.dhtml.utils.isNumber;
-        days = (config.days!=null) ? config.days : defaultConfig.days;
+      //Process config
+        if (!config.eventStore) config.eventStore = new javaxt.dhtml.calendar.EventStore();
         config.holdDelay = isNumber(config.holdDelay) ? parseInt(config.holdDelay) : defaultConfig.holdDelay;
         config.debug = config.debug===true;
 
@@ -236,6 +231,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         me.clear();
         me.addEvents(events);
         if (scrollTop!=null) bodyDiv.scrollTop = scrollTop;
+
+        updateCurrTime();
     };
 
 
@@ -275,6 +272,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         tr = table.addRow();
         addStyle(tr, config.style.header);
         tr.setAttribute("desc", "header");
+        headerRow = tr;
         var header = tr.addColumn({width: "100%", height: "inherit"});
 
 
@@ -358,8 +356,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         var spacerUL = createElement('div', td);
 
         var d = new Date(startDate);
-        for (var i=0; i<days; i++){
-            td = tr.addColumn({width: (100/days) + '%', height: "100%"});
+        for (var i=0; i<config.days; i++){
+            td = tr.addColumn({width: (100/config.days) + '%', height: "100%"});
             addStyle(td, config.style.headerCol);
             td.appendChild(me.createColumnHeader(d.getDay()));
             d.setDate(d.getDate()+1);
@@ -369,6 +367,11 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         var spacerUR = createElement('div', td);
 
 
+      //Grow the header row to fit its column headers (e.g. a custom renderer
+      //that stacks the weekday over the date). No-op for single-line headers.
+        resizeHeader(headerRow);
+
+
       //Populate footer
         var footerTable = createTable(footer);
         tr = footerTable.addRow();
@@ -376,8 +379,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         var spacerLL = createElement('div', td);
 
         var d = new Date(startDate);
-        for (var i=0; i<days; i++){
-            td = tr.addColumn({width: (100/days) + '%', height: "100%"});
+        for (var i=0; i<config.days; i++){
+            td = tr.addColumn({width: (100/config.days) + '%', height: "100%"});
             addStyle(td, config.style.footerCol);
             td.appendChild(me.createColumnFooter(d.getDay()));
             d.setDate(d.getDate()+1);
@@ -406,8 +409,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         tr = multidayTable.addRow();
         td = tr.addColumn();
         var spacerML = createElement('div', td);
-        for (var i=0; i<days; i++){
-            td = tr.addColumn({width: (100/days) + '%', height: "1px"});
+        for (var i=0; i<config.days; i++){
+            td = tr.addColumn({width: (100/config.days) + '%', height: "1px"});
             addStyle(td, config.style.multidayCol);
         }
         multidayEventsTable = multidayTable.firstChild;
@@ -438,9 +441,9 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
       //Create main table used to render days
         var d = new Date(startDate);
-        for (var i=0; i<days; i++){
+        for (var i=0; i<config.days; i++){
 
-            td = row.addColumn({width: (100/days) + '%', height: "100%", verticalAlign: "top"});
+            td = row.addColumn({width: (100/config.days) + '%', height: "100%", verticalAlign: "top"});
             addStyle(td, config.style.cell);
             td.valign="top";
 
@@ -507,9 +510,13 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         spacerLR.style.width = scrollWidth + 'px';
 
 
-      //Update position of the current time indicator
+      //Position the current time indicator once the grid is laid out. Measuring
+      //row offsets requires layout, so defer via onRender - running this while
+      //the view is still hidden/0-sized (e.g. mid view-switch) would pin the
+      //indicator to the top (12am) until the next timer tick. onResize corrects
+      //it again if the grid height changes after it first renders.
         currTimeDiv.style.left = lt + 'px';
-        updateCurrTime();
+        onRender(el, updateCurrTime);
 
 
       //Kick off scheduled task to periodically update the current time indicator
@@ -698,7 +705,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
 
         var text = config.dayNames[i];
-        if (days>1) text = text.substring(0,3);
+        if (config.days>1) text = text.substring(0,3);
         //else text+= ", " + config.monthNames[d.getMonth()] + " " + d.getDate();
         innerDiv.innerHTML = text;
 
@@ -830,7 +837,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   //** getEventStore
   //**************************************************************************
     this.getEventStore = function(){
-        return store;
+        return config.eventStore;
     };
 
 
@@ -897,7 +904,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
 
       //Update the event store
-        store.add(event);
+        config.eventStore.add(event);
     };
 
 
@@ -1081,7 +1088,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
     this.removeEvent = function(event){
 
       //Update event store
-        store.remove(event);
+        config.eventStore.remove(event);
 
 
       //Remove div
@@ -1199,8 +1206,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
       //Find events that occur with a single day
         var d = new Date(date);
-        if (days>1 && d.getDay()>0) d.setDate(d.getDate()-d.getDay());
-        for (var i=0; i<days; i++){
+        if (config.days>1 && d.getDay()>0) d.setDate(d.getDate()-d.getDay());
+        for (var i=0; i<config.days; i++){
             var divs = getDivs(d);
 
             for (var j=0; j<divs.length; j++){
@@ -1249,14 +1256,14 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
       //Remove events that occur with a single day
         var d = new Date(date);
-        if (days>1 && d.getDay()>0) d.setDate(d.getDate()-d.getDay());
-        for (var i=0; i<days; i++){
+        if (config.days>1 && d.getDay()>0) d.setDate(d.getDate()-d.getDay());
+        for (var i=0; i<config.days; i++){
             var divs = getDivs(d);
 
             for (var j=0; j<divs.length; j++){
                 var div = divs[j];
                 var event = div.event;
-                store.remove(event);
+                config.eventStore.remove(event);
                 var parentNode = div.parentNode;
                 parentNode.removeChild(div);
             }
@@ -1276,7 +1283,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
                 if (td.childNodes.length>0){
                     var div = td.childNodes[0];
                     var event = div.event;
-                    store.remove(event);
+                    config.eventStore.remove(event);
                 }
             }
 
@@ -1539,8 +1546,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
       //gives a fractional value just under the next column and must NOT be
       //treated as continuing past the view.
         endColID = Math.floor(b);
-        if (endColID>days-1){
-            endColID = days-1;
+        if (endColID>config.days-1){
+            endColID = config.days-1;
             continueRight = true;
         }
 
@@ -1620,7 +1627,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
 
           //Add days
-            for (var i=0; i<days; i++){
+            for (var i=0; i<config.days; i++){
                 td = createElement('td', tr);
                 addStyle(td, config.style.multidayCol);
 
@@ -1738,7 +1745,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   //**************************************************************************
     this.next = function(){
         var d = new Date(startDate);
-        d.setDate(d.getDate()+days);
+        d.setDate(d.getDate()+config.days);
         me.setDate(d);
     };
 
@@ -1748,7 +1755,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   //**************************************************************************
     this.back = function(){
         var d = new Date(startDate);
-        d.setDate(d.getDate()-days);
+        d.setDate(d.getDate()-config.days);
         me.setDate(d);
     };
 
@@ -1770,10 +1777,10 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
         date = d;
         startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-        if (days>1 && startDate.getDay()>0) startDate.setDate(startDate.getDate()-startDate.getDay());
+        if (config.days>1 && startDate.getDay()>0) startDate.setDate(startDate.getDate()-startDate.getDay());
 
         endDate = new Date(startDate);
-        endDate.setDate(endDate.getDate()+days);
+        endDate.setDate(endDate.getDate()+config.days);
 
 
         renderTable();
@@ -1808,7 +1815,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   /** Returns a title for the current view. */
 
     this.getTitle = function(){
-        if (days==1){
+        if (config.days==1){
             var month = config.monthNames[date.getMonth()];
             return (month + " " + date.getDate() + ", " + date.getFullYear());
         }
@@ -1843,7 +1850,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   //**************************************************************************
     var loadEvents = function(){
 
-        var events = store.getEvents();
+        var events = config.eventStore.getEvents();
         for (var i=0; i<events.length; i++){
 
             if (events[i].getStartDate().getTime()<endDate.getTime() &&
@@ -2040,7 +2047,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
     var getOverlappingEvents = function(event){
 
         var arr = [];
-        var overlappingEvents = store.getOverlappingEvents(event);
+        var overlappingEvents = config.eventStore.getOverlappingEvents(event);
         for (var i=0; i<overlappingEvents.length; i++){
             var _event = overlappingEvents[i];
             if (_event.numDays()<1){//Ignore mulitday events
@@ -2143,6 +2150,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
     var createElement = javaxt.dhtml.utils.createElement;
     var createTable = javaxt.dhtml.utils.createTable;
     var intersects = javaxt.dhtml.utils.intersects;
+    var isNumber = javaxt.dhtml.utils.isNumber;
     var addStyle = javaxt.dhtml.utils.addStyle;
     var onRender = javaxt.dhtml.utils.onRender;
     var _getRect = javaxt.dhtml.utils.getRect;
@@ -2150,6 +2158,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
     var log = function(str){if(config.debug)console.log(str);};
     var getEventMetrics = javaxt.dhtml.calendar.utils.getEventMetrics;
+    var resizeHeader = javaxt.dhtml.calendar.utils.resizeHeader;
     var getStyle = javaxt.dhtml.calendar.utils.getStyle;
     var initDrag = javaxt.dhtml.calendar.utils.initDrag;
 

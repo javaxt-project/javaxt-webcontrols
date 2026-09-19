@@ -96,6 +96,49 @@ javaxt.dhtml.calendar.utils = {
 
 
   //**************************************************************************
+  //** resizeHeader
+  //**************************************************************************
+  /** Grows a calendar view's header row to fit its column headers, so a custom
+   *  renderer that produces a taller header (e.g. the weekday stacked over the
+   *  date) is not clipped by the styled header height.
+   *
+   *  The header content is rendered inside an overflow:hidden box, so the fixed
+   *  header height clips anything taller. getBoundingClientRect reports an
+   *  element's laid-out position regardless of that clipping, so we find the
+   *  lowest content bottom in the header and, if it falls below the row, grow
+   *  the row to reach it. A single-line header sits within the styled height, so
+   *  the row is unchanged. The measurement is renderer-agnostic and idempotent
+   *  (once the row fits, its own full-height cells define the bottom, so
+   *  re-running is a no-op). Deferred via onRender so it measures a laid-out
+   *  element.
+   *  @param headerRow The view's header row (a <tr>).
+   */
+    resizeHeader : function(headerRow){
+        if (!headerRow) return;
+
+        javaxt.dhtml.utils.onRender(headerRow, function(){
+
+          //Find the lowest content bottom among the header's elements (relative
+          //to the row top). Clipped content still reports its true position.
+            var getRect = javaxt.dhtml.utils.getRect;
+            var rowRect = getRect(headerRow);
+            var maxBottom = rowRect.top;
+            var els = headerRow.getElementsByTagName('div');
+            for (var i=0; i<els.length; i++){
+                var bottom = getRect(els[i]).bottom;
+                if (bottom > maxBottom) maxBottom = bottom;
+            }
+
+          //Grow the row if the content extends past its current height.
+            var needed = maxBottom - rowRect.top;
+            if (needed > rowRect.height){
+                headerRow.style.height = Math.ceil(needed) + "px";
+            }
+        });
+    },
+
+
+  //**************************************************************************
   //** addColSpan
   //**************************************************************************
   /** Used to add a colspan to a given column.

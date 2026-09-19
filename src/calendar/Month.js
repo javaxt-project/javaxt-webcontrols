@@ -24,8 +24,24 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
 
         },
 
+      /** Day names or abbreviations to use in the column headers
+       */
+        dayNames : [],
 
-      /** Vertical spacing between events, in pixels */
+      /** Number of days to render in the view
+       */
+        days: 1,
+
+      /** User to specify which month to render
+       */
+        date: new Date(),
+
+      /** Instance of an EventStore
+       */
+        eventStore: null,
+
+      /** Vertical spacing between events, in pixels
+       */
         eventSpacing: 2,
 
       /** Amount of time, in milliseconds, to wait before a mousedown is
@@ -33,7 +49,8 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
        */
         holdDelay: 500,
 
-      /** If true, enables debug logging to the console */
+      /** If true, enables debug logging to the console
+       */
         debug: false
     };
 
@@ -41,31 +58,20 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
 
   //DOM elements
     var table;
+    var headerRow;
 
 
   //Class variables
-    var startDate, endDate;
+    var date, startDate, endDate;
     var numWeeks;
     var cells = {};
     var multiDayCols = {};
     var singleDayCols = {};
     var mutiDayEventDivs = [];
+    var eventHeight;
+    var eventPadding;
     var touchEnabled = true;
     var rendered;
-
-
-  //Config options (defaults are defined in defaultConfig)
-    var date;
-    var days;
-    var store;
-
-
-  //Event geometry derived from the DOM (see updateEventMetrics). These are
-  //not config options - they are measured from an actual event rendered with
-  //the configured event style so the layout adapts to the current theme
-  //(font size, borders, padding) instead of assuming fixed pixel values.
-    var eventHeight;   //event wrapper height (natural content height), in pixels
-    var eventPadding;  //padding within a cell, in pixels
 
 
 
@@ -90,22 +96,11 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
         javaxt.dhtml.utils.addNoSelectRule();
 
 
-      //Get days config
-        days = config.dayNames;
-
-
       //Call super
         new javaxt.dhtml.calendar.View(me, config);
 
-      //Set store
-        store = config.eventStore==null ? new javaxt.dhtml.calendar.EventStore() : config.eventStore;
-
-
-      //Set config options. Normalize/validate the numeric values back into
-      //the config object so they can be referenced directly (e.g. config.eventSpacing).
-      //Note: eventHeight and eventPadding are NOT config options - they are
-      //measured from the DOM (see updateEventMetrics).
-        var isNumber = javaxt.dhtml.utils.isNumber;
+      //Process config
+        if (!config.eventStore) config.eventStore = new javaxt.dhtml.calendar.EventStore();
         config.holdDelay = isNumber(config.holdDelay) ? parseInt(config.holdDelay) : defaultConfig.holdDelay;
         config.debug = config.debug===true;
         config.eventSpacing = isNumber(config.eventSpacing) ? parseInt(config.eventSpacing) : defaultConfig.eventSpacing;
@@ -227,6 +222,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
         var tr = table.addRow();
         addStyle(tr, config.style.header);
         tr.setAttribute("desc", "header-row");
+        headerRow = tr;
         var header = tr.addColumn({width: "100%"});
         tr = table.addRow();
         addStyle(tr, config.style.body);
@@ -237,19 +233,24 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
       //Create header table
         var headerTable = createTable(header);
         var th = headerTable.addRow();
-        for (var i=0; i<days.length; i++){
-            var td = th.addColumn({width: (100/days.length) + '%'});
+        for (var i=0; i<config.dayNames.length; i++){
+            var td = th.addColumn({width: (100/config.dayNames.length) + '%'});
             addStyle(td, config.style.headerCol);
 
 
             //Update left and right border of the first and last days. The
             //border should be set via the javaxt-cal-header style.
             if (i==0) td.style.borderLeft = "0px";
-            if (i==days.length-1) td.style.borderRight = "0px";
+            if (i==config.dayNames.length-1) td.style.borderRight = "0px";
 
 
             td.appendChild(me.createColumnHeader(i));
         }
+
+
+      //Grow the header row to fit its column headers (no-op for single-line
+      //headers, e.g. the default day-name header).
+        resizeHeader(headerRow);
 
 
 
@@ -306,15 +307,15 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
 
                   //Set date
                     var d = new Date(startDate);
-                    d.setDate(d.getDate()+(i*days.length));
+                    d.setDate(d.getDate()+(i*config.dayNames.length));
 
 
                     tr = innerTable.addRow();
 
 
                   //Add columns - one for each day
-                    for (var j=0; j<days.length; j++){
-                        td = tr.addColumn({width: (100/days.length) + '%'});
+                    for (var j=0; j<config.dayNames.length; j++){
+                        td = tr.addColumn({width: (100/config.dayNames.length) + '%'});
                         if (d.getMonth()<date.getMonth()) addStyle(td, config.style.cellPrevMonth);
                         else if (d.getMonth()>date.getMonth()) addStyle(td, config.style.cellNextMonth);
                         else addStyle(td, config.style.cell);
@@ -431,7 +432,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
                         if (j==0){
                             td.style.borderLeft = "0px";
                         }
-                        if (j==days.length-1){
+                        if (j==config.dayNames.length-1){
                             td.style.borderRight = "0px";
                         }
                         if (i==0){
@@ -485,7 +486,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
             whiteSpace: 'nowrap',
             overflow: 'hidden'
         });
-        innerDiv.innerHTML = days[i];
+        innerDiv.innerHTML = config.dayNames[i];
         return outerDiv;
     };
 
@@ -563,7 +564,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
   //** getEventStore
   //**************************************************************************
     this.getEventStore = function(){
-        return store;
+        return config.eventStore;
     };
 
 
@@ -625,7 +626,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
 
 
       //Update the event store
-        store.add(event);
+        config.eventStore.add(event);
     };
 
 
@@ -638,7 +639,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
 
 
       //Remove the event from the store
-        store.remove(event);
+        config.eventStore.remove(event);
 
 
       //Update view
@@ -864,7 +865,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
                 while (div.firstChild) {
                     var eventDiv = div.firstChild;
                     var event = eventDiv.event;
-                    store.remove(event);
+                    config.eventStore.remove(event);
                     div.removeChild(eventDiv);
                 }
             }
@@ -884,7 +885,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
                     var eventDiv = td.firstChild;
                     if (eventDiv!=null){
                         var event = eventDiv.event;
-                        store.remove(event);
+                        config.eventStore.remove(event);
                     }
 
 
@@ -1410,7 +1411,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
   //** loadEvents
   //**************************************************************************
     var loadEvents = function(){
-        var events = store.getEvents();
+        var events = config.eventStore.getEvents();
         for (var i=0; i<events.length; i++){
             me.addEvent(events[i]);
         }
@@ -1437,6 +1438,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
   //**************************************************************************
     var createElement = javaxt.dhtml.utils.createElement;
     var createTable = javaxt.dhtml.utils.createTable;
+    var isNumber = javaxt.dhtml.utils.isNumber;
     var onRender = javaxt.dhtml.utils.onRender;
     var addStyle = javaxt.dhtml.utils.addStyle;
     var _getRect = javaxt.dhtml.utils.getRect;
@@ -1446,6 +1448,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
     var getStyle = javaxt.dhtml.calendar.utils.getStyle;
     var initDrag = javaxt.dhtml.calendar.utils.initDrag;
     var getEventMetrics = javaxt.dhtml.calendar.utils.getEventMetrics;
+    var resizeHeader = javaxt.dhtml.calendar.utils.resizeHeader;
 
     init();
 };

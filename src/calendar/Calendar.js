@@ -180,6 +180,11 @@ javaxt.dhtml.Calendar = function(parent, config) {
         },
 
 
+      /** Instance of an EventStore
+       */
+        eventStore: null,
+
+
       /** Vertical spacing between events, in pixels
        */
         eventSpacing: 2,
@@ -221,7 +226,7 @@ javaxt.dhtml.Calendar = function(parent, config) {
 
 
       //Set store
-        if (config.eventStore==null) config.eventStore = new javaxt.dhtml.calendar.EventStore();
+        if (!config.eventStore) config.eventStore = new javaxt.dhtml.calendar.EventStore();
 
 
 
