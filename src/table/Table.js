@@ -101,8 +101,8 @@ javaxt.dhtml.Table = function(parent, config) {
 
             headerColumn: {
                 lineHeight: "35px",
-                borderLeft: "1px solid #cccccc",
-                borderRight: "1px solid #cccccc",
+                borderLeft: "1px solid #ccc",
+                borderRight: "1px solid #ccc",
                 padding: "0 5px",
                 color: "#272727",
                 cursor: "pointer",
@@ -111,14 +111,14 @@ javaxt.dhtml.Table = function(parent, config) {
 
             row: {
                 height: "35px",
-                borderBottom: "1px solid #cccccc"
+                borderBottom: "1px solid #ccc"
             },
 
             column: {
                 height: "35px",
                 lineHeight: "35px",
-                borderLeft: "1px solid #cccccc",
-                borderRight: "1px solid #cccccc",
+                borderLeft: "1px solid #ccc",
+                borderRight: "1px solid #ccc",
                 padding: "0 5px",
                 color: "#272727",
                 cursor: "default",
@@ -127,7 +127,7 @@ javaxt.dhtml.Table = function(parent, config) {
 
             selectedRow: {
                 height: "35px",
-                borderBottom: "1px solid #cccccc",
+                borderBottom: "1px solid #ccc",
                 backgroundColor: "#FFFFB1"
             },
 
@@ -222,6 +222,8 @@ javaxt.dhtml.Table = function(parent, config) {
             tr.style.visibility = 'hidden';
             tr.style.display = 'none';
         }
+        var phantomRowHeight = 1;
+        header.style.marginTop = -phantomRowHeight + "px";
 
 
 
@@ -328,11 +330,11 @@ javaxt.dhtml.Table = function(parent, config) {
         });
         body = createTable(bodyDiv);
         body.style.height = '';
-
+        body.style.marginTop = -phantomRowHeight + "px";
 
 
       //Populate header
-        tr = createPhantomRow(header, 1);
+        tr = createPhantomRow(header, phantomRowHeight);
         var spacerUR = createElement('div', tr.addColumn());
 
 
@@ -382,7 +384,7 @@ javaxt.dhtml.Table = function(parent, config) {
 
 
       //Populate body
-        createPhantomRow(body, 1);
+        createPhantomRow(body, phantomRowHeight);
 
 
 
