@@ -14,8 +14,8 @@ javaxt.dhtml.Table = function(parent, config) {
 
     var me = this;
 
-    var deferUpdate = false;
-    var header, body; //tbody elements
+    var header, body; //tables created via createTable()
+    var tbody; //tbody element in the body table. The first row is a phantom row
     var bodyDiv; //overflow div
     var mask;
     var prevSelection;
@@ -384,7 +384,7 @@ javaxt.dhtml.Table = function(parent, config) {
 
 
       //Populate body
-        createPhantomRow(body, phantomRowHeight);
+        tbody = createPhantomRow(body, phantomRowHeight).parentNode;
 
 
 
@@ -472,23 +472,21 @@ javaxt.dhtml.Table = function(parent, config) {
         for (var i=0; i<config.columns.length; i++){
 
             var columnConfig = config.columns[i];
-            var clonedColumnConfig = {};
-            merge(clonedColumnConfig, columnConfig);
+            var columnWidth = columnConfig.width;
+            if (columnWidth==null) columnWidth = 25;
 
             var cell = row.addColumn();
             cell.style.height = getPixels(height);
+            cell.style.width = getPixels(columnWidth);
+            var minWidth = columnConfig.minWidth;
+            if (minWidth) cell.style.minWidth = getPixels(minWidth);
 
 
+          //Hide column as needed. Note that we still set the column width so
+          //the column renders correctly if it is shown later (see showColumn)
             if (columnConfig.hidden === true){
                 cell.style.visibility = 'hidden';
                 cell.style.display = 'none';
-                cell.style.width = '0px';
-            }
-            else{
-                var columnWidth = columnConfig.width;
-                cell.style.width = getPixels((columnWidth==null) ? 25 : columnWidth);
-                var minWidth = columnConfig.minWidth;
-                if (minWidth) cell.style.minWidth = getPixels(minWidth);
             }
 
             var x = createElement("div", cell);
@@ -573,47 +571,20 @@ javaxt.dhtml.Table = function(parent, config) {
   //**************************************************************************
   //** addRows
   //**************************************************************************
-  /** Appends multiple rows to the table. On some browsers (e.g. iPad) this
-   *  method is significantly faster than calling addRow() multiple times.
-   *  Example:
+  /** Appends multiple rows to the table. This method is significantly faster
+   *  than calling addRow() multiple times. Example:
    <pre>
     table.addRows([
         ["Bob","12/30","$5.25"],
         ["Jim","10/28","$7.33"]
     ]);
    </pre>
+   *  @param rows An array of rows. Each row is an array of values. You can
+   *  also provide a number to add that many empty rows.
+   *  @return An array of rows (DOM elements) that were added to the table
    */
     this.addRows = function(rows){
-
-      //Check if rows is a number
-        if (!isArray(rows)){
-            rows = parseInt(rows);
-            if (isNaN(rows)) return;
-            else{
-                var numRows = rows;
-                rows = [];
-                var data = [];
-                for (var i=0; i<config.columns.length; i++){
-                    data.push("");
-                }
-                for (var i=0; i<numRows; i++){
-                    rows.push(data);
-                }
-            }
-        }
-
-
-        deferUpdate = true;
-
-        var arr = [];
-        for (var i=0; i<rows.length; i++){
-            arr.push(me.addRow(rows[i]));
-        }
-
-        deferUpdate = false;
-        me.update();
-
-        return arr;
+        return me.insertRows(null, rows);
     };
 
 
@@ -629,19 +600,148 @@ javaxt.dhtml.Table = function(parent, config) {
    <pre>
     table.addRow(["Bob","12/30","$5.25"]);
    </pre>
+   *  @return The row (DOM element) that was added to the table
    */
     this.addRow = function(){
+        return me.insertRows(null, [getRowData(arguments, 0)])[0];
+    };
 
-        var data = arguments;
+
+  //**************************************************************************
+  //** insertRows
+  //**************************************************************************
+  /** Inserts multiple rows into the table at a given index or before a given
+   *  row. Rows below the insertion point are pushed down. Example:
+   <pre>
+    //Insert two rows at the top of the table
+    table.insertRows(0, [
+        ["Bob","12/30","$5.25"],
+        ["Jim","10/28","$7.33"]
+    ]);
+
+    //Insert a row before a row in the table
+    table.insertRows(row, [["Sue","11/02","$4.10"]]);
+   </pre>
+   *  @param index Either a row index (integer) or a row in the table (DOM
+   *  element). Row indexes start at 0. If the index is null or greater than
+   *  the number of rows in the table, the rows are appended to the end of the
+   *  table. Negative indexes are treated as 0. If a DOM element is given that
+   *  is not a row in this table, no rows are inserted.
+   *  @param rows An array of rows. Each row is an array of values. You can
+   *  also provide a number to insert that many empty rows.
+   *  @return An array of rows (DOM elements) that were added to the table
+   */
+    this.insertRows = function(index, rows){
+        if (!tbody) return [];
 
 
-      //Check if the first argument is an array. If so, use it.
-      //Otherwise, we'll use all the arguments as data.
-        if (isArray(data[0])) data = data[0];
+      //Find the row to insert before. Null means append to the end.
+        var nextRow = null;
+        if (isElement(index)){
+            if (!isRow(index)) return [];
+            nextRow = index;
+        }
+        else if (isNumber(index)){
+            var idx = Math.max(parseInt(index), 0);
+            nextRow = getRowAt(idx);
+        }
 
+
+      //Check if rows is a number
+        if (!isArray(rows)){
+            var numRows = parseInt(rows);
+            if (isNaN(numRows)) return [];
+            rows = [];
+            for (var i=0; i<numRows; i++){
+                rows.push([]);
+            }
+        }
+
+
+      //Create rows and add them to a document fragment so we only update the
+      //DOM once
+        var arr = [];
+        var fragment = document.createDocumentFragment();
+        for (var i=0; i<rows.length; i++){
+            var row = createRow(rows[i]);
+            fragment.appendChild(row);
+            arr.push(row);
+        }
+        tbody.insertBefore(fragment, nextRow);
+
+
+      //Update the scroll
+        me.update();
+
+        return arr;
+    };
+
+
+  //**************************************************************************
+  //** insertRow
+  //**************************************************************************
+  /** Inserts a row into the table at a given index or before a given row.
+   *  Rows below the insertion point are pushed down. Example:
+   <pre>
+    table.insertRow(0, "Bob","12/30","$5.25"); //insert at the top
+    table.insertRow(row, ["Bob","12/30","$5.25"]); //insert before a row
+   </pre>
+   *  @param index Either a row index (integer) or a row in the table (DOM
+   *  element). See insertRows() for more information.
+   *  @return The row (DOM element) that was added to the table
+   */
+    this.insertRow = function(index){
+        return me.insertRows(index, [getRowData(arguments, 1)])[0];
+    };
+
+
+  //**************************************************************************
+  //** getRowData
+  //**************************************************************************
+  /** Returns cell values from the arguments passed to addRow() or
+   *  insertRow(). The values are either given as an array or as individual
+   *  arguments, starting at a given offset.
+   */
+    var getRowData = function(args, offset){
+        if (isArray(args[offset])) return args[offset];
+        return Array.prototype.slice.call(args, offset);
+    };
+
+
+  //**************************************************************************
+  //** getRowAt
+  //**************************************************************************
+  /** Returns the row at a given index or null if the index is out of range.
+   */
+    var getRowAt = function(idx){
+        var rows = tbody.childNodes;
+        idx++; //skip phantom row!
+        if (idx<1 || idx>=rows.length) return null;
+        return rows[idx];
+    };
+
+
+  //**************************************************************************
+  //** isRow
+  //**************************************************************************
+  /** Returns true if the given element is a row in this table (excluding the
+   *  phantom row).
+   */
+    var isRow = function(el){
+        return el.parentNode===tbody && el!==tbody.firstChild;
+    };
+
+
+  //**************************************************************************
+  //** createRow
+  //**************************************************************************
+  /** Creates a new row and populates the cells with given values. Note that
+   *  the row is not added to the table.
+   */
+    var createRow = function(data){
 
       //Create row
-        var row = body.addRow();
+        var row = createElement("tr");
         row.selected = false;
         setStyle(row, "row");
 
@@ -656,9 +756,30 @@ javaxt.dhtml.Table = function(parent, config) {
         };
 
 
-      //Create template as needed. The template is a collection of cells that
-      //are cloned whenever a new row is added. This approach results in faster
-      //row rendering.
+      //Insert cells
+        var template = getTemplate();
+        for (var i=0; i<config.columns.length; i++){
+            var cell = template[i].cloneNode(true);
+            cell.innerDiv = cell.firstChild.firstChild;
+            cell.setContent = setContent;
+            cell.getContent = getContent;
+            cell.setContent(data[i]);
+            row.appendChild(cell);
+        }
+
+        return row;
+    };
+
+
+  //**************************************************************************
+  //** getTemplate
+  //**************************************************************************
+  /** Returns the row template, creating it as needed. The template is a
+   *  collection of cells that are cloned whenever a new row is added. This
+   *  approach results in faster row rendering. Note that the template is
+   *  updated whenever a column is shown or hidden.
+   */
+    var getTemplate = function(){
         if (!template){
             template = [];
             for (var i=0; i<config.columns.length; i++){
@@ -669,24 +790,7 @@ javaxt.dhtml.Table = function(parent, config) {
                 template.push(cell);
             }
         }
-
-
-      //Insert cells
-        for (var i=0; i<config.columns.length; i++){
-            var cell = template[i].cloneNode(true);
-            cell.innerDiv = cell.firstChild.firstChild;
-            cell.setContent = setContent;
-            cell.getContent = getContent;
-            cell.setContent(data[i]);
-            row.appendChild(cell);
-        }
-
-
-      //Update table as needed
-        if (!deferUpdate) me.update();
-
-
-        return row;
+        return template;
     };
 
 
@@ -1288,15 +1392,94 @@ javaxt.dhtml.Table = function(parent, config) {
   //** removeRow
   //**************************************************************************
   /** Used to remove a row from the table and update the scroll.
+   *  @param row Either a row index (integer) or a row in the table (DOM
+   *  element)
+   *  @return The row (DOM element) that was removed from the table or null if
+   *  the row was not found
    */
     this.removeRow = function(row){
-        var scrollInfo = me.getScrollInfo();
-        var x = scrollInfo.x;
-        var y = scrollInfo.y;
-        var h = row.offsetHeight;
-        body.removeRow(row);
+        var rows = me.removeRows(row);
+        return rows.length>0 ? rows[0] : null;
+    };
+
+
+  //**************************************************************************
+  //** removeRows
+  //**************************************************************************
+  /** Used to remove rows from the table and update the scroll. Example:
+   <pre>
+    table.removeRows(0); //remove the first row
+    table.removeRows(row); //remove a row
+    table.removeRows([0, 1, 2]); //remove the first three rows
+    table.removeRows([row1, row2]); //remove multiple rows
+   </pre>
+   *  Selected rows are deselected before they are removed (fires the
+   *  onSelectionChange event).
+   *  @param rows A row index (integer), a row in the table (DOM element), or
+   *  an array of either. Array-like objects (e.g. a NodeList returned by
+   *  querySelectorAll or an HTMLCollection) are also supported. Indexes refer
+   *  to row positions before any rows are removed. Invalid indexes and
+   *  elements that are not rows in this table are ignored.
+   *  @return An array of rows (DOM elements) that were removed from the table
+   */
+    this.removeRows = function(rows){
+        if (!tbody) return [];
+        if (!isArray(rows)){
+
+          //Convert array-like objects (e.g. NodeList or HTMLCollection) into
+          //an array. Note that some collections are live so we need a copy.
+            if (rows!=null && typeof rows === "object" && !isElement(rows) &&
+                typeof rows.length === "number"){
+                rows = Array.prototype.slice.call(rows);
+            }
+            else{
+                rows = [rows];
+            }
+        }
+
+
+      //Resolve indexes into rows before we remove anything
+        var arr = [];
+        for (var i=0; i<rows.length; i++){
+            var row = rows[i];
+            if (isElement(row)){
+                if (!isRow(row)) continue;
+            }
+            else if (isNumber(row)){
+                row = getRowAt(parseInt(row));
+                if (!row) continue;
+            }
+            else{
+                continue;
+            }
+            if (arr.indexOf(row)===-1) arr.push(row);
+        }
+        if (arr.length===0) return arr;
+
+
+      //Deselect rows
+        var deselectedRows = [];
+        for (var i=0; i<arr.length; i++){
+            var row = arr[i];
+            if (row.selected){
+                me.deselect(row);
+                deselectedRows.push(row);
+            }
+            if (row===prevSelection) prevSelection = null;
+        }
+        if (deselectedRows.length>0) me.onSelectionChange(deselectedRows);
+
+
+      //Remove rows
+        for (var i=0; i<arr.length; i++){
+            tbody.removeChild(arr[i]);
+        }
+
+
+      //Update the scroll
         me.update();
-        me.scrollTo(x, y-h);
+
+        return arr;
     };
 
 
@@ -1315,41 +1498,55 @@ javaxt.dhtml.Table = function(parent, config) {
   //** showColumn
   //**************************************************************************
   /** Used to render a column if it is hidden
+   *  @param idx Column index (integer). Invalid indexes are ignored.
    */
     this.showColumn = function(idx){
-        var headerRows = header.getRows();
-        var numColumns = headerRows[0].childNodes.length;
-        if (idx>=numColumns) return;
-        var childNodes = body.getRows();
-        //if (readerRows[0].childNodes[idx].style.display!="none") return;
-        var rows = nodeListToArray(headerRows);
-        rows = rows.concat(nodeListToArray(childNodes));
-        for (var i=0; i<rows.length; i++){
-            var cols = rows[i].childNodes;
-            cols[idx].style.visibility = "";
-            cols[idx].style.display = "";
-        }
+        setColumnVisibility(idx, true);
     };
 
 
   //**************************************************************************
   //** hideColumn
   //**************************************************************************
-  /** Used to hide column
+  /** Used to hide a column
+   *  @param idx Column index (integer). Invalid indexes are ignored.
    */
     this.hideColumn = function(idx){
-        var headerRows = header.getRows();
-        var numColumns = headerRows[0].childNodes.length;
-        if (idx>=numColumns) return;
-        var childNodes = body.getRows();
-        if (childNodes[0].childNodes[idx].style.display=="none") return;
-        var rows = nodeListToArray(headerRows);
-        rows = rows.concat(nodeListToArray(childNodes));
-        for (var i=0; i<rows.length; i++){
-            var cols = rows[i].childNodes;
+        setColumnVisibility(idx, false);
+    };
 
-            cols[idx].style.visibility = "hidden";
-            cols[idx].style.display = "none";
+
+  //**************************************************************************
+  //** setColumnVisibility
+  //**************************************************************************
+  /** Used to show or hide a column. Updates cells in the header, the body,
+   *  and the template used to create new rows (see getTemplate).
+   */
+    var setColumnVisibility = function(idx, visible){
+        if (!body) return;
+        if (!isNumber(idx)) return;
+        idx = parseInt(idx);
+        if (idx<0 || idx>=config.columns.length) return;
+
+
+      //Get cells to update. Note that the header rows have an extra cell at
+      //the end (spacer) which is ignored since idx is less than the number of
+      //columns.
+        var cells = [];
+        var rows = nodeListToArray(header.getRows());
+        rows = rows.concat(nodeListToArray(body.getRows()));
+        for (var i=0; i<rows.length; i++){
+            var cell = rows[i].childNodes[idx];
+            if (cell) cells.push(cell);
+        }
+        cells.push(getTemplate()[idx]);
+
+
+      //Update cells
+        for (var i=0; i<cells.length; i++){
+            var style = cells[i].style;
+            style.visibility = visible ? "" : "hidden";
+            style.display = visible ? "" : "none";
         }
     };
 
