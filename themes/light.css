@@ -113,7 +113,7 @@ input, select, textarea { /* Allows overriding native style of form elements on 
         margin: 0 0 0 5px;
         color: #272727;
         border-radius: 3px;
-        border: 1px solid rgba(0,0,0,0); /* Transparent border, maintains size parity with default.css */
+        border: 1px solid rgba(0,0,0,0);
         cursor: pointer;
     }
 
@@ -578,14 +578,25 @@ select:focus, textarea:focus, input:focus{
 /**************************************************************************/
 /** Pulldown Button Icon
 /**************************************************************************/
-.pulldown-button-icon { /*form-button form-input-button pulldown-button-icon*/
-    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAlklEQVQ4jWNgGAUowNvbW9PBwUEAjxJGHx8f/dDQUB4MGV9f3+TAwMD/AQEB97y8vOSxafb392+BqrlkbGzMhSLr7++/MTAw8D8OQ+CaYdjb21sT3flKAQEBj7AYgqHZz8+vBqsHPT09ldENCQgImIysOSAgoBZPGGEaQpJmfIYQrRmbITj9TAg4ODgIeHp6apGleegAAME5Y+rCcN+AAAAAAElFTkSuQmCC);
-    background-position: 5px 5px;
-    background-repeat: no-repeat;
-    background-color: #e4e4e4;
+.pulldown-button-icon {
+    color: #525252;
 }
 
+.pulldown-button-icon::after {
+    content:"";
+    position:absolute;
+    border-right: 2px solid;
+    border-bottom: 2px solid;
+    width: 8px;
+    height: 8px;
+    cursor: pointer;
+    transform-origin: 0% 0%;
+    -webkit-transform-origin: 0% 0%;
 
+    transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+    margin-top: -9px;
+}
 
 /**************************************************************************/
 /** Callout Panel
@@ -791,7 +802,7 @@ select:focus, textarea:focus, input:focus{
 
     .tab-bar {
         background-color: #0f6391; /* same as windows header */
-        height: 30px;
+        height: 36px;
         color: #fff;
         border: 1px solid #6393bf;
         border-width: 0 1px;
@@ -799,8 +810,9 @@ select:focus, textarea:focus, input:focus{
 
     .tab-active, .tab-inactive {
         padding: 0 12px;
-        line-height: 30px;
-        cursor: default;
+        line-height: 36px;
+        border-right: 1px solid #6a9ebb;
+        cursor: pointer;
     }
 
     .tab-active {
@@ -813,6 +825,23 @@ select:focus, textarea:focus, input:focus{
 
     .tab-inactive:hover {
         background-color: #3dabe9;
+    }
+
+    .tab-button {
+        width: 16px;
+        height: 16px;
+        border: 0 none;
+        color: #fff;
+        padding: 3px;
+        margin: 0 0 0 5px;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+    .tab-button:hover {
+        background-color:#0f6391;
+        transition: 0.1s;
+        border-radius: 3px;
     }
 
     .tab-body {
@@ -828,7 +857,15 @@ select:focus, textarea:focus, input:focus{
 .javaxt-window {
     .window-body table:first-child .tab-bar {
         background-color: #208EC9;
+        height: 30px;
     }
+
+
+    .window-body table:first-child .tab-active,
+    .window-body table:first-child .tab-inactive {
+        line-height: 30px;
+    }
+
 
     .window-body table:first-child .tab-active {
         background-color: #379ad1;
@@ -1024,11 +1061,22 @@ select:focus, textarea:focus, input:focus{
         background-color:#EDF3FE;
     }
 
-    .table-row-selected{
+    .table-row-selected, .table-row-checked {
         /*border-bottom-style:dotted;*/
         /*border-color:#a3bae9;*/
         background-color:#FFFFB1;
     }
+
+
+    .table-row-checked,
+    .table-row-checked:nth-child(odd) { /*overrides table-row*/
+        background-color: #e8f1fd;
+    }
+
+    .table-row-checked:hover {
+        background-color: #d9e6f6;
+    }
+
 
     .table-col, .table-header-col {
         white-space: nowrap;
@@ -1055,8 +1103,8 @@ select:focus, textarea:focus, input:focus{
     }
 
     .table-col {
-        border-left: 0;
-        border-right: 0;
+        border-left: 0 none; /*1px solid rgba(0,0,0,0);*/
+        border-right: 0 none; /*1px solid rgba(0,0,0,0);*/
     }
 
     .table-resizeHandle {
@@ -1602,6 +1650,12 @@ select:focus, textarea:focus, input:focus{
         border: 1px solid #3a9b9b;
         background-color: #CFE9E9;
         background: linear-gradient(#fff, #CFE9E9);
+    }
+
+    .javaxt-cal-event-orange {
+        border: 1px solid #c2701c;
+        background-color: #F3B267;
+        background: linear-gradient(#fff, #F3B267);
     }
 
 }

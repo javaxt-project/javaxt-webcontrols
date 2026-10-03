@@ -107,6 +107,7 @@ javaxt.dhtml.style.default = {
         row: "table-row",
         column: "table-col",
         selectedRow: "table-row-selected",
+        checkedRow: "table-row-checked",
         resizeHandle: "table-resizeHandle",
         ascendingSortIcon: "table-icon-sort-asc",
         descendingSortIcon: "table-icon-sort-desc",
@@ -117,7 +118,8 @@ javaxt.dhtml.style.default = {
         tabBar: "tab-bar",
         activeTab: "tab-active",
         inactiveTab: "tab-inactive",
-        tabBody: "tab-body"
+        tabBody: "tab-body",
+        closeButton: "tab-button"
     },
 
     accordion: {

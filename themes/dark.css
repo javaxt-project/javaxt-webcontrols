@@ -771,7 +771,7 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 
     .tab-bar {
         background-color: #335177; /* same as windows header */
-        height: 30px;
+        height: 36px;
         color: #fff;
         border: 1px solid #2e588d;
         border-width: 0 1px;
@@ -780,8 +780,9 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 
     .tab-active, .tab-inactive {
         padding: 0 12px;
-        line-height: 30px;
-        cursor: default;
+        line-height: 36px;
+        border-right: 1px solid #3e4453;
+        cursor: pointer;
     }
 
     .tab-active {
@@ -798,6 +799,24 @@ input, select, textarea { /* Allows overriding native style of form elements on 
         color: #fff;
     }
 
+    .tab-button {
+        width: 16px;
+        height: 16px;
+        border: 0 none;
+        color: #bdbdbd;
+        padding: 3px;
+        margin: 0 0 0 5px;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+    .tab-button:hover {
+        background-color: #3e70af;
+        transition: 0.1s;
+        border-radius: 3px;
+        color: #ccc;
+    }
+
     .tab-body {
         padding: 7px;
         vertical-align: top;
@@ -811,11 +830,24 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 .javaxt-window {
     .window-body table:first-child .tab-bar {
         background-color: #4c5468;
+        height: 30px;
     }
+
+
+    .window-body table:first-child .tab-active,
+    .window-body table:first-child .tab-inactive {
+        line-height: 30px;
+    }
+
 
     .window-body table:first-child .tab-active {
         border-top: 2px solid #4a84b7;
+        background-color: #3e4453; /* window body */
         margin-top: -2px;
+    }
+
+    .window-body table:first-child .tab-inactive:hover {
+        background-color: #454c5e;
     }
 
     .window-body table:first-child .tab-body {
@@ -832,6 +864,12 @@ input, select, textarea { /* Allows overriding native style of form elements on 
  *  generated using the javaxt.dhtml.Checkbox class.
  */
 .javaxt-checkbox {
+
+    .checkbox-panel {
+        display: inline-block;
+        position: relative;
+        vertical-align: text-bottom;
+    }
 
     .checkbox-label {
         color: #bfc0c3;
@@ -1006,17 +1044,17 @@ input, select, textarea { /* Allows overriding native style of form elements on 
     }
 
 
-  /* Row (label) background + hover */
+  /* Row background + hover */
     .row {
-        /*height: 20px;*/
+        color: #97989c;
+        cursor: pointer;
     }
     .row:hover {
-        background-color: #3a3f4a;
+        background-color: #364156;
+        color: #e6e6e6;
     }
 
     .label {
-        /*display: inline-block;
-        position: absolute;*/
         padding-left: 21px;
         line-height: 20px;
         cursor: default;
@@ -1052,16 +1090,16 @@ input, select, textarea { /* Allows overriding native style of form elements on 
     }
 
 
-    .table-row:nth-child(odd) {
+    .table-row:nth-child(odd) { /*overrides light theme*/
         background-color: #23252b; /*#272a31*/
     }
 
 
-    .table-row:hover{
+    .table-row:hover {
         background-color:#212939;
     }
 
-    .table-row-selected{
+    .table-row-selected, .table-row-checked {
         /*border-bottom-style:dotted;*/
         /*border-color:#a3bae9;*/
         background-color:#25334f;
@@ -1069,18 +1107,22 @@ input, select, textarea { /* Allows overriding native style of form elements on 
         transition: 0.2s;
     }
 
+
+    .table-row-checked,
+    .table-row-checked:nth-child(odd) { /*overrides table-row*/
+        background-color:#25334f;
+        border-bottom: 1px solid #364a71;
+    }
+
+    .table-row-checked:hover {
+        background-color: #364a71;
+    }
+
     .table-col, .table-header-col {
-
         white-space: nowrap;
-
         height: 35px;
         line-height: 35px;
-
-
-        border-left: 1px solid #383b41;
-        border-right: 1px solid #383b41;
         padding: 0 5px;
-
 
         /*
         text-overflow: ellipsis;
@@ -1090,6 +1132,8 @@ input, select, textarea { /* Allows overriding native style of form elements on 
     }
 
     .table-header-col {
+        border-left: 1px solid #383b41;
+        border-right: 1px solid #383b41;
         cursor: pointer;
         color: #bfc0c3;
     }
@@ -1102,8 +1146,8 @@ input, select, textarea { /* Allows overriding native style of form elements on 
     }
 
     .table-col {
-        border-left: 0;
-        border-right: 0;
+        border-left: 0 none; /*1px solid rgba(0,0,0,0);*/
+        border-right: 0 none; /*1px solid rgba(0,0,0,0);*/
         color: inherit;
     }
 
@@ -1115,21 +1159,6 @@ input, select, textarea { /* Allows overriding native style of form elements on 
     }
 
  }
-
-
-/**************************************************************************/
-/** Tree
-/**************************************************************************/
-
-.tree-node {
-    color: #97989c;
-    cursor: pointer;
-}
-
-.tree-node:hover {
-    background-color:#364156 !important;
-}
-
 
 
 /**************************************************************************/
@@ -1307,16 +1336,16 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 
     /* style for the header row */
     .javaxt-cal-multiday-header {
-        border-bottom: 1px solid #99BBE8;
-        border-left: 1px solid #000000;
-        border-right: 1px solid #000000;
-        background-color: #FFFFFF;
+        border-bottom: 1px solid #4b5157;
+        border-left: 1px solid #4b5157;
+        border-right: 1px solid #4b5157;
+        background-color: #2f3139;
     }
 
     /* style for individual cells in the header */
     .javaxt-cal-multiday-col {
-        border-left: 1px solid #000000;
-        border-right: 1px solid #000000;
+        border-left: 1px solid #383b41;
+        border-right: 1px solid #383b41;
         padding-top: 0px;
         vertical-align: top;
     }
@@ -1534,6 +1563,7 @@ input, select, textarea { /* Allows overriding native style of form elements on 
     .javaxt-cal-event-green  { --cal-accent: 70, 167, 88;   color: #a6e0b3; }
     .javaxt-cal-event-purple { --cal-accent: 163, 113, 247; color: #cdb4ff; }
     .javaxt-cal-event-teal   { --cal-accent: 41, 184, 219;  color: #9fe1f0; }
+    .javaxt-cal-event-orange { --cal-accent: 237, 137, 54;  color: #f7c58a; }
 }
 
 
