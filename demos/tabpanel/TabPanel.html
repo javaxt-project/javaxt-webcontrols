@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>TabPanel Demo</title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<link  href="../style.css" rel="stylesheet" type="text/css" />
+
+<script src="../../src/tabpanel/TabPanel.js"></script>
+<script src="../../src/utils/Utils.js"></script>
+
+<style>
+
+  /**************************************************************************/
+  /** Demo layout
+  /**************************************************************************/
+
+    .demo-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 40px;
+    }
+
+    .demo-col h2 {
+        font-size: 15px;
+        font-weight: 600;
+        color: #363636;
+        margin: 0 0 4px 0;
+    }
+
+    .demo-col p.hint {
+        font-size: 12px;
+        color: #888;
+        margin: 0 0 12px 0;
+    }
+
+    .tabs {
+        width: 400px;
+        height: 220px;
+        font-size: 13px;
+    }
+
+    .tab-content {
+        padding: 10px;
+    }
+
+    .log {
+        width: 400px;
+        height: 60px;
+        margin: 8px 0 0 0;
+        padding: 4px 6px;
+        overflow: auto;
+        font-size: 11px;
+        color: #666;
+        background-color: #f7f7f7;
+        border: 1px solid #ddd;
+        box-sizing: border-box;
+    }
+
+
+    /* iframe styles for the javaxt theme demos */
+    .theme-frame {
+        width: 400px;
+        height: 300px;
+        border: 1px solid rgba(0,0,0,0);
+    }
+
+    .theme-frame-dark {
+        border-color: #3a3f4a;
+    }
+
+
+  /**************************************************************************/
+  /** TabPanel
+  /**************************************************************************/
+  /* Custom "browser" style. The style config maps each element of the tab
+     panel to one of these classes. */
+
+    .browser-bar {
+        height: 32px;
+        padding: 4px 4px 0 4px;
+        background-color: #dee1e6;
+        border-radius: 6px 6px 0 0;
+    }
+
+    .browser-tab-active, .browser-tab-inactive {
+        line-height: 28px;
+        padding: 0 10px;
+        margin-right: 2px;
+        border-radius: 6px 6px 0 0;
+        color: #3c4043;
+    }
+
+    .browser-tab-active {
+        background-color: #fff;
+        cursor: default;
+    }
+
+    .browser-tab-inactive {
+        cursor: pointer;
+    }
+
+    .browser-tab-inactive:hover {
+        background-color: #eceef1;
+    }
+
+    .browser-body {
+        background-color: #fff;
+        border: 1px solid #dee1e6;
+        border-top: 0 none;
+        vertical-align: top;
+    }
+
+    .browser-close {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        margin: 0 0 0 8px;
+        border-radius: 50%;
+        color: #5f6368;
+        cursor: pointer;
+        vertical-align: middle;
+    }
+
+    .browser-close:hover {
+        background-color: #d3d5d8;
+    }
+
+    .browser-close-icon {
+        font-size: 10px;
+        line-height: 16px;
+        text-align: center;
+    }
+
+    .browser-close-icon:before {
+        content: "\2715";
+    }
+
+</style>
+
+
+
+<script>
+window.onload = function() {
+
+
+  //**************************************************************************
+  //** Sample tabs (shared by both tab panels)
+  //**************************************************************************
+  /** The first tab can't be closed. The other tabs are closable - the 3rd
+   *  argument of addTab().
+   */
+    var addTabs = function(tabPanel){
+        tabPanel.addTab("Home", content("Home tab (not closable)"), false);
+        tabPanel.addTab("Tab A", content("Contents of tab A"), true);
+        var tab = tabPanel.addTab("Tab B", content("Contents of tab B"), true);
+        tab.body.setAttribute("data-tab", "b"); //addTab() returns the tab info
+    };
+
+    var content = function(text){
+        var div = document.createElement("div");
+        div.className = "tab-content";
+        div.innerText = text;
+        return div;
+    };
+
+
+  //**************************************************************************
+  //** Wire up event logging for a tab panel
+  //**************************************************************************
+    var addLogging = function(tabPanel, log){
+        var append = function(msg){
+            log.innerText += msg + "\n";
+            log.scrollTop = log.scrollHeight;
+        };
+        tabPanel.onTabChange = function(currTab, prevTab){
+            append("change:" + currTab.name);
+        };
+        tabPanel.onTabClose = function(tab){
+            append("close:" + tab.name);
+        };
+    };
+
+
+  //**************************************************************************
+  //** TabPanel 1 - Default (inline) style
+  //**************************************************************************
+  /** No "style" config is provided, so the tab panel renders using its
+   *  built-in, inline default styles. No external stylesheet is required.
+   */
+    var tabPanel1 = new javaxt.dhtml.TabPanel(document.getElementById("demo1"));
+    addLogging(tabPanel1, document.getElementById("log1"));
+    addTabs(tabPanel1);
+    window.tabPanel = tabPanel1; //used by the tests
+
+
+  //**************************************************************************
+  //** TabPanel 2 - Custom (stylesheet) style
+  //**************************************************************************
+  /** The style config below maps each element to a CSS class name defined in
+   *  the <style> block above.
+   */
+    var tabPanel2 = new javaxt.dhtml.TabPanel(document.getElementById("demo2"), {
+        style: {
+            tabBar: "browser-bar",
+            activeTab: "browser-tab-active",
+            inactiveTab: "browser-tab-inactive",
+            tabBody: "browser-body",
+            closeButton: "browser-close",
+            closeIcon: "browser-close-icon"
+        }
+    });
+    addLogging(tabPanel2, document.getElementById("log2"));
+    addTabs(tabPanel2);
+
+};
+</script>
+
+
+</head>
+<body>
+
+<h1>TabPanel Demo</h1>
+<p>The tab panels below are rendered with two different styles. The one on the
+left uses the component's default style, which is defined inline (no
+stylesheet required). The one on the right uses a <b>stylesheet</b>-based
+style. In both, the "Home" tab can't be closed and the other tabs have a close
+button (the 3rd argument of <code>addTab()</code>). Tab events are logged
+below each panel.</p>
+
+
+<div class="demo-row">
+
+    <div class="demo-col">
+        <h2>Default style</h2>
+        <p class="hint">Inline styles &mdash; no stylesheet needed</p>
+        <div id="demo1" class="tabs"></div>
+        <pre id="log1" class="log"></pre>
+    </div>
+
+    <div class="demo-col">
+        <h2>Browser style</h2>
+        <p class="hint">CSS classes from the &lt;style&gt; block</p>
+        <div id="demo2" class="tabs"></div>
+        <pre id="log2" class="log"></pre>
+    </div>
+
+</div>
+
+
+<h1 style="margin-top:40px;">JavaXT Themes</h1>
+<p>The same tab panel styled with the JavaXT themes (themes/light.css and
+themes/dark.css), using the theme's "tabPanel" style map. Each theme is shown
+in its own iframe so the two stylesheets don't collide.</p>
+
+
+<div class="demo-row">
+
+    <div class="demo-col">
+        <h2>Light theme</h2>
+        <p class="hint">themes/light.css &mdash; javaxt-tabpanel</p>
+        <iframe class="theme-frame" src="tabpanel-theme.html?theme=light"></iframe>
+    </div>
+
+    <div class="demo-col">
+        <h2>Dark theme</h2>
+        <p class="hint">themes/dark.css &mdash; javaxt-tabpanel</p>
+        <iframe class="theme-frame theme-frame-dark" src="tabpanel-theme.html?theme=dark"></iframe>
+    </div>
+
+</div>
+
+</body>
+</html>

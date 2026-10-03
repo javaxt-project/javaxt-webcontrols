@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Themed TabPanel</title>
+
+<!-- The theme stylesheet is swapped at runtime based on the ?theme= param -->
+<link id="theme" href="../../themes/light.css" rel="stylesheet" type="text/css" />
+
+<script src="../../src/tabpanel/TabPanel.js"></script>
+<script src="../../src/utils/Utils.js"></script>
+<script src="../../themes/default.js"></script>
+
+<style>
+    html, body { height: 100%; margin: 0; }
+    #tabs {
+        height: 100%;
+        box-sizing: border-box;
+    }
+    .tab-content {
+        padding: 10px;
+        font-size: 13px;
+    }
+</style>
+
+<script>
+window.onload = function() {
+
+  //Swap in the requested theme stylesheet (light | dark)
+    var theme = (javaxt.dhtml.utils.getParameter("theme") || "light").toLowerCase();
+    if (theme==="dark"){
+        document.getElementById("theme").href = "../../themes/dark.css";
+    }
+    document.body.style.backgroundColor = theme==="dark" ? "#2b2e35" : "#ffffff";
+
+
+    var content = function(text){
+        var div = document.createElement("div");
+        div.className = "tab-content";
+        div.innerText = text;
+        return div;
+    };
+
+
+    var tabPanel = new javaxt.dhtml.TabPanel(document.getElementById("tabs"), {
+        style: javaxt.dhtml.style.default.tabPanel
+    });
+    tabPanel.el.style.height = "100%";
+    tabPanel.addTab("Home", content("Home tab"));
+    tabPanel.addTab("Tab A", content("Contents of tab A"));
+    tabPanel.addTab("Tab B", content("Contents of tab B"));
+};
+</script>
+</head>
+<body>
+<div id="tabs"></div>
+</body>
+</html>
