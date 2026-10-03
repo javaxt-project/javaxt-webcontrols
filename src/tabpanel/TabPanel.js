@@ -18,10 +18,6 @@ javaxt.dhtml.TabPanel = function(parent, config) {
 
     var defaultConfig = {
 
-      /** If true, will insert a "close" icon into the tab that will allow
-       *  users to close/remove the tab from the tab panel.
-       */
-        closable: false,
 
       /** Style for individual elements within the component. Note that you can
        *  provide CSS class names instead of individual style definitions.
@@ -52,8 +48,23 @@ javaxt.dhtml.TabPanel = function(parent, config) {
                 border: "1px solid #ccc",
                 verticalAlign: "top"
             },
+            closeButton: {
+                width: "15px",
+                height: "15px",
+                border: "1px solid #ccc",
+                borderRadius: "3px",
+                background: "#F6F6F6",
+                color: "#6f6f6f",
+                margin: "0 0 0 5px",
+                display: "inline-block",
+                cursor: "default"
+            },
             closeIcon: {
-
+                //content: "&#10006;",
+                content: "&#x2715;",
+                fontSize: "12px",
+                lineHeight: "16px",
+                textAlign: "center"
             }
         }
     };
@@ -82,7 +93,7 @@ javaxt.dhtml.TabPanel = function(parent, config) {
 
       //Create main table
         var table = createTable(parent);
-        table.className = "javaxt-tab-panel";
+        table.className = "javaxt-tabpanel";
 
 
 
@@ -120,12 +131,15 @@ javaxt.dhtml.TabPanel = function(parent, config) {
   //**************************************************************************
   //** addTab
   //**************************************************************************
-  /** Used to add a new tab to the panel.
+  /** Used to add a new tab to the panel. Returns information about the new
+   *  tab (see getTabs).
    *  @param label Tab title.
-   *  @param el Tab contents. Rendered when the tab is active. Accepts strings,
-   *  DOM elements, and nulls
+   *  @param content Tab contents. Rendered when the tab is active. Accepts
+   *  strings, DOM elements, and nulls
+   *  @param closable If true, will insert a "close" icon into the tab that
+   *  will allow users to close/remove the tab from the tab panel.
    */
-    this.addTab = function(label, el){
+    this.addTab = function(label, content, closable){
 
         var div = createElement("div", tabContent, {
             width: "100%",
@@ -134,16 +148,16 @@ javaxt.dhtml.TabPanel = function(parent, config) {
         });
 
 
-        if (el==null) div.innerHTML = "";
+        if (content==null) div.innerHTML = "";
         else{
-            if (isElement(el)){
-                var p = el.parentNode;
-                if (p) p.removeChild(el);
-                div.appendChild(el);
+            if (isElement(content)){
+                var p = content.parentNode;
+                if (p) p.removeChild(content);
+                div.appendChild(content);
             }
             else{
-                if (typeof el === "string"){
-                    div.innerHTML = el;
+                if (typeof content === "string"){
+                    div.innerHTML = content;
                 }
             }
         }
@@ -155,10 +169,23 @@ javaxt.dhtml.TabPanel = function(parent, config) {
         tab.style.float = "left";
         tab.style.height = "100%";
         tab.innerHTML = label;
+        tab.label = label;
         tab.el = div;
         tab.onclick = function(){
             raiseTab(this);
         };
+
+
+      //Add close icon as needed
+        if (closable===true){
+            var closeButton = createElement("div", tab, config.style.closeButton);
+            createElement("div", closeButton, config.style.closeIcon);
+            closeButton.onclick = function(e){
+                if (e) e.stopPropagation();
+                closeTab(tab);
+            };
+        }
+
         tab.onselectstart = function () {return false;};
         tab.onmousedown = function () {return false;};
         for (var i=0; i<tabList.childNodes.length; i++){
@@ -175,6 +202,7 @@ javaxt.dhtml.TabPanel = function(parent, config) {
         div.style.display='none'; //<-- style used to test whether the tab is visible (see raiseTab)
 
         raiseTab(tab);
+        return getTabInfo(tab);
     };
 
 
@@ -268,7 +296,7 @@ javaxt.dhtml.TabPanel = function(parent, config) {
         var hidden = (tab.style.display === 'none');
         var active = (tab.el.style.display !== 'none');
         return {
-            name: tab.innerText,
+            name: (typeof tab.label === "string") ? tab.label : tab.innerText,
             el: tab.el, //should be renamed to body or content
             header: tab,
             body: tab.el,
@@ -296,21 +324,44 @@ javaxt.dhtml.TabPanel = function(parent, config) {
 
 
   //**************************************************************************
+  //** onTabClose
+  //**************************************************************************
+  /** Called after a  tab has been removed from the tab panel.
+   */
+    this.onTabClose = function(tab){};
+
+
+  //**************************************************************************
+  //** closeTab
+  //**************************************************************************
+  /** Removes a tab and calls the onTabClose event
+   */
+    var closeTab = function(tab){
+        var info = getTabInfo(tab);
+        me.removeTab(tab);
+        info.active = false;
+        me.onTabClose(info);
+    };
+
+
+  //**************************************************************************
   //** removeTab
   //**************************************************************************
   /** Used to remove a tab from the tab panel.
-   *  @param id Accepts a tab index (stating at 0) or a tab name
+   *  @param id Accepts a tab index (stating at 0), a tab name, or the tab
+   *  header (see getTabs)
    */
     this.removeTab = function(id){
         var tab = findTab(id);
         if (tab){
+            var isActive = (tab.el.style.display !== 'none');
             var nextTab = tab.nextSibling;
             if (!nextTab) nextTab = tab.previousSibling;
 
             tabContent.removeChild(tab.el);
             tabList.removeChild(tab);
 
-            if (nextTab) raiseTab(nextTab);
+            if (nextTab && isActive) raiseTab(nextTab);
         }
     };
 
@@ -355,11 +406,19 @@ javaxt.dhtml.TabPanel = function(parent, config) {
   //** findTab
   //**************************************************************************
     var findTab = function(id){
+        if (id==null) return null;
+        if (isElement(id)){
+            for (var i=0; i<tabList.childNodes.length; i++){
+                if (tabList.childNodes[i]===id) return id;
+            }
+            return null;
+        }
         if (isNaN(id)){
             if (typeof id === "string"){
                 for (var i=0; i<tabList.childNodes.length; i++){
                     var t = tabList.childNodes[i];
-                    if (t.innerHTML === id ){
+                    var label = (typeof t.label === "string") ? t.label : t.innerHTML;
+                    if (label === id){
                         return t;
                     }
                 }
