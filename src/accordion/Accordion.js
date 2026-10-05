@@ -29,7 +29,7 @@ javaxt.dhtml.Accordion = function(parent, config) {
 
         style:{
 
-            accordion: {
+            panel: {
                 width: "100%",
                 height: "100%",
                 border: "1px solid #969696",
@@ -79,6 +79,9 @@ javaxt.dhtml.Accordion = function(parent, config) {
         config = clone;
 
 
+        if (config.style.accordion && !config.style.panel){
+            config.style.panel = config.style.accordion;
+        }
 
 
       //Remove anything found inside the parent
@@ -100,9 +103,7 @@ javaxt.dhtml.Accordion = function(parent, config) {
       //the table was the only thing I could use that would correctly maintain
       //100% height...
         var table = createTable(parent);
-        table.setAttribute("desc", me.className);
-        setStyle(table, "accordion");
-        table.style.borderCollapse = "collapse";
+        table.className = "javaxt-accordion";
         var td = table.addRow().addColumn({
             width: "100%",
             height: "100%",
@@ -112,11 +113,11 @@ javaxt.dhtml.Accordion = function(parent, config) {
 
 
       //Create overflow divs inside the table
-        var div = createElement('div', td, {
-            width: "100%",
-            height: "100%",
-            position: "relative"
-        });
+        var div = createElement('div', td, config.style.panel);
+        div.style.width = "100%";
+        div.style.height = "100%";
+        div.style.position = "relative";
+
 
         var overflowDiv = createElement('div', div, {
             width: "100%",
@@ -247,12 +248,11 @@ javaxt.dhtml.Accordion = function(parent, config) {
   //** createHeader
   //**************************************************************************
     var createHeader = function(title, parent){
-        var header = createElement("div", parent);
+        var header = createElement("div", parent, config.style.tabHeader);
         header.innerHTML = title;
         //header.onmouseover = mouseOver;
         //header.onmouseout = mouseOut;
         header.onselectstart = function(){ return false; };
-        setStyle(header, "tabHeader");
         return header;
     };
 
@@ -616,28 +616,15 @@ javaxt.dhtml.Accordion = function(parent, config) {
    */
     var getPadding = function(opening){
 
-        var paddingTop = parseFloat(getElementStyle(opening, "padding-top").replace("px", ""));
-        var paddingBottom = parseFloat(getElementStyle(opening, "padding-bottom").replace("px", ""));
+        var paddingTop = parseFloat(getStyle(opening, "padding-top").replace("px", ""));
+        var paddingBottom = parseFloat(getStyle(opening, "padding-bottom").replace("px", ""));
 
-        var borderTop = parseFloat(getElementStyle(opening, "border-top-width").replace("px", ""));
-        var borderBottom = parseFloat(getElementStyle(opening, "border-bottom-width").replace("px", ""));
+        var borderTop = parseFloat(getStyle(opening, "border-top-width").replace("px", ""));
+        var borderBottom = parseFloat(getStyle(opening, "border-bottom-width").replace("px", ""));
 
         var h = (paddingTop+paddingBottom+borderTop+borderBottom);
         if (isNaN(h)) return 0; //<--IE
         else return h;
-    };
-
-
-  //**************************************************************************
-  //** getElementStyle
-  //**************************************************************************
-    var getElementStyle = function(element, styleProp){
-        if (element.currentStyle){
-            return element.currentStyle[styleProp];
-        }
-        else if (window.getComputedStyle){
-            return document.defaultView.getComputedStyle(element, '').getPropertyValue(styleProp);
-        }
     };
 
 
@@ -649,6 +636,7 @@ javaxt.dhtml.Accordion = function(parent, config) {
     var createTable = javaxt.dhtml.utils.createTable;
     var createElement = javaxt.dhtml.utils.createElement;
     var addResizeListener = javaxt.dhtml.utils.addResizeListener;
+    var getStyle = javaxt.dhtml.utils.getStyle;
     var setStyle = function(el, style){
         javaxt.dhtml.utils.setStyle(el, config.style[style]);
     };
