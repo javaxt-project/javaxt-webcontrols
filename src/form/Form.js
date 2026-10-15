@@ -865,6 +865,7 @@ javaxt.dhtml.Form = function (parent, config) {
       //Create new row for the groupbox
         var startGroup = formTable.addRow();
         startGroup.setAttribute("desc", "-- Group Start --");
+        addShowHide(startGroup);
 
 
       //Calculate padding and border width for the group box
@@ -929,6 +930,7 @@ javaxt.dhtml.Form = function (parent, config) {
       //Add row below the last input for padding
         var endGroup = formTable.addRow();
         endGroup.setAttribute("desc", "-- Group End --");
+        addShowHide(endGroup);
         var td = endGroup.addColumn();
         td.style.padding = (parseInt(verticalSpacing) + paddingBottom) + "px 0 0 0";
         td.colSpan = 3;
@@ -1009,7 +1011,8 @@ javaxt.dhtml.Form = function (parent, config) {
   /** Used to display a hidden group.
    */
     this.showGroup = function(name){
-        showHideGroup(name, false);
+        var group = showHideGroup(name, false);
+        if (group) updateGroup(group);
     };
 
 
@@ -1040,16 +1043,19 @@ javaxt.dhtml.Form = function (parent, config) {
             var rows = group.getRows();
             for (var i=0; i<rows.length; i++){
                 var tr = rows[i];
+
+              //Note that only the "display" style is updated. Fields hidden
+              //via hideField() are also "visibility: hidden" (isVisible() is
+              //false) and remain hidden when the group is shown.
                 if (hide){
-                    tr.style.visibility = 'hidden';
                     tr.style.display = 'none';
                 }
                 else{
-                    tr.style.display = '';
-                    tr.style.visibility = '';
+                    if (tr.isVisible()) tr.style.display = '';
                 }
             }
         }
+        return group;
     };
 
 
@@ -1132,6 +1138,7 @@ javaxt.dhtml.Form = function (parent, config) {
 
       //Create new row
         var row = formTable.addRow();
+        addShowHide(row);
 
 
       //Icon
@@ -1259,9 +1266,8 @@ javaxt.dhtml.Form = function (parent, config) {
         if (field){
             var row = field.row;
 
-          //Update visibility
-            row.style.visibility = 'hidden';
-            row.style.display = 'none';
+          //Update visibility (see showHideGroup)
+            row.hide();
 
           //Check if the row is part of a group and update height as needed
             var group = findGroup(row);
@@ -1284,12 +1290,14 @@ javaxt.dhtml.Form = function (parent, config) {
         if (field){
             var row = field.row;
 
-          //Update visibility
-            row.style.visibility = '';
-            row.style.display = '';
-
-          //Check if the row is part of a group and update height as needed
+          //Update visibility. If the field is in a hidden group, it will be
+          //displayed when the group is shown (see showHideGroup)
             var group = findGroup(row);
+            if (group && !isGroupVisible(group)) row.style.visibility = '';
+            else row.show();
+
+
+          //Update the group height as needed
             if (group) updateGroup(group);
 
             return true;
@@ -1491,6 +1499,16 @@ javaxt.dhtml.Form = function (parent, config) {
 
 
   //**************************************************************************
+  //** isGroupVisible
+  //**************************************************************************
+  /** Returns true if a groupbox is visible (see showHideGroup)
+   */
+    var isGroupVisible = function(group){
+        return group.getRows()[0].style.display !== 'none';
+    };
+
+
+  //**************************************************************************
   //** updateGroup
   //**************************************************************************
   /** Used to update the hight of a given groupbox.
@@ -1520,8 +1538,8 @@ javaxt.dhtml.Form = function (parent, config) {
         temp.style.display = 'block';
         var body = document.getElementsByTagName("body")[0];
         body.appendChild(temp);
-        var style = temp.currentStyle || window.getComputedStyle(temp);
-        var getStyle = function(prop){
+        var style = getStyle(temp);
+        var getStyleValue = function(prop){
             if (style.getPropertyValue){
                 var val = style.getPropertyValue(prop);
                 if (val && val.length>0) return val;
@@ -1534,14 +1552,14 @@ javaxt.dhtml.Form = function (parent, config) {
         };
 
         config.groupbox = {
-            paddingTop: parseInt(getStyle("paddingTop")),
-            paddingBottom: parseInt(getStyle("paddingBottom")),
-            paddingLeft: parseInt(getStyle("paddingLeft")),
-            paddingRight: parseInt(getStyle("paddingRight")),
-            borderLeft: parseInt(getStyle("borderLeftWidth")),
-            borderRight: parseInt(getStyle("borderRightWidth")),
-            borderTop: parseInt(getStyle("borderTopWidth")),
-            borderBottom: parseInt(getStyle("borderBottomWidth"))
+            paddingTop: parseInt(getStyleValue("paddingTop")),
+            paddingBottom: parseInt(getStyleValue("paddingBottom")),
+            paddingLeft: parseInt(getStyleValue("paddingLeft")),
+            paddingRight: parseInt(getStyleValue("paddingRight")),
+            borderLeft: parseInt(getStyleValue("borderLeftWidth")),
+            borderRight: parseInt(getStyleValue("borderRightWidth")),
+            borderTop: parseInt(getStyleValue("borderTopWidth")),
+            borderBottom: parseInt(getStyleValue("borderBottomWidth"))
         };
 
         body.removeChild(temp);
@@ -1662,6 +1680,8 @@ javaxt.dhtml.Form = function (parent, config) {
     var onRender = javaxt.dhtml.utils.onRender;
     var createElement = javaxt.dhtml.utils.createElement;
     var addResizeListener = javaxt.dhtml.utils.addResizeListener;
+    var addShowHide = javaxt.dhtml.utils.addShowHide;
+    var getStyle = javaxt.dhtml.utils.getStyle;
     var isString = javaxt.dhtml.utils.isString;
     var isArray = javaxt.dhtml.utils.isArray;
 
