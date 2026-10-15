@@ -31,6 +31,12 @@ javaxt.dhtml.ComboBox = function(parent, config) {
        */
         spellcheck: false,
 
+      /** If true, the browser may show its own autocomplete/autofill
+       *  suggestions (e.g. saved names and addresses) under the input, on top
+       *  of the dropdown menu. Default is false (autocomplete="off").
+       */
+        autocomplete: false,
+
       /** The number of menu items to that appear in the dropdown menu before
        *  overflow. Default is 5.
        */
@@ -198,10 +204,11 @@ javaxt.dhtml.ComboBox = function(parent, config) {
 
 
       //Create main div
-        var mainDiv = createElement("div", parent);
+        var mainDiv = createElement("div", parent, {
+            position: "relative",
+            width: config.style.width
+        });
         mainDiv.className = "javaxt-combobox";
-        mainDiv.style.width = config.style.width;
-        mainDiv.style.position = "relative";
         me.el = mainDiv;
 
 
@@ -212,8 +219,9 @@ javaxt.dhtml.ComboBox = function(parent, config) {
 
 
       //Create input in the first column
-        var td = tr.addColumn();
-        td.style.width="100%";
+        var td = tr.addColumn({
+            width: "100%"
+        });
         input = createElement('input', td);
         input.type = "text";
         setStyle(input, "input");
@@ -223,6 +231,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
             input.setAttribute("readonly", "true");
         }
         if (config.spellcheck===true){} else input.setAttribute("spellcheck", "false");
+        if (config.autocomplete===true){} else input.setAttribute("autocomplete", "off");
         if (config.placeholder) input.setAttribute("placeholder", config.placeholder);
 
         input.onkeydown = function(e){
@@ -293,10 +302,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
 
 
       //Create button in the second column
-        button = createElement('button', tr.addColumn());
-        //button.type = "button";
-        setStyle(button, "button");
-
+        button = createElement('button', tr.addColumn(), config.style.button);
         button.onclick = function(e){
             button.blur();
             e.preventDefault();
@@ -516,7 +522,7 @@ javaxt.dhtml.ComboBox = function(parent, config) {
 
       //Ensure the input is visible
         input.show();
-        
+
         input.blur();
     };
 
@@ -712,8 +718,6 @@ javaxt.dhtml.ComboBox = function(parent, config) {
    */
     this.filter = function(){
 
-      //Show menu
-        me.showMenu();
 
       //Get input value
         var filter = input.value.replace(/^\s*/, "").replace(/\s*$/, "").toLowerCase();
@@ -747,9 +751,13 @@ javaxt.dhtml.ComboBox = function(parent, config) {
                 }
             }
         }
+        if (config.addNewOption===true){
+            numVisibleItems++;
+            h = Math.max(newOption.offsetHeight, h);
+        }
 
-      //Resize menu
-        resizeMenu(numVisibleItems, h);
+      //Show/hide the menu
+        updateMenu(numVisibleItems, h);
     };
 
 
@@ -775,38 +783,49 @@ javaxt.dhtml.ComboBox = function(parent, config) {
    */
     this.showMenu = function(removeFilter){
 
-        if (menuDiv.style.visibility === "hidden"){
 
-
-          //Unhide all the options as needed
-            if (removeFilter===true){
-                for (var i=0; i<menuOptions.childNodes.length; i++){
-                    menuOptions.childNodes[i].style.display = '';
-                }
-            }
-
-
-          //Check to see if the menu has anything to display
-            var numVisibleItems = 0;
-            var h = 0;
+      //Unhide all the options as needed
+        if (removeFilter===true){
             for (var i=0; i<menuOptions.childNodes.length; i++){
-                var div = menuOptions.childNodes[i];
-                if (div.style.display !== "none"){
-                    numVisibleItems++;
-                    h = Math.max(div.offsetHeight, h);
-                }
+                menuOptions.childNodes[i].style.display = '';
             }
-            if (config.addNewOption===true){
+        }
+
+
+      //Check to see if the menu has anything to display
+        var numVisibleItems = 0;
+        var h = 0;
+        for (var i=0; i<menuOptions.childNodes.length; i++){
+            var div = menuOptions.childNodes[i];
+            if (div.style.display !== "none"){
                 numVisibleItems++;
-                h = Math.max(newOption.offsetHeight, h);
+                h = Math.max(div.offsetHeight, h);
             }
+        }
+        if (config.addNewOption===true){
+            numVisibleItems++;
+            h = Math.max(newOption.offsetHeight, h);
+        }
 
 
-            if (numVisibleItems>0){
+      //Update menu
+        updateMenu(numVisibleItems, h);
+    };
 
-              //Update menu size
-                resizeMenu(numVisibleItems, h);
 
+  //**************************************************************************
+  //** updateMenu
+  //**************************************************************************
+  /** Used to show/hide the dropdown menu.
+   */
+    var updateMenu = function(numVisibleItems, h){
+        if (numVisibleItems>0){
+
+          //Update menu size
+            resizeMenu(numVisibleItems, h);
+
+          //Show menu if hidden
+            if (menuDiv.style.visibility === "hidden"){
 
               //Set zIndex
                 var highestElements = getHighestElements();
@@ -839,6 +858,9 @@ javaxt.dhtml.ComboBox = function(parent, config) {
               //Fire event
                 me.onMenuShow();
             }
+        }
+        else{
+            me.hideMenu(false);
         }
     };
 
