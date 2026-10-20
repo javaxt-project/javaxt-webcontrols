@@ -159,7 +159,7 @@ javaxt.dhtml.Callout = function(parent, config) {
 
 
             if (document.addEventListener) { // For all major browsers, except IE 8 and earlier
-                document.addEventListener("click", onclick);
+                document.addEventListener("click", onclick, true);
                 document.addEventListener("touchstart", ontouchstart);
                 window.addEventListener("resize", onresize);
             }
@@ -242,16 +242,25 @@ javaxt.dhtml.Callout = function(parent, config) {
   //**************************************************************************
   /** Used to render the callout.
    */
-    this.show = function(){
+    this.show = function(animation){
         opening = true;
 
-        div.style.zIndex = getNextHighestZindex();
-        div.style.display = 'block';
-        me.onShow();
+        var callback = function(){
+            div.style.zIndex = getNextHighestZindex();
+            div.style.display = 'block';
+            me.onShow();
 
-        setTimeout(function() {
-            opening = false;
-        }, 500);
+            setTimeout(function() {
+                opening = false;
+            }, 500);
+        };
+
+        if (animation){
+            animation.apply(me, [div, callback]);
+        }
+        else{
+            callback();
+        }
     };
 
 
@@ -267,7 +276,7 @@ javaxt.dhtml.Callout = function(parent, config) {
    *  @param align Options include left, right, center if the "position" is
    *  above or below. Otherwise, options are top, bottom, or middle.
    */
-    this.showAt = function(x, y, position, align){
+    this.showAt = function(x, y, position, align, animation){
         opening = true;
 
 
@@ -429,7 +438,7 @@ javaxt.dhtml.Callout = function(parent, config) {
 
         div.style.visibility = "";
 
-        me.show();
+        me.show(animation);
     };
 
 
