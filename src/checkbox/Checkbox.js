@@ -32,7 +32,8 @@ javaxt.dhtml.Checkbox = function(parent, config) {
     this.className = "javaxt.dhtml.Checkbox";
 
     var me = this;
-    var box, check, mask, label;
+    var panel, box, check, mask, label;
+    var isDisabled = false;
 
 
     var defaultConfig = {
@@ -68,7 +69,9 @@ javaxt.dhtml.Checkbox = function(parent, config) {
         style:{
 
             panel: {
-                display: "inline-block"
+                display: "inline-block",
+                position: "relative",
+                verticalAlign: "text-bottom"
             },
 
           /** Style for the checkbox
@@ -152,19 +155,25 @@ javaxt.dhtml.Checkbox = function(parent, config) {
 
 
       //Create container
-        me.el = createElement("span", parent, "javaxt-checkbox");
-        addShowHide(me);
+        var span = createElement("span", parent, "javaxt-checkbox");
+        var innerDiv = createElement('div', span, config.style.panel);
+        panel = innerDiv;
 
-
-        var innerDiv = createElement('div', me.el, config.style.panel);
-        innerDiv.style.position = "relative";
-        if (config.display){
-            console.warn(
-            "The 'display' config in the javaxt.dhtml.Checkbox " +
-            "class has been deprecated. Use panel style instead");
-            innerDiv.style.display = config.display;
-        }
-
+      //Update style as needed
+        onRender(innerDiv, (innerDiv)=>{
+            var style = getStyle(innerDiv);
+            if (style.position!="relative"){
+                innerDiv.style.position = "relative";
+            }
+            if (style.verticalAlign!="text-bottom"){
+                innerDiv.style.verticalAlign = "text-bottom";
+            }
+            if (config.display){ //legacy config
+                if (style.display!=config.display){
+                    innerDiv.style.display = config.display;
+                }
+            }
+        });
 
 
       //Create checkbox
@@ -203,6 +212,9 @@ javaxt.dhtml.Checkbox = function(parent, config) {
       //Set button state
         if (config.disabled===true) me.disable();
         if (config.checked===true) me.select();
+
+        me.el = span;
+        addShowHide(me);
     };
 
 
@@ -217,7 +229,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
 
 
         div.onmousedown=function(){
-            addStyle(box, "select");
+            addStyle(box, config.style.select);
             return false;
         };
 
@@ -246,7 +258,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
             touchEndTime = null;
 
             if (box.checked!==true){
-                addStyle(box, "hover");
+                addStyle(box, config.style.hover);
             }
         };
 
@@ -275,14 +287,14 @@ javaxt.dhtml.Checkbox = function(parent, config) {
         div.onmouseover = function(){
 
             if (box.checked!==true){
-                addStyle(box, "hover");
+                addStyle(box, config.style.hover);
             }
 
         };
         div.onmouseout = function(){
 
             if (box.checked!==true){
-                setStyle(box, "box");
+                setStyle(box, config.style.box);
             }
 
         };
@@ -311,9 +323,10 @@ javaxt.dhtml.Checkbox = function(parent, config) {
   /** Used to enable the checkbox.
    */
     this.enable = function(){
-        mask.style.visibility = "hidden";
+        if (mask) mask.style.visibility = "hidden";
         box.style.opacity = "";
-        label.style.opacity = "";
+        if (label) label.style.opacity = "";
+        isDisabled = false;
     };
 
 
@@ -335,11 +348,21 @@ javaxt.dhtml.Checkbox = function(parent, config) {
             mask.style.width = "100%";
             mask.style.height = "100%";
 
-            var innerDiv = me.el.firstChild;
-            innerDiv.insertBefore(mask, innerDiv.firstChild);
+            panel.insertBefore(mask, panel.firstChild);
         }
         box.style.opacity = "0.5";
-        label.style.opacity = "0.5";
+        if (label) label.style.opacity = "0.5";
+        isDisabled = true;
+    };
+
+
+  //**************************************************************************
+  //** isDisabled
+  //**************************************************************************
+  /** Returns true if the checkbox is disabled
+   */
+    this.isDisabled = function(){
+        return isDisabled;
     };
 
 
@@ -351,7 +374,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
     this.select = function(silent){
         if (box.checked===true) return;
         box.checked = true;
-        addStyle(box,"select");
+        addStyle(box, config.style.select);
 
         if (check){
             check.style.visibility = "visible";
@@ -373,7 +396,7 @@ javaxt.dhtml.Checkbox = function(parent, config) {
     this.deselect = function(silent){
         if (box.checked===true){
             box.checked = false;
-            setStyle(box,"box");
+            setStyle(box, config.style.box);
             check.style.visibility = "hidden";
 
             if (silent===true) return;
@@ -428,14 +451,11 @@ javaxt.dhtml.Checkbox = function(parent, config) {
     var createTable = javaxt.dhtml.utils.createTable;
     var addShowHide = javaxt.dhtml.utils.addShowHide;
     var isElement = javaxt.dhtml.utils.isElement;
+    var onRender = javaxt.dhtml.utils.onRender;
+    var getStyle = javaxt.dhtml.utils.getStyle;
+    var setStyle = javaxt.dhtml.utils.setStyle;
+    var addStyle = javaxt.dhtml.utils.addStyle;
     var merge = javaxt.dhtml.utils.merge;
-
-    var setStyle = function(el, style){
-        javaxt.dhtml.utils.setStyle(el, config.style[style]);
-    };
-    var addStyle = function(el, style){
-        javaxt.dhtml.utils.addStyle(el, config.style[style]);
-    };
 
 
     init();
