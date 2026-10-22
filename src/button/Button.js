@@ -217,13 +217,13 @@ javaxt.dhtml.Button = function(parent, config) {
 
 
       //Only set display if there's a mismatch (cleaner dom)
-        var cs = window.getComputedStyle(outerDiv);
-        if (cs.display!=config.display){
+        var style = getStyle(outerDiv);
+        if (style.display!=config.display){
             outerDiv.style.display = config.display;
         }
 
       //Simlarly, only set position as needed
-        if (cs.position!="relative"){
+        if (style.position!="relative"){
             outerDiv.style.position = "relative";
         }
 
@@ -266,7 +266,7 @@ javaxt.dhtml.Button = function(parent, config) {
       //to 100% of the available width. As a workaround, it looks like we can
       //wrap the button div in another div with the display style set to "table".
         var tableDiv = createElement('div', outerDiv);
-        if (outerDiv.style.display==="inline-block" || cs.display==="inline-block"){
+        if (outerDiv.style.display==="inline-block" || style.display==="inline-block"){
             tableDiv.style.display = "table";
             if (config.width) tableDiv.style.width = outerDiv.style.width;
         }
@@ -344,50 +344,7 @@ javaxt.dhtml.Button = function(parent, config) {
       //Create menu panel as needed
         if (config.menu===true){
             config.toggle = true;
-            menu = createElement('div', outerDiv, config.style.menu);
-            menu.setAttribute("desc", "menu");
-            menu.style.position = "absolute";
-            menu.style.visibility = "hidden";
-
-
-            var hideMenu = function(e){
-                if (!mainDiv.contains(e.target)){
-                    menu.style.visibility = "hidden";
-                    me.deselect();
-                }
-            };
-
-          //Hide menu if the client clicks outside of the menu
-            window.addEventListener('click', hideMenu);
-
-
-          //Create logic to process touch events
-            var touchStartTime, touchEndTime;
-            var x1, x2, y1, y2;
-
-            window.addEventListener('touchstart', function(e){
-                x1 = e.changedTouches[0].pageX;
-                y1 = e.changedTouches[0].pageY;
-                touchStartTime = new Date().getTime();
-                touchEndTime = null;
-            });
-
-            window.addEventListener('touchend', function(e){
-
-                touchEndTime= new Date().getTime();
-                x2 = e.changedTouches[0].pageX;
-                y2 = e.changedTouches[0].pageY;
-
-                var distance = Math.sqrt( (x2-=x1)*x2 + (y2-=y1)*y2 );
-                if (distance<0) distance = -distance;
-                var duration = touchEndTime - touchStartTime;
-
-                if ((duration <= 500 && distance <= 10) || //Quick tap
-                    (duration > 500 && distance <= 10)) {  //Long press
-                    hideMenu(e);
-                }
-            });
-
+            createMenu(outerDiv);
         }
 
 
@@ -689,6 +646,18 @@ javaxt.dhtml.Button = function(parent, config) {
 
 
   //**************************************************************************
+  //** addMenuItem
+  //**************************************************************************
+  /** Used to add an item (e.g. javaxt.dhtml.Button) to the menu panel. Under
+   *  the hood, this method calls menu.addButton().
+   */
+    this.addMenuItem = function(config){
+        if (!menu) return;
+        return menu.addButton(config);
+    };
+
+
+  //**************************************************************************
   //** getMenuPanel
   //**************************************************************************
   /** Returns the DOM element associated with the menu panel. Typically, this
@@ -696,6 +665,95 @@ javaxt.dhtml.Button = function(parent, config) {
    */
     this.getMenuPanel = function(){
         return menu;
+    };
+
+
+  //**************************************************************************
+  //** createMenu
+  //**************************************************************************
+    var createMenu = function(outerDiv){
+        menu = createElement('div', outerDiv, config.style.menu);
+        menu.setAttribute("desc", "menu");
+        menu.style.position = "absolute";
+        menu.style.visibility = "hidden";
+
+
+        var hideMenu = function(e){
+            if (e && mainDiv.contains(e.target)) return;
+            menu.style.visibility = "hidden";
+            me.deselect();
+        };
+
+      //Hide menu if the client clicks outside of the menu
+        window.addEventListener('click', hideMenu, true);
+
+
+      //Create logic to process touch events
+        var touchStartTime, touchEndTime;
+        var x1, x2, y1, y2;
+
+        window.addEventListener('touchstart', function(e){
+            x1 = e.changedTouches[0].pageX;
+            y1 = e.changedTouches[0].pageY;
+            touchStartTime = new Date().getTime();
+            touchEndTime = null;
+        });
+
+        window.addEventListener('touchend', function(e){
+
+            touchEndTime= new Date().getTime();
+            x2 = e.changedTouches[0].pageX;
+            y2 = e.changedTouches[0].pageY;
+
+            var distance = Math.sqrt( (x2-=x1)*x2 + (y2-=y1)*y2 );
+            if (distance<0) distance = -distance;
+            var duration = touchEndTime - touchStartTime;
+
+            if ((duration <= 500 && distance <= 10) || //Quick tap
+                (duration > 500 && distance <= 10)) {  //Long press
+                hideMenu(e);
+            }
+        });
+
+
+      //Add custom addButtom() method to the menu
+        var buttonStyle = config.style.menuItem || defaultConfig.style;
+        menu.addButton = function(config){
+            if (!config) config = {};
+
+            var style;
+            if (config.style){
+                style = merge(merge({}, config.style), buttonStyle);
+            }
+            else{
+                style = merge({
+                    button: "menu-button",
+                    hover: "menu-button-hover"
+                }, buttonStyle);
+            }
+            style.arrow = { display: "none"};
+
+
+            if (config.icon!==false){
+                style.icon = (config.icon ? config.icon + " " : "") + "menu-button-icon";
+            }
+
+            var button = new javaxt.dhtml.Button(menu, {
+                label: config.label,
+                display: "inherit",
+                style: style,
+                disabled: config.disabled,
+                menu: false
+            });
+            button.onClick = function(){
+                hideMenu();
+                if (me.isSelected()) me.toggle();
+                if (config.onClick) config.onClick();
+            };
+
+            return button;
+        };
+
     };
 
 
@@ -758,6 +816,7 @@ javaxt.dhtml.Button = function(parent, config) {
     var createTable = javaxt.dhtml.utils.createTable;
     var createElement = javaxt.dhtml.utils.createElement;
     var addShowHide = javaxt.dhtml.utils.addShowHide;
+    var getStyle = javaxt.dhtml.utils.getStyle;
     var setStyle = function(el, style){
 
       //Don't set empty style. Especially for hidden elements (e.g. icon)
