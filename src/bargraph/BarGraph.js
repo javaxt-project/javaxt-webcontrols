@@ -5,7 +5,10 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 //**  BarGraph
 //******************************************************************************
 /**
- *   Used to create a simple bar graph.
+ *   Used to create a simple bar graph. Bars are rendered vertically with
+ *   optional animation, horizontal grid lines, and axis labels. Users can
+ *   click individual bars or cells, select/deselect bars programmatically,
+ *   and update values dynamically.
  *
  ******************************************************************************/
 
@@ -24,11 +27,25 @@ javaxt.dhtml.BarGraph = function (parent, config) {
 
     var defaultConfig = {
 
-        animate: false, //null or false to disable
+      /** If true, the bar graph animates upward when first rendered or updated.
+       *  Default is false.
+       */
+        animate: false,
+
+      /** Duration of the animation in milliseconds. Only applies when animate
+       *  is true. Default is 750.
+       */
         animationSteps: 750,
 
+
+      /** Maximum number of horizontal grid lines and corresponding y-axis
+       *  labels to display. Default is 3.
+       */
         maxHorizonalLabels: 3,
 
+      /** Style for individual elements within the component. Note that you can
+       *  provide CSS class names instead of individual style definitions.
+       */
         style: {
             cell: {
                 borderBottom: "1px solid #ccc",
@@ -217,8 +234,7 @@ javaxt.dhtml.BarGraph = function (parent, config) {
 
 
           //Add column
-            td = createElement('td');
-            setStyle(td, "cell");
+            td = createElement('td', config.style.cell);
             td.style.height = "100%";
             td.style.verticalAlign = "bottom";
 
@@ -229,8 +245,7 @@ javaxt.dhtml.BarGraph = function (parent, config) {
 
 
           //Add bar
-            bar = createElement('div', div);
-            setStyle(bar, "bar");
+            bar = createElement('div', div, config.style.bar);
             bar.style.position = "absolute";
             bar.style.bottom = 0;
             bar.style.width = "100%";
@@ -277,25 +292,13 @@ javaxt.dhtml.BarGraph = function (parent, config) {
         else{
             if (typeof config.style.cell === "string"){
                 if (!cellWidth){
-                    var temp = createElement('div');
-                    setStyle(temp, "cell");
+                    var temp = createElement('div', config.style.cell);
                     temp.style.position = "absolute";
                     temp.style.visibility = 'hidden';
                     temp.style.display = 'block';
                     var body = document.getElementsByTagName("body")[0];
                     body.appendChild(temp);
-                    var style = temp.currentStyle || window.getComputedStyle(temp);
-                    var getStyle = function(prop){
-                        if (style.getPropertyValue){
-                            var val = style.getPropertyValue(prop);
-                            if (val && val.length>0) return val;
-                            return style.getPropertyValue(prop);
-                        }
-                        else{
-                            return style[prop];
-                        }
-                    };
-                    cellWidth = parseInt(getStyle("width"));
+                    cellWidth = parseInt(getStyle(temp, "width"));
                     body.removeChild(temp);
                     temp = null;
                 }
@@ -304,13 +307,11 @@ javaxt.dhtml.BarGraph = function (parent, config) {
 
 
       //Add tick
-        var td = tickRow.addColumn();
-        setStyle(td, "tick");
+        var td = tickRow.addColumn(config.style.tick);
 
 
       //Add label
-        td = labelRow.addColumn();
-        setStyle(td, "labelX");
+        td = labelRow.addColumn(config.style.labelX);
         if (label!=null){
 
             var outerDiv = createElement('div', td, {
@@ -411,13 +412,11 @@ javaxt.dhtml.BarGraph = function (parent, config) {
             var tr = yAxis.addRow();
 
             var td = tr.addColumn({verticalAlign: "top"});
-            var div = createElement('div', td);
-            setStyle(div, "labelY");
+            var div = createElement('div', td, config.style.labelY);
             td.label = div;
 
             var td = tr.addColumn({verticalAlign: "top"});
-            var div = createElement('div', td);
-            setStyle(div, "hline");
+            var div = createElement('div', td, config.style.hline);
             div.style.width = "100%";
 
 
@@ -425,8 +424,7 @@ javaxt.dhtml.BarGraph = function (parent, config) {
           //Add horizontal line
             tr = horizontalLines.addRow();
             td = tr.addColumn({verticalAlign: "top"});
-            var div = createElement('div', td);
-            setStyle(div, "hline");
+            var div = createElement('div', td, config.style.hline);
             div.style.width = "100%";
             div.style.position = "absolute";
         }
@@ -712,6 +710,7 @@ javaxt.dhtml.BarGraph = function (parent, config) {
     var onRender = javaxt.dhtml.utils.onRender;
     var createTable = javaxt.dhtml.utils.createTable;
     var createElement = javaxt.dhtml.utils.createElement;
+    var getStyle = javaxt.dhtml.utils.getStyle;
     var setStyle = function(el, style){
         javaxt.dhtml.utils.setStyle(el, config.style[style]);
     };

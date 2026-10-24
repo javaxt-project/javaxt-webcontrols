@@ -5,7 +5,10 @@ if(!javaxt.dhtml) javaxt.dhtml={};
 //**  Accordion Class
 //******************************************************************************
 /**
- *   A custom widget used to create an accordian control.
+ *   Accordian control - a vertically stacked set of panels where one panel is
+ *   open at a time. Clicking a panel header opens that panel and closes the
+ *   previously open one. The control supports animated transitions and can
+ *   optionally reorder panels so the active tab moves to the top.
  *
  ******************************************************************************/
 
@@ -21,12 +24,32 @@ javaxt.dhtml.Accordion = function(parent, config) {
 
     var defaultConfig = {
 
+      /** If true, the active panel will always be displayed at the top of the
+       *  accordion. Headers that appear above the selected panel are moved
+       *  below it. Default is false.
+       */
         activeOnTop: false,
+
+      /** If true, panels will slide open and closed when switching tabs.
+       *  Default is true.
+       */
         animate: true,
-        animationSteps: 250.0, //time in milliseconds
+
+      /** Duration of the open/close animation, in milliseconds. Only used if
+       *  the "animate" config is true. Default is 250.
+       */
+        animationSteps: 250.0,
+
+      /** Tab to open when the accordion is first rendered. Accepts either the
+       *  index of the tab (starting at 1) or the title of the tab. The tab is
+       *  opened without animation. If null, no tab is opened by default.
+       */
         defaultTab: null,
 
 
+      /** Style for individual elements within the component. Note that you can
+       *  provide CSS class names instead of individual style definitions.
+       */
         style:{
 
             panel: {
