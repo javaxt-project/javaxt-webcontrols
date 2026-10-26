@@ -13,32 +13,97 @@
 <script type="text/javascript" src="../../src/window/Window.js"></script>
 <script type="text/javascript" src="../../src/utils/Utils.js"></script>
 
+<style>
+
+  /**************************************************************************/
+  /** Demo layout
+  /**************************************************************************/
+
+    .demo-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 40px;
+    }
+
+    .demo-col {
+        flex: 1;
+        min-width: 0;
+    }
+
+    p.hint {
+        font-size: 12px;
+        color: #888;
+        margin: 0 0 12px 0;
+    }
+
+
+    /* iframe styles for the javaxt theme demos */
+    .theme-frame {
+        width: 100%;
+        height: 325px;
+        box-sizing: border-box;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .theme-frame-dark {
+        border-color: #3a3f4a;
+    }
+
+    /* Taller iframes for the alert and confirm dialogs (450px wide) */
+    .dialog-frame {
+        height: 300px;
+        margin-bottom: 20px;
+    }
+
+    /* Light/Dark switch for the dialog iframe */
+    .theme-switch {
+        margin: 0 0 8px 0;
+        color: #555;
+    }
+
+    .theme-switch label {
+        margin-left: 10px;
+        cursor: pointer;
+    }
+
+</style>
+
 </head>
 <body>
+<div class="demo-container">
 
 <h1>Window Demos</h1>
 
 <h2>Modal Pop-up Window</h2>
-<p>Simple modal pop-up window </p>
-<input type="button" value="Open" onclick="demo1()"></input>
+<p>Simple modal pop-up window. Click the button below to open the window.</p>
+<input type="button" value="Open" onclick="demo1(this)"></input>
 
 <script type="text/javascript">
 var win;
-var demo1 = function() {
+var demo1 = function(button) {
 
     if (!win){
-        var body = document.getElementsByTagName("body")[0];
-        win = new javaxt.dhtml.Window(body, {
+        win = new javaxt.dhtml.Window(document.body, {
             width: 400,
             height: 100,
             modal: true,
-            valign: "top",
             title: "Demo 1",
             body: "Drag me! Grab the header and move me around."
         });
     }
 
-    win.show();
+
+  //Open the window just to the right of the button, vertically centered on
+  //it. Note that getRect() returns viewport coordinates, while showAt()
+  //expects page coordinates, so we add the page scroll offset. The window
+  //height is only known once it is visible, so it is measured after it is
+  //opened and then moved into place.
+    var rect = javaxt.dhtml.utils.getRect(button);
+    var x = rect.right + 20 + window.pageXOffset;
+    var y = rect.top + rect.height/2 + window.pageYOffset;
+    win.showAt(x, y);
+    win.showAt(x, Math.max(window.pageYOffset, y - win.getHeight()/2));
 
 };
 </script>
@@ -98,5 +163,103 @@ var demo2 = function() {
 
 </script>
 
+
+<h2>JavaXT Themes</h2>
+<p>The same window styled with the JavaXT themes (themes/light.css and
+themes/dark.css). Each theme is shown in its own iframe so the two stylesheets
+don't collide.</p>
+
+
+<div class="demo-row">
+
+    <div class="demo-col">
+        <h3>Light theme</h3>
+        <p class="hint">themes/light.css &mdash; javaxt-window</p>
+        <iframe class="theme-frame" src="window-theme.html?theme=light"></iframe>
+    </div>
+
+    <div class="demo-col">
+        <h3>Dark theme</h3>
+        <p class="hint">themes/dark.css &mdash; javaxt-window</p>
+        <iframe class="theme-frame theme-frame-dark" src="window-theme.html?theme=dark"></iframe>
+    </div>
+
+</div>
+
+
+<h2>Alert and Confirm Dialogs</h2>
+<p>The <code>javaxt.dhtml.utils.alert()</code> and
+<code>javaxt.dhtml.utils.confirm()</code> methods render modal alert and
+confirm dialogs using the Window class. Unlike the native
+<code>confirm()</code>, the confirm dialog doesn't block, so the answer is
+passed to a callback. The dialogs are styled using the JavaXT themes. Click the
+buttons below to open the dialogs and use the Light/Dark switch to change the theme.</p>
+<pre>
+  //Simple alert. Also accepts an XHR response (e.g. a server error).
+    javaxt.dhtml.utils.alert("Something went wrong! Please try again.");
+
+  //Confirm with the default title and OK/Cancel buttons
+    javaxt.dhtml.utils.confirm("Are you sure you want to continue?", {
+        callback: function(answer){ //true for OK, false for Cancel
+            console.log(answer);
+        }
+    });
+
+  //Confirm with a custom title and buttons
+    javaxt.dhtml.utils.confirm({
+        title: "Quit Game?",
+        text: "Are you sure you want to quit the game?",
+        leftButton: { label: "Yes", value: true },
+        rightButton: { label: "No", value: false },
+        callback: function(answer){
+            if (answer===true) console.log("quit game");
+            else console.log("continue game");
+        }
+    });
+</pre>
+
+<div class="theme-switch">
+    Theme:
+    <label><input type="radio" name="dialog-theme" value="light" checked="checked" /> Light</label>
+    <label><input type="radio" name="dialog-theme" value="dark" /> Dark</label>
+</div>
+<iframe id="dialog-frame" class="theme-frame dialog-frame" src="window-dialogs.html?theme=light"></iframe>
+
+<script type="text/javascript">
+
+  //Send the selected theme to the dialog iframe. The iframe swaps its
+  //stylesheet in place, so any open dialog keeps its state and position.
+  //We use postMessage because browsers may not let this page access the
+  //iframe directly (e.g. file:// urls).
+    (function(){
+        var frame = document.getElementById("dialog-frame");
+        var radios = document.getElementsByName("dialog-theme");
+
+        var getTheme = function(){
+            for (var i=0; i<radios.length; i++){
+                if (radios[i].checked) return radios[i].value;
+            }
+            return "light";
+        };
+
+        var update = function(){
+            var theme = getTheme();
+            frame.contentWindow.postMessage({ theme: theme }, "*");
+            frame.className = "theme-frame dialog-frame" +
+                (theme==="dark" ? " theme-frame-dark" : "");
+        };
+
+        for (var i=0; i<radios.length; i++){
+            radios[i].onchange = update;
+        }
+
+      //Sync the iframe whenever it loads. Some browsers restore the radio
+      //selection when the page is reloaded, so it may not be "light".
+        frame.onload = update;
+    })();
+
+</script>
+
+</div>
 </body>
 </html>

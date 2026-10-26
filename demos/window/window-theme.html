@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Themed Window</title>
+
+<!-- The theme stylesheet is swapped at runtime based on the ?theme= param -->
+<link id="theme" href="../../themes/light.css" rel="stylesheet" type="text/css" />
+
+<script src="../../src/window/Window.js"></script>
+<script src="../../src/utils/Utils.js"></script>
+<script src="../../themes/default.js"></script>
+
+<style>
+    html, body { height: 100%; margin: 0; overflow: hidden; }
+    body { font-family: helvetica,arial,verdana,sans-serif; font-size: 14px; }
+    #container { position: relative; width: 100%; height: 100%; }
+    #reopen { position: absolute; left: 10px; bottom: 10px; }
+</style>
+
+<script>
+window.onload = function() {
+
+  //Swap in the requested theme stylesheet (light | dark)
+    var theme = (javaxt.dhtml.utils.getParameter("theme") || "light").toLowerCase();
+    if (theme==="dark"){
+        document.getElementById("theme").href = "../../themes/dark.css";
+    }
+    document.body.style.backgroundColor = theme==="dark" ? "#2b2e35" : "#ffffff";
+
+
+  //Style the window using the active theme's "window" map (CSS class names).
+  //This is the same style the kitchen sink demo uses.
+    var win = new javaxt.dhtml.Window(document.getElementById("container"), {
+        width: 280,
+        height: 140,
+        title: "Window",
+        body: "Drag me! Grab the header and move me around.",
+        buttons: [
+            {
+                name: "OK",
+                onclick: function(){
+                    win.close();
+                }
+            }
+        ],
+        style: javaxt.dhtml.style.default.window
+    });
+    win.show();
+
+
+  //Show a button to reopen the window after it is closed
+    var reopen = document.getElementById("reopen");
+    win.onClose = function(){ reopen.style.display = ""; };
+    reopen.onclick = function(){
+        reopen.style.display = "none";
+        win.show();
+    };
+};
+</script>
+</head>
+<body>
+<div id="container">
+    <button id="reopen" class="form-button" style="display:none;">Open</button>
+</div>
+</body>
+</html>

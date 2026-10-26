@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Alert and Confirm Dialogs</title>
+
+<!-- The theme stylesheet is swapped at runtime based on the ?theme= param -->
+<link id="theme" href="../../themes/light.css" rel="stylesheet" type="text/css" />
+
+<script src="../../src/window/Window.js"></script>
+<script src="../../src/utils/Utils.js"></script>
+<script src="../../themes/default.js"></script>
+
+<style>
+    html, body { height: 100%; margin: 0; overflow: hidden; }
+    body { font-family: helvetica,arial,verdana,sans-serif; font-size: 14px; }
+    #toolbar { padding: 15px; }
+    /* Theme buttons are a fixed 80px wide, which is too narrow for longer
+       labels like "Custom Confirm" */
+    #toolbar input[type=button] { margin: 0 6px 0 0; width: auto; min-width: 80px; padding: 0 12px; }
+    #result { padding: 0 15px; font-size: 13px; }
+</style>
+
+<script>
+window.onload = function() {
+
+  //**************************************************************************
+  //** setTheme
+  //**************************************************************************
+  /** Swaps the theme stylesheet (light | dark) in place. The alert and confirm
+   *  dialogs are styled with CSS class names, so any open dialog picks up the
+   *  new theme and keeps its state and position.
+   */
+    var setTheme = function(theme){
+        theme = theme==="dark" ? "dark" : "light";
+        document.getElementById("theme").href = "../../themes/" + theme + ".css";
+        document.body.style.backgroundColor = theme==="dark" ? "#2b2e35" : "#ffffff";
+        document.body.style.color = theme==="dark" ? "#bdbdbd" : "#363636";
+    };
+
+
+  //Set the initial theme using the ?theme= param
+    setTheme((javaxt.dhtml.utils.getParameter("theme") || "light").toLowerCase());
+
+
+  //Listen for theme changes from the parent page (Window.html). We use
+  //postMessage because browsers may not let the parent page access this
+  //iframe directly (e.g. file:// urls).
+    window.addEventListener("message", function(e){
+        if (e.source!==window.parent) return;
+        if (e.data && e.data.theme) setTheme(e.data.theme);
+    });
+
+
+    var result = document.getElementById("result");
+    var log = function(msg){
+        result.innerText = msg;
+    };
+
+
+  //**************************************************************************
+  //** Alert
+  //**************************************************************************
+  /** Note that the alert() and confirm() dialogs pick up the active theme's
+   *  "window" style (javaxt.dhtml.style.default.window) automatically.
+   */
+    document.getElementById("alert").onclick = function(){
+        javaxt.dhtml.utils.alert("Something went wrong! Please try again.");
+        log("");
+    };
+
+
+  //**************************************************************************
+  //** Confirm with the default title and OK/Cancel buttons
+  //**************************************************************************
+    document.getElementById("confirm").onclick = function(){
+        javaxt.dhtml.utils.confirm("Are you sure you want to continue?", {
+            callback: function(answer){
+                log("You clicked " + (answer ? "OK" : "Cancel") + " (" + answer + ")");
+            }
+        });
+        log("");
+    };
+
+
+  //**************************************************************************
+  //** Confirm with a custom title and buttons
+  //**************************************************************************
+    document.getElementById("custom").onclick = function(){
+        javaxt.dhtml.utils.confirm({
+            title: "Quit Game?",
+            text: "Are you sure you want to quit the game?",
+            leftButton: {
+                label: "Yes",
+                value: true
+            },
+            rightButton: {
+                label: "No",
+                value: false
+            },
+            callback: function(answer){
+                log(answer ? "Quit game" : "Continue game");
+            }
+        });
+        log("");
+    };
+};
+</script>
+</head>
+<body>
+<div id="toolbar">
+    <input type="button" class="form-button" id="alert" value="Alert" />
+    <input type="button" class="form-button" id="confirm" value="Confirm" />
+    <input type="button" class="form-button" id="custom" value="Custom Confirm" />
+</div>
+<div id="result"></div>
+</body>
+</html>
