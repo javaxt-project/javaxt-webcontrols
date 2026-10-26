@@ -1569,10 +1569,21 @@ javaxt.dhtml.utils = {
    *  responses with "responseText".
    *  @param config Optional config used to instantiate the
    *  javaxt.dhtml.Window class.
+   *  @return The javaxt.dhtml.Window used to render the alert dialog.
    */
     alert: function(msg, config){
+
+        if (!config) config = {};
         var win = javaxt.dhtml.utils.Alert;
-        if (win && win.isOpen()) return;
+        var alert = javaxt.dhtml.utils.alert;
+        if (!alert.queue) alert.queue = [];
+
+
+      //If an alert dialog is already open, queue the requested alert
+        if (win && win.isOpen()){
+            alert.queue.push([msg, config]);
+            return win;
+        }
 
 
         if (msg==null) msg = "";
@@ -1587,11 +1598,10 @@ javaxt.dhtml.utils = {
         }
 
 
-        var win = javaxt.dhtml.utils.Alert;
+      //Create new window as needed
         if (!win){
             var createElement = javaxt.dhtml.utils.createElement;
             var merge = javaxt.dhtml.utils.merge;
-
 
             var outerDiv = createElement('div', {
                 position: "relative",
@@ -1609,18 +1619,15 @@ javaxt.dhtml.utils = {
             });
 
 
-            if (!config) config = {};
             var style  = {};
             if (javaxt.dhtml.style && javaxt.dhtml.style.default){
                 style = javaxt.dhtml.style.default.window;
             }
 
-            merge(config, {
-                width: 450,
-                height: 200,
+
+            win = new javaxt.dhtml.Window(document.body, {
                 valign: "top",
                 modal: true,
-                title: "Alert",
                 body: outerDiv,
                 style: merge(
                     {
@@ -1630,14 +1637,23 @@ javaxt.dhtml.utils = {
                     style
                 )
             });
-
-
-            win = new javaxt.dhtml.Window(document.body, config);
             win.div = innerDiv;
+            win.onClose = function(){
+                if (alert.queue.length>0){
+                    var args = alert.queue.shift();
+                    setTimeout(function(){
+                        alert.apply(javaxt.dhtml.utils, args);
+                    }, 50);
+                }
+            };
             javaxt.dhtml.utils.Alert = win;
         }
 
 
+      //Update the window config
+        win.setTitle(config.title || "Alert");
+        win.setWidth(config.width || 450);
+        win.setHeight(config.height || 200);
         win.div.innerHTML = msg;
 
         win.show();
@@ -1668,99 +1684,97 @@ javaxt.dhtml.utils = {
         }
     });
    </pre>
-    @param msg String with question/prompt or a JSON config like the example
-    above. If passing a string, a default config is used which can be
-    overridden using the optional "config" parameter.
-    @param config JSON config like the example above. Additional config options
-    are available. See the javaxt.dhtml.Window config for more information.
-    This parameter is optional.
+   *  @param msg String with question/prompt or a config like the example above.
+   *  @param config Callback and optional window and button config.
+   *  @return The javaxt.dhtml.Window used to render the confirm dialog.
    */
     confirm: function(msg, config){
-        var win = javaxt.dhtml.utils.Confirm;
-        if (win && win.isOpen()) return;
-
-
-        if (!(typeof(msg) === 'string' || msg instanceof String)){
-            config = msg;
-        }
 
         if (!config) config = {};
-        javaxt.dhtml.utils.merge(config, {
-            title: "Confirm",
-            text: msg
-        });
+        var win = javaxt.dhtml.utils.Confirm;
+        var confirm = javaxt.dhtml.utils.confirm;
+        if (!confirm.queue) confirm.queue = [];
+
+
+      //If a confirm dialog is already open, queue the requested confirm
+        if (win && win.isOpen()){
+            confirm.queue.push([msg, config]);
+            return win;
+        }
+
+
+      //The first argument may be a config instead of the question text
+        if (msg!=null && typeof msg==="object" && !(msg instanceof String)){
+            config = msg;
+            msg = null;
+        }
+
+
+        var text = config.text;
+        if (text==null) text = msg;
+        if (text==null) text = "";
 
 
       //Create new window as needed
         if (!win){
-            var createElement = javaxt.dhtml.utils.createElement;
             var merge = javaxt.dhtml.utils.merge;
-
-
-            var buttonDiv = createElement("div", "button-div");
-
-
-            var createButton = function(label, result){
-                var input = createElement("input", buttonDiv, "form-button");
-                input.type = "button";
-
-                input.onclick = function(){
-                    win.result = this.result;
-                    win.close();
-                };
-                input.setLabel = function(label){
-                    if (label) this.name = this.value = label;
-                };
-                input.setValue = function(b){
-                    if (b===true || b===false) this.result = b;
-                };
-                input.update = function(config){
-                    if (config){
-                        this.setLabel(config.label);
-                        this.setValue(config.value);
-                    }
-                };
-                input.setLabel(label);
-                input.setValue(result);
-                return input;
-            };
-
 
             var style  = {};
             if (javaxt.dhtml.style && javaxt.dhtml.style.default){
                 style = javaxt.dhtml.style.default.window;
             }
 
-            merge(config, {
-                width: 450,
-                height: 150,
+
+            win = new javaxt.dhtml.Window(document.body, {
                 valign: "top",
                 modal: true,
-                footer: buttonDiv,
                 style: merge(
                     { body: "window-body confirm-body" },
                     style
                 )
             });
-
-
-            win = new javaxt.dhtml.Window(document.body, config);
             javaxt.dhtml.utils.Confirm = win;
 
 
-            win.leftButton = createButton("OK", true);
-            win.rightButton = createButton("Cancel", false);
+          //Add buttons to the footer
+            var onclick = function(){
+                win.result = this.result;
+                win.close();
+            };
+            win.addButton("OK", onclick);
+            win.addButton("Cancel", onclick);
         }
 
 
-        win.setTitle(config.title);
-        win.setContent(config.text.replace("\n","<p></p>"));
-        win.leftButton.update(config.leftButton);
-        win.rightButton.update(config.rightButton);
+      //Used to update a button label and value
+        var updateButton = function(input, button, defaultLabel, defaultValue){
+            if (!button) button = {};
+            input.name = input.value = button.label || defaultLabel;
+            input.result = (typeof button.value !== "undefined") ?
+                button.value : defaultValue;
+        };
+
+
+      //Update the window config
+        win.setTitle(config.title || "Confirm");
+        win.setWidth(config.width || 450);
+        win.setHeight(config.height || 150);
+        win.setContent(String(text).replace("\n","<p></p>"));
+        var buttons = win.getFooter().getElementsByTagName("input");
+        updateButton(buttons[0], config.leftButton, "OK", true);
+        updateButton(buttons[1], config.rightButton, "Cancel", false);
         win.result = false;
+
+
+        var callback = config.callback;
         win.onClose = function(){
-            var callback = config.callback;
             if (callback) callback.apply(win, [win.result]);
+            if (confirm.queue.length>0){
+                var args = confirm.queue.shift();
+                setTimeout(function(){
+                    confirm.apply(javaxt.dhtml.utils, args);
+                }, 50);
+            }
         };
         win.show();
         return win;
