@@ -15,44 +15,201 @@
 
 <style>
 
-    h1 {
-        margin-top: 0px;
+
+
+  /* Target marker: a crosshair at the point passed to showAt() */
+    .target {
+        position: absolute;
+        width: 0;
+        height: 0;
+    }
+    .target:before,
+    .target:after {
+        content: "";
+        position: absolute;
+        background-color: #e0412e;
+    }
+    .target:before {
+        left: -7px;
+        top: 0;
+        width: 15px;
+        height: 1px;
+    }
+    .target:after {
+        left: 0;
+        top: -7px;
+        width: 1px;
+        height: 15px;
     }
 
-    h2 {
-        font-size:18px;
-        font-weight: normal;
-        margin: 20px 0 5px 0;
-    }
 
-    p {
-        margin: 5px 0 15px 0;
-        color: #555555;
+  /* Gallery: one cell per position/align combination */
+    #gallery {
+        display: grid;
+        grid-template-columns: repeat(3, 260px);
+        grid-auto-rows: 150px;
+        gap: 6px;
     }
-
-    input[type="button"] {
-        width: 72px;
-        height: 26px;
-    }
-
-    #demo2 {
-        border: 2px dashed #bbb;
-        -moz-border-radius: 5px;
-        -webkit-border-radius: 5px;
+    #gallery .cell {
+        position: relative;
+        border: 1px dashed #ccc;
         border-radius: 5px;
-        padding: 25px;
+    }
+    #gallery .cell .target {
+        left: 50%;
+        top: 50%;
+    }
+    #gallery .caption {
+        position: absolute;
+        left: 6px;
+        bottom: 4px;
+        font-family: monospace;
+        font-size: 11px;
+        color: #999;
+    }
+    .gallery-label {
+        font-size: 12px;
+        white-space: nowrap;
+        padding: 5px 8px;
+    }
+    .gallery-label .caption {
+        font-family: monospace;
+        font-size: 11px;
+        color: #999;
+        padding: 3px 0 10px 0;
+    }
+
+
+  /* Sectors: a box in the middle of a panel, with 12 sectors around it */
+    #sectors {
+        position: relative;
+        height: 380px;
+        border: 2px dashed #bbb;
+        border-radius: 5px;
+        overflow: hidden;
+        user-select: none;
+    }
+    #sectors svg {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+    }
+    #sectors svg line {
+        stroke: #ddd;
+        stroke-dasharray: 4 4;
+    }
+    #sectorBox {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 150px;
+        height: 96px;
+        margin: -48px 0 0 -75px;
+        box-sizing: border-box;
+        border: 1px solid #999;
+        border-radius: 4px;
+        background-color: #f7f7f7;
+        color: #888;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         text-align: center;
+    }
+
+
+  /* Playground */
+    .controls {
+        margin-bottom: 8px;
+    }
+    .controls > div {
+        display: inline-block;
+        margin: 0 18px 6px 0;
+        vertical-align: top;
+    }
+    .controls .label {
+        display: block;
+        font-size: 12px;
+        color: #777;
+        margin-bottom: 3px;
+    }
+    .segmented button {
+        font-size: 13px;
+        padding: 4px 10px;
+        margin: 0 -1px 0 0;
+        border: 1px solid #bbb;
+        background-color: #f7f7f7;
+        cursor: pointer;
+    }
+    .segmented button:first-child { border-radius: 4px 0 0 4px; }
+    .segmented button:last-child { border-radius: 0 4px 4px 0; }
+    .segmented button.selected {
+        background-color: #3a6ea5;
+        border-color: #3a6ea5;
+        color: #fff;
+    }
+    .segmented button:disabled {
+        color: #bbb;
+        cursor: default;
+    }
+
+    #playground {
+        position: relative;
+        height: 260px;
+        border: 2px dashed #bbb;
+        border-radius: 5px;
+        color: #bbb;
         font-size: 20pt;
         font-weight: bold;
-        color: #bbb;
-        cursor: pointer;
-
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -o-user-select: none;
-        -ms-user-select: none;
-        -khtml-user-select: none;
+        text-align: center;
+        line-height: 260px;
+        cursor: crosshair;
         user-select: none;
+    }
+
+
+  /* Edge demo */
+    #edges {
+        position: relative;
+        height: 36px;
+        margin-bottom: 115px;
+    }
+    #edges button {
+        position: absolute;
+        top: 0;
+        height: 30px;
+    }
+    #edgeLeft { left: 0; }
+    #edgeRight { right: 0; }
+
+
+  /* Readouts */
+    .readout {
+        font-family: monospace;
+        font-size: 12px;
+        color: #555;
+        margin-top: 6px;
+        min-height: 16px;
+        white-space: pre-wrap;
+    }
+    .readout .ok { color: #238f23; }
+    .readout .bad { color: #c62828; font-weight: bold; }
+
+
+  /* Callout content */
+    .fixed-content {
+        width: 160px;
+        height: 100px;
+        padding: 8px;
+        box-sizing: border-box;
+    }
+    .text-content {
+        padding: 6px 8px;
+    }
+    .long-content {
+        max-width: 260px;
     }
 </style>
 
@@ -62,115 +219,485 @@
 
 window.onload = function() {
 
-  //Create callout for Demo #1
     var body = document.getElementsByTagName("body")[0];
-    var callout1 = new javaxt.dhtml.Callout(body);
+    var createElement = javaxt.dhtml.utils.createElement;
+
+    var POSITIONS = ["above", "below", "left", "right"];
+    var ALIGNS = {
+        above: ["left", "center", "right"],
+        below: ["left", "center", "right"],
+        left:  ["top", "middle", "bottom"],
+        right: ["top", "middle", "bottom"]
+    };
+
+    var LONG_TEXT = "A longer message with a max-width but no fixed width. The " +
+        "callout is sized to fit its content, so this text also wraps when " +
+        "there isn't enough room between the callout and the window's edge.";
 
 
-  //Populate callout for Demo #1
-    var innerDiv = callout1.getInnerDiv();
-    innerDiv.style.width = "165px";
-    innerDiv.style.height = "165px";
-    var contentDiv = document.createElement("div");
-    contentDiv.style.padding = "5px";
-    contentDiv.innerHTML = "Hello World!";
-    innerDiv.appendChild(contentDiv);
+  //**************************************************************************
+  //** Utils
+  //**************************************************************************
 
-
-  //Make the callout visible when the button is clicked
-    document.getElementById("demo1").onclick = function(e){
-        var rect = getRect(this);
-        console.log(rect);
-        var x = rect.x + rect.width;
-        var y = rect.y + (rect.height/2);
-        callout1.showAt(x, y, "right", "top");
+  /** Returns the page coordinates (document, not viewport) of an element */
+    var getPageRect = function(el){
+        var r = el.getBoundingClientRect();
+        return {
+            x: r.left + window.pageXOffset,
+            y: r.top + window.pageYOffset,
+            width: r.width,
+            height: r.height
+        };
     };
 
 
-  //Simple function to get coordinates and dimensions of a DOM element
-    var getRect = function(el){
+  /** Returns the page coordinates of the tip of a callout's arrow. The
+   *  arrow is a CSS triangle (the "notchBorder" element) that points at
+   *  the coordinate passed to showAt().
+   */
+    var getArrowTip = function(callout, position){
+        var notch = callout.el.querySelector('b[desc="notchBorder"]');
+        var r = getPageRect(notch);
+        if (position==="below") return {x: r.x + r.width/2, y: r.y};
+        if (position==="above") return {x: r.x + r.width/2, y: r.y + r.height};
+        if (position==="left")  return {x: r.x + r.width, y: r.y + r.height/2};
+        if (position==="right") return {x: r.x, y: r.y + r.height/2};
+    };
 
-        function findPosX(obj){
-            var curleft = 0;
-            if (obj.offsetParent){
-                while (obj.offsetParent) {
-                    curleft += obj.offsetLeft;
-                    obj = obj.offsetParent;
+
+  /** Returns a line of text comparing the requested point with the arrow tip */
+    var describe = function(label, callout, x, y, position, align){
+        var tip = getArrowTip(callout, position);
+        var dx = tip.x - x, dy = tip.y - y;
+        var ok = Math.abs(dx)<=1.5 && Math.abs(dy)<=1.5;
+        var round = function(n){ return Math.round(n*10)/10; };
+        return (label ? label + ": " : "") +
+            position + "/" + align + "  requested (" + round(x) + ", " + round(y) + ")" +
+            "  arrow tip (" + round(tip.x) + ", " + round(tip.y) + ")  " +
+            '<span class="' + (ok ? "ok" : "bad") + '">' +
+            (ok ? "✓" : "✗ off by (" + round(dx) + ", " + round(dy) + ")") +
+            "</span>";
+    };
+
+
+  /** Adds a crosshair at a page coordinate */
+    var addTarget = function(parent, x, y){
+        var target = createElement("div", parent, "target");
+        if (x!=null){
+
+          //Absolutely positioned elements are placed relative to the inside
+          //of the parent's border (e.g. the playground's 2px border)
+            var r = getPageRect(parent);
+            target.style.left = (x - r.x - parent.clientLeft) + "px";
+            target.style.top = (y - r.y - parent.clientTop) + "px";
+        }
+        return target;
+    };
+
+
+
+  //**************************************************************************
+  //** Demo 1: Gallery of every position and alignment
+  //**************************************************************************
+
+    var gallery = document.getElementById("gallery");
+    var galleryCallouts = [];
+
+    POSITIONS.forEach(function(position){
+        ALIGNS[position].forEach(function(align){
+            var cell = createElement("div", gallery, "cell");
+            var target = addTarget(cell);
+            var caption = createElement("div", cell, "caption");
+            caption.innerText = 'showAt(x, y, "' + position + '", "' + align + '")';
+
+          //Keep the gallery callouts open (no autoHide on clicks or resizes)
+            var callout = new javaxt.dhtml.Callout(body, {
+                autoHide: false,
+                style: {
+                    arrow: {
+                        padding: (position==="left" || position==="right" ? "8px" : "10px")
+                    }
                 }
+            });
+
+
+
+            var label = createElement("div", callout.getInnerDiv(), "gallery-label");
+            createElement("div", label).innerText = position + " / " + align;
+            if ((position==="left" || position==="right") && align!="middle"){
+                createElement("div", label, "caption").innerText = "(extra height)";
             }
-            else if (obj.x)
-                    curleft += obj.x;
-            return curleft;
+
+
+            galleryCallouts.push({
+                callout: callout, target: target,
+                position: position, align: align
+            });
+        });
+    });
+
+    var showGallery = function(){
+        var lines = [];
+        galleryCallouts.forEach(function(item){
+            var r = getPageRect(item.target);
+            item.callout.showAt(r.x, r.y, item.position, item.align);
+            lines.push(describe(null, item.callout, r.x, r.y, item.position, item.align));
+        });
+        document.getElementById("galleryReadout").innerHTML = lines.join("\n");
+    };
+    showGallery();
+
+
+  //Move the callouts if the targets move (e.g. the page reflows when the
+  //window is resized)
+    window.addEventListener("resize", showGallery);
+
+
+
+  //**************************************************************************
+  //** Demo 2: Sectors around a box
+  //**************************************************************************
+  /** The space around the box is divided into 12 sectors: 3 along each side.
+   *  The side is the one the cursor is furthest beyond (relative to the size
+   *  of the box) and the sector is the third of that side the cursor is in.
+   *  The callout is shown on that side with its arrow touching the box, in
+   *  the middle of the third, and extends towards the cursor.
+   */
+
+    var sectorPanel = document.getElementById("sectors");
+    var sectorBox = document.getElementById("sectorBox");
+
+
+  //Callout for the sectors. Ignores the mouse so moving the cursor over it
+  //doesn't count as leaving the panel.
+    var sectorCallout = new javaxt.dhtml.Callout(body, {autoHide: false});
+    sectorCallout.el.style.pointerEvents = "none";
+    var sectorLabel = createElement("div", sectorCallout.getInnerDiv(), "gallery-label");
+    var sectorTitle = createElement("div", sectorLabel);
+    var sectorCode = createElement("div", sectorLabel, "caption");
+
+
+  //The 12 sectors: the side of the box, the third of the side, and the
+  //position/align used to show the callout (towards the cursor)
+    var SECTORS = {
+        "top-left":     {position: "above", align: "right"},
+        "top-center":   {position: "above", align: "center"},
+        "top-right":    {position: "above", align: "left"},
+        "bottom-left":  {position: "below", align: "right"},
+        "bottom-center":{position: "below", align: "center"},
+        "bottom-right": {position: "below", align: "left"},
+        "left-top":     {position: "left",  align: "bottom"},
+        "left-middle":  {position: "left",  align: "middle"},
+        "left-bottom":  {position: "left",  align: "top"},
+        "right-top":    {position: "right", align: "bottom"},
+        "right-middle": {position: "right", align: "middle"},
+        "right-bottom": {position: "right", align: "top"}
+    };
+
+
+  /** Returns the sector for a point in the window (client coordinates), or
+   *  null if the point is inside the box.
+   */
+    var getSector = function(clientX, clientY){
+        var r = sectorBox.getBoundingClientRect();
+        var nx = (clientX - (r.left + r.width/2)) / (r.width/2);
+        var ny = (clientY - (r.top + r.height/2)) / (r.height/2);
+        if (Math.abs(nx)<=1 && Math.abs(ny)<=1) return null;
+
+        var third = function(n, names){
+            return n < -1/3 ? names[0] : (n > 1/3 ? names[2] : names[1]);
+        };
+        if (Math.abs(ny) >= Math.abs(nx)){
+            return (ny < 0 ? "top" : "bottom") + "-" + third(nx, ["left", "center", "right"]);
+        }
+        else{
+            return (nx < 0 ? "left" : "right") + "-" + third(ny, ["top", "middle", "bottom"]);
+        }
+    };
+
+
+  /** Returns the point on the edge of the box (page coordinates) the arrow
+   *  points to for a given sector: the middle of the third of the side.
+   */
+    var getAnchor = function(sector){
+        var r = getPageRect(sectorBox);
+        var parts = sector.split("-");
+        var side = parts[0], part = parts[1];
+        var offset = {left: 1/6, top: 1/6, center: 1/2, middle: 1/2, right: 5/6, bottom: 5/6}[part];
+        if (side==="top")    return {x: r.x + r.width*offset, y: r.y};
+        if (side==="bottom") return {x: r.x + r.width*offset, y: r.y + r.height};
+        if (side==="left")   return {x: r.x, y: r.y + r.height*offset};
+        if (side==="right")  return {x: r.x + r.width, y: r.y + r.height*offset};
+    };
+
+
+  //Show the callout for the sector under the cursor (only when the sector
+  //changes)
+    var currSector;
+    var showSector = function(sector){
+        if (sector===currSector && sectorCallout.isVisible()) return;
+        currSector = sector;
+
+        var s = SECTORS[sector];
+        var p = getAnchor(sector);
+        sectorTitle.innerText = sector;
+        sectorCode.innerText = 'showAt(x, y, "' + s.position + '", "' + s.align + '")';
+        sectorCallout.showAt(p.x, p.y, s.position, s.align);
+
+        document.getElementById("sectorReadout").innerHTML =
+            describe(sector, sectorCallout, p.x, p.y, s.position, s.align);
+    };
+
+    sectorPanel.addEventListener("mousemove", function(e){
+        var sector = getSector(e.clientX, e.clientY);
+        if (sector) showSector(sector); //inside the box: keep the last sector
+    });
+
+    sectorPanel.addEventListener("mouseleave", function(){
+        sectorCallout.hide();
+        currSector = null;
+    });
+
+
+  //Draw the sector boundaries: diagonals from the corners of the box and
+  //lines from the thirds of each side, out to the edge of the panel
+    var drawSectors = function(){
+        var svg = sectorPanel.getElementsByTagName("svg")[0];
+        while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+        var p = sectorPanel.getBoundingClientRect();
+        var b = sectorBox.getBoundingClientRect();
+        var left = b.left - p.left - sectorPanel.clientLeft;
+        var top = b.top - p.top - sectorPanel.clientTop;
+        var right = left + b.width, bottom = top + b.height;
+        var cx = (left + right)/2, cy = (top + bottom)/2;
+        var far = 10000;
+
+        var line = function(x1, y1, x2, y2){
+            var l = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            l.setAttribute("x1", x1); l.setAttribute("y1", y1);
+            l.setAttribute("x2", x2); l.setAttribute("y2", y2);
+            svg.appendChild(l);
         };
 
+      //Diagonals (the corners of the box, continued outwards)
+        [[left, top], [right, top], [left, bottom], [right, bottom]].forEach(function(c){
+            line(c[0], c[1], c[0] + (c[0]-cx)*far, c[1] + (c[1]-cy)*far);
+        });
 
-        function findPosY(obj){
-            var curtop = 0;
-            if (obj.offsetParent) {
-                while (obj.offsetParent){
-                    curtop += obj.offsetTop;
-                    obj = obj.offsetParent;
-                }
+      //Thirds of each side
+        [left + b.width/3, left + b.width*2/3].forEach(function(x){
+            line(x, top, x, -far);
+            line(x, bottom, x, far);
+        });
+        [top + b.height/3, top + b.height*2/3].forEach(function(y){
+            line(left, y, -far, y);
+            line(right, y, far, y);
+        });
+    };
+    drawSectors();
+    window.addEventListener("resize", drawSectors);
+
+
+
+  //**************************************************************************
+  //** Demo 3: Playground
+  //**************************************************************************
+
+    var settings = {position: "below", align: "left", content: "fixed"};
+
+
+  //Create one callout per content type
+    var playgroundCallouts = {};
+    var fixed = new javaxt.dhtml.Callout(body);
+    createElement("div", fixed.getInnerDiv(), "fixed-content").innerText = "Fixed size (160 x 100)";
+    playgroundCallouts.fixed = fixed;
+
+    var shortText = new javaxt.dhtml.Callout(body);
+    createElement("div", shortText.getInnerDiv(), "text-content").innerText = "Hello World!";
+    playgroundCallouts.short = shortText;
+
+    var longText = new javaxt.dhtml.Callout(body);
+    createElement("div", longText.getInnerDiv(), "text-content long-content").innerText = LONG_TEXT;
+    playgroundCallouts.long = longText;
+
+
+  //Create segmented controls
+    var createSegmented = function(id, values, key, onChange){
+        var div = document.getElementById(id);
+        var buttons = {};
+        values.forEach(function(value){
+            var button = createElement("button", div);
+            button.type = "button";
+            button.innerText = value;
+            button.onclick = function(){
+                select(value);
+                if (onChange) onChange(value);
+                updatePlayground();
+            };
+            buttons[value] = button;
+        });
+        var select = function(value){
+            settings[key] = value;
+            for (var v in buttons){
+                buttons[v].className = (v===value) ? "selected" : "";
             }
-            else if (obj.y) {
-                curtop += obj.y;
-            }
-            return curtop;
         };
+        select(settings[key]);
+        return {buttons: buttons, select: select};
+    };
+
+    var aligns = createSegmented("alignControl",
+        ["left", "center", "right", "top", "middle", "bottom"], "align");
+
+    var updateAligns = function(position){
+        var valid = position==="auto" ? [] : ALIGNS[position];
+        for (var v in aligns.buttons){
+            aligns.buttons[v].disabled = valid.indexOf(v)===-1;
+        }
+        if (position!=="auto" && valid.indexOf(settings.align)===-1){
+            aligns.select(valid[0]);
+        }
+    };
+
+    createSegmented("positionControl",
+        ["above", "below", "left", "right", "auto"], "position", updateAligns);
+    updateAligns(settings.position);
+
+    createSegmented("contentControl", ["fixed", "short", "long"], "content");
 
 
+  //Show a callout wherever the user clicks in the playground
+    var playground = document.getElementById("playground");
+    var playgroundTarget;
+    var playgroundPoint; //page coordinates of the last click
+    playground.onclick = function(e){
+        playgroundPoint = {x: e.pageX, y: e.pageY};
+        updatePlayground();
+    };
 
-        var x = 0;
-        var y = 0;
-        var h = el.offsetHeight;
-        var w = el.offsetWidth;
 
-        x = findPosX(el);
-        y = findPosY(el);
+  //Shows the callout at the last point clicked in the playground, using the
+  //current settings. Called on click and whenever a setting is changed (the
+  //click on the setting's button hides the callout first, since it's outside
+  //the callout).
+    var updatePlayground = function(){
+        if (!playgroundPoint) return;
+        for (var key in playgroundCallouts) playgroundCallouts[key].hide();
 
-        return{
-            x: x,
-            y: y,
-            width: w,
-            height: h
-        };
+        var x = playgroundPoint.x;
+        var y = playgroundPoint.y;
+        var callout = playgroundCallouts[settings.content];
+        var position = settings.position;
+        var align = settings.align;
+
+
+      //Auto: show the callout below and to the right of the point, and flip
+      //it above and/or to the left if it doesn't fit in the window. Uses
+      //getSize() to measure the callout before it is shown.
+        var note = "";
+        if (position==="auto"){
+            var size = callout.getSize();
+            var clientX = x - window.pageXOffset, clientY = y - window.pageYOffset;
+            position = (clientY + size.height + 10 > window.innerHeight) ? "above" : "below";
+            align = (clientX + size.width + 10 > window.innerWidth) ? "right" : "left";
+            note = "  getSize() " + size.width + " x " + size.height;
+        }
+
+        callout.showAt(x, y, position, align);
+
+        if (playgroundTarget) playgroundTarget.parentNode.removeChild(playgroundTarget);
+        playgroundTarget = addTarget(playground, x, y);
+
+        document.getElementById("playgroundReadout").innerHTML =
+            describe(null, callout, x, y, position, align) + note;
     };
 
 
 
-  //Demo #2
-    var callout2 = new javaxt.dhtml.Callout(body);
-    innerDiv = callout2.getInnerDiv();
-    innerDiv.style.width = "165px";
-    innerDiv.style.height = "165px";
-    var contentDiv = document.createElement("div");
-    contentDiv.style.padding = "5px";
-    contentDiv.innerHTML = "Hello Demo 2!";
-    innerDiv.appendChild(contentDiv);
-    document.getElementById("demo2").onclick = function(e){
-        var x = e.pageX;
-        var y = e.pageY;
-        callout2.showAt(x, y, "below", "left");
+  //**************************************************************************
+  //** Demo 4: Reusing a callout near the edges of the window
+  //**************************************************************************
+
+    var edgeCallout = new javaxt.dhtml.Callout(body);
+    createElement("div", edgeCallout.getInnerDiv(), "text-content long-content").innerText = LONG_TEXT;
+
+    var showEdgeCallout = function(button){
+        var r = getPageRect(button);
+        var x = r.x + r.width/2;
+        var y = r.y + r.height + 4;
+        var align = (button.id==="edgeRight") ? "right" : "left";
+        edgeCallout.showAt(x, y, "below", align);
+        document.getElementById("edgeReadout").innerHTML =
+            describe(button.innerText, edgeCallout, x, y, "below", align);
     };
+    document.getElementById("edgeLeft").onclick = function(){ showEdgeCallout(this); };
+    document.getElementById("edgeRight").onclick = function(){ showEdgeCallout(this); };
 };
 </script>
 
 
 </head>
 <body>
+<div class="demo-container">
+    <h1>Callout Demo</h1>
+    <p>
+    A callout is a popup box with an arrow. <code>showAt(x, y, position, align)</code>
+    places the tip of the arrow at a point: <code>position</code> is the side of
+    the point the box appears on, and <code>align</code> is how the box lines up
+    with the arrow. The red crosshairs mark the points passed to <code>showAt()</code>,
+    and the line under each demo compares them with where the arrow tip ended up.
+    Clicking outside a callout hides it.
+    </p>
 
-<h1>Callout Demo</h1>
+
+    <h2>Positions and alignments</h2>
+    <p>Every combination of <code>position</code> and <code>align</code>.
+    Extra height is added to some of the left/right callouts to demonstrate top/bottom alignment.
+    </p>
+    <div id="gallery"></div>
+    <div class="readout" id="galleryReadout"></div>
 
 
+    <h2>Sectors</h2>
+    <p>
+    Move the cursor around the box. The space around it is divided into 12 sectors,
+    3 along each side, and the callout is shown on the side of the box the cursor is
+    on, extending towards the cursor.
+    </p>
+    <div id="sectors">
+        <svg></svg>
+        <div id="sectorBox">Move the cursor<br/>around me</div>
+    </div>
+    <div class="readout" id="sectorReadout"></div>
 
-<h2>Demo 1</h2>
-<p>Simple callout that will appear to the right of the button when clicked. </p>
-<input type="button" value="Open" id="demo1"></input>
+
+    <h2>Playground</h2>
+    <p>
+    Click anywhere in the box to show a callout at that point. <b>auto</b> picks the
+    side that fits in the window (below/right unless there isn't room), measuring the
+    callout with <code>getSize()</code> first. Try the long text near the right edge.
+    </p>
+    <div class="controls">
+        <div><span class="label">position</span><span class="segmented" id="positionControl"></span></div>
+        <div><span class="label">align</span><span class="segmented" id="alignControl"></span></div>
+        <div><span class="label">content</span><span class="segmented" id="contentControl"></span></div>
+    </div>
+    <div id="playground">Click me!</div>
+    <div class="readout" id="playgroundReadout"></div>
 
 
-<h2>Demo 2</h2>
-<p>Callout that will appear whenever clicked inside the box. </p>
-<div id="demo2">Click me!</div>
-
+    <h2>Reusing a callout near the edges</h2>
+    <p>
+    One callout opened from either side of the window, right-aligned under the right
+    button. Open the right one, then the left, then the right again: the arrow should
+    always point at the button that opened it.
+    </p>
+    <div id="edges">
+        <button type="button" id="edgeLeft">Left</button>
+        <button type="button" id="edgeRight">Right</button>
+    </div>
+    <div class="readout" id="edgeReadout"></div>
+</div>
 </body>
 </html>
