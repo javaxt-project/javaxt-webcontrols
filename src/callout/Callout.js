@@ -22,6 +22,12 @@ javaxt.dhtml.Callout = function(parent, config) {
         position: "absolute",
 
 
+      /** If true, the callout will hide itself when the user clicks (or
+       *  touches) outside of it, or when the window is resized.
+       */
+        autoHide: true,
+
+
       /** Style for individual elements within the component. Note that you can
        *  provide CSS class names instead of individual style definitions.
        */
@@ -138,23 +144,23 @@ javaxt.dhtml.Callout = function(parent, config) {
 
 
 
-      //Add event listeners
-        if (config.position==="absolute"){
+      //Add event listeners used to hide the callout automatically
+        if (config.position==="absolute" && config.autoHide!==false){
 
-            var onresize = function(){
-                me.hide();
+            var onresize = function(e){
+                autoHide(e);
             };
 
             var onclick = function(e){
                 var x = e.clientX;
                 var y = e.clientY;
-                hideIfOutside(x, y);
+                hideIfOutside(x, y, e);
             };
 
             var ontouchstart = function(e){
                 var x = e.changedTouches[0].pageX;
                 var y = e.changedTouches[0].pageY;
-                hideIfOutside(x, y);
+                hideIfOutside(x, y, e);
             };
 
 
@@ -167,32 +173,6 @@ javaxt.dhtml.Callout = function(parent, config) {
                 document.attachEvent("onclick", onclick);
                 document.attachEvent("ontouchstart", ontouchstart);
                 window.attachEvent("onresize", onresize);
-            }
-        }
-    };
-
-
-  //**************************************************************************
-  //** hideIfOutside
-  //**************************************************************************
-    var hideIfOutside = function(x, y){
-
-        if (opening) return;
-
-        if (div.style.display === 'block'){
-
-            var x1 = parseInt(div.style.left);
-            var x2 = x1+div.offsetWidth;
-            var y1 = parseInt(div.style.top);
-            var y2 = y1+div.offsetHeight;
-
-            if (x<x1 || x>x2){
-                me.hide();
-            }
-            else{
-                if (y<y1 || y>y2){
-                    me.hide();
-                }
             }
         }
     };
@@ -218,6 +198,12 @@ javaxt.dhtml.Callout = function(parent, config) {
         var size;
 
         if (div.style.display === 'none'){
+
+          //Measure the div in the top left corner (see showAt)
+            var left = div.style.left;
+            var top = div.style.top;
+            div.style.left = div.style.top = "0px";
+
             div.style.visibility = 'hidden';
             div.style.display = 'block';
             size = {
@@ -226,6 +212,9 @@ javaxt.dhtml.Callout = function(parent, config) {
             };
             div.style.visibility = '';
             div.style.display = 'none';
+
+            div.style.left = left;
+            div.style.top = top;
         }
         else{
             size = {
@@ -283,6 +272,14 @@ javaxt.dhtml.Callout = function(parent, config) {
       //Hack to get div width/height BEFORE making the div visible
         div.style.visibility = 'hidden';
         div.style.display = 'block';
+        div.style.left = div.style.top = "0px";
+        var width = div.offsetWidth;
+
+
+      //Reset the offset of the callout box within the div. Each position sets
+      //the offset it needs (e.g. "right" moves the box to the right to make
+      //room for the arrow), so don't carry it over from the last showAt().
+        callout.style.left = callout.style.top = "0px";
 
 
       //Update arrow style config
@@ -308,11 +305,11 @@ javaxt.dhtml.Callout = function(parent, config) {
             }
             else if (align==="right"){
                 notchOffset = config.arrow.paddingRight;
-                div.style.left = ((x-div.offsetWidth) + (notchOffset+notchCenter)) + "px";
-                notch.style.left=notchBorder.style.left= (div.offsetWidth-(notchOffset+(notchCenter*2))) + "px";
+                div.style.left = ((x-width) + (notchOffset+notchCenter)) + "px";
+                notch.style.left=notchBorder.style.left= (width-(notchOffset+(notchCenter*2))) + "px";
             }
             else if (align==="center" || align==="middle"){
-                var center = div.offsetWidth/2;
+                var center = width/2;
                 div.style.left = (x-center) + "px";
                 notch.style.left=notchBorder.style.left= (center-notchCenter) + "px";
             }
@@ -322,8 +319,13 @@ javaxt.dhtml.Callout = function(parent, config) {
         };
 
 
+      //Note that valign() is called after the div is in its final horizontal
+      //position (see the "left" and "right" positions below). The height of
+      //the div depends on its width (e.g. text wraps when the div is near the
+      //right edge of the window) so it is measured here, not in advance.
         var valign = function(){
             callout.style.top = "0px";
+            var height = div.offsetHeight;
 
             if (align==="top"){
                 notchOffset = config.arrow.paddingTop;
@@ -332,11 +334,11 @@ javaxt.dhtml.Callout = function(parent, config) {
             }
             else if (align==="bottom"){
                 notchOffset = config.arrow.paddingBottom;
-                div.style.top = ((y-div.offsetWidth) + (notchOffset+notchCenter)) + "px";
-                notch.style.top = notchBorder.style.top = (div.offsetHeight-(notchOffset+(notchCenter*2))) + "px";
+                div.style.top = ((y-height) + (notchOffset+notchCenter)) + "px";
+                notch.style.top = notchBorder.style.top = (height-(notchOffset+(notchCenter*2))) + "px";
             }
             else if (align==="middle" || align==="center"){
-                var center = div.offsetHeight/2;
+                var center = height/2;
                 div.style.top = (y-center) + "px";
                 notch.style.top = notchBorder.style.top = (center-notchCenter) + "px";
             }
@@ -358,16 +360,19 @@ javaxt.dhtml.Callout = function(parent, config) {
             notchBorder.style.borderTopColor=borderColor; //<--Make sure this appears after all other border definitions!
 
 
-          //Set vertical position of the notch, div, and callout
-            div.style.left = x + "px";
-            div.style.top = ((y-div.offsetHeight)-notchHeight) + "px";
-            callout.style.top = "0px";
-            notch.style.top = (div.offsetHeight-1) + "px"; //-1 for the border width
-            notchBorder.style.top = div.offsetHeight + "px";
-
-
-          //Set horizontal alignment of the notch and div
+          //Set horizontal alignment of the notch and div. Do this first: the
+          //height of the div depends on its width, which depends on where the
+          //div is (e.g. text wraps when the div is near the right edge).
+            div.style.left = x + "px"; //in case the align is invalid
             halign();
+
+
+          //Set vertical position of the notch, div, and callout
+            var height = div.offsetHeight;
+            div.style.top = ((y-height)-notchHeight) + "px";
+            callout.style.top = "0px";
+            notch.style.top = (height-1) + "px"; //-1 for the border width
+            notchBorder.style.top = height + "px";
         }
         else if (position==="below"){
 
@@ -401,10 +406,10 @@ javaxt.dhtml.Callout = function(parent, config) {
 
 
           //Set horizontal position
-            div.style.left = (x-(div.offsetWidth+notchHeight)) + "px";
+            div.style.left = (x-(width+notchHeight)) + "px";
             callout.style.left = "0px";
-            notch.style.left = (div.offsetWidth-1) + "px";
-            notchBorder.style.left = div.offsetWidth + "px";
+            notch.style.left = (width-1) + "px";
+            notchBorder.style.left = width + "px";
 
 
           //Set vertical position of the notch and div
@@ -446,11 +451,13 @@ javaxt.dhtml.Callout = function(parent, config) {
   //** hide
   //**************************************************************************
   /** Used to hide the callout.
+   *  @param silent If true, hides the callout without calling beforeHide() or
+   *  onHide().
    */
-    this.hide = function(){
-        div.style.display = 'none';
-        opening = false;
-        me.onHide();
+    this.hide = function(silent){
+        if (silent!==true && me.beforeHide()===false) return;
+        var e; //leave undefined
+        hide(e, silent);
     };
 
 
@@ -476,8 +483,76 @@ javaxt.dhtml.Callout = function(parent, config) {
   //** onHide
   //**************************************************************************
   /** Called whenever the callout is hidden.
+   *  @param e The click, touchstart, or resize event. May be undefined.
    */
-    this.onHide = function(){};
+    this.onHide = function(e){};
+
+
+  //**************************************************************************
+  //** beforeHide
+  //**************************************************************************
+  /** Called immediately before the callout is hidden. Return false to keep
+   *  the callout open. Example:
+   <pre>
+    callout.beforeHide = function(e){
+        if (e && e.type==="click" && button.contains(e.target)) return false;
+    };
+   </pre>
+   *  @param e The click, touchstart, or resize event that caused the callout
+   *  to hide itself. Undefined when called from the hide() method.
+   */
+    this.beforeHide = function(e){};
+
+
+
+  //**************************************************************************
+  //** hideIfOutside
+  //**************************************************************************
+    var hideIfOutside = function(x, y, e){
+
+        if (opening) return;
+
+        if (div.style.display === 'block'){
+
+            var x1 = parseInt(div.style.left);
+            var x2 = x1+div.offsetWidth;
+            var y1 = parseInt(div.style.top);
+            var y2 = y1+div.offsetHeight;
+
+            if (x<x1 || x>x2){
+                autoHide(e);
+            }
+            else{
+                if (y<y1 || y>y2){
+                    autoHide(e);
+                }
+            }
+        }
+    };
+
+
+  //**************************************************************************
+  //** autoHide
+  //**************************************************************************
+  /** Hides the callout in response to an event (e.g. a click outside of the
+   *  callout or a window resize).
+   */
+    var autoHide = function(e){
+        if (div.style.display === 'none') return;
+        if (me.beforeHide(e)===false) return;
+        hide(e);
+    };
+
+
+  //**************************************************************************
+  //** hide
+  //**************************************************************************
+    var hide = function(e, silent){
+        div.style.display = 'none';
+        opening = false;
+        if (silent===true) return;
+        me.onHide(e);
+    };
 
 
   //**************************************************************************
