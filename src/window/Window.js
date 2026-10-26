@@ -357,18 +357,21 @@ javaxt.dhtml.Window = function(parent, config) {
                     var enabled = true;
                     var onclick = button.onclick;
 
-                    addButton(name, enabled, onclick);
+                    me.addButton(name, onclick);
                 }
             }
         }
 
 
-      //Create mask (used for modal dialogs and resize)
+      //Create mask (used for modal dialogs and resize). If the window is
+      //rendered in the body, use a fixed position so the mask covers the
+      //visible part of the page, even if the page scrolls. Otherwise, the
+      //mask would only cover the first screenful of the page.
         mask = createElement('div', mainDiv);
         if (config.modal===true){
             addStyle(mask, "mask");
         }
-        mask.style.position = "absolute";
+        mask.style.position = isBody() ? "fixed" : "absolute";
         mask.style.left = "0px";
         mask.style.top = "0px";
         mask.style.width = "100%";
@@ -394,6 +397,7 @@ javaxt.dhtml.Window = function(parent, config) {
                     div.yOffset = yOffset;
                     div.width = rect.width;
                     div.height = rect.height;
+                    div.bounds = getViewport();
 
 
                     div.style.left = (x-xOffset) + 'px';
@@ -403,17 +407,17 @@ javaxt.dhtml.Window = function(parent, config) {
                 },
                 onDrag: function(x,y){
                     var div = win;
+                    var bounds = div.bounds;
+                    var maxLeft = bounds.left + bounds.width;
+                    var maxTop = bounds.top + bounds.height;
 
                     var left = (x-div.xOffset);
-                    if (left<0) left = 0;
-
-
-                    if (left+div.width>parent.offsetWidth) left=parent.offsetWidth-div.width;
+                    if (left+div.width>maxLeft) left=maxLeft-div.width;
+                    if (left<bounds.left) left = bounds.left;
 
                     var top = (y-div.yOffset);
-                    if (top<0) top = 0;
-
-                    if (top+div.height>parent.offsetHeight) top=parent.offsetHeight-div.height;
+                    if (top+div.height>maxTop) top=maxTop-div.height;
+                    if (top<bounds.top) top = bounds.top;
 
                     div.style.left = left + 'px';
                     div.style.top = top + 'px';
@@ -836,8 +840,9 @@ javaxt.dhtml.Window = function(parent, config) {
 
        var w = win.offsetWidth;
        var h = win.offsetHeight;
-       var x = parent.clientWidth;
-       var y = parent.clientHeight;
+       var viewport = getViewport();
+       var x = viewport.width;
+       var y = viewport.height;
 
      //Update x if >1 monitor in use
        if (screen.width>(2*screen.height)) x=x/2;
@@ -845,21 +850,25 @@ javaxt.dhtml.Window = function(parent, config) {
      //Set x value to the middle of the screen
        x = (x/2)-(w/2);
 
+     //Compute y value for the middle of the screen
+       var m = (y/2)-(h/2);
+
      //Compute y value
        switch(config.valign){
             case "top":
-                y = (y/4)-(h/2);
+                y = m/3;
                 break;
             default:
-                y = (y/2)-(h/2);
+                y = m;
        }
 
        if (y<0) y=0;
        if (x<0) x=0;
 
-     //Move form
-       win.style.left = x + "px";
-       win.style.top = y + "px";
+     //Move window. Note that the viewport may be offset from the top left
+     //corner of the parent (e.g. if the window is in a body that scrolls)
+       win.style.left = (viewport.left + x) + "px";
+       win.style.top = (viewport.top + y) + "px";
 
     };
 
@@ -867,7 +876,9 @@ javaxt.dhtml.Window = function(parent, config) {
   //**************************************************************************
   //** addButton
   //**************************************************************************
-    addButton = function (name, enabled, onclick){
+  /** Adds a button to the footer
+   */
+    this.addButton = function (name, onclick){
 
         if (!buttonRow){
             var buttonDiv = createElement('div', footer, config.style.footerButtonBar);
@@ -884,6 +895,7 @@ javaxt.dhtml.Window = function(parent, config) {
             input.name = name;
             input.value = name;
             input.onclick = onclick;
+            return input;
         }
     };
 
@@ -1176,13 +1188,66 @@ javaxt.dhtml.Window = function(parent, config) {
     var shrinkToFit = function(){
         var width = me.getWidth();
         var height = me.getHeight();
-        var w = parent.offsetWidth;
-        var h = parent.offsetHeight;
+        var viewport = getViewport();
+        var w = viewport.width;
+        var h = viewport.height;
         if (width>w){
             me.setWidth(w);
         }
         if (height>h){
             me.setHeight(h);
+        }
+    };
+
+
+  //**************************************************************************
+  //** isBody
+  //**************************************************************************
+  /** Returns true if the window is rendered directly in the document body.
+   */
+    var isBody = function(){
+        return parent===document.body || parent===document.documentElement;
+    };
+
+
+  //**************************************************************************
+  //** getViewport
+  //**************************************************************************
+  /** Returns the area in which the window can be displayed, in the same
+   *  coordinates used to position the window (i.e. relative to the parent).
+   *  Typically, this is simply the parent. However, if the window is rendered
+   *  in the body, the area is the visible part of the page. The body may be
+   *  taller than the browser window (or shorter than its content) and may be
+   *  scrolled, so its dimensions don't reflect what the user can actually see.
+   */
+    var getViewport = function(){
+        if (isBody()){
+            var left, top;
+            if (javaxt.dhtml.utils.getStyle(parent, "position")==="static"){
+              //Window is positioned relative to the document
+                left = window.pageXOffset;
+                top = window.pageYOffset;
+            }
+            else{
+              //Window is positioned relative to the body
+                var rect = parent.getBoundingClientRect();
+                left = -(rect.left + parent.clientLeft);
+                top = -(rect.top + parent.clientTop);
+            }
+            return {
+                left: left,
+                top: top,
+                width: document.documentElement.clientWidth,
+                height: document.documentElement.clientHeight
+            };
+        }
+        else{
+            return {
+                left: 0,
+                top: 0,
+                width: parent.clientWidth,
+                height: parent.clientHeight
+            };
         }
     };
 
