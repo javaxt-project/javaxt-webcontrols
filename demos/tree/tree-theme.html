@@ -5,7 +5,7 @@
 <title>Themed Tree</title>
 
 <!-- The theme stylesheet is swapped at runtime based on the ?theme= param -->
-<link id="theme" href="../../themes/default.css" rel="stylesheet" type="text/css" />
+<link id="theme" href="../../themes/light.css" rel="stylesheet" type="text/css" />
 
 <script src="../../src/tree/Tree.js"></script>
 <script src="../../src/utils/Utils.js"></script>
@@ -23,8 +23,8 @@
 <script>
 window.onload = function() {
 
-  //Swap in the requested theme stylesheet (default | dark)
-    var theme = (javaxt.dhtml.utils.getParameter("theme") || "default").toLowerCase();
+  //Swap in the requested theme stylesheet (light | dark)
+    var theme = (javaxt.dhtml.utils.getParameter("theme") || "light").toLowerCase();
     if (theme==="dark"){
         document.getElementById("theme").href = "../../themes/dark.css";
     }

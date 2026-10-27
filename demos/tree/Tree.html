@@ -25,13 +25,6 @@
         gap: 40px;
     }
 
-    .demo-col h2 {
-        font-size: 15px;
-        font-weight: 600;
-        color: #363636;
-        margin: 0 0 4px 0;
-    }
-
     .demo-col p.hint {
         font-size: 12px;
         color: #888;
@@ -71,6 +64,31 @@
 
     .row:hover {
         background-color: #dff0ff;
+    }
+
+    /* Row hover for the lazy loading tree. It uses the default (inline) style,
+       so we target the rows directly: each row is the div inside an li. */
+    #demo3 li > div:hover {
+        background-color: #dff0ff;
+    }
+
+    /* Inline spinner shown next to the label of a node while its children
+       are loading (see fetchChildren) */
+    #demo3 .loading::after {
+        content: "";
+        display: inline-block;
+        width: 9px;
+        height: 9px;
+        margin-left: 6px;
+        vertical-align: -1px;
+        border: 2px solid #cbd2d8;
+        border-top-color: #5f7280;
+        border-radius: 50%;
+        animation: demo3-spin 0.7s linear infinite;
+    }
+
+    @keyframes demo3-spin {
+        to { transform: rotate(360deg); }
     }
 
     .join_leaf_bottom, .join_leaf_middle, .join_line,
@@ -221,12 +239,118 @@ window.onload = function() {
     tree2.show(tree2.getItem(["javaxt-core", "javaxt.sql", "Connection"]));
     addLogging(tree2, "legacy");
 
+
+  //**************************************************************************
+  //** Tree 3 - Dynamic children (lazy loading)
+  //**************************************************************************
+  /** Nodes with an empty "nodes" array are rendered as expandable before
+   *  their children are known. The children are "fetched" (simulated with a
+   *  timer) the first time a node is expanded, then added under it with
+   *  addNodes(children, item). removeNodes(item) removes an item's children.
+   *  Items declared as nodes stay expandable so their children can be
+   *  reloaded. Leaves that became nodes become leaves again. Every folder
+   *  named "src" has subfolders.
+   */
+    var tree3 = new javaxt.dhtml.Tree(document.getElementById("demo3"), {
+        nodes: [
+            {name: "src", nodes: []},
+            {name: "demos", nodes: []},
+            "README.md"
+        ]
+    });
+
+    var log3 = document.getElementById("demo3-log");
+    var setStatus = function(msg){ log3.innerText = msg; };
+
+  //Show/hide an inline spinner next to the label of a node while its children
+  //are loading. The label is the last element in the row (the div inside the li).
+    var setLoading = function(item, loading){
+        var row = item.el.firstElementChild;
+        var label = row.lastElementChild;
+        label.classList.toggle("loading", loading);
+    };
+
+    var fetchChildren = function(item, callback){
+        setStatus("Loading " + item.name + "...");
+        setLoading(item, true);
+        setTimeout(function(){
+            setLoading(item, false);
+            var children = [];
+            var n = 2 + Math.floor(Math.random()*3);
+            for (var i=1; i<=n; i++){
+                var name = (i===1) ? "src" : item.name + "-" + i;
+                children.push(i<=2 ? {name: name, nodes: []} : name);
+            }
+            children.push("file.js");
+            callback(children);
+            setStatus("Loaded " + children.length + " items under " +
+                tree3.getPath(item).reverse().map(function(i){ return i.name; }).join("/"));
+        }, 400);
+    };
+
+  //Returns true if a node has children to load (i.e. it was declared with a
+  //"nodes" array). Leaves that became nodes via "Add child" don't.
+    var hasChildrenToLoad = function(node){
+        return Array.isArray(node.nodes);
+    };
+
+  //Load children the first time a node is expanded. Leaves that became nodes
+  //via "Add child" only show the children that were added to them.
+    tree3.onExpand = function(item){
+        var node = item.node;
+        if (!hasChildrenToLoad(node) || node.loaded || node.loading) return;
+        node.loading = true;
+        fetchChildren(item, function(children){
+            node.loading = false;
+            node.loaded = true;
+            tree3.addNodes(children, item);
+        });
+    };
+
+  //Items are selected when they are clicked. The selected row is highlighted
+  //using the "selectedRow" style. Items with a file extension (e.g. "README.md",
+  //"file.js") are files, which can't have children. This is specific to the
+  //demo, not the Tree class.
+    var isFile = function(item){
+        return /\.[a-z0-9]+$/i.test(item.name);
+    };
+
+    var addButton = document.getElementById("demo3-add");
+    tree3.onSelectionChange = function(item){
+        document.getElementById("demo3-selected").innerText = item.name;
+        addButton.disabled = isFile(item);
+    };
+
+    addButton.onclick = function(){
+        var selected = tree3.getSelectedItem();
+        if (!selected) return;
+        if (isFile(selected)){
+            setStatus("Can't add a child under " + selected.name + " (files can't have children)");
+            return;
+        }
+        tree3.addNodes(["new-" + Date.now() % 1000], selected); //a leaf becomes a node
+        tree3.show(selected); //expand the item so the new child is visible
+        setStatus("Added a child under " + selected.name);
+    };
+
+    document.getElementById("demo3-clear").onclick = function(){
+        var selected = tree3.getSelectedItem();
+        if (!selected) return;
+        tree3.removeNodes(selected);
+        selected.node.loaded = false; //reload on the next expand
+        setStatus("Cleared the children of " + selected.name +
+            (hasChildrenToLoad(selected.node) ? " (expand it to reload them)" : ""));
+    };
+
 };
 </script>
 
 
 </head>
 <body>
+<div class="demo-container">
+
+
 
 <h1>Tree Demo</h1>
 <p>The trees below are rendered with two different styles. The tree on the
@@ -238,13 +362,13 @@ style backed by an image sprite (tree.png). Open the web console to see events.<
 <div class="demo-row">
 
     <div class="demo-col">
-        <h2>Default style</h2>
+        <h3>Default style</h3>
         <p class="hint">Inline SVG icons &mdash; no stylesheet needed</p>
         <div id="demo1" class="tree"></div>
     </div>
 
     <div class="demo-col">
-        <h2>Windows classic style</h2>
+        <h3>Windows classic style</h3>
         <p class="hint">CSS classes + tree.png image sprite</p>
         <div id="demo2" class="tree"></div>
     </div>
@@ -252,8 +376,10 @@ style backed by an image sprite (tree.png). Open the web console to see events.<
 </div>
 
 
-<h1 style="margin-top:40px;">JavaXT Themes</h1>
-<p>The same tree styled with the JavaXT themes (themes/default.css and
+
+
+<h2>JavaXT Themes</h2>
+<p>The same tree styled with the JavaXT themes (themes/light.css and
 themes/dark.css). The nodes, leaves and connectors are drawn entirely with CSS
 (no image sprite) and follow the active theme. Each theme is shown in its own
 iframe so the two stylesheets don't collide.</p>
@@ -262,18 +388,46 @@ iframe so the two stylesheets don't collide.</p>
 <div class="demo-row">
 
     <div class="demo-col">
-        <h2>Default theme</h2>
-        <p class="hint">themes/default.css &mdash; javaxt-tree</p>
-        <iframe class="theme-frame" src="tree-theme.html?theme=default"></iframe>
+        <h3>Light theme</h3>
+        <p class="hint">themes/light.css &mdash; javaxt-tree</p>
+        <iframe class="theme-frame" src="tree-theme.html?theme=light"></iframe>
     </div>
 
     <div class="demo-col">
-        <h2>Dark theme</h2>
+        <h3>Dark theme</h3>
         <p class="hint">themes/dark.css &mdash; javaxt-tree</p>
         <iframe class="theme-frame theme-frame-dark" src="tree-theme.html?theme=dark"></iframe>
     </div>
 
 </div>
 
+
+<h2>Dynamic Children</h2>
+<p>Nodes can be added and removed dynamically after the tree is rendered.
+Click an item in the tree to select it, then use the buttons to either add or
+remove children. A slight delay and spinner is added to simulate lazy loading
+(e.g. fetching records from a server).
+</p>
+
+
+<div class="demo-row">
+
+    <div class="demo-col">
+        <h3>Lazy loading</h3>
+        <div id="demo3" class="tree"></div>
+    </div>
+
+    <div class="demo-col">
+        <h3>Actions</h3>
+        <p class="hint">Selected: <b id="demo3-selected">(none)</b></p>
+        <button id="demo3-add">Add child</button>
+        <button id="demo3-clear">Clear children</button>
+        <p class="hint" id="demo3-log" style="margin-top:12px;"></p>
+    </div>
+
+</div>
+
+
+</div>
 </body>
 </html>
