@@ -16,7 +16,7 @@ javaxt.dhtml.Tree = function (parent, config) {
     var me = this;
 
 
-  //SVG fragments for the default style config
+  //SVG-related properties and functions for the default style config
     var cw = 21; //node width
     var rh = 20; //row height
     var connectorColor = "#cbd2d8"; //guide lines
@@ -106,6 +106,12 @@ javaxt.dhtml.Tree = function (parent, config) {
                 height: rh + "px"
             },
 
+          //Style for the selected row.
+            selectedRow: {
+                height: rh + "px",
+                backgroundColor: "#cce5ff"
+            },
+
           //Style for node and leaf labels
             label: {
                 display: "inline-block",
@@ -127,6 +133,10 @@ javaxt.dhtml.Tree = function (parent, config) {
         ul: "grid",
         li: "block"
     };
+
+
+    var selected = null; //li of the selected item (see selectItem)
+
 
 
   //**************************************************************************
@@ -177,6 +187,54 @@ javaxt.dhtml.Tree = function (parent, config) {
    */
     this.clear = function(){
         me.el.innerHTML = "";
+        selected = null;
+    };
+
+
+  //**************************************************************************
+  //** removeNodes
+  //**************************************************************************
+  /** Used to remove the children of a given item in the tree. The item itself
+   *  is kept. If the item was declared as a node (i.e. it has a "nodes"
+   *  array, even an empty one), it remains an expandable node so its
+   *  children can be reloaded (see addNodes). Otherwise, the item was a leaf
+   *  that became a node when children were added to it, so it is converted
+   *  back to a leaf.
+   *  @param parent An item in the tree (see getItem).
+   */
+    this.removeNodes = function(parent){
+        if (parent==null) return;
+
+        var li = parent.el || parent;
+        var ul = getChildList(li);
+        if (!ul) return;
+
+
+      //Remove children. Drop the selection if the selected item was removed.
+        if (selected && ul.contains(selected)) selected = null;
+        ul.innerHTML = "";
+
+
+      //Keep items that were declared as nodes expandable so their children
+      //can be reloaded
+        if (li.node && (isArray(li.node.nodes) || isArray(li.node.leaves))) return;
+
+
+      //Convert the node to a leaf. Remove the container for the child nodes
+      //(see addNodes) and update the join and icon styles.
+        var container = ul.parentNode;
+        container.parentNode.removeChild(container);
+
+        var nodeType = getNodeType(li); //"leaf" or "root" now
+        if (nodeType==="leaf"){
+            var style = getJoinStyle(nodeType, false, isLast(li));
+            if (style) applyStyle(li, style);
+            li.setIcon(config.style.leaf);
+        }
+        else{
+          //Roots without children are rendered "closed" (see addNodes)
+            li.setIcon(config.style.root.closed);
+        }
     };
 
 
@@ -210,12 +268,32 @@ javaxt.dhtml.Tree = function (parent, config) {
         }
     ];
    </pre>
+   *  A node with an empty "nodes" array is rendered as an expandable node
+   *  before its children are known. Use this to load children on demand:
+   *  listen for onExpand and call addNodes(children, item) the first time
+   *  the node is expanded.
+   *  @param parent Optional. An item in the tree (see getItem) to add the
+   *  nodes under. If not given, the nodes are added to the root of the tree.
+   *  New nodes are appended after any existing children. If the item is a
+   *  leaf, it becomes a (collapsed) node.
    *  @param expandAll If true, will render all the nodes and leaves. Default
    *  is false.
    */
-    this.addNodes = function(nodes, expandAll){
+    this.addNodes = function(nodes, parent, expandAll){
+        if (parent===true || parent===false){
+            expandAll = parent;
+            parent = null;
+        }
+
         var hiddenNodes = [];
-        addNodes(nodes, me.el, hiddenNodes);
+        var li = parent ? (parent.el || parent) : null;
+        if (li && li.tagName && isLI(li)){
+            addChildNodes(nodes, li, hiddenNodes);
+        }
+        else{
+            addNodes(nodes, me.el, hiddenNodes);
+        }
+
         if (expandAll===true) return;
         for (var i=0; i<hiddenNodes.length; i++){
             hide(hiddenNodes[i], true);
@@ -251,6 +329,55 @@ javaxt.dhtml.Tree = function (parent, config) {
    *  information.
    */
     this.onCollapse = function(item){};
+
+
+  //**************************************************************************
+  //** onSelectionChange
+  //**************************************************************************
+  /** Called whenever the user selects an item in the tree.
+   *  @param item The item that was selected. See getItem() for more
+   *  information.
+   */
+    this.onSelectionChange = function(item){};
+
+
+  //**************************************************************************
+  //** selectItem
+  //**************************************************************************
+  /** Used to select an item in the tree.
+   *  @param item An item in the tree (see getItem).
+   */
+    this.selectItem = function(item){
+        var li = item ? (item.el || item) : null;
+        if (!li || !li.node || li===selected) return;
+        me.deselectItem();
+        selected = li;
+        setStyle(getRow(li), config.style.selectedRow);
+    };
+
+
+  //**************************************************************************
+  //** deselectItem
+  //**************************************************************************
+  /** Used to deselect the selected item, if any.
+   */
+    this.deselectItem = function(){
+        if (!selected) return;
+        var row = getRow(selected);
+        selected = null;
+        if (row) setStyle(row, config.style.row);
+    };
+
+
+  //**************************************************************************
+  //** getSelectedItem
+  //**************************************************************************
+  /** Returns the selected item (see getItem), or null if no item is selected.
+   */
+    this.getSelectedItem = function(){
+        if (selected && !me.el.contains(selected)) selected = null;
+        return selected ? getItem(selected) : null;
+    };
 
 
   //**************************************************************************
@@ -341,8 +468,8 @@ javaxt.dhtml.Tree = function (parent, config) {
   //**************************************************************************
   //** show
   //**************************************************************************
-  /** Used to expand a given item in the tree. If no item is specified, then
-   *  the
+  /** Used to expand an item in the tree. If no item is specified, and the
+   *  tree is hidden, then it is made visible.
    */
     this.show = function(item){
         if (item){
@@ -353,9 +480,9 @@ javaxt.dhtml.Tree = function (parent, config) {
 
           //If the item is a node, expand children
             if (getNodeType(li)!="leaf"){
-                var nextNode = li.nextSibling;
-                if (isUL(nextNode)){
-                    show(nextNode);
+                var childList = getChildList(li);
+                if (childList && childList.style.visibility==="hidden"){
+                    show(childList);
                 }
             }
 
@@ -379,7 +506,7 @@ javaxt.dhtml.Tree = function (parent, config) {
 
           //Show the tree if it is hidden
             me.el.style.visibility = "";
-            me.el.style.display = "";
+            me.el.style.display = display.ul;
         }
     };
 
@@ -387,15 +514,26 @@ javaxt.dhtml.Tree = function (parent, config) {
   //**************************************************************************
   //** hide
   //**************************************************************************
+  /** Used to collapse an item in the tree. If no item is specified, then the
+   *  entire tree is hidden.
+   */
     this.hide = function(item){
         if (item){
+            var li = item.el || item;
 
+          //If the item is a node, collapse its children
+            if (getNodeType(li)!="leaf"){
+                var childList = getChildList(li);
+                if (childList && childList.style.visibility!=="hidden"){
+                    hide(childList);
+                }
+            }
         }
         else{
 
           //Hide the tree
             me.el.style.visibility = "hidden";
-            me.el.style.display = "node";
+            me.el.style.display = "none";
         }
     };
 
@@ -472,7 +610,8 @@ javaxt.dhtml.Tree = function (parent, config) {
             }
 
 
-          //Get children
+          //Get children. Nodes with an empty array are rendered as expandable
+          //nodes with no children (yet). See addNodes().
             var children = node.nodes;
             if (!children) children = node.leaves;
 
@@ -487,6 +626,14 @@ javaxt.dhtml.Tree = function (parent, config) {
             li.node = node;
             li.onclick = function(){
                 var li = this;
+
+              //Select the item. Do this first so the selection is up to date
+              //in the onExpand, onCollapse, and onClick events.
+                if (li!==selected){
+                    me.selectItem(li);
+                    me.onSelectionChange(getItem(li));
+                }
+
                 if (li.nextSibling){
 
                     var ul;
@@ -618,6 +765,97 @@ javaxt.dhtml.Tree = function (parent, config) {
                 }
             });
         }
+    };
+
+
+  //**************************************************************************
+  //** addChildNodes
+  //**************************************************************************
+  /** Used to add nodes under an existing item (li) in the tree. Creates the
+   *  child list if the item doesn't have one (a leaf becomes a node), and
+   *  updates the join icon of the previous last child so the connectors stay
+   *  continuous.
+   */
+    var addChildNodes = function(nodes, li, hiddenNodes){
+        if (!nodes || nodes.length===0) return;
+
+        var ul = getChildList(li);
+        if (!ul){
+
+          //Create a container for the child nodes, right after the item (same
+          //structure as addNodes)
+            var container = createLI(li.parentNode);
+            li.parentNode.insertBefore(container, li.nextSibling);
+            ul = createUL(container);
+            ul.style.width = "100%";
+            addLine(container);
+
+          //If the item has siblings below it, its new child list also needs
+          //the vertical connector line. Note that addLine() only updates the
+          //siblings above the container. In addNodes() that's enough, since
+          //nodes are created top to bottom and each new sibling draws the
+          //line for the ones above it. Here, the siblings below the item
+          //already exist, so we need to draw the line ourselves.
+            if (container.parentNode!==me.el && !isLast(container)){
+                addStyle(ul, config.style.path.line);
+                ul.style.height = "100%";
+            }
+
+            var nodeType = getNodeType(li); //"root" or "node" now
+            if (nodeType!=="root"){
+                getColWidth(function(colWidth){
+                    ul.style.paddingLeft = colWidth;
+                });
+            }
+
+          //Render collapsed (updates the item's icon and join style)
+            hiddenNodes.push(ul);
+        }
+
+
+      //Find the current last child (its join icon changes from "last" to
+      //"middle" once nodes are added after it)
+        var prevLast = null;
+        for (var i=ul.childNodes.length-1; i>=0; i--){
+            var child = ul.childNodes[i];
+            if (isLI(child) && child.node){
+                prevLast = child;
+                break;
+            }
+        }
+
+
+      //Add nodes
+        addNodes(nodes, ul, hiddenNodes);
+
+
+      //Update the join icon of the previous last child
+        if (prevLast){
+            var type = getNodeType(prevLast);
+            if (type!=="root"){
+                var childList = getChildList(prevLast);
+                var isOpen = childList ? childList.style.visibility!=="hidden" : true;
+                var style = getJoinStyle(type, isOpen, false);
+                if (style) applyStyle(prevLast, style);
+            }
+        }
+    };
+
+
+  //**************************************************************************
+  //** getChildList
+  //**************************************************************************
+  /** Returns the "ul" with the children of a given item (li), or null if the
+   *  item has no child list (i.e. it's a leaf or a childless root).
+   */
+    var getChildList = function(li){
+        if (!li) return null;
+        var container = li.nextSibling;
+        if (!container || !isLI(container) || container.node) return null;
+        for (var i=0; i<container.childNodes.length; i++){
+            if (isUL(container.childNodes[i])) return container.childNodes[i];
+        }
+        return null;
     };
 
 
@@ -938,10 +1176,25 @@ javaxt.dhtml.Tree = function (parent, config) {
 
 
   //**************************************************************************
+  //** getRow
+  //**************************************************************************
+  /** Returns the row (div) for a given item (li). See createLabel.
+   */
+    var getRow = function(li){
+        for (var i=0; i<li.childNodes.length; i++){
+            var el = li.childNodes[i];
+            if (el.nodeType===1 && isTag(el, "div")) return el;
+        }
+        return null;
+    };
+
+
+  //**************************************************************************
   //** Utils
   //**************************************************************************
     var merge = javaxt.dhtml.utils.merge;
     var addStyle = javaxt.dhtml.utils.addStyle;
+    var setStyle = javaxt.dhtml.utils.setStyle;
     var isArray = javaxt.dhtml.utils.isArray;
     var isString = javaxt.dhtml.utils.isString;
     var onRender = javaxt.dhtml.utils.onRender;
