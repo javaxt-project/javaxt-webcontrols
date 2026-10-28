@@ -76,21 +76,21 @@ javaxt.dhtml.DateInput = function(parent, config) {
                 width: "24px",
                 border: "1px solid #b4b4b4",
                 cursor: "pointer",
-
-                backgroundImage: "url(data:image/png;base64,iVBORw0KGgoAAAANSUh"+
-                "EUgAAABAAAAAQCAYAAAAf8/9hAAAAlklEQVQ4jWNgGAUowNvbW9PBwUEAjxJGHx"+
-                "8f/dDQUB4MGV9f3+TAwMD/AQEB97y8vOSxafb392+BqrlkbGzMhSLr7++/MTAw8"+
-                "D8OQ+CaYdjb21sT3flKAQEBj7AYgqHZz8+vBqsHPT09ldENCQgImIysOSAgoBZP"+
-                "GGEaQpJmfIYQrRmbITj9TAg4ODgIeHp6apGleegAAME5Y+rCcN+AAAAAAElFTkSuQmCC)",
-                backgroundPosition: "3px 3px",
+                backgroundImage: "url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf"+
+                "8/9hAAAAlUlEQVR4AdSQSQ6AIBAExRfCUR+oR/ghpg5NBkEh8SRJp4dZimVdPq4u"+
+                "IISQ79xejp4ugMKsCsB7v3EKYhi3sjl62aMCcM4dMUaHKOBWNkcve1QAbCQGFct7"+
+                "OWoVwF75LWZQqgCcMiMN4xWAhE5+i6lJDUCFWW8AegKAp5ia1AB+/ISc867rj5ze"+
+                "5g9SSqc+beT0CnABAAD//7G3b9QAAAAGSURBVAMAKHi4Ielz4bkAAAAASUVORK5C"+
+                "YII=)",
+                backgroundPosition: "center",
                 backgroundRepeat: "no-repeat",
                 backgroundColor: "#e4e4e4"
             },
 
             menu: {
                 backgroundColor: "#fff",
-                border: "1px solid #ccc",
-                borderTop: "0 none"
+                border: "0 none",
+                marginTop: "-1px"
             },
 
             datePicker: {
