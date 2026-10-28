@@ -401,7 +401,7 @@ window.onload = function() {
     new javaxt.dhtml.DatePicker("datePicker4", {
         style: {
             panel: {
-                fontFamily: "helvetica,arial,verdana,sans-serif", 
+                fontFamily: "helvetica,arial,verdana,sans-serif",
                 border: "1px solid #b4cbdd",
                 width: "100%" //<--set to 100%
             },
@@ -439,12 +439,13 @@ window.onload = function() {
 
 </head>
 <body>
+<div class="demo-container">
 
 <h1>Date Picker Demos</h1>
 
 
 <h2>Default Date Picker</h2>
-<p>Simple date picker with default style and default settings. If you click on 
+<p>Simple date picker with default style and default settings. If you click on
    a date, the selected date will appear below the calendar.
 </p>
   <div style="height:230px">
@@ -470,10 +471,10 @@ window.onload = function() {
 
 
 <h2>Max Width</h2>
-<p>By default, the date picker uses the cell width style to set the overall 
+<p>By default, the date picker uses the cell width style to set the overall
    width of component. So, for example, if the cell width is set to 18px,
    the overall width will be approximately 18x7 pixels wide (excluding border,
-   margin, etc). To use the entire available width, you can update the style of 
+   margin, etc). To use the entire available width, you can update the style of
    the 'panel', 'cell', and 'today' as follows:
 </p>
 <pre>
@@ -498,6 +499,6 @@ window.onload = function() {
     <div id="datePicker4"></div>
   </div>
 
-
+</div>
 </body>
 </html>

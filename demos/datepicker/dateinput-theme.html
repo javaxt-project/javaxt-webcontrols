@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Themed DateInput</title>
+
+<!-- The theme stylesheet is swapped at runtime based on the ?theme= param -->
+<link id="theme" href="../../themes/light.css" rel="stylesheet" type="text/css" />
+
+<script src="../../src/datepicker/DatePicker.js"></script>
+<script src="../../src/datepicker/DateInput.js"></script>
+<script src="../../src/utils/Utils.js"></script>
+<script src="../../themes/default.js"></script>
+
+<style>
+    html, body { height: 100%; margin: 0; overflow: hidden; }
+    #dateInput { margin: 20px auto; visibility: hidden; }
+</style>
+
+<script>
+window.onload = function() {
+
+  //Swap in the requested theme stylesheet (light | dark). The input is sized
+  //to fit the calendar menu (see init), so wait for the new stylesheet to
+  //load before creating the DateInput.
+    var theme = (javaxt.dhtml.utils.getParameter("theme") || "light").toLowerCase();
+    document.body.style.backgroundColor = theme==="dark" ? "#2b2e35" : "#ffffff";
+    if (theme==="dark"){
+        var link = document.getElementById("theme");
+        link.onload = init;
+        link.href = "../../themes/dark.css";
+    }
+    else{
+        init();
+    }
+};
+
+var init = function(){
+
+  //Style the DateInput using the active theme's "dateInput" map (CSS class
+  //names). This is the same style the kitchen sink demo uses.
+    var div = document.getElementById("dateInput");
+    var dateInput = new javaxt.dhtml.DateInput(div, {
+        date: new Date(),
+        style: javaxt.dhtml.style.default.dateInput
+    });
+
+
+  //Make the input and button as wide as the calendar menu (like the "Default
+  //Date Input" demo). The width of the calendar depends on the theme, so we
+  //open the menu to measure it, then close it again. The div is hidden (see
+  //CSS) until it has its final size.
+    dateInput.showMenu();
+    var menu = div.querySelector(".form-input-menu");
+    div.style.width = menu.offsetWidth + "px";
+    dateInput.hideMenu();
+    div.style.visibility = "visible";
+};
+</script>
+</head>
+<body>
+<div id="dateInput"></div>
+</body>
+</html>
