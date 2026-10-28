@@ -149,6 +149,7 @@ javaxt.dhtml.DateInput = function(parent, config) {
         input = createElement('input', tr.addColumn({width: "100%"}), config.style.input);
         input.style.width="100%";
         input.type = "text";
+        input.setAttribute("autocomplete", "off");
 
         input.onkeydown = function(e){
             if (e.keyCode===9){
