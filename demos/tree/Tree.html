@@ -87,6 +87,41 @@
         animation: demo3-spin 0.7s linear infinite;
     }
 
+    /* Scrollable container for the lazy loading tree. The tree can get very
+       deep (and wide), so we don't want it to change the page layout. */
+    .demo3-scroll {
+        width: 340px;
+        height: 320px;
+        overflow: auto;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    /* Let the tree grow wider than the scroll box (to fit the widest row) so
+       deep nodes can be scrolled into view horizontally instead of being
+       truncated. All the rows stretch to the width of the tree, so the
+       hover/selected highlights line up. */
+    .demo3-scroll .tree {
+        display: block;
+        width: max-content;
+        min-width: 100%;
+    }
+
+    /* The actions column fills the rest of the row. An explicit min-width
+       lets it shrink (instead of growing to fit long text like the status
+       path, which would push it below the tree). Long text is truncated with
+       an ellipsis. */
+    .demo3-actions {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .demo3-actions .hint {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
     @keyframes demo3-spin {
         to { transform: rotate(360deg); }
     }
@@ -260,7 +295,10 @@ window.onload = function() {
     });
 
     var log3 = document.getElementById("demo3-log");
-    var setStatus = function(msg){ log3.innerText = msg; };
+    var setStatus = function(msg){
+        log3.innerText = msg;
+        log3.title = msg; //full text on hover (long paths are truncated)
+    };
 
   //Show/hide an inline spinner next to the label of a node while its children
   //are loading. The label is the last element in the row (the div inside the li).
@@ -414,10 +452,12 @@ remove children. A slight delay and spinner is added to simulate lazy loading
 
     <div class="demo-col">
         <h3>Lazy loading</h3>
-        <div id="demo3" class="tree"></div>
+        <div class="demo3-scroll">
+            <div id="demo3" class="tree"></div>
+        </div>
     </div>
 
-    <div class="demo-col">
+    <div class="demo-col demo3-actions">
         <h3>Actions</h3>
         <p class="hint">Selected: <b id="demo3-selected">(none)</b></p>
         <button id="demo3-add">Add child</button>
