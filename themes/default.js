@@ -70,6 +70,13 @@ javaxt.dhtml.style.default = {
     },
 
 
+    searchBar : {
+        input: "searchbar-input",
+        searchIcon: "searchbar-search-icon",
+        clearButton: "searchbar-clear-icon"
+    },
+
+
     checkbox : {
         box: "checkbox-box",
         label: "checkbox-label",
@@ -123,9 +130,10 @@ javaxt.dhtml.style.default = {
     },
 
     accordion: {
-        accordion: "accordion-panel",
+        panel: "accordion-panel",
         tabHeader: "accordion-header noselect",
         tabContent: "accordion-content"
+        //activeTab: "accordion-header-active"
     },
 
     tree: {
@@ -147,6 +155,7 @@ javaxt.dhtml.style.default = {
             line: "join-line"
         },
         row: "row",
+        selectedRow: "row row-selected",
         label: "label"
     },
 
@@ -179,7 +188,7 @@ javaxt.dhtml.style.default = {
 
     dateInput: {
         input: "form-input form-input-with-button",
-        button: "form-button form-input-button pulldown-button-icon",
+        button: "form-button form-input-button calendar-button-icon",
         menu: "form-input-menu",
         datePicker: null //updated below
     },

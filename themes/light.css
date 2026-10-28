@@ -91,12 +91,15 @@ input, select, textarea { /* Allows overriding native style of form elements on 
         vertical-align: middle;
 
         .form-input {
-            margin: 0 5px;
+            margin: 0;
         }
 
         .checkbox-box {
             width: 18px;
             height: 18px;
+        }
+        .checkbox-check {
+            margin: 2px 0 0 6px;
         }
 
         .javaxt-button {
@@ -181,6 +184,35 @@ input, select, textarea { /* Allows overriding native style of form elements on 
         box-shadow: inset 1px 4px 9px 0px #787878;
     }
 
+
+    .panel-toolbar-toggle-group {
+        text-align: center;
+        vertical-align: middle;
+        display: inline-block;
+        border: 1px solid rgba(128, 128, 128, 0.45);
+        border-radius: 4px;
+        overflow: hidden;   /* clip the active segment's fill to the rounded corners */
+
+        .toolbar-button,
+        .toolbar-button-selected {
+            margin: 0;
+            border: 0;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+      /* Divider between adjacent segments */
+        .javaxt-button:not(:first-child) .toolbar-button,
+        .javaxt-button:not(:first-child) .toolbar-button-selected {
+            border-left: 1px solid rgba(128, 128, 128, 0.45);
+        }
+
+        .toolbar-button-label {
+            min-width: 50px;
+        }
+    }
+
+
     .toolbar-spacer {
         display: inline-block;
         position: relative;
@@ -209,6 +241,56 @@ input, select, textarea { /* Allows overriding native style of form elements on 
         line-height: 18px;
         height: 18px;
     }
+
+
+    .searchbar-input {
+        color: #363636;
+        height: 30px;
+        line-height: 30px;
+        padding: 0 28px 0 8px;
+        box-sizing: border-box;
+        border-radius: 4px;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
+        transition: border 0.2s linear 0s, box-shadow 0.2s linear 0s,
+                    padding-left 0.2s ease-in-out; /* slides the text when the icon hides/shows */
+    }
+
+    .searchbar-input:focus {
+        border-color: rgba(82, 168, 236, 0.8);
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6);
+        outline: 0 none;
+    }
+
+    .searchbar-input::placeholder {
+        color: #a1a1a1;
+    }
+
+    .searchbar-search-icon {
+        left: 8px;
+        width: 16px;
+        height: 16px;
+        background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABVElEQVR42tWX7Q2EIAyGHYERHIERGMERGMER2MARyDuBI9wIjuAIjnB3Jr2ENHq02Iu5H/0hQd6nH1DoAHR3WvePAD2AwOznALtoBrACeJ7YDGCwBnAk/FTYAsBbAPgDj/fvCcBIoY/vuYlEOUi8ArCLb0w4CtI0ayHOwl56nmlMmtfIIAYtQGbiLdVdQmzfHDgKYxl2d2GLTcVaSQqQtUVU2UFb4YwIYK39cCEKoQZQhn8yAgi1NJxNHo0AXM2pM4Bg2HA+az40APEHALMGIBmJe00NdKyhWACMtRORD5RneW8AUB7pTgIw1HLWeBxnTS9YDIqxZ9201wD4lr7OxBdpQUtb6iRsTJF5XnVA09c3AgkMxlO1f7svxtY74XDgkcTSgQOx9VbsaMFVIJxZwVUhWrpbolQ8aKsmipQTpjLe8TLiEP6Op1m8G+CzY/zfP05N7QVPY1L/pI/WeQAAAABJRU5ErkJggg==);
+        background-size: 16px 16px;
+        background-repeat: no-repeat;
+        transition: opacity 0.2s cubic-bezier(0.39, 0.575, 0.565, 1); /* ease-out */
+    }
+
+    .searchbar-clear-icon {
+        right: 6px;
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+        background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAmklEQVR42u2WsQ3AIAwEPYJLb80sTMJIRJFIg4DET/GJ4sLl+w8SP5ZsJsySAAiANwNoNkutFGj+SL9qcAprq+KE0Ka59GkXwAPRm8MAo0Z3EG4NcppZQwRYBLzSvjFk7hnDlQFs7s2BmRFsjgTRCKJujCuUhDOIggTW5wCon4D6E1LHkBpE1CimP0b055i+kNBXstiKA+AfAAf23yHRWpuTEwAAAABJRU5ErkJggg==);
+        background-size: 16px 16px;
+        background-repeat: no-repeat;
+    }
+
+    .searchbar-clear-icon:hover {
+        opacity: 0.75;
+    }
+
 }
 
 
@@ -224,7 +306,7 @@ input, select, textarea { /* Allows overriding native style of form elements on 
         border-radius: 3px;
         color: #363636;
         display: inline-block;
-        width: 80px;
+        padding: 0 2px;
         height: 26px;
         line-height: 24px;
         vertical-align: middle;
@@ -276,58 +358,106 @@ input, select, textarea { /* Allows overriding native style of form elements on 
 /**************************************************************************/
 /** Form Inputs
 /**************************************************************************/
-/** The following classes are used to define the style for form inputs
- *  defined in the javaxt.dhtml.Form control.
+/** The following classes are used define form inputs, labels and buttons
+ *  used by Form, DatePicker, ComboBox, etc.
  */
+.javaxt-form,
+.javaxt-combobox,
+.javaxt-dateinput,
+.javaxt-panel,
+.javaxt-table,
+.javaxt-datagrid {
 
-.form-input {
+    .form-input {
 
-    border-radius: 4px;
-    -moz-border-radius: 4px;
-    -webkit-border-radius: 4px;
-
-
-    color: #363636;
-    display: inline-block;
-    height: 28px;
-    line-height: 28px;
-    padding: 2px 4px;
-    vertical-align: middle;
+        border-radius: 4px;
+        -moz-border-radius: 4px;
+        -webkit-border-radius: 4px;
 
 
-    transition: border 0.2s linear 0s, box-shadow 0.2s linear 0s;
-    -webkit-transition: all 0.20s ease-in-out;
-    -moz-transition: all 0.20s ease-in-out;
-    -ms-transition: all 0.20s ease-in-out;
-    -o-transition: all 0.20s ease-in-out;
+        color: #363636;
+        display: inline-block;
+        height: 28px;
+        line-height: 28px;
+        padding: 2px 4px;
+        vertical-align: middle;
 
 
-    background-color: #fff;
-    border: 1px solid #ccc;
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
+        transition: border 0.2s linear 0s, box-shadow 0.2s linear 0s;
+        -webkit-transition: all 0.20s ease-in-out;
+        -moz-transition: all 0.20s ease-in-out;
+        -ms-transition: all 0.20s ease-in-out;
+        -o-transition: all 0.20s ease-in-out;
 
-    box-sizing: border-box;
-}
 
-.form-input:focus {
-    border-color: rgba(82, 168, 236, 0.8);
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6);
-    outline: 0 none;
-}
+        background-color: #fff;
+        border: 1px solid #ccc;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
 
-.form-input:disabled,
-.form-input[disabled]{
-    opacity:0.75;
-    color: #939393;
-    cursor:default;
-}
+        box-sizing: border-box;
+    }
 
-.form-label {
-    color: #636363;
-    white-space: nowrap;
-    cursor: default;
-    padding: 5px 10px 0 0;
-    vertical-align: top;
+    .form-input:focus {
+        border-color: rgba(82, 168, 236, 0.8);
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6);
+        outline: 0 none;
+    }
+
+    .form-input::placeholder {
+      color: #a1a1a1;
+      font-style: italic;
+    }
+
+    .form-input:disabled,
+    .form-input[disabled]{
+        opacity:0.75;
+        color: #939393;
+        cursor:default;
+    }
+
+    .form-label {
+        color: #636363;
+        white-space: nowrap;
+        cursor: default;
+        padding: 5px 10px 0 0;
+        vertical-align: top;
+    }
+
+
+    /** The following classes are used define form inputs with buttons (e.g.
+     *  DatePicker, ComboBox, etc.)
+     */
+    .form-input-with-button { /* used in conjunction with form-input */
+        border-radius: 4px 0 0 4px;
+        -moz-border-radius: 4px 0 0 4px;
+        -webkit-border-radius: 4px 0 0 4px;
+        border-right: 0 none;
+    }
+
+    .form-input-button {  /* used in conjunction with form-button */
+        border-radius: 0 3px 3px 0;
+        -moz-border-radius: 0 3px 3px 0;
+        -webkit-border-radius: 0 3px 3px 0;
+        box-shadow: none;
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        margin: 0;
+
+
+        /*Add 5px inner glow to mask neighbors in the sprite*/
+        -webkit-box-shadow: inset -5px 5px 5px 0px #e4e4e4, inset 5px -5px 5px 0px #e4e4e4;
+        -moz-box-shadow: inset -5px 5px 5px 0px #e4e4e4, inset 5px -5px 5px 0px #e4e4e4;
+        box-shadow: inset -5px 5px 5px 0px #e4e4e4, inset 5px -5px 5px 0px #e4e4e4;
+    }
+
+    /* Preserve 5px inner glow */
+    .form-input-button:hover, .form-input-button:focus {
+        background-color: #d2e3ed;
+        box-shadow: inset -5px 5px 5px 0px #d2e3ed, inset 5px -5px 5px 0px #d2e3ed, /*5px inner mask*/
+                    0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6); /*blue glow*/
+    }
+
 }
 
 
@@ -454,45 +584,6 @@ select:focus, textarea:focus, input:focus{
 }
 
 
-
-/**************************************************************************/
-/** Form Input With Button
-/**************************************************************************/
-/** The following classes are used define the style for custom form inputs
- *  with buttons (e.g. DatePicker, ComboBox, etc.)
- */
-.form-input-with-button { /* used in conjunction with form-input */
-    border-radius: 4px 0 0 4px;
-    -moz-border-radius: 4px 0 0 4px;
-    -webkit-border-radius: 4px 0 0 4px;
-    border-right: 0 none;
-}
-
-.form-input-button {  /* used in conjunction with form-button */
-    border-radius: 0 3px 3px 0;
-    -moz-border-radius: 0 3px 3px 0;
-    -webkit-border-radius: 0 3px 3px 0;
-    box-shadow: none;
-    width: 28px;
-    height: 28px;
-    padding: 0;
-    margin: 0;
-
-
-    /*Add 5px inner glow to mask neighbors in the sprite*/
-    -webkit-box-shadow: inset -5px 5px 5px 0px #e4e4e4, inset 5px -5px 5px 0px #e4e4e4;
-    -moz-box-shadow: inset -5px 5px 5px 0px #e4e4e4, inset 5px -5px 5px 0px #e4e4e4;
-    box-shadow: inset -5px 5px 5px 0px #e4e4e4, inset 5px -5px 5px 0px #e4e4e4;
-}
-
-/* Preserve 5px inner glow */
-.form-input-button:hover, .form-input-button:focus {
-    background-color: #d2e3ed;
-    box-shadow: inset -5px 5px 5px 0px #d2e3ed, inset 5px -5px 5px 0px #d2e3ed, /*5px inner mask*/
-                0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6); /*blue glow*/
-}
-
-
 /**************************************************************************/
 /** Form Menu
 /**************************************************************************/
@@ -544,16 +635,6 @@ select:focus, textarea:focus, input:focus{
 
 
 /**************************************************************************/
-/** Form placeholder
-/**************************************************************************/
-
-.form-input::placeholder {
-  color: #a1a1a1;
-  font-style: italic;
-}
-
-
-/**************************************************************************/
 /** Form Group
 /**************************************************************************/
 /** The following classes are used to define the style for group boxes in
@@ -597,6 +678,34 @@ select:focus, textarea:focus, input:focus{
     -webkit-transform: rotate(45deg);
     margin-top: -9px;
 }
+
+
+/**************************************************************************/
+/** Calendar Button Icon
+/**************************************************************************/
+/** Calendar icon used in date inputs (e.g. javaxt.dhtml.DateInput). The icon
+ *  is a 16x16 PNG used as a mask, so it is drawn using the text color of the
+ *  button (like the pulldown icon).
+ */
+.calendar-button-icon {
+    position: relative;
+    color: #525252;
+}
+
+.calendar-button-icon::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    background-color: currentColor;
+    -webkit-mask: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAlUlEQVR4AdSQSQ6AIBAExRfCUR+oR/ghpg5NBkEh8SRJp4dZimVdPq4uIISQ79xejp4ugMKsCsB7v3EKYhi3sjl62aMCcM4dMUaHKOBWNkcve1QAbCQGFct7OWoVwF75LWZQqgCcMiMN4xWAhE5+i6lJDUCFWW8AegKAp5ia1AB+/ISc867rj5ze5g9SSqc+beT0CnABAAD//7G3b9QAAAAGSURBVAMAKHi4Ielz4bkAAAAASUVORK5CYII=) no-repeat center;
+    mask: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAlUlEQVR4AdSQSQ6AIBAExRfCUR+oR/ghpg5NBkEh8SRJp4dZimVdPq4uIISQ79xejp4ugMKsCsB7v3EKYhi3sjl62aMCcM4dMUaHKOBWNkcve1QAbCQGFct7OWoVwF75LWZQqgCcMiMN4xWAhE5+i6lJDUCFWW8AegKAp5ia1AB+/ISc867rj5ze5g9SSqc+beT0CnABAAD//7G3b9QAAAAGSURBVAMAKHi4Ielz4bkAAAAASUVORK5CYII=) no-repeat center;
+    cursor: pointer;
+}
+
 
 /**************************************************************************/
 /** Callout Panel
@@ -856,6 +965,7 @@ select:focus, textarea:focus, input:focus{
 /** Special case when tab is the first component inside a window  **/
 .javaxt-window {
     .window-body table:first-child .tab-bar {
+        border: 0 none;
         background-color: #208EC9;
         height: 30px;
     }
@@ -1020,10 +1130,21 @@ select:focus, textarea:focus, input:focus{
         background-color: #eaf1fb;
     }
 
+  /* Selected row. Used in conjunction with "row". */
+    .row-selected,
+    .row-selected:hover {
+        background-color: #d3e3f8;
+    }
+
     .label {
         padding-left: 21px;
         line-height: 20px;
         cursor: default;
+
+      /* Truncate long labels so they don't extend past the tree */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
 }
@@ -1135,6 +1256,12 @@ select:focus, textarea:focus, input:focus{
         border-top: 5px solid #525252;
     }
 
+
+
+    .form-input {
+        margin-top: -4px;
+    }
+
 }
 
 
@@ -1160,8 +1287,8 @@ select:focus, textarea:focus, input:focus{
     .checkbox-box {
         padding: 0px;
         margin: 0px;
-        width: 16px;
-        height: 16px;
+        width: 14px;
+        height: 14px;
         border: 1px solid #b9b9b9;
         border-radius: 3px;
         background-color: #f8f8f8;
@@ -1183,7 +1310,7 @@ select:focus, textarea:focus, input:focus{
         border: solid #fff;
         border-width: 0 2px 2px 0;
         transform: rotate(45deg);
-        margin: 2px 0 0 6px;
+        margin: 1px 0 0 4px;
     }
 
     .checkbox-select {
@@ -1232,8 +1359,8 @@ select:focus, textarea:focus, input:focus{
 
     .date-picker-header {
         background-color: #b4cbdd;
-        height: 36px;
-        line-height: 36px;
+        height: 28px;
+        line-height: 28px;
         position: relative;
     }
 
@@ -1321,7 +1448,7 @@ select:focus, textarea:focus, input:focus{
         border-right: 2px solid #23436e;
         border-bottom: 2px solid #23436e;
         transform: rotate(135deg);
-        margin: 12px 0 0 12px;
+        margin: 9px 0 0 12px;
     }
 
     .date-picker-next {
@@ -1329,7 +1456,7 @@ select:focus, textarea:focus, input:focus{
         border-right: 2px solid #23436e;
         border-bottom: 2px solid #23436e;
         transform: rotate(-45deg);
-        margin: 12px 12px 0 0;
+        margin: 9px 12px 0 0;
     }
 
 }
