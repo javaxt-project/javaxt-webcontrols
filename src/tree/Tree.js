@@ -114,11 +114,13 @@ javaxt.dhtml.Tree = function (parent, config) {
 
           //Style for node and leaf labels
             label: {
-                display: "inline-block",
-                position: "absolute",
+                display: "block",
                 paddingLeft: cw + "px",
                 lineHeight: rh + "px",
-                cursor: "default"
+                cursor: "default",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis"
             }
         }
     };
@@ -1096,7 +1098,8 @@ javaxt.dhtml.Tree = function (parent, config) {
             listStyleType: "none",
             padding: 0,
             margin: 0,
-            display: display.ul
+            display: display.ul,
+            boxSizing: "border-box"
         });
     };
 
@@ -1109,7 +1112,10 @@ javaxt.dhtml.Tree = function (parent, config) {
     var createLI = function(parent){
         var li = createElement("li", parent, {
             width: "100%",
-            display: display.li
+            display: display.li,
+            boxSizing: "border-box",
+            position: "relative",
+            minWidth: 0
         });
         li.setIcon = function(icon){};
         li.getText = function(){};
