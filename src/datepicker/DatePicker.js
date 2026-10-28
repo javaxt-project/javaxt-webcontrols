@@ -51,7 +51,7 @@ javaxt.dhtml.DatePicker = function(parent, config) {
           //Panel Style
             panel: {
                 fontFamily: "helvetica,arial,verdana,sans-serif",
-                backgroundColor: "#ffffff",
+                backgroundColor: "#fff",
                 border: "1px solid #b4cbdd",
                 display: "inline-block"
             },
@@ -71,7 +71,7 @@ javaxt.dhtml.DatePicker = function(parent, config) {
                 //fontFamily: "helvetica,arial,verdana,sans-serif",
                 fontSize: "14px",
                 fontWeight: "bold",
-                color: "#555555",
+                color: "#555",
                 textAlign: "center",
                 cursor: "default"
             },
@@ -106,9 +106,9 @@ javaxt.dhtml.DatePicker = function(parent, config) {
                 textAlign: "right",
                 padding: "2px 4px 1px 0px",
                 fontSize: "11px",
-                color: "#000000",
+                color: "#000",
                 cursor: "pointer",
-                border: "1px solid #ffffff",
+                border: "1px solid #fff",
                 margin: "1px"
             },
 
@@ -126,11 +126,11 @@ javaxt.dhtml.DatePicker = function(parent, config) {
 
 
             previousMonth: { //overrides cell style for previous month
-                color: "#aaaaaa"
+                color: "#aaa"
             },
 
             nextMonth: { //overrides cell style for next month
-                color: "#aaaaaa"
+                color: "#aaa"
             },
 
             today: {
@@ -147,7 +147,7 @@ javaxt.dhtml.DatePicker = function(parent, config) {
             },
 
             selectedCell: {
-                color: "#000000",
+                color: "#000",
                 fontWeight: "bold",
                 backgroundColor: "#fff4bf",
                 border: "1px solid #bfa52f"
@@ -627,8 +627,12 @@ javaxt.dhtml.DatePicker = function(parent, config) {
             var _cell = cells[x];
             if (_cell.selected){
 
-                if (config.allowDeselect){
-
+              //Clear any week-selection styling applied to the cell's row
+                var row = _cell.parentNode ? _cell.parentNode.parentNode : null;
+                if (row){
+                    row.className = '';
+                    row.removeAttribute("class");
+                    row.style = '';
                 }
 
                 deselect(_cell);
