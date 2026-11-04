@@ -20,6 +20,7 @@ javaxt.dhtml.Table = function(parent, config) {
     var mask;
     var prevSelection;
     var template;
+    var columnWidths; //widths used to render the columns (see initColumnWidths)
     var cntrlIsPressed = false;
     var shiftIsPressed = false;
     var altIsPressed = false;
@@ -186,6 +187,7 @@ javaxt.dhtml.Table = function(parent, config) {
 
       //Parse config
         if (!config.columns || config.columns.length===0) return;
+        config.columns = config.columns.slice();
         if (typeof IScroll !== 'undefined'){
             var columnWidth = config.style.iscroll ? config.style.iscroll.columnWidth : null;
             if (!columnWidth) columnWidth = "15px";
@@ -197,6 +199,7 @@ javaxt.dhtml.Table = function(parent, config) {
                 config.columns.push({header: '', width: columnWidth});
             }
         }
+        initColumnWidths();
 
 
       //Create main table
@@ -472,8 +475,7 @@ javaxt.dhtml.Table = function(parent, config) {
         for (var i=0; i<config.columns.length; i++){
 
             var columnConfig = config.columns[i];
-            var columnWidth = columnConfig.width;
-            if (columnWidth==null) columnWidth = 25;
+            var columnWidth = columnWidths[i];
 
             var cell = row.addColumn();
             cell.style.height = getPixels(height);
@@ -1552,6 +1554,115 @@ javaxt.dhtml.Table = function(parent, config) {
 
 
   //**************************************************************************
+  //** initColumnWidths
+  //**************************************************************************
+  /** Used to compute column widths. There should be at least one column with
+   *  100% width (or multiple columns that add up to 100%).
+   */
+    var initColumnWidths = function(){
+        columnWidths = [];
+
+        var unassigned = [];
+        var percentages = [];
+        var totalPercent = 0;
+        for (var i=0; i<config.columns.length; i++){
+            var columnConfig = config.columns[i];
+            var width = columnConfig.width;
+            columnWidths.push(width);
+            if (columnConfig.hidden===true) continue;
+
+            if (width==null || width===""){
+                unassigned.push(i);
+            }
+            else if ((width+"").indexOf("%")>-1){
+                var pct = parseFloat(width);
+                if (!isNaN(pct)){
+                    percentages.push(i);
+                    totalPercent += pct;
+                }
+            }
+        }
+
+
+      //Assign widths to columns without a width
+        if (unassigned.length>0){
+            var remaining = 100-totalPercent;
+            if (remaining>0){
+                var pct = remaining/unassigned.length;
+                for (var i=0; i<unassigned.length; i++){
+                    columnWidths[unassigned[i]] = pct + "%";
+                }
+            }
+            else{
+                for (var i=0; i<unassigned.length; i++){
+                    columnWidths[unassigned[i]] = 25;
+                }
+                warn("Columns without a width were assigned a width of 25px " +
+                "since the other columns already use " + totalPercent + "% " +
+                "of the table width. " + getColumnNames(unassigned));
+            }
+        }
+        else{
+
+          //Scale percentages so they add up to exactly 100%. Otherwise, the
+          //browser distributes the difference differently in the header and
+          //the body (the header has an extra spacer column) and the columns
+          //don't line up. Only warn if the difference is more than rounding
+          //(e.g. three columns with a width of 33%)
+            if (percentages.length>0){
+                if (Math.abs(totalPercent-100)>0.01){
+                    for (var i=0; i<percentages.length; i++){
+                        var idx = percentages[i];
+                        var pct = parseFloat(config.columns[idx].width);
+                        columnWidths[idx] = (pct*100/totalPercent) + "%";
+                    }
+                    if (Math.abs(totalPercent-100)>1){
+                        warn("Column widths add up to " + totalPercent + "% " +
+                        "instead of 100%. The widths were scaled to 100%.");
+                    }
+                }
+            }
+            else{
+                if (hasVisibleColumns()){
+                    warn("All the columns have a fixed width so the table may " +
+                    "not fill the available width and the header may not line " +
+                    "up with the rows. Consider setting the width of one of the " +
+                    "columns to 100%.");
+                }
+            }
+        }
+    };
+
+
+  //**************************************************************************
+  //** hasVisibleColumns
+  //**************************************************************************
+    var hasVisibleColumns = function(){
+        for (var i=0; i<config.columns.length; i++){
+            if (config.columns[i].hidden!==true) return true;
+        }
+        return false;
+    };
+
+
+  //**************************************************************************
+  //** getColumnNames
+  //**************************************************************************
+  /** Returns a list of column headers for a given list of column indexes.
+   *  Used to generate warning messages.
+   */
+    var getColumnNames = function(indexes){
+        var names = [];
+        for (var i=0; i<indexes.length; i++){
+            var header = config.columns[indexes[i]].header;
+            if (typeof header !== "string") header = header ? header.innerText : null;
+            names.push(header ? "'" + header + "'" : "#" + indexes[i]);
+        }
+        return "Columns: " + names.join(", ");
+    };
+
+
+  //**************************************************************************
   //** nodeListToArray
   //**************************************************************************
   /** Converts a nodelist into a standard javascript array.
@@ -1638,6 +1749,15 @@ javaxt.dhtml.Table = function(parent, config) {
         return mask;
     };
 
+
+  //**************************************************************************
+  //** warn
+  //**************************************************************************
+    var warn = function(msg){
+        if (typeof console !== "undefined" && console.warn){
+            console.warn("javaxt.dhtml.Table: " + msg);
+        }
+    };
 
   //**************************************************************************
   //** Utils
