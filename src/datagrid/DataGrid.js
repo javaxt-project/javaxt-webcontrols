@@ -70,7 +70,15 @@ javaxt.dhtml.DataGrid = function(parent, config) {
     var pageRequests = {};
     var loading = false;
 
+  //Paging variables used to keep track of changes to the grid
+    var lastPage = 0; //highest page loaded from the server
+    var offsetShift = 0; //adjustment to the server offset (<=0) for removed rows
+    var removedKeys = {}; //keys of records removed from the grid
+    var requestID = 0; //incremented whenever the grid is cleared (see load)
+
     var checkboxHeader;
+    var checkAnchor = null; //last row whose checkbox was clicked (start of a shift+click range)
+    var checkedTimer; //used to coalesce onCheckedChange events
     var columns;
     var rowHeight; //<-- Assumes all the rows are the same height!
 
@@ -110,11 +118,8 @@ javaxt.dhtml.DataGrid = function(parent, config) {
        *  Note that one of the columns should have a width of 100%. Additional
        *  options include "align" and "field". If a "field" is provided it will
        *  be used to construct a "fields" parameter to that is sent to the
-       *  server (see "fields" config). Fially, you can specify a checkbox
-       *  column by setting the "header" to "x" (e.g. header: 'x'). If a
-       *  checkbox column is defined, a checkbox will be created in the header
-       *  and in individual rows. The checkbox is typically used to support
-       *  multi-select operations.
+       *  server (see "fields" config). You can also specify a checkbox column
+       *  (e.g. header: 'x') to support multi-select operations.
        */
         columns: [],
 
@@ -236,7 +241,14 @@ javaxt.dhtml.DataGrid = function(parent, config) {
        *  a simple mask will be created automatically using the "mask" style
        *  config.
        */
-        mask: null
+        mask: null,
+
+      /** Name of a field used to uniquely identify records. The given key is
+       *  used to deduplicate rows. If a key is not provided or if records
+       *  returned from the server don't include a matching key, rows will be
+       *  blindly added to the grid (no deduplication). Default is "id".
+       */
+        key: "id"
     };
 
 
@@ -339,6 +351,23 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         me.el = table.el;
 
 
+      //Handle clicks in the checkbox column (see onCheckboxCellClick). The
+      //listeners use the capture phase so they run before the checkbox and
+      //the table's row selection logic.
+        if (checkboxHeader){
+            me.el.addEventListener("click", onCheckboxCellClick, true);
+            me.el.addEventListener("mousedown", function(e){
+              //Prevent shift+click from selecting text across rows
+                if (e.shiftKey && getCheckboxCellRow(e.target)) e.preventDefault();
+            }, true);
+            me.el.addEventListener("touchend", function(e){
+              //The checkbox toggles itself on touchend. Let the click that
+              //follows toggle it instead (see onCheckboxCellClick).
+                if (getCheckboxCellRow(e.target)) e.stopPropagation();
+            }, true);
+        }
+
+
       //Get mask
         mask = config.mask;
         if (!mask) mask = table.getMask();
@@ -348,224 +377,26 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         table.load = function(records, append){
             if (!append) me.clear();
             var rows = table.addRows(records.length);
-
-
-            var select = false;
-            if (checkboxHeader){
-                select = checkboxHeader.isChecked();
-            }
-
             var isDataStore = (records instanceof javaxt.dhtml.DataStore);
-
             for (var i=0; i<rows.length; i++){
-
-              //Assign the record to the row
-                rows[i].record = isDataStore ? records.get(i) : records[i];
-
-
-              //Override the update method
-                rows[i].update = function(){
-                    config.update(this, this.record);
-
-                  //Fill in any empty cells using the column config. Columns
-                  //with a "field" attribute are populated using values from
-                  //the record. This also ensures that the checkbox column is
-                  //rendered, even if the update function never called
-                  //row.set('x').
-                    for (var j=0; j<config.columns.length; j++){
-                        var col = this.childNodes[j];
-                        if (col.getContent()) continue;
-
-                        if (config.columns[j].header==='x'){
-                            this.set('x');
-                        }
-                        else{
-                            var field = config.columns[j].field;
-                            if (field){
-                                var val = this.record[field];
-                                if (val!=null) this.set(j, val);
-                            }
-                        }
-                    }
-                };
-
-
-              //Override the native "set" method on the row
-                rows[i]._set = rows[i].set;
-                rows[i].set = function(key, val){
-                    if (key==='x'){
-
-                      //Create checkbox
-                        for (var j=0; j<config.columns.length; j++){
-                            if (config.columns[j].header==='x'){
-                                var field = config.columns[j].field;
-
-                                var col = this.childNodes[j];
-                                var obj = col.getContent();
-                                if (obj){
-                                    //Column has a checkbox already?
-                                }
-                                else{
-                                    val = field  ? this.record[field] : this.record;
-                                    var checkboxDiv = createCheckbox(val, this);
-                                    var checkbox = checkboxDiv.checkbox;
-                                    if (select) checkbox.select();
-                                    this._set(j, checkboxDiv);
-                                }
-                                return;
-                            }
-                        }
-                    }
-                    else{
-
-                      //Resolve the key to a column index. Numeric keys are
-                      //used as-is. Otherwise, exact header matches take
-                      //precedence. If no header matches, use the first
-                      //non-checkbox column with a matching "field" attribute.
-                        var idx = -1;
-                        if (typeof key === "number"){
-                            if (key>=0 && key<config.columns.length) idx = key;
-                        }
-                        else{
-                            for (var j=0; j<config.columns.length; j++){
-                                if (key===config.columns[j].header){
-                                    idx = j;
-                                    break;
-                                }
-                            }
-                            if (idx<0){
-                                for (var j=0; j<config.columns.length; j++){
-                                    var column = config.columns[j];
-                                    if (column.header!=='x' && key===column.field){
-                                        idx = j;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-
-
-                        if (idx>-1){
-
-                          //Wrap value in an overflow div as requested
-                            if (config.columns[idx].wrap===true) val = wrap(val);
-
-                            this._set(idx, val);
-                        }
-                        else{
-
-                          //Pass the key through as-is and let the underlying
-                          //table try to resolve it (e.g. numeric strings)
-                            this._set(key, val);
-                        }
-                    }
-                };
-
-
-
-              //Override the native "onclick" method on the row
-                rows[i]._onclick = rows[i].onclick;
-                rows[i].onclick = function(e){
-
-
-                  //Special case for columns with checkboxes
-                    if (checkboxHeader){
-
-                      //Check if the client clicked inside a checkbox
-                        var insideCheckbox = false;
-                        var checkboxCol = this.childNodes[checkboxHeader.idx];
-                        var checkbox = getCheckbox(checkboxCol.getContent());
-                        if (checkbox){
-                            var rect = _getRect(checkbox.el);
-                            var clientX = e.clientX;
-                            var clientY = e.clientY;
-                            if (clientX>=rect.left && clientX<=rect.right){
-                                if (clientY>=rect.top && clientY<=rect.bottom){
-                                    insideCheckbox = true;
-                                }
-                            }
-                        }
-
-
-                        if (insideCheckbox){
-
-                          //Update checkbox header
-                            if (checkbox.isChecked()){
-
-                              //Count number of rows that are selected
-                                var numRows = 0;
-                                var checkedItems = 0;
-                                var rows = this.parentNode.childNodes;
-                                for (var i=1; i<rows.length; i++){ //skip phantom row
-                                    numRows++;
-                                    var checkboxCol = rows[i].childNodes[checkboxHeader.idx];
-                                    var rowCheckbox = getCheckbox(checkboxCol.getContent());
-                                    if (rowCheckbox && rowCheckbox.isChecked()){
-                                        checkedItems++;
-                                    }
-                                }
-
-                              //Check the checkbox header as needed
-                                if (checkedItems===numRows){
-                                    checkboxHeader.check();
-                                }
-
-                            }
-                            else{
-
-                              //Uncheck the checkbox header
-                                checkboxHeader.uncheck();
-                            }
-
-                        }
-                        else{
-
-                            if (!e.ctrlKey && !e.shiftKey){
-                                var numSelectedRows = 0;
-                                table.forEachRow(function (row) {
-                                    if (row.selected){
-                                        numSelectedRows++;
-                                        if (numSelectedRows>1){
-
-                                          //Update the click event to simulate a ctrl+click
-                                            e = new MouseEvent("click", {
-                                                isTrusted: e.isTrusted,
-                                                view: e.view,
-                                                bubbles: e.bubbles,
-                                                cancelable: e.cancelable,
-                                                clientX: e.clientX,
-                                                clientY: e.clientY,
-                                                screenX: e.screenX,
-                                                screenY: e.screenY,
-                                                altKey: e.altKey,
-                                                ctrlKey: true
-                                            });
-
-
-                                          //Exit forEachRow
-                                            return true;
-                                        }
-                                    }
-                                });
-                            }
-                        }
-                    }
-
-
-                    this._onclick(e);
-                };
-
-
-              //Update the row
-                rows[i].update();
+                initRow(rows[i], isDataStore ? records.get(i) : records[i]);
             }
-
             if (!append) table.update();
+            if (checkboxHeader) checkedChange();
         };
 
 
       //Watch for selection change events
         table.onSelectionChange = function(rows){
+
+          //Restore the "checkedRow" style
+            if (rows){
+                for (var i=0; i<rows.length; i++){
+                    updateCheckedStyle(rows[i]);
+                }
+            }
+
+          //Fire selection change event
             me.onSelectionChange();
         };
 
@@ -585,12 +416,12 @@ javaxt.dhtml.DataGrid = function(parent, config) {
             //console.log(startRow + "/" + endRow + " (Page: " + currPage + ")");
 
 
+          //Load the next page when the user scrolls to the bottom of the grid.
+          //Note that we use the last page loaded instead of the current page
+          //since rows may have been inserted or removed from the grid.
             var d = Math.abs(maxY-y);
             if (d<rowHeight){ //if (y===maxY){
-                if (!eof){
-                    if (currPage===prevPage) setPage(currPage+1);
-                    load(currPage);
-                }
+                if (!eof) load(lastPage+1);
             }
 
             me.onScroll();
@@ -617,6 +448,133 @@ javaxt.dhtml.DataGrid = function(parent, config) {
       //Load records
         if (config.autoload===true) load();
 
+    };
+
+
+  //**************************************************************************
+  //** initRow
+  //**************************************************************************
+  /** Used to assign a record to a row in the table, add custom methods to
+   *  the row (e.g. update), and render the row using the update function
+   *  defined in the config.
+   *  @param select Optional. If true, the row is checked (see "x" column).
+   *  By default, rows are checked if the checkbox in the header is checked
+   *  (e.g. rows loaded after a user clicks "select all").
+   */
+    var initRow = function(row, record, select){
+
+      //Check whether new rows should be checked (see "x" column)
+        if (typeof select === "undefined"){
+            select = checkboxHeader ? checkboxHeader.isChecked() : false;
+        }
+
+
+      //Assign the record to the row
+        row.record = record;
+
+
+      //Override the update method
+        row.update = function(){
+            config.update(this, this.record);
+
+          //Fill in any empty cells using the column config. Columns
+          //with a "field" attribute are populated using values from
+          //the record. This also ensures that the checkbox column is
+          //rendered, even if the update function never called
+          //row.set('x').
+            for (var j=0; j<config.columns.length; j++){
+                var col = this.childNodes[j];
+                if (col.getContent()) continue;
+
+                if (config.columns[j].header==='x'){
+                    this.set('x');
+                }
+                else{
+                    var field = config.columns[j].field;
+                    if (field){
+                        var val = this.record[field];
+                        if (val!=null) this.set(j, val);
+                    }
+                }
+            }
+        };
+
+
+      //Override the native "set" method on the row
+        row._set = row.set;
+        row.set = function(key, val){
+            if (key==='x'){
+
+              //Create checkbox
+                for (var j=0; j<config.columns.length; j++){
+                    if (config.columns[j].header==='x'){
+                        var field = config.columns[j].field;
+
+                        var col = this.childNodes[j];
+                        var obj = col.getContent();
+                        if (obj){
+                            //Column has a checkbox already?
+                        }
+                        else{
+                            val = field  ? this.record[field] : this.record;
+                            var checkboxDiv = createCheckbox(val, this);
+                            var checkbox = checkboxDiv.checkbox;
+                            if (select) checkbox.select();
+                            this._set(j, checkboxDiv);
+                        }
+                        return;
+                    }
+                }
+            }
+            else{
+
+              //Resolve the key to a column index. Numeric keys are
+              //used as-is. Otherwise, exact header matches take
+              //precedence. If no header matches, use the first
+              //non-checkbox column with a matching "field" attribute.
+                var idx = -1;
+                if (typeof key === "number"){
+                    if (key>=0 && key<config.columns.length) idx = key;
+                }
+                else{
+                    for (var j=0; j<config.columns.length; j++){
+                        if (key===config.columns[j].header){
+                            idx = j;
+                            break;
+                        }
+                    }
+                    if (idx<0){
+                        for (var j=0; j<config.columns.length; j++){
+                            var column = config.columns[j];
+                            if (column.header!=='x' && key===column.field){
+                                idx = j;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+
+                if (idx>-1){
+
+                  //Wrap value in an overflow div as requested
+                    if (config.columns[idx].wrap===true) val = wrap(val);
+
+                    this._set(idx, val);
+                }
+                else{
+
+                  //Pass the key through as-is and let the underlying
+                  //table try to resolve it (e.g. numeric strings)
+                    this._set(key, val);
+                }
+            }
+        };
+
+
+
+      //Update the row
+        row.update();
     };
 
 
@@ -808,6 +766,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
      *  scrolls to a previous page. */
     this.onPageChange = function(currPage, prevPage){};
 
+    /** Called whenever a row in the grid is selected or deselected. */
     this.onSelectionChange = function(){};
 
     /** Called immediately before fetching records from the server. */
@@ -825,11 +784,11 @@ javaxt.dhtml.DataGrid = function(parent, config) {
     /** Called whenever a keyboard event is initiated from the table. */
     this.onKeyEvent = function(keyCode, modifiers){};
 
-    /** Called whenever a client clicks on a checkbox, either in the header or
-     *  one of the rows. Columns with checkboxes are defined in the "columns"
-     *  config (e.g. header: 'x'),
-     */
+    /** Called whenever a client clicks on a checkbox in a checkbox column. */
     this.onCheckbox = function(value, checked, checkbox){};
+
+    /** Called after an individual checkbox or range of checkboxes have changed state. */
+    this.onCheckedChange = function(records){};
 
     /** Called whenever a client clicks on a header. */
     this.onSort = function(idx, sortDirection){};
@@ -864,12 +823,46 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
 
   //**************************************************************************
+  //** getRowCount
+  //**************************************************************************
+  /** Returns the number of rows in the grid. Note that this is the number of
+   *  rows loaded in the grid, not the total number of records on the server.
+   */
+    this.getRowCount = function(){
+        return table.getRowCount();
+    };
+
+
+  //**************************************************************************
+  //** showColumn
+  //**************************************************************************
+  /** Used to render a column if it is hidden (e.g. a checkbox column)
+   *  @param idx Column index (integer). Invalid indexes are ignored.
+   */
+    this.showColumn = function(idx){
+        table.showColumn(idx);
+    };
+
+
+  //**************************************************************************
+  //** hideColumn
+  //**************************************************************************
+  /** Used to hide a column (e.g. a checkbox column)
+   *  @param idx Column index (integer). Invalid indexes are ignored.
+   */
+    this.hideColumn = function(idx){
+        table.hideColumn(idx);
+    };
+
+
+  //**************************************************************************
   //** select
   //**************************************************************************
   /** Used to select a given row in the grid
    */
     this.select = function(row){
         table.select(row);
+        updateCheckedStyle(row);
     };
 
 
@@ -902,7 +895,23 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         table.clear();
         currPage = 1;
         pageRequests = {};
-        if (checkboxHeader) checkboxHeader.uncheck();
+        lastPage = 0;
+        offsetShift = 0;
+        removedKeys = {};
+        if (checkboxHeader){
+            checkboxHeader.uncheck();
+            checkAnchor = null;
+            checkedChange();
+        }
+
+
+      //Ignore responses for pages that are still loading (see load). This
+      //allows the grid to be refreshed while a page is loading.
+        requestID++;
+        if (loading){
+            loading = false;
+            mask.hide();
+        }
     };
 
 
@@ -910,9 +919,150 @@ javaxt.dhtml.DataGrid = function(parent, config) {
   //** remove
   //**************************************************************************
   /** Removes a row from the grid
+   *  @param row Either a row index (integer) or a row in the grid (DOM
+   *  element)
+   *  @return The row (DOM element) that was removed from the grid or null if
+   *  the row was not found
    */
     this.remove = function(row){
-        table.removeRow(row);
+        var rows = me.removeRows(row);
+        return rows.length>0 ? rows[0] : null;
+    };
+
+
+  //**************************************************************************
+  //** removeRows
+  //**************************************************************************
+  /** Removes rows from the grid. Example:
+   <pre>
+    grid.removeRows(0); //remove the first row
+    grid.removeRows([row1, row2]); //remove multiple rows
+   </pre>
+   *  Note that rows are only removed from the grid, not the remote store.
+   *  <p/>
+   *  If records are loaded from a server one page at a time, the grid assumes
+   *  that the removed records were also deleted on the server (e.g. a user
+   *  deleted records in the grid) and adjusts the offset of subsequent page
+   *  requests so that no records are skipped. Records that are still on the
+   *  server will not reappear in the grid as long as they have a key (see
+   *  "key" config). If the grid is no longer full after the rows are removed,
+   *  the next page is loaded automatically.
+   *  @param rows A row index (integer), a row in the grid (DOM element), or an
+   *  array of either. Indexes refer to row positions before any rows are
+   *  removed.
+   *  @return An array of rows (DOM elements) that were removed from the grid
+   */
+    this.removeRows = function(rows){
+        rows = table.removeRows(rows);
+
+
+      //Update paging variables. Each removed record shifts subsequent records
+      //on the server up by one (assuming the record was deleted on the
+      //server). If the record wasn't deleted, the next page will overlap with
+      //records that are already in the grid. These records are ignored (see
+      //filterRecords) so it's safer to overlap than to skip records.
+        for (var i=0; i<rows.length; i++){
+            var record = rows[i].record;
+            if (typeof record === "undefined") continue;
+            offsetShift--;
+            var key = getKey(record);
+            if (key!=null) removedKeys[key] = true;
+        }
+
+
+      //Clear the shift+click anchor if it was removed and update the
+      //checkbox in the header (e.g. all the remaining rows are checked)
+        if (rows.length>0 && checkboxHeader){
+            if (checkAnchor && rows.indexOf(checkAnchor)>-1) checkAnchor = null;
+            checkedChange();
+        }
+
+
+      //Load more records if the grid is no longer full
+        if (rows.length>0) loadMore();
+
+        return rows;
+    };
+
+
+  //**************************************************************************
+  //** insertRow
+  //**************************************************************************
+  /** Inserts a record into the grid at a given index or before a given row.
+   *  The row is rendered using the update function defined in the config.
+   *  Example:
+   <pre>
+    grid.insertRow(0, {id: 1, name: "Bob"}); //insert at the top
+    grid.insertRow(row, {id: 2, name: "Jim"}); //insert before a row
+   </pre>
+   *  @param index Either a row index (integer) or a row in the grid (DOM
+   *  element). See insertRows() for more information.
+   *  @param record A record to insert. The record is assigned to the new row
+   *  (row.record)
+   *  @return The row (DOM element) that was added to the grid
+   */
+    this.insertRow = function(index, record){
+        return me.insertRows(index, [record])[0];
+    };
+
+
+  //**************************************************************************
+  //** insertRows
+  //**************************************************************************
+  /** Inserts records into the grid at a given index or before a given row.
+   *  Rows below the insertion point are pushed down. Each record is assigned
+   *  to a new row and rendered using the update function defined in the
+   *  config. Example:
+   <pre>
+    grid.insertRows(0, [
+        {id: 1, name: "Bob"},
+        {id: 2, name: "Jim"}
+    ]);
+   </pre>
+   *  Note that records are only added to the grid, not the remote store.
+   *  <p/>
+   *  If records are loaded from a server one page at a time, and the inserted
+   *  records are also on the server, subsequent pages may include records
+   *  that are already in the grid (e.g. an inserted record or records that
+   *  were pushed down to the next page). These records are ignored as long
+   *  as they have a key (see "key" config).
+   *  <p/>
+   *  If the grid has a checkbox column, inserted rows are not checked. If the
+   *  checkbox in the header is checked ("select all"), it is unchecked.
+   *  @param index Either a row index (integer) or a row in the grid (DOM
+   *  element). Row indexes start at 0. If the index is null or greater than
+   *  the number of rows in the grid, the records are appended to the end of
+   *  the grid. If a DOM element is given that is not a row in this grid, no
+   *  records are inserted.
+   *  @param records An array of records or a javaxt.dhtml.DataStore
+   *  @return An array of rows (DOM elements) that were added to the grid
+   */
+    this.insertRows = function(index, records){
+        if (!records) return [];
+        var isDataStore = (records instanceof javaxt.dhtml.DataStore);
+        if (!isDataStore && !isArray(records)) return [];
+
+        var rows = table.insertRows(index, records.length);
+        for (var i=0; i<rows.length; i++){
+            var record = isDataStore ? records.get(i) : records[i];
+
+          //Render the row. Note that inserted rows are never checked, even if
+          //the checkbox in the header is checked ("select all"). Otherwise,
+          //users might act on records they haven't seen (e.g. new mail).
+            initRow(rows[i], record, false);
+
+          //If the record was removed earlier, it's back in the grid now
+            var key = getKey(record);
+            if (key!=null) delete removedKeys[key];
+        }
+
+
+      //Uncheck the checkbox in the header since not all the rows are checked
+        if (rows.length>0 && checkboxHeader) checkedChange();
+
+        calculateRowHeight();
+        table.update();
+        return rows;
     };
 
 
@@ -980,6 +1130,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
             if (isArray(records) || records instanceof javaxt.dhtml.DataStore){
                 me.beforeLoad(page);
                 table.load(records, page>1);
+                lastPage = page;
                 setPage(page);
                 calculateRowHeight();
 
@@ -1068,6 +1219,89 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
 
   //**************************************************************************
+  //** getNextOffset
+  //**************************************************************************
+  /** Returns the server offset for the next page of records. The offset is
+   *  adjusted for rows that were removed from the grid (see removeRows).
+   */
+    var getNextOffset = function(){
+        return Math.max(0, lastPage*config.limit + offsetShift);
+    };
+
+
+  //**************************************************************************
+  //** hasKey
+  //**************************************************************************
+  /** Returns true if a key is defined in the config (see "key" config). A
+   *  null or empty key disables de-duplication.
+   */
+    var hasKey = function(){
+        return config.key!=null && config.key!=="";
+    };
+
+
+  //**************************************************************************
+  //** getKey
+  //**************************************************************************
+  /** Returns the key for a given record as a string (see "key" config), or
+   *  null if the record doesn't have a key.
+   */
+    var getKey = function(record){
+        if (!hasKey() || record==null || typeof record !== "object") return null;
+        var key = record[config.key];
+        if (key==null) return null;
+        return key+"";
+    };
+
+
+  //**************************************************************************
+  //** filterRecords
+  //**************************************************************************
+  /** Returns records that are not in the grid and have not been removed from
+   *  the grid. Records are identified using the "key" config. Records
+   *  without a key are always returned.
+   */
+    var filterRecords = function(records){
+        if (!hasKey() || !isArray(records)) return records;
+
+        var keys = {};
+        table.forEachRow(function(row){
+            var key = getKey(row.record);
+            if (key!=null) keys[key] = true;
+        });
+
+        var arr = [];
+        for (var i=0; i<records.length; i++){
+            var key = getKey(records[i]);
+            if (key!=null){
+                if (keys[key] || removedKeys[key]) continue;
+                keys[key] = true;
+            }
+            arr.push(records[i]);
+        }
+        return arr;
+    };
+
+
+  //**************************************************************************
+  //** loadMore
+  //**************************************************************************
+  /** Loads the next page of records from the server if the grid isn't full
+   *  or if the grid is scrolled to the bottom. This is called after a page is
+   *  loaded (e.g. if records were ignored because they were already in the
+   *  grid) and after rows are removed (e.g. if all the rows were removed, the
+   *  grid can't be scrolled to load more records).
+   */
+    var loadMore = function(){
+        if (eof || loading || !config.url) return;
+        var scrollInfo = table.getScrollInfo();
+        if (!scrollInfo.h) return; //grid is not visible
+        var d = scrollInfo.maxY - scrollInfo.y;
+        if (d<(rowHeight || 1)) load(lastPage+1);
+    };
+
+
+  //**************************************************************************
   //** calculateRowHeight
   //**************************************************************************
     var calculateRowHeight = function(){
@@ -1081,9 +1315,31 @@ javaxt.dhtml.DataGrid = function(parent, config) {
 
 
   //**************************************************************************
+  //** getCheckedRecords
+  //**************************************************************************
+  /** Returns the records of the rows that are checked in the checkbox column
+   *  (see "columns" config). Unlike getSelectedRecords(), rows that are only
+   *  selected (e.g. clicked) are not included, and records that haven't been
+   *  loaded yet are never fetched.
+   *  @return An array of records (empty if the grid has no checkbox column)
+   */
+    this.getCheckedRecords = function(){
+        var records = [];
+        if (!checkboxHeader) return records;
+        table.forEachRow(function(row, content){
+            var checkbox = getCheckbox(content[checkboxHeader.idx]);
+            if (checkbox && checkbox.isChecked() && row.record) records.push(row.record);
+        });
+        return records;
+    };
+
+
+  //**************************************************************************
   //** getSelectedRecords
   //**************************************************************************
-  /** Returns an array of selected records from the grid.
+  /** Returns an array of selected records from the grid. If the grid has a
+   *  checkbox column, both checked rows and selected (e.g. clicked) rows are
+   *  returned. Use getCheckedRecords() to get just the checked rows.
    *  @param key Optional field name or index (e.g. 'id' or 0). If given, the
    *  output array will only contain values for the given key. This can be
    *  useful for limiting the amount of data returned in the array. For
@@ -1183,7 +1439,7 @@ javaxt.dhtml.DataGrid = function(parent, config) {
             var url = buildURL({
                 fields: fieldNames,
                 count: false,
-                offset: currPage*config.limit
+                offset: getNextOffset()
             });
 
 
@@ -1192,6 +1448,11 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                 if (request.status===200){
                     var arr = [];
                     var records = config.parseResponse.apply(me, [request]);
+
+                  //Ignore records that are already in the grid (e.g. if rows
+                  //were removed from the grid but not the server)
+                    records = filterRecords(records);
+
                     for (var i=0; i<records.length; i++){
                         var record = records[i];
                         if (key){
@@ -1288,42 +1549,41 @@ javaxt.dhtml.DataGrid = function(parent, config) {
                 me.onCheckbox(value, checked, this);
             };
 
+
+          //Style the row whenever the checkbox is checked or unchecked (see
+          //"checkedRow" style). The select and deselect methods are wrapped,
+          //rather than using the onChange event, so that the row is styled
+          //for every change: clicks, the checkbox header, programmatic and
+          //silent calls (e.g. checkbox.select(true)). Note that the Checkbox
+          //calls these methods on itself when it is clicked.
+            if (row){
+                var _select = checkbox.select;
+                var _deselect = checkbox.deselect;
+                checkbox.select = function(){
+                    _select.apply(checkbox, arguments);
+                    setCheckedStyle(row, checkbox.isChecked());
+                };
+                checkbox.deselect = function(){
+                    _deselect.apply(checkbox, arguments);
+                    setCheckedStyle(row, checkbox.isChecked());
+                };
+            }
         }
         else{ //checkbox header
 
+          //Check or uncheck every row in the grid. Note that checking rows
+          //doesn't select them (see onCheckboxCellClick). Fires onCheckbox
+          //for each row that changed, then onCheckedChange once.
             checkbox.onClick = function(checked){
-
-              /*
-              //Method 1: Select/deselect using the table control. This will
-              //highlight the rows and the onSelectionChange listener will
-              //update the checkboxes.
-                if (checked) {
-                    table.selectAll();
-                }
-                else{
-                    table.deselectAll();
-                }
-                */
-
-
-              //Method 2: Select/deselect manually. No rows will highlight.
                 table.forEachRow(function (row, content) {
-
                     var checkbox = getCheckbox(content[checkboxHeader.idx]);
-                    if (!checkbox) return;
-
-                    if (checked) {
-                        checkbox.select();
-                    }
-                    else{
-                        checkbox.deselect();
-                    }
-
-                    me.onCheckbox(row.record, checked, checkbox);
-
+                    if (!checkbox || checkbox.isChecked()===checked) return;
+                    if (checked) checkbox.select(true);
+                    else checkbox.deselect(true);
+                    me.onCheckbox(checkbox.getValue(), checked, checkbox);
                 });
-                //me.onSelectionChange();
-
+                checkAnchor = null;
+                checkedChange();
             };
         }
 
@@ -1345,6 +1605,164 @@ javaxt.dhtml.DataGrid = function(parent, config) {
     var getCheckbox = function(content){
         if (content && content.checkbox) return content.checkbox;
         return null;
+    };
+
+
+  //**************************************************************************
+  //** setCheckedStyle
+  //**************************************************************************
+  /** Adds or removes the "checkedRow" style (see config.style) to/from a row.
+   *  Rows are styled whenever their checkbox is checked or unchecked (see
+   *  createCheckbox). Only class names are supported (e.g. "table-row-checked").
+   *  @param row A row in the grid (DOM element)
+   *  @param checked If true, adds the style. Otherwise, removes it.
+   */
+    var setCheckedStyle = function(row, checked){
+        var style = config.style.checkedRow;
+        if (!row || !row.classList || typeof style !== "string") return;
+        var classNames = style.split(/\s+/);
+        for (var i=0; i<classNames.length; i++){
+            if (!classNames[i]) continue;
+            if (checked) row.classList.add(classNames[i]);
+            else row.classList.remove(classNames[i]);
+        }
+    };
+
+
+  //**************************************************************************
+  //** updateCheckedStyle
+  //**************************************************************************
+  /** Updates the "checkedRow" style of a row to match the state of the row's
+   *  checkbox. Called after rows are selected or deselected since the Table
+   *  resets the row's className when it does that.
+   */
+    var updateCheckedStyle = function(row){
+        if (!checkboxHeader || !row || !row.childNodes) return;
+        var cell = row.childNodes[checkboxHeader.idx];
+        if (!cell || !cell.getContent) return;
+        var checkbox = getCheckbox(cell.getContent());
+        if (checkbox) setCheckedStyle(row, checkbox.isChecked());
+    };
+
+
+  //**************************************************************************
+  //** onCheckboxCellClick
+  //**************************************************************************
+  /** Handles a click anywhere in a row's checkbox cell (see "columns"
+   *  config). A plain click toggles the row's checkbox. A shift+click applies
+   *  the clicked row's new state to every row between it and the row that
+   *  was clicked last. Clicks in the checkbox cell never select the row or
+   *  fire onRowClick: checking and selecting are separate (see
+   *  getCheckedRecords and getSelectedRecords).
+   */
+    var onCheckboxCellClick = function(e){
+        var row = getCheckboxCellRow(e.target);
+        if (!row) return;
+
+      //Handled here: don't toggle the checkbox again or select the row. Note
+      //that stopImmediatePropagation also stops other click listeners on the
+      //grid (e.g. apps that implemented this behaviour themselves before it
+      //was added to the DataGrid), which would toggle the checkbox back.
+        e.stopImmediatePropagation();
+        e.preventDefault();
+
+        var checkbox = getRowCheckbox(row);
+        if (!checkbox) return;
+        var checked = !checkbox.isChecked();
+
+        var rows = [row];
+        var anchor = checkAnchor;
+        if (e.shiftKey && anchor && anchor!==row && anchor.parentNode===row.parentNode){
+            var siblings = row.parentNode.childNodes;
+            var a = -1, b = -1;
+            for (var i=0; i<siblings.length; i++){
+                if (siblings[i]===anchor) a = i;
+                if (siblings[i]===row) b = i;
+            }
+            if (a>-1 && b>-1){
+                rows = [];
+                for (var j=Math.min(a,b); j<=Math.max(a,b); j++) rows.push(siblings[j]);
+            }
+        }
+
+        for (var i=0; i<rows.length; i++){
+            var cb = getRowCheckbox(rows[i]);
+            if (!cb || cb.isChecked()===checked) continue;
+            if (checked) cb.select(true);
+            else cb.deselect(true);
+            me.onCheckbox(cb.getValue(), checked, cb);
+        }
+
+        checkAnchor = row;
+        checkedChange();
+    };
+
+
+  //**************************************************************************
+  //** getCheckboxCellRow
+  //**************************************************************************
+  /** Returns the row if the given element is inside the checkbox cell of a
+   *  row with a record. Returns null for anything else (e.g. the header or
+   *  rows without a record).
+   */
+    var getCheckboxCellRow = function(el){
+        if (!checkboxHeader) return null;
+        var node = el;
+        while (node && node!==me.el){
+            var parent = node.parentNode;
+            if (parent && parent.record && parent.update){ //node is a cell in a row
+                return parent.childNodes[checkboxHeader.idx]===node ? parent : null;
+            }
+            node = parent;
+        }
+        return null;
+    };
+
+
+  //**************************************************************************
+  //** getRowCheckbox
+  //**************************************************************************
+  /** Returns the checkbox in a given row, or null if there isn't one
+   */
+    var getRowCheckbox = function(row){
+        if (!checkboxHeader || !row || !row.childNodes) return null;
+        var cell = row.childNodes[checkboxHeader.idx];
+        return (cell && cell.getContent) ? getCheckbox(cell.getContent()) : null;
+    };
+
+
+  //**************************************************************************
+  //** checkedChange
+  //**************************************************************************
+  /** Called whenever the checked rows may have changed. Checks the checkbox
+   *  in the header if every row is checked (and unchecks it otherwise), then
+   *  fires onCheckedChange. The event is coalesced (fired once, after the
+   *  current call stack) so several changes in a row fire one event.
+   */
+    var checkedChange = function(){
+        if (!checkboxHeader) return;
+
+      //Update the checkbox in the header
+        var total = 0, checked = 0;
+        table.forEachRow(function(row, content){
+            var checkbox = getCheckbox(content[checkboxHeader.idx]);
+            if (!checkbox) return;
+            total++;
+            if (checkbox.isChecked()) checked++;
+        });
+        if (total>0 && checked===total){
+            if (!checkboxHeader.isChecked()) checkboxHeader.check(true);
+        }
+        else{
+            if (checkboxHeader.isChecked()) checkboxHeader.uncheck(true);
+        }
+
+      //Fire onCheckedChange event
+        if (checkedTimer) return;
+        checkedTimer = setTimeout(function(){
+            checkedTimer = null;
+            me.onCheckedChange(me.getCheckedRecords());
+        }, 0);
     };
 
 
@@ -1473,39 +1891,97 @@ javaxt.dhtml.DataGrid = function(parent, config) {
         else params.count = false;
 
 
+      //Add offset to the querystring if rows have been removed from the grid.
+      //The server should use the offset instead of the page to find records.
+        if (page>1 && offsetShift!==0) params.offset = getNextOffset();
+
+
       //Build URL
         var url = buildURL(params);
+
+
+      //Keep track of the state of the grid when the request is sent. The
+      //state may change before the response is received (see below).
+        var id = requestID;
+        var shift = offsetShift;
+
+
+      //Function called when a request fails
+        var onError = function(request){
+            delete pageRequests[page+""]; //allow the page to be requested again
+            loading = false;
+            mask.hide();
+            me.onError(request);
+        };
 
 
 
       //Execute service request and process response
         config.getResponse(url, config.payload, function(request){
+
+
+          //Ignore the response if the grid was cleared or refreshed while
+          //the request was in flight
+            if (id!==requestID) return;
+
+
+          //If rows were removed while the request was in flight, the server
+          //may have processed the request before or after the records were
+          //deleted. We can't tell which so we request the page again using
+          //the updated offset. Any overlap is ignored (see filterRecords).
+            if (page>1 && shift!==offsetShift){
+                delete pageRequests[page+""];
+                loading = false;
+                load(page, callback);
+                return;
+            }
+
+
             if (request.status===200){
 
 
               //Parse response
-                var records = config.parseResponse.apply(me, [request]);
-                if (records.length===0){
-                    if (page===1) table.clear();
-                    eof = true;
+                var records;
+                try{
+                    records = config.parseResponse.apply(me, [request]);
+                }
+                catch(e){
+                    onError(request);
+                    throw e;
+                }
+                if (records.length<config.limit) eof = true;
+
+
+              //Update the grid
+                if (page===1){
+                    if (records.length===0) me.clear();
+                    else table.load(records, false);
                 }
                 else{
-                    if (records.length<config.limit) eof = true;
 
-                    table.load(records, page>1);
+                  //Ignore records that are already in the grid or have been
+                  //removed from the grid
+                    records = filterRecords(records);
+                    if (records.length>0) table.load(records, true);
+                }
+                lastPage = Math.max(lastPage, page);
+                if (records.length>0){
                     setPage(page);
                     calculateRowHeight();
                 }
+
 
                 if (callback) callback.apply(me, []);
                 loading = false;
                 mask.hide();
                 me.onLoad();
+
+
+              //Load more records if the grid isn't full
+                loadMore();
             }
             else{
-                loading = false;
-                mask.hide();
-                me.onError(request);
+                onError(request);
             }
         });
     };
@@ -1874,7 +2350,6 @@ javaxt.dhtml.DataGrid = function(parent, config) {
   //** Utils
   //**************************************************************************
     var merge = javaxt.dhtml.utils.merge;
-    var _getRect = javaxt.dhtml.utils.getRect;
     var isArray = javaxt.dhtml.utils.isArray;
     var isNumber = javaxt.dhtml.utils.isNumber;
     var isElement = javaxt.dhtml.utils.isElement;
