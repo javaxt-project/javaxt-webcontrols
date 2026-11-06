@@ -57,6 +57,12 @@
         border: 1px solid #dcdcdc;
     }
 
+    
+    #demo1 {
+        width: 100%;
+        height: 342px;
+    }
+
 
     /* Status bar under the table used to show the visible rows */
     .status {
@@ -775,7 +781,7 @@ selection. Open the web console to see events.</p>
 
 <div class="demo-row">
 
-    <div class="demo-col">
+    <div class="demo-col demo-col-full">
         <h3>Fixed header</h3>
         <p class="hint">Default inline style &mdash; no stylesheet needed</p>
         <div id="demo1" class="table-container"></div>
@@ -783,6 +789,29 @@ selection. Open the web console to see events.</p>
             <span id="visibleRows"></span>
             <span id="scrollPosition"></span>
         </div>
+    </div>
+
+</div>
+
+
+
+<h2>JavaXT Themes</h2>
+<p>The same table styled with the JavaXT themes (themes/light.css and
+themes/dark.css). Each theme is shown in its own iframe so the two stylesheets
+don't collide.</p>
+
+<div class="demo-row">
+
+    <div class="demo-col demo-col-half">
+        <h3>Light theme</h3>
+        <p class="hint">themes/light.css &mdash; javaxt-table</p>
+        <iframe class="theme-frame" src="table-theme.html?theme=light"></iframe>
+    </div>
+
+    <div class="demo-col demo-col-half">
+        <h3>Dark theme</h3>
+        <p class="hint">themes/dark.css &mdash; javaxt-table</p>
+        <iframe class="theme-frame theme-frame-dark" src="table-theme.html?theme=dark"></iframe>
     </div>
 
 </div>
@@ -827,27 +856,11 @@ over the section rows.</p>
 </div>
 
 
-<h2>JavaXT Themes</h2>
-<p>The same table styled with the JavaXT themes (themes/light.css and
-themes/dark.css). Each theme is shown in its own iframe so the two stylesheets
-don't collide.</p>
 
 
-<div class="demo-row">
 
-    <div class="demo-col demo-col-half">
-        <h3>Light theme</h3>
-        <p class="hint">themes/light.css &mdash; javaxt-table</p>
-        <iframe class="theme-frame" src="table-theme.html?theme=light"></iframe>
-    </div>
 
-    <div class="demo-col demo-col-half">
-        <h3>Dark theme</h3>
-        <p class="hint">themes/dark.css &mdash; javaxt-table</p>
-        <iframe class="theme-frame theme-frame-dark" src="table-theme.html?theme=dark"></iframe>
-    </div>
 
-</div>
 </div>
 </body>
 </html>
