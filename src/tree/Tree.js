@@ -475,9 +475,17 @@ javaxt.dhtml.Tree = function (parent, config) {
    */
     this.show = function(item){
         if (item){
-            var li = item.el;
+            var li = item.el || item;
             var ul = li.parentNode;
-            show(ul);
+
+            var showList = function(ul){
+              //only show when need (avoid firing unwanted onExpand event)
+                if (ul!==me.el && ul.style.visibility==="hidden") show(ul);
+            };
+
+
+          //Expand the list containing the item
+            showList(ul);
 
 
           //If the item is a node, expand children
@@ -497,7 +505,7 @@ javaxt.dhtml.Tree = function (parent, config) {
                     ul = ul.parentNode;
                     if (isLI(ul)) ul = ul.parentNode;
 
-                    show(ul);
+                    showList(ul);
                     if (me.el === ul){
                         break;
                     }
