@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Table Demo</title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<link  href="../style.css" rel="stylesheet" type="text/css" />
+
+<script src="../../src/table/Table.js"></script>
+<script src="../../src/utils/Utils.js"></script>
+<script src="names.js"></script>
+
+<style>
+
+  /**************************************************************************/
+  /** Demo layout
+  /**************************************************************************/
+
+    .demo-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 40px;
+    }
+
+    /* Column that spans the full width of the demo container */
+    .demo-col-full {
+        flex: 1 1 100%;
+        min-width: 0;
+    }
+
+    /* Columns that split the width of the demo container evenly. The columns
+       wrap onto separate lines if the container is less than ~640px wide. */
+    .demo-col-half {
+        flex: 1 1 300px;
+        min-width: 0;
+    }
+
+
+    .demo-col p.hint {
+        font-size: 12px;
+        color: #888;
+        margin: 0 0 12px 0;
+    }
+
+
+    /* Container for the table. The table fills 100% of its parent so the
+       parent needs an explicit height - that's what makes the body scroll
+       under the fixed header. */
+    .table-container {
+        width: 420px;
+        height: 360px;
+        background-color: #fff;
+        border: 1px solid #dcdcdc;
+    }
+
+
+    /* Status bar under the table used to show the visible rows */
+    .status {
+        width: 420px;
+        font-size: 12px;
+        color: #888;
+        margin-top: 6px;
+        display: flex;
+        justify-content: space-between;
+    }
+
+
+    /* iframe styles for the javaxt theme demos */
+    .theme-frame {
+        width: 100%;
+        height: 300px;
+        box-sizing: border-box;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .theme-frame-dark {
+        border-color: #3a3f4a;
+    }
+
+
+  /**************************************************************************/
+  /** Group headers
+  /**************************************************************************/
+  /* Group rows are regular table rows whose inline styles are replaced with
+     the classes below (see addGroup in the script). */
+
+    .group-table {
+        width: 100%;
+        height: 460px;
+        box-sizing: border-box;
+    }
+
+    .group-row {
+        cursor: pointer;
+        background-color: #fff;
+        border-bottom: 2px solid #b4c9e6;
+    }
+
+    .group-cell {
+        height: 32px;
+        line-height: 32px;
+        padding: 0 5px;
+        color: #1f4e8c;
+        font-weight: bold;
+        white-space: nowrap;
+        user-select: none;
+    }
+
+    /* The +/- box next to the group label */
+    .group-toggle {
+        display: inline-block;
+        width: 9px;
+        height: 9px;
+        margin: 0 7px 0 1px;
+        border: 1px solid #1f4e8c;
+        position: relative;
+        top: 1px;
+    }
+    .group-toggle::before, .group-toggle::after {
+        content: "";
+        position: absolute;
+        background-color: #1f4e8c;
+    }
+    .group-toggle::before { /* horizontal bar (minus) */
+        left: 2px;
+        right: 2px;
+        top: 4px;
+        height: 1px;
+    }
+    .group-toggle::after { /* vertical bar (plus) */
+        top: 2px;
+        bottom: 2px;
+        left: 4px;
+        width: 1px;
+    }
+    .group-expanded .group-toggle::after {
+        display: none;
+    }
+
+  /**************************************************************************/
+  /** Section rows
+  /**************************************************************************/
+  /* Section rows are created with addHeaderRow, just like the group rows. */
+
+    .email-table {
+        width: 100%;
+        height: 460px;
+        box-sizing: border-box;
+    }
+
+    /* Section headers use the same font and bottom line as the group headers
+       (see .group-row and .group-cell) but they are not clickable */
+    .section-row {
+        background-color: #fff;
+        border-bottom: 2px solid #b4c9e6;
+    }
+
+    .section-cell {
+        height: 32px;
+        line-height: 32px;
+        padding: 0 5px;
+        color: #1f4e8c;
+        font-weight: bold;
+        white-space: nowrap;
+        cursor: default;
+        user-select: none;
+    }
+
+    /* Blue dot used to indicate unread messages */
+    .unread-dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #0f69ff;
+    }
+
+    .email-from {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .email-summary {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .email-preview {
+        color: #7a7f85;
+        margin-left: 6px;
+    }
+
+    /* Note that we put the "unread" class on the cell content instead of the
+       row. The table updates the row's style whenever it is selected. */
+    .email-from.unread,
+    .email-subject.unread {
+        font-weight: bold;
+    }
+
+    .email-date {
+        font-size: 12px;
+        color: #5b636a;
+    }
+
+
+    /* Icons in the first column */
+    .item-icon {
+        display: block;
+        width: 18px;
+        height: 18px;
+        margin: 9px auto 0 auto;
+    }
+
+</style>
+
+
+
+<script>
+window.onload = function() {
+
+
+  //**************************************************************************
+  //** Sample data
+  //**************************************************************************
+  /** Convert the [name, count] records defined in names.js into table rows
+   *  with a name, rank, and formatted count.
+   */
+    var rows = [];
+    for (var i=0; i<popularNames.length; i++){
+        var name = popularNames[i][0];
+        var count = popularNames[i][1];
+        rows.push([name, i+1, count.toLocaleString()]);
+    }
+
+
+  //**************************************************************************
+  //** Table - Default (inline) style
+  //**************************************************************************
+  /** No "style" config is provided, so the table renders using its built-in,
+   *  inline default styles. The table fills its parent. The header row is
+   *  rendered in a separate table from the body so it stays in place while
+   *  the rows scroll underneath it.
+   */
+    var table = new javaxt.dhtml.Table(document.getElementById("demo1"), {
+        columns: [
+            {header: 'Name', width:'100%'},
+            {header: 'Rank', width:'60', align:'center'},
+            {header: 'Count', width:'100', align:'right'}
+        ]
+    });
+    var tableRows = table.addRows(rows);
+
+
+  //**************************************************************************
+  //** Status bar
+  //**************************************************************************
+  /** Use the onScroll event to show which rows are currently in view. This
+   *  is the same event you would use to load more records as the user
+   *  scrolls to the bottom of the table (e.g. an infinite grid).
+   */
+    var visibleRows = document.getElementById("visibleRows");
+    var scrollPosition = document.getElementById("scrollPosition");
+    var updateStatus = function(y, maxY, h){
+        var rowHeight = tableRows[0].offsetHeight;
+        var numRows = table.getRowCount();
+        var first = Math.min(Math.floor(y/rowHeight)+1, numRows);
+        var last = Math.min(Math.ceil((y+h)/rowHeight), numRows);
+        visibleRows.innerText = "Rows " + first + "-" + last + " of " + numRows;
+        scrollPosition.innerText = "Scroll " + Math.round(y) + " / " + maxY + "px";
+    };
+    table.onScroll = updateStatus;
+
+    var scrollInfo = table.getScrollInfo();
+    updateStatus(scrollInfo.y, scrollInfo.maxY, scrollInfo.h);
+
+
+  //**************************************************************************
+  //** Events
+  //**************************************************************************
+    table.onHeaderClick = function(idx, colConfig){
+        console.log("Clicked header " + colConfig.header);
+    };
+
+    table.onSelectionChange = function(rows){
+        for (var i=0; i<rows.length; i++){
+            var row = rows[i];
+            console.log((row.selected ? "Selected " : "Deselected ") + row.get("Name"));
+        }
+    };
+
+
+    groupHeaderDemo();
+    sectionRowDemo();
+};
+
+
+//******************************************************************************
+//** addHeaderRow
+//******************************************************************************
+/** Used to add a full-width "header" row to a table (e.g. a group or section
+ *  header). The Table doesn't support this natively. Instead, we add a regular
+ *  row and then modify it: the first cell is stretched across the table with a
+ *  colSpan, the other cells are hidden, and the row's inline styles and click
+ *  handler are replaced with our own. Header rows are never selected.
+ *  @param table javaxt.dhtml.Table
+ *  @param content Content for the header (string or DOM element)
+ *  @param rowClass CSS class(es) for the row
+ *  @param cellClass CSS class(es) for the cell
+ *  @returns The row. Set row.onHeaderClick to handle clicks on the header.
+ */
+var addHeaderRow = function(table, content, rowClass, cellClass){
+
+  //Add a regular row with the content in the first cell
+    var row = table.addRow(content);
+
+
+  //Stretch the first cell across the table and hide the rest. Note that we
+  //hide the cells instead of removing them so the cell indexes stay the same
+  //as the other rows (e.g. for hideColumn and showColumn).
+    var cells = row.childNodes;
+    var cell = cells[0];
+    cell.colSpan = cells.length;
+    for (var i=1; i<cells.length; i++){
+        cells[i].style.display = "none";
+    }
+
+
+  //Replace inline styles with our own classes
+    row.removeAttribute("style");
+    row.className = rowClass;
+    cell.removeAttribute("style");
+    cell.className = cellClass;
+
+
+  //Replace the click handler. By default, clicking on a row selects it.
+    row.isHeader = true;
+    row.onHeaderClick = function(){};
+    row.onclick = function(e){
+
+      //Clicks triggered by the table's keyboard navigation (up/down arrows)
+      //are not "trusted". Pass these on to the next row.
+        if (!e.isTrusted){
+            skipHeader(table, row);
+            return;
+        }
+
+        row.onHeaderClick();
+    };
+
+    return row;
+};
+
+
+//******************************************************************************
+//** skipHeader
+//******************************************************************************
+/** The table's keyboard navigation selects the row above/below the current
+ *  selection by calling click() on it. When that row is a header row, we skip
+ *  over it (and any hidden rows) and click the next visible row in the same
+ *  direction instead.
+ */
+var skipHeader = function(table, headerRow){
+
+  //Find the selected row and figure out which way we're going
+    var selectedRow;
+    table.forEachRow(function(row){
+        if (row.selected){
+            selectedRow = row;
+            return true;
+        }
+    });
+    if (!selectedRow) return;
+    var down = !!(headerRow.compareDocumentPosition(selectedRow) &
+        Node.DOCUMENT_POSITION_PRECEDING);
+
+
+  //Find the next visible row
+    var row = headerRow;
+    while (true){
+        row = down ? row.nextSibling : row.previousSibling;
+        if (!row || !row.get) return; //end of table (or phantom row)
+        if (row.isHeader || row.style.display==="none") continue;
+        table.scrollTo(row);
+        row.click();
+        return;
+    }
+};
+
+
+//******************************************************************************
+//** Group Header Demo
+//******************************************************************************
+/** Collapsible groups, similar to the ExtJS grouping feature. Each group
+ *  header is a full-width row created with addHeaderRow.
+ */
+var groupHeaderDemo = function(){
+
+    var createElement = javaxt.dhtml.utils.createElement;
+
+
+  //**************************************************************************
+  //** Sample data
+  //**************************************************************************
+  /** Items for an app settings page, organized into groups. Each item has
+   *  an icon (see createIcon), a name, and a description.
+   */
+    var groups = [
+        {
+            name: "Account",
+            items: [
+                ["user", "Profile", "Update your name, photo, and contact information."],
+                ["lock", "Password & Security", "Change your password and set up two-step verification."],
+                ["bell", "Notifications", "Choose which emails and alerts you receive."]
+            ]
+        },
+        {
+            name: "Appearance",
+            items: [
+                ["moon", "Theme", "Switch between the light and dark themes."],
+                ["globe", "Language", "Select the language used throughout the app."],
+                ["calendar", "Date & Time Format", "Set your time zone and how dates and times are displayed."]
+            ]
+        },
+        {
+            name: "Data",
+            items: [
+                ["download", "Import", "Import records from a CSV or JSON file."],
+                ["upload", "Export", "Download a copy of your data."],
+                ["database", "Backups", "Schedule automatic backups and restore previous versions."]
+            ]
+        }
+    ];
+
+
+  //**************************************************************************
+  //** Create table
+  //**************************************************************************
+    var table = new javaxt.dhtml.Table(document.getElementById("demo2"), {
+        columns: [
+            {header: '', width:'30', align:'center'},
+            {header: 'Name', width:'230'},
+            {header: 'Description', width:'100%'}
+        ],
+
+      //Remove vertical lines between cells in the body (same as the
+      //javaxt themes). Other column styles are inherited from the defaults.
+        style: {
+            column: {
+                borderLeft: "0 none",
+                borderRight: "0 none"
+            }
+        }
+    });
+
+
+  //**************************************************************************
+  //** addGroup
+  //**************************************************************************
+  /** Adds a group header row to the table. Returns the row.
+   */
+    var addGroup = function(name){
+
+      //Create a label with a +/- toggle. This becomes the content of the
+      //first cell (the same as any other cell value).
+        var label = createElement("div");
+        createElement("span", label, "group-toggle");
+        createElement("span", label).innerText = name;
+
+
+      //Add a full-width header row (see addHeaderRow below)
+        var row = addHeaderRow(table, label, "group-row group-expanded", "group-cell");
+
+
+      //Clicking on a group header expands/collapses the group
+        row.isGroup = true;
+        row.expanded = true;
+        row.onHeaderClick = function(){
+            if (row.expanded) collapse(row);
+            else expand(row);
+        };
+
+        return row;
+    };
+
+
+  //**************************************************************************
+  //** getItems
+  //**************************************************************************
+  /** Returns all the item rows under a given group row
+   */
+    var getItems = function(groupRow){
+        var items = [];
+        var row = groupRow.nextSibling;
+        while (row && !row.isGroup){
+            items.push(row);
+            row = row.nextSibling;
+        }
+        return items;
+    };
+
+
+  //**************************************************************************
+  //** collapse
+  //**************************************************************************
+    var collapse = function(groupRow){
+        var items = getItems(groupRow);
+        var deselected = [];
+        for (var i=0; i<items.length; i++){
+            var row = items[i];
+            if (row.selected){ //don't leave hidden rows selected
+                table.deselect(row);
+                deselected.push(row);
+            }
+            row.style.display = "none";
+        }
+        groupRow.expanded = false;
+        groupRow.className = "group-row";
+        table.update(); //refresh the scroll
+        if (deselected.length) table.onSelectionChange(deselected);
+        console.log("Collapsed " + groupRow.innerText);
+    };
+
+
+  //**************************************************************************
+  //** expand
+  //**************************************************************************
+    var expand = function(groupRow){
+        var items = getItems(groupRow);
+        for (var i=0; i<items.length; i++){
+            items[i].style.display = "";
+        }
+        groupRow.expanded = true;
+        groupRow.className = "group-row group-expanded";
+        table.update();
+        console.log("Expanded " + groupRow.innerText);
+    };
+
+
+  //**************************************************************************
+  //** createIcon
+  //**************************************************************************
+  /** Returns a small inline SVG icon. Paths are adapted from Feather Icons
+   *  (MIT license).
+   */
+    var icons = {
+        user: ["#4a7bd0", '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'],
+        lock: ["#c0392b", '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>'],
+        bell: ["#d08a2a", '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>'],
+        moon: ["#6d3fc0", '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'],
+        globe: ["#2f7fb8", '<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'],
+        calendar: ["#c0507a", '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>'],
+        download: ["#3f9a4b", '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>'],
+        upload: ["#3f9a4b", '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>'],
+        database: ["#6a6a6a", '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>']
+    };
+    var createIcon = function(name){
+        var icon = icons[name];
+        var div = createElement("div");
+        div.innerHTML =
+            '<svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="' + icon[0] + '" ' +
+            'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + icon[1] + '</svg>';
+        return div.firstChild;
+    };
+
+
+  //**************************************************************************
+  //** Populate table
+  //**************************************************************************
+    for (var i=0; i<groups.length; i++){
+        var group = groups[i];
+        addGroup(group.name);
+        for (var j=0; j<group.items.length; j++){
+            var item = group.items[j];
+            table.addRow(createIcon(item[0]), item[1], item[2]);
+        }
+    }
+
+
+  //**************************************************************************
+  //** Events
+  //**************************************************************************
+  /** Only item rows fire selection events - group rows have their own click
+   *  handler (see addGroup).
+   */
+    table.onSelectionChange = function(rows){
+        for (var i=0; i<rows.length; i++){
+            var row = rows[i];
+            console.log((row.selected ? "Selected " : "Deselected ") + row.get("Name"));
+        }
+    };
+};
+
+
+//******************************************************************************
+//** Section Row Demo
+//******************************************************************************
+/** Email inbox with messages organized into sections by date (Today,
+ *  Yesterday, etc). Each section header is a full-width row created with
+ *  addHeaderRow. Unlike the group headers, section rows can't be collapsed.
+ */
+var sectionRowDemo = function(){
+
+    var createElement = javaxt.dhtml.utils.createElement;
+
+
+  //**************************************************************************
+  //** Sample data
+  //**************************************************************************
+  /** Messages are dated relative to the current date so the sections always
+   *  make sense. The list is sorted by date, newest first.
+   */
+    var emails = [
+        {daysAgo:0,  time:"09:14", read:false, from:"Alice Nguyen",      subject:"Q3 roadmap review", preview:"Hi team, attached is the updated roadmap for next quarter. Please review before Thursday."},
+        {daysAgo:0,  time:"08:02", read:true,  from:"GitHub",            subject:"[javaxt] 3 new pull requests", preview:"Updated Table demo, fixed column resize handle, added group headers."},
+        {daysAgo:0,  time:"07:30", read:false, from:"Northwind Bank",    subject:"Your statement is ready", preview:"Your monthly statement for account ending in 4821 is now available online."},
+        {daysAgo:1,  time:"17:45", read:false, from:"Bob Carter",        subject:"Lunch on Friday?", preview:"Are you free for lunch on Friday? There's a new ramen place downtown."},
+        {daysAgo:1,  time:"13:30", read:true,  from:"Karen Diaz",        subject:"Invoice #10842 attached", preview:"Please find attached the invoice for the September consulting work."},
+        {daysAgo:1,  time:"11:10", read:true,  from:"Contoso Rewards",   subject:"You've earned 500 bonus points", preview:"Thanks for being a loyal customer! Your points expire at the end of the year."},
+        {daysAgo:1,  time:"06:00", read:true,  from:"Travel Deals",      subject:"Your weekend getaway awaits", preview:"Save up to 40% on hotels this weekend. Book by Sunday to lock in the price."},
+        {daysAgo:2,  time:"22:11", read:false, from:"Mike Johnson",      subject:"Re: API contract questions", preview:"Thanks for the quick reply. One more question about the pagination parameters."},
+        {daysAgo:3,  time:"15:52", read:true,  from:"Amy Robinson",      subject:"Design mockups v2", preview:"Here's the second round of mockups. I incorporated the feedback from Monday."},
+        {daysAgo:4,  time:"11:03", read:true,  from:"IT Helpdesk",       subject:"Scheduled maintenance tonight", preview:"The email server will be unavailable from 11 PM to 1 AM for scheduled maintenance."},
+        {daysAgo:5,  time:"19:20", read:false, from:"Sofia Martinez",    subject:"Contract renewal terms", preview:"I've reviewed the renewal terms and have a few comments on section 4."},
+        {daysAgo:6,  time:"07:30", read:true,  from:"JS Weekly",         subject:"This week in JavaScript", preview:"New proposals reach stage 3, a look at view transitions, and more."},
+        {daysAgo:12, time:"09:45", read:true,  from:"Daniel Lee",        subject:"Standup notes", preview:"Notes from today's standup: release is on track, two open bugs on the grid."},
+        {daysAgo:18, time:"08:15", read:true,  from:"HR Department",     subject:"Open enrollment reminder", preview:"Open enrollment for benefits ends on Friday. Make sure to review your selections."},
+        {daysAgo:25, time:"20:05", read:true,  from:"Grace Kim",         subject:"Photos from the offsite", preview:"Uploaded all the photos from the offsite to the shared drive. Enjoy!"},
+        {daysAgo:40, time:"14:40", read:true,  from:"Legal",             subject:"NDA countersigned", preview:"The NDA has been countersigned. A copy is attached for your records."},
+        {daysAgo:48, time:"05:00", read:true,  from:"Fabrikam Payments", subject:"Your receipt", preview:"Thanks for your payment. This email is your receipt."}
+    ];
+
+    var now = new Date();
+    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    for (var i=0; i<emails.length; i++){
+        var email = emails[i];
+        var t = email.time.split(":");
+        email.date = new Date(
+            today.getFullYear(), today.getMonth(), today.getDate()-email.daysAgo,
+            parseInt(t[0]), parseInt(t[1])
+        );
+    }
+
+
+  //**************************************************************************
+  //** getSection
+  //**************************************************************************
+  /** Returns the name of the section for a given date
+   */
+    var getSection = function(date){
+        var day = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        var days = Math.round((today - day)/86400000);
+        if (days<=0) return "Today";
+        if (days===1) return "Yesterday";
+        if (days<7) return "Last week";
+        var month = date.toLocaleDateString(undefined, {month: "long"});
+        if (date.getFullYear()!==today.getFullYear()) month += " " + date.getFullYear();
+        return month;
+    };
+
+
+  //**************************************************************************
+  //** formatDate
+  //**************************************************************************
+  /** Returns the time for today's messages and the month/day for older ones
+   */
+    var formatDate = function(date){
+        if (getSection(date)==="Today"){
+            return date.toLocaleTimeString(undefined, {hour: "numeric", minute: "2-digit"});
+        }
+        return date.toLocaleDateString(undefined, {month: "short", day: "numeric"});
+    };
+
+
+  //**************************************************************************
+  //** Create table
+  //**************************************************************************
+    var table = new javaxt.dhtml.Table(document.getElementById("demo3"), {
+        columns: [
+            {header: '', width:'24', align:'center'},
+            {header: 'From', width:'180'},
+            {header: 'Subject', width:'100%'},
+            {header: 'Date', width:'80', align:'right'}
+        ],
+
+      //Remove vertical lines between cells in the body (same as the
+      //javaxt themes). Other column styles are inherited from the defaults.
+        style: {
+            column: {
+                borderLeft: "0 none",
+                borderRight: "0 none"
+            }
+        }
+    });
+
+
+  //**************************************************************************
+  //** Populate table
+  //**************************************************************************
+  /** Insert a section row whenever the section changes. Since the emails are
+   *  sorted by date, each section only appears once.
+   */
+    var currSection;
+    for (var i=0; i<emails.length; i++){
+        var email = emails[i];
+
+      //Add section row as needed
+        var section = getSection(email.date);
+        if (section!==currSection){
+            addHeaderRow(table, section, "section-row", "section-cell");
+            currSection = section;
+        }
+
+
+      //Create cell content
+        var dot = createElement("span", email.read ? "" : "unread-dot");
+
+        var from = createElement("div", "email-from" + (email.read ? "" : " unread"));
+        from.innerText = email.from;
+
+        var summary = createElement("div", "email-summary");
+        var subject = createElement("span", summary, "email-subject" + (email.read ? "" : " unread"));
+        subject.innerText = email.subject;
+        createElement("span", summary, "email-preview").innerText = email.preview;
+
+        var date = createElement("span", "email-date");
+        date.innerText = formatDate(email.date);
+
+
+      //Add row
+        var row = table.addRow(dot, from, summary, date);
+        row.email = email;
+    }
+
+
+  //**************************************************************************
+  //** Events
+  //**************************************************************************
+  /** Mark messages as read when they are selected
+   */
+    table.onSelectionChange = function(rows){
+        for (var i=0; i<rows.length; i++){
+            var row = rows[i];
+            if (!row.selected) continue;
+
+            var email = row.email;
+            console.log("Opened \"" + email.subject + "\" from " + email.from);
+            if (!email.read){
+                email.read = true;
+                row.get(0).className = "";
+                row.get("From").classList.remove("unread");
+                row.get("Subject").firstChild.classList.remove("unread");
+            }
+        }
+    };
+};
+</script>
+
+
+</head>
+<body>
+<div class="demo-container">
+<h1>Table Demo</h1>
+<p>The Table component renders a scrollable table with a <b>fixed header</b>.
+Scroll through the 200 names below and notice that the header row stays in
+place. The header and the body are rendered as two separate tables that share
+the same column widths, so the columns stay aligned as you scroll.
+Click on a row to select it, then use the up/down arrow keys to move the
+selection. Open the web console to see events.</p>
+
+
+<div class="demo-row">
+
+    <div class="demo-col">
+        <h3>Fixed header</h3>
+        <p class="hint">Default inline style &mdash; no stylesheet needed</p>
+        <div id="demo1" class="table-container"></div>
+        <div class="status">
+            <span id="visibleRows"></span>
+            <span id="scrollPosition"></span>
+        </div>
+    </div>
+
+</div>
+
+
+<h2>Group Headers</h2>
+<p>The Table doesn't support grouping natively, but you can fake it. Each
+group header below is a regular row with its first cell stretched across the
+table (colSpan) and the remaining cells hidden. The row's inline styles and
+click handler are replaced so that clicking on a header expands or collapses
+the group instead of selecting the row. Items can still be selected with the
+mouse or the up/down arrow keys; keyboard navigation skips over the headers.</p>
+
+
+<div class="demo-row">
+
+    <div class="demo-col demo-col-full">
+        <h3>Grouped rows</h3>
+        <p class="hint">Click a group header to expand/collapse</p>
+        <div id="demo2" class="table-container group-table"></div>
+    </div>
+
+</div>
+
+
+<h2>Section Rows</h2>
+<p>Section rows are created the same way as the group headers (a full-width
+row with the other cells hidden) but they don't do anything when clicked.
+In the example below, messages are organized by date, similar to the inbox in
+Yahoo Mail. Click on a message to mark it as read. Keyboard navigation skips
+over the section rows.</p>
+
+
+<div class="demo-row">
+
+    <div class="demo-col demo-col-full">
+        <h3>Inbox</h3>
+        <p class="hint">Messages organized into Today, Yesterday, Last week, etc</p>
+        <div id="demo3" class="table-container email-table"></div>
+    </div>
+
+</div>
+
+
+<h2>JavaXT Themes</h2>
+<p>The same table styled with the JavaXT themes (themes/light.css and
+themes/dark.css). Each theme is shown in its own iframe so the two stylesheets
+don't collide.</p>
+
+
+<div class="demo-row">
+
+    <div class="demo-col demo-col-half">
+        <h3>Light theme</h3>
+        <p class="hint">themes/light.css &mdash; javaxt-table</p>
+        <iframe class="theme-frame" src="table-theme.html?theme=light"></iframe>
+    </div>
+
+    <div class="demo-col demo-col-half">
+        <h3>Dark theme</h3>
+        <p class="hint">themes/dark.css &mdash; javaxt-table</p>
+        <iframe class="theme-frame theme-frame-dark" src="table-theme.html?theme=dark"></iframe>
+    </div>
+
+</div>
+</div>
+</body>
+</html>
