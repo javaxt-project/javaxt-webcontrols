@@ -216,6 +216,11 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
         }
 
 
+      //Reset variables
+        multiDayCols = {};
+        singleDayCols = {};
+
+
       //Create table with 2 rows - one for the header and one for the grid
         table = createTable(parent);
         table.className = "javaxt-cal-month javaxt-noselect";
@@ -1078,10 +1083,14 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
             if (col==null){
 
               //Insert row
-                var currRow = cols[0][cols[0].length-1].parentNode;
-                var nextRow = currRow.nextSibling;
-                var newRow = cols[0][0].parentNode.cloneNode(true);
-                currRow.parentNode.insertBefore(newRow, nextRow);
+                var baseRow = cols[0][0].parentNode;
+                var currRow = baseRow;
+                while (currRow.nextSibling && currRow.nextSibling.multiDayRow===true){
+                    currRow = currRow.nextSibling;
+                }
+                var newRow = baseRow.cloneNode(true);
+                newRow.multiDayRow = true;
+                currRow.parentNode.insertBefore(newRow, currRow.nextSibling);
 
               //Update the multiDayCols array
                 for (var j=0; j<cols[0][0].parentNode.childNodes.length; j++){
