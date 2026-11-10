@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Themed Accordion</title>
+
+<!-- The theme stylesheet is swapped at runtime based on the ?theme= param -->
+<link id="theme" href="../../themes/light.css" rel="stylesheet" type="text/css" />
+
+<script src="../../src/accordion/Accordion.js"></script>
+<script src="../../src/utils/Utils.js"></script>
+<script src="../../themes/default.js"></script>
+
+<style>
+    html, body { height: 100%; margin: 0; }
+    #accordion { height: 100%; }
+
+    /* The theme removes the content padding, so pad the panels themselves */
+    .panel-body { padding: 10px; }
+</style>
+
+<script>
+window.onload = function() {
+
+  //Swap in the requested theme stylesheet (light | dark)
+    var theme = (javaxt.dhtml.utils.getParameter("theme") || "light").toLowerCase();
+    if (theme==="dark"){
+        document.getElementById("theme").href = "../../themes/dark.css";
+    }
+    document.body.style.backgroundColor = theme==="dark" ? "#2b2e35" : "#ffffff";
+    document.body.style.color = theme==="dark" ? "#bdbdbd" : "#363636";
+
+
+  //Style the accordion using the active theme's "accordion" map (CSS class
+  //names). This is the same style the kitchen sink demo uses.
+    new javaxt.dhtml.Accordion(document.getElementById("accordion"), {
+        animate: true,
+        defaultTab: 1,
+        style: javaxt.dhtml.style.default.accordion
+    });
+};
+</script>
+</head>
+<body>
+<div id="accordion">
+    <div title="Calendar"><div class="panel-body">Calendar Panel</div></div>
+    <div title="Cases"><div class="panel-body">Cases Panel</div></div>
+    <div title="Contacts"><div class="panel-body">Contacts Panel</div></div>
+    <div title="Email"><div class="panel-body">Email Panel</div></div>
+    <div title="Reports"><div class="panel-body">Reports Panel</div></div>
+</div>
+</body>
+</html>

@@ -1,4 +1,6 @@
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!DOCTYPE html>
+<html>
+
 <head>
 <title>Accordion Demo</title>
 
@@ -8,16 +10,75 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
 <link  href="../style.css" rel="stylesheet" type="text/css" />
 
-
-<!-- JavaXT Includes -->
-<script type="text/javascript" src="../../src/accordion/Accordion.js"></script>
-<script type="text/javascript" src="../../src/utils/Utils.js"></script>
+<script src="../../src/accordion/Accordion.js"></script>
+<script src="../../src/utils/Utils.js"></script>
 
 <style>
-    body {
-        padding: 0;
+
+  /**************************************************************************/
+  /** Demo layout
+  /**************************************************************************/
+
+    .demo-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 40px;
     }
 
+    .demo-col p.hint {
+        font-size: 12px;
+        color: #888;
+        margin: 0 0 12px 0;
+    }
+
+
+    /* Each demo is an accordion (left) and a status panel (right) inside a
+       fixed-height box. The accordion fills 100% of its parent's height. */
+    .demo-box {
+        display: flex;
+        width: 100%;
+        height: 560px;
+        overflow: hidden;
+    }
+
+    .demo-box .facet-panel {
+        width: 250px;
+        height: 100%;
+        flex-shrink: 0;
+        border: 1px solid #ddd;
+        border-top: 0px;
+
+        box-sizing: border-box;
+    }
+
+    .demo-box .main-panel {
+        flex: 1;
+        padding: 7px;
+        color: #555;
+        border: 1px solid #ddd;
+
+        border-left: 0 none;
+        border-radius: 0 6px 6px 0;
+    }
+
+
+    /* iframe styles for the javaxt theme demos */
+    .theme-frame {
+        width: 340px;
+        height: 480px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .theme-frame-dark {
+        border-color: #3a3f4a;
+    }
+
+
+  /**************************************************************************/
+  /** Accordion
+  /**************************************************************************/
+  /* Custom stylesheet-based header and content styles */
 
     .accordionHeader {
         padding: 7px 0 6px 7px;
@@ -35,46 +96,74 @@
         border-top: 1px solid #99bce8;
         padding: 5px 0 0 7px;
     }
+
 </style>
 
 
 
-<script type="text/javascript">
+<script>
 window.onload = function() {
 
 
-    var accordion = new javaxt.dhtml.Accordion("facet-panel", {
-        animate: true,
-        default: 2,
-        style: {
+  //**************************************************************************
+  //** Create an accordion and wire up the status panel next to it
+  //**************************************************************************
+    var createAccordion = function(id, config){
 
-            accordion: {
+        var mainPanel = document.getElementById(id + "-main");
+
+        config.style = {
+            panel: {
                 width: "100%",
                 height: "100%",
-                border: "1px solid #969696",
-                borderWidth: "0px 1px"
+                border: "0px solid #969696",
+                borderRightWidth: "0px"
             },
-
             tabHeader: "accordionHeader",
             tabContent: "accordionContent"
-        }
+        };
+
+        var accordion = new javaxt.dhtml.Accordion(id, config);
+
+        accordion.onHeaderClick = function(title, header, panel, event){
+            console.log("[" + id + "] Clicked " + title);
+        };
+
+        accordion.beforeChange = function(){
+            mainPanel.innerHTML = "Loading...";
+        };
+
+        accordion.afterChange = function(){
+            var tab = accordion.getCurrentTab();
+            mainPanel.innerHTML = tab.title;
+        };
+
+        return accordion;
+    };
+
+
+  //**************************************************************************
+  //** Accordion 1 - Basic
+  //**************************************************************************
+  /** Panels open and close in place. The second panel is opened by default.
+   */
+    createAccordion("demo1", {
+        animate: true,
+        defaultTab: 2
     });
 
 
-    accordion.onHeaderClick = function(title, header, panel, event){
-        //document.getElementById("main-panel").innerHTML = title;
-    };
-
-    accordion.beforeChange = function(){
-        document.getElementById("main-panel").innerHTML = "Loading...";
-    };
-
-    accordion.afterChange = function(){
-        var tab = accordion.getCurrentTab();
-        document.getElementById("main-panel").innerHTML = tab.title;
-    };
-
-    //accordion.open(1);
+  //**************************************************************************
+  //** Accordion 2 - Active on top
+  //**************************************************************************
+  /** With activeOnTop=true, the headers above the active panel are moved
+   *  below it so the active panel always displays at the top.
+   */
+    createAccordion("demo2", {
+        animate: true,
+        defaultTab: 1,
+        activeOnTop: true
+    });
 
 };
 </script>
@@ -82,51 +171,74 @@ window.onload = function() {
 
 </head>
 <body>
+<div class="demo-container">
+<h1>Accordion Demo</h1>
+<p>The accordions below are created from a list of divs. The title attribute
+of each div is used as the header label. Click on a header to switch panels.
+Open the web console to see events.</p>
 
 
-    <table style="border-collapse:collapse;width:100%;height:100%;" cellpadding="0">
-      <tr>
-          <td id="facet-panel" style="width:250px;height:100%;vertical-align:top;">
+<h2>Basic Accordion</h2>
+<p>Panels open and close in place. The <code>defaultTab</code> config is used
+to open the second panel on load.</p>
 
-              <div title="Calendar">
-                  Calendar Panel
-              </div>
-
-              <div title="Cases">
-                  Cases Panel
-              </div>
-
-              <div title="Contacts">
-                  Contacts Panel
-              </div>
-
-              <div title="Email">
-                  Email Panel
-              </div>
-
-              <div title="Reports">
-                  Reports Panel
-              </div>
-
-              <div title="Billing">
-                  Billing Panel
-              </div>
-
-              <div title="Admin">
-                  Admin Panel
-              </div>
-
-          </td>
+<div class="demo-box">
+    <div id="demo1" class="facet-panel">
+        <div title="Calendar">Calendar Panel</div>
+        <div title="Cases">Cases Panel</div>
+        <div title="Contacts">Contacts Panel</div>
+        <div title="Email">Email Panel</div>
+        <div title="Reports">Reports Panel</div>
+        <div title="Billing">Billing Panel</div>
+        <div title="Admin">Admin Panel</div>
+    </div>
+    <div id="demo1-main" class="main-panel">
+        Basic accordion demo. Click on a tab to switch views.
+    </div>
+</div>
 
 
-          <td id="main-panel" style="height:100%;vertical-align:top;padding:7px;">
+<h2>Active On Top</h2>
+<p>With <code>activeOnTop=true</code>, the active panel always displays at the
+top. Headers above the selected panel are moved below it.</p>
 
-              Basic accordion demo. Click on a tab to switch views.
+<div class="demo-box">
+    <div id="demo2" class="facet-panel">
+        <div title="Calendar">Calendar Panel</div>
+        <div title="Cases">Cases Panel</div>
+        <div title="Contacts">Contacts Panel</div>
+        <div title="Email">Email Panel</div>
+        <div title="Reports">Reports Panel</div>
+        <div title="Billing">Billing Panel</div>
+        <div title="Admin">Admin Panel</div>
+    </div>
+    <div id="demo2-main" class="main-panel">
+        Click on a tab to switch views. The active panel will always display at the top.
+    </div>
+</div>
 
-          </td>
 
-      </tr>
-    </table>
+<h2>JavaXT Themes</h2>
+<p>The same accordion styled with the JavaXT themes (themes/light.css and
+themes/dark.css). Each theme is shown in its own iframe so the two stylesheets
+don't collide.</p>
 
+
+<div class="demo-row">
+
+    <div class="demo-col">
+        <h3>Light theme</h3>
+        <p class="hint">themes/light.css &mdash; javaxt-accordion</p>
+        <iframe class="theme-frame" src="accordion-theme.html?theme=light"></iframe>
+    </div>
+
+    <div class="demo-col">
+        <h3>Dark theme</h3>
+        <p class="hint">themes/dark.css &mdash; javaxt-accordion</p>
+        <iframe class="theme-frame theme-frame-dark" src="accordion-theme.html?theme=dark"></iframe>
+    </div>
+
+</div>
+</div>
 </body>
 </html>
