@@ -85,6 +85,10 @@ javaxt.dhtml.PlayControl = function(parent, config) {
             me.setElapsedTime(config.startTime);
             fireEvents = true;
         };
+
+
+      //Fire the onRender() event (slider may have fired before our override)
+        if (slider.getWidth()>0) slider.onRender();
     };
 
 
