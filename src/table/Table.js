@@ -220,6 +220,8 @@ javaxt.dhtml.Table = function(parent, config) {
         td = tr.addColumn();
         td.style.width = "100%";
         td.style.height = "inherit";
+        td.style.boxSizing = "border-box";
+        var headerCell = td;
         header = createTable(td);
         if (config.hideHeader===true){
             tr.style.visibility = 'hidden';
@@ -337,8 +339,7 @@ javaxt.dhtml.Table = function(parent, config) {
 
 
       //Populate header
-        tr = createPhantomRow(header, phantomRowHeight);
-        var spacerUR = createElement('div', tr.addColumn());
+        createPhantomRow(header, phantomRowHeight);
 
 
         tr = header.addRow();
@@ -381,7 +382,6 @@ javaxt.dhtml.Table = function(parent, config) {
             };
             tr.appendChild(cell);
         }
-        tr.addColumn(); //<-- add cell under the spacer
 
 
 
@@ -448,11 +448,11 @@ javaxt.dhtml.Table = function(parent, config) {
             }
 
 
-          //Update the spacer in the right column of the header
+          //Reserve space in the header for the vertical scrollbar in the body
             var bodyWidth = bodyDiv.offsetWidth;
             var tableWidth = body.offsetWidth;
             var scrollWidth = Math.abs(bodyWidth-tableWidth);
-            spacerUR.style.width = scrollWidth + "px";
+            headerCell.style.paddingRight = scrollWidth + "px";
 
 
           //Watch for resize events
@@ -1531,9 +1531,7 @@ javaxt.dhtml.Table = function(parent, config) {
         if (idx<0 || idx>=config.columns.length) return;
 
 
-      //Get cells to update. Note that the header rows have an extra cell at
-      //the end (spacer) which is ignored since idx is less than the number of
-      //columns.
+      //Get cells to update
         var cells = [];
         var rows = nodeListToArray(header.getRows());
         rows = rows.concat(nodeListToArray(body.getRows()));
@@ -1605,10 +1603,11 @@ javaxt.dhtml.Table = function(parent, config) {
         else{
 
           //Scale percentages so they add up to exactly 100%. Otherwise, the
-          //browser distributes the difference differently in the header and
-          //the body (the header has an extra spacer column) and the columns
-          //don't line up. Only warn if the difference is more than rounding
-          //(e.g. three columns with a width of 33%)
+          //browser may distribute the difference differently in the header
+          //and the body (the header and body tables have different widths
+          //because of the scrollbar) and the columns don't line up. Only warn
+          //if the difference is more than rounding (e.g. three columns with a
+          //width of 33%)
             if (percentages.length>0){
                 if (Math.abs(totalPercent-100)>0.01){
                     for (var i=0; i<percentages.length; i++){
