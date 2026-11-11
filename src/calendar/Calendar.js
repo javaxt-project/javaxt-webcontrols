@@ -57,13 +57,15 @@ javaxt.dhtml.Calendar = function(parent, config) {
 
           //Header
             header : {
-                border: "1px solid #99BBE8",
-                background: "#EEEEEE",
+                border: "0 none",
+                borderBottom: "1px solid #8f8f8f",
+                background: "#eaeaea",
                 height: "25px"
             },
             headerCol : {
-                borderLeft: "1px solid #99BBE8",
-                borderRight: "1px solid #99BBE8",
+                borderLeft: "1px solid #ccc",
+                borderRight: "1px solid #ccc",
+                color: "#272727",
                 textAlign: "center",
                 fontFamily: "tahoma,arial,verdana,sans-serif",
                 fontSize: "11px",
@@ -74,13 +76,11 @@ javaxt.dhtml.Calendar = function(parent, config) {
           //Multiday event header
             multidayHeader : {
                 borderBottom: "1px solid #99BBE8",
-                borderLeft: "1px solid #000000",
-                borderRight: "1px solid #000000",
-                backgroundColor: "#FFFFFF"
+                backgroundColor: "#fff"
             },
             multidayCol : {
-                borderLeft: "1px solid #000000",
-                borderRight: "1px solid #000000",
+                borderLeft: "1px solid #ccc",
+                borderRight: "1px solid #ccc",
                 paddingTop: "0px",
                 verticalAlign: "top"
             },
@@ -88,15 +88,13 @@ javaxt.dhtml.Calendar = function(parent, config) {
 
           //Body
             body : {
-                borderRight: "1px solid #000000",
-                borderBottom: "1px solid #000000",
-                borderLeft: "1px solid #000000"
+                border: "0 none"
             },
 
           //Cells
             cell : {
-                borderRight: "1px solid #000000",
-                borderLeft: "1px solid #000000",
+                borderRight: "1px solid #ccc",
+                borderLeft: "1px solid #ccc",
                 verticalAlign: "top"
             },
             cellHeader : {
@@ -107,17 +105,17 @@ javaxt.dhtml.Calendar = function(parent, config) {
                 fontSize: "11px"
             },
             cellFooter : {
-                borderBottom: "1px solid #000000"
+                borderBottom: "1px solid #ccc"
             },
             cellPrevMonth : {
                 background: "#EFF9FC",
-                borderRight: "1px solid #000000",
-                borderLeft: "1px solid #000000"
+                borderRight: "1px solid #ccc",
+                borderLeft: "1px solid #ccc"
             },
             cellNextMonth : {
                 background: "#EFF9FC",
-                borderRight: "1px solid #000000",
-                borderLeft: "1px solid #000000"
+                borderRight: "1px solid #ccc",
+                borderLeft: "1px solid #ccc"
             },
 
           //Hours
