@@ -110,7 +110,8 @@ javaxt.dhtml.calendar.Event = function(config) {
     };
 
     this.numDays = function(){
-        return Math.floor(javaxt.dhtml.calendar.utils.getDaysBetween(startDate, endDate));
+        var lastDate = javaxt.dhtml.calendar.utils.getEndDate(startDate, endDate);
+        return Math.floor(javaxt.dhtml.calendar.utils.getDaysBetween(startDate, lastDate));
     };
 
     this.isEditable = function(){

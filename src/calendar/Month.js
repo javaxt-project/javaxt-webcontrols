@@ -1137,6 +1137,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
             });
 
             div.style.height = "100%";
+            div.style.boxSizing = "border-box"; //the wrapper is sized to the whole bar (see below)
             innerDiv.appendChild(div);
 
 
@@ -1146,7 +1147,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
                 height: eventHeight + "px", //"100%"
                 position: "relative"
             });
-            if (k>1) wrapper.style.marginTop = (config.eventSpacing*2) + "px";  //Vertical padding
+            if (k>1) wrapper.style.marginTop = eventSpacer + "px";  //Gap between multiday rows
             wrapper.appendChild(outerDiv);
             wrapper.event = event;
             wrapper.onclick = function(e){
@@ -1160,7 +1161,20 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
 
 
             col.appendChild(wrapper);
-            col.style.height = eventHeight + "px";
+
+
+          //Size the row to fit the event text plus the event's own padding and
+          //border so stacked multiday events don't overlap. Computed styles
+          //don't require layout.
+            var h = eventHeight;
+            var props = ["padding-top", "padding-bottom", "border-top-width", "border-bottom-width"];
+            for (var j=0; j<props.length; j++){
+                var v = parseFloat(getCssValue(div, props[j]));
+                if (!isNaN(v)) h += v;
+            }
+            h = Math.ceil(h);
+            wrapper.style.height = h + "px";
+            col.style.height = h + "px";
             mutiDayEventDivs.push(wrapper);
         }
 
@@ -1209,7 +1223,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
                 if (lastUsedCol!=null){
                     var lastUsedRow = tr.parentNode.childNodes[lastUsedCol];
                     y1 = _getRect(lastUsedRow).bottom;
-                    offset = y2-y1;
+                    offset = (y2-y1) + ((config.eventSpacing*2)-eventSpacer);
                 }
                 else{
                     y1 = _getRect(tr.parentNode.childNodes[0]).top;
@@ -1455,6 +1469,7 @@ javaxt.dhtml.calendar.Month = function(parent, config) {
 
     var log = function(str){if(config.debug)console.log(str);};
     var getStyle = javaxt.dhtml.calendar.utils.getStyle;
+    var getCssValue = javaxt.dhtml.utils.getStyle;
     var initDrag = javaxt.dhtml.calendar.utils.initDrag;
     var getEventMetrics = javaxt.dhtml.calendar.utils.getEventMetrics;
     var resizeHeader = javaxt.dhtml.calendar.utils.resizeHeader;

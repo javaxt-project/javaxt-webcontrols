@@ -23,6 +23,25 @@ javaxt.dhtml.calendar.utils = {
 
 
   //**************************************************************************
+  //** getEndDate
+  //**************************************************************************
+  /** Returns the last date for a given date range. For all-day or multi-day
+   *  events, returns the end date minus 1 millisecond for events that end
+   *  exactly at midnight. This ensures that an event that ends exactly at
+   *  midnight doesn't extend into the next day.
+   */
+    getEndDate : function(startDate, endDate){
+        var end = new Date(endDate);
+        if (end.getTime()>new Date(startDate).getTime() &&
+            end.getHours()===0 && end.getMinutes()===0 &&
+            end.getSeconds()===0 && end.getMilliseconds()===0){
+            end.setTime(end.getTime()-1);
+        }
+        return end;
+    },
+
+
+  //**************************************************************************
   //** getStyle
   //**************************************************************************
   /** Used to get or create a style object for a given event

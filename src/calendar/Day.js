@@ -64,13 +64,12 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
     var widths = {};
     var scrollWidth;
     var scrollable = true;
-    var eventHeight;
-    var eventPadding;
+    var eventHeight, eventContentHeight, eventPadding, eventGap;
+    var gridLineWidth = 1;
     var rendered;
 
 
   //Browser detection used to adjust event padding
-    var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
     var isIE = window.navigator.userAgent.indexOf("MSIE ") > -1 ||
                window.navigator.userAgent.indexOf("Trident/") > -1;
 
@@ -860,11 +859,11 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
     var addEvent = function(event, deferUpdates){
 
         log("Adding " + event.getSubject() + "...");
-        var numDays = event.numDays();
+        var multiDay = isMultiDay(event);
 
 
       //Check if we've already rendered the given event
-        if (numDays>=1){
+        if (multiDay){
             for (var i=1; i<multidayEventsTable.childNodes.length; i++){
                 var tr = multidayEventsTable.childNodes[i];
                 for (var j=1; j<tr.childNodes.length; j++){
@@ -895,7 +894,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         var style = getStyle(event, config);
         event.setStyle(style);
 
-        if (numDays>=1){
+        if (multiDay){
             addMultiDayEvent(event);
         }
         else{
@@ -930,7 +929,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         events = me.getEvents();
         for (var i=0; i<events.length; i++){
             var event = events[i];
-            if (event.numDays()<1){
+            if (!isMultiDay(event)){
                 var div = getDiv(event);
                 if (div!=null) singleDayEvents.push(event);
             }
@@ -1092,7 +1091,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
 
       //Remove div
-        if (event.numDays()>=1){
+        if (isMultiDay(event)){
 
             for (var i=1; i<multidayEventsTable.childNodes.length; i++){
                 var tr = multidayEventsTable.childNodes[i];
@@ -1141,14 +1140,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
 
                           //Update table height
-                            var maxHeight = (multidayEventsTable.childNodes.length-1)*(eventHeight+eventPadding);
-                            if (maxHeight==0){
-                                multidayRow.style.display = "none";
-                                multidayRow.style.visibility = "hidden";
-                            }
-                            else{
-                                multidayEventsTable.parentNode.parentNode.parentNode.style.height = (maxHeight+(eventPadding)) + "px";
-                            }
+                            updateMultidayLayout();
 
 
                             return;
@@ -1412,6 +1404,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         updatePadding(outerDiv);
         var startTime = event.getStartDate().getHours() + (event.getStartDate().getMinutes()/60);
         var endTime = event.getEndDate().getHours() + (event.getEndDate().getMinutes()/60);
+        if (event.getEndDate().getDate()!==event.getStartDate().getDate()) endTime = 24;
 
       //Position the event as a percentage of the day so it scales with the grid
       //(the grid rows stretch to fill the view). Pixel offsets would drift away
@@ -1424,6 +1417,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
       //Create div used to render the event
         var div = event.createDiv();
+        div.style.boxSizing = "border-box";
 
 
       //Wrap event in a table to ensure proper padding (I couldn't figure out how to do it with divs)
@@ -1433,23 +1427,15 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
             verticalAlign: "top",
             width: "100%",
             height: "100%",
-            padding: ((eventPadding/2)+1) + "px " + eventPadding + "px " + (eventPadding/2) + "px" //+1 for half-hour border
+            padding: eventGap + "px " + eventGap + "px " + (eventGap+gridLineWidth) + "px"
         });
         td.appendChild(div);
 
 
-      //Update vertical padding. Each browser pads tables differently. Chrome
-      //doesn't apply any padding so the table fits perfectly in the div. IE
-      //puts the 1px table below where we expect and adds 1px to the bottom.
-      //FF adds 1 px to the bottom. This might have something to do with how
-      //browsers interpret the cellpadding and cellspacing attributes.
+      //Update vertical padding for legacy IE
         if (isIE) {
             td.style.paddingTop = (eventPadding/2) + "px";
             td.style.paddingBottom = (eventPadding+1) + "px";
-        }
-        if (isFirefox){
-            td.style.paddingTop = (eventPadding/2) + "px";
-            td.style.paddingBottom = (((eventPadding/2)+1)*2) + "px";
         }
 
 
@@ -1520,14 +1506,15 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
     var addMultiDayEvent = function(event){
 
       //Check whether the event is in range
-        if (event.getEndDate()<startDate || event.getStartDate()>endDate) return;
+        var lastDate = getEndDate(event.getStartDate(), event.getEndDate());
+        if (lastDate<startDate || event.getStartDate()>endDate) return;
 
 
         var startColID, endColID;
         var continueLeft = false;
         var continueRight = false;
-        var a = javaxt.dhtml.calendar.utils.getDaysBetween(startDate, event.getStartDate());
-        var b = javaxt.dhtml.calendar.utils.getDaysBetween(startDate, event.getEndDate());
+        var a = getDaysBetween(startDate, event.getStartDate());
+        var b = getDaysBetween(startDate, lastDate);
         //console.log(event.getSubject() + " " + a + " --> " + b);
 
         startColID = a;
@@ -1651,8 +1638,8 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
             position: "absolute"
         });
 
-        var paddingLeft = continueLeft ? "0px" : eventPadding + "px";
-        var paddingRight = continueRight ? "0px" : eventPadding + "px";
+        var paddingLeft = continueLeft ? "0px" : eventGap + "px";
+        var paddingRight = continueRight ? "0px" : eventGap + "px";
         var innerDiv = createElement('div', outerDiv, {
             height: "100%",
             padding: "0px " + paddingRight + " 0px " + paddingLeft, //Horizontal padding
@@ -1661,6 +1648,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
         var div = event.createDiv(continueLeft, continueRight);
         div.style.height = "100%";
+        div.style.boxSizing = "border-box";
         innerDiv.appendChild(div);
 
 
@@ -1668,8 +1656,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         var wrapper = createElement('div', {
             width: "100%",
             height: eventHeight + "px",
-            position: "relative",
-            marginTop: (multidayEventsTable.childNodes.length>2 ? (eventPadding*2) : 0) + "px"
+            position: "relative"
         });
         wrapper.appendChild(outerDiv);
         wrapper.event = event;
@@ -1685,17 +1672,22 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         startCol.appendChild(wrapper);
 
 
-      //Update the visibility of the multiday row
-        multidayRow.style.display = '';
-        multidayRow.style.visibility = "visible";
+      //Size the wrapper to fit the event text plus the event's own padding and
+      //border (same as the month view). Computed styles don't require layout.
+        if (eventContentHeight>0){
+            var h = eventContentHeight;
+            var props = ["padding-top", "padding-bottom", "border-top-width", "border-bottom-width"];
+            for (var i=0; i<props.length; i++){
+                var v = parseFloat(getCssValue(div, props[i]));
+                if (!isNaN(v)) h += v;
+            }
+            wrapper.style.height = Math.ceil(h) + "px";
+        }
 
 
-      //Update table height
-        var numMultiDayEvents = multidayEventsTable.childNodes.length-1;
-        var h = numMultiDayEvents*(eventHeight+eventPadding);
-        h = (h+(eventPadding*2));
+      //Update the visibility and height of the multiday row
+        var h = updateMultidayLayout();
         var multidayEventsDiv = multidayEventsTable.parentNode.parentNode.parentNode;
-        multidayEventsDiv.style.height =  h + "px";
 
 
 
@@ -1729,6 +1721,60 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
             }
         }
 
+    };
+
+
+  //**************************************************************************
+  //** isMultiDay
+  //**************************************************************************
+  /** Returns true if the event should be rendered in the multiday (all-day)
+   *  row instead of the time grid: i.e. if it lasts 24 hours or more.
+   */
+    var isMultiDay = function(event){
+        return getDaysBetween(event.getStartDate(), event.getEndDate())>=1;
+    };
+
+
+  //**************************************************************************
+  //** updateMultidayLayout
+  //**************************************************************************
+  /** Used to space the multiday event rows and size the multiday row to fit
+   *  them. Uses the same gap as the month view (eventSpacing+1) above, between,
+   *  and below the rows. Returns the height of the multiday events div.
+   */
+    var updateMultidayLayout = function(){
+
+        var rows = multidayEventsTable.childNodes; //row 0 is the 1px column row
+        var numRows = rows.length-1;
+        if (numRows<1){
+            multidayRow.style.display = "none";
+            multidayRow.style.visibility = "hidden";
+            return 0;
+        }
+
+
+      //Set the vertical spacing above each row of events and sum the row heights
+        var gap = (isNumber(config.eventSpacing) ? parseInt(config.eventSpacing) : 2) + 1;
+        var h = 1; //column row
+        for (var i=1; i<rows.length; i++){
+            var margin = (i===1 ? gap-1 : gap); //-1 for the column row
+            var rowHeight = 0;
+            var cols = rows[i].childNodes;
+            for (var j=1; j<cols.length; j++){
+                var wrapper = cols[j].childNodes[0];
+                if (wrapper){
+                    wrapper.style.marginTop = margin + "px";
+                    var wh = parseFloat(wrapper.style.height);
+                    if (wh>rowHeight) rowHeight = wh;
+                }
+            }
+            h += margin + rowHeight;
+        }
+        h += gap;
+        multidayEventsTable.parentNode.parentNode.parentNode.style.height = h + "px";
+        multidayRow.style.display = '';
+        multidayRow.style.visibility = "visible";
+        return h;
     };
 
 
@@ -1853,8 +1899,9 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         var events = config.eventStore.getEvents();
         for (var i=0; i<events.length; i++){
 
+            var lastDate = getEndDate(events[i].getStartDate(), events[i].getEndDate());
             if (events[i].getStartDate().getTime()<endDate.getTime() &&
-                events[i].getEndDate().getTime()>=startDate.getTime()){
+                lastDate.getTime()>=startDate.getTime()){
                 me.addEvent(events[i]);
             }
         }
@@ -1969,7 +2016,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         if (td){
             var left = parseInt(outerDiv.style.left);
             if (left===0){
-                td.style.paddingLeft = eventPadding+"px";
+                td.style.paddingLeft = eventGap+"px";
             }
             else{
                 td.style.paddingLeft = "0px";
@@ -2050,7 +2097,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
         var overlappingEvents = config.eventStore.getOverlappingEvents(event);
         for (var i=0; i<overlappingEvents.length; i++){
             var _event = overlappingEvents[i];
-            if (_event.numDays()<1){//Ignore mulitday events
+            if (!isMultiDay(_event)){//Ignore mulitday events
                 var _div = getDiv(_event);
                 if (_div!=null){ //Ignore events that are out of view
                     arr.push(_event);
@@ -2089,7 +2136,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
    */
     var getDiv = function(event){
 
-        if (event.numDays()>=1){
+        if (isMultiDay(event)){
             //TODO: Find multiday event div...
         }
         else{
@@ -2129,15 +2176,29 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
   //**************************************************************************
   //** updateEventMetrics
   //**************************************************************************
-  /** Used to set eventHeight and eventPadding
+  /** Used to set eventHeight, eventPadding, eventGap, and gridLineWidth
    */
     var updateEventMetrics = function(){
+
+      //Get the width of the grid lines between the time slots
+        for (var cellID in cells){
+            if (cells.hasOwnProperty(cellID)){
+                var rows = cells[cellID].getElementsByTagName("table")[0].rows; //grid table
+                var w = 0;
+                for (var i=1; i<Math.min(3, rows.length); i++){ //skip row 0 (no top border)
+                    var bw = parseFloat(getCssValue(rows[i].childNodes[0], "border-top-width"));
+                    if (bw>w) w = bw;
+                }
+                gridLineWidth = Math.ceil(w);
+                break;
+            }
+        }
+
         getEventMetrics(el, config.style.event, function(metrics){
-          //Multiday event divs are border-box (see the .javaxt-cal-day rule), so
-          //their height:100% is the full bar - use the full rendered height so
-          //the text isn't clipped.
             eventHeight = metrics.offsetHeight;
+            eventContentHeight = metrics.contentHeight;
             eventPadding = metrics.padding;
+            eventGap = (eventPadding/2)+1;
         });
     };
 
@@ -2150,6 +2211,7 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
     var createElement = javaxt.dhtml.utils.createElement;
     var createTable = javaxt.dhtml.utils.createTable;
     var intersects = javaxt.dhtml.utils.intersects;
+    var getCssValue = javaxt.dhtml.utils.getStyle;
     var isNumber = javaxt.dhtml.utils.isNumber;
     var addStyle = javaxt.dhtml.utils.addStyle;
     var onRender = javaxt.dhtml.utils.onRender;
@@ -2158,6 +2220,9 @@ javaxt.dhtml.calendar.Day = function(parent, config) {
 
     var log = function(str){if(config.debug)console.log(str);};
     var getEventMetrics = javaxt.dhtml.calendar.utils.getEventMetrics;
+    var getDaysBetween = javaxt.dhtml.calendar.utils.getDaysBetween;
+    var getEndDate = javaxt.dhtml.calendar.utils.getEndDate;
+
     var resizeHeader = javaxt.dhtml.calendar.utils.resizeHeader;
     var getStyle = javaxt.dhtml.calendar.utils.getStyle;
     var initDrag = javaxt.dhtml.calendar.utils.initDrag;
