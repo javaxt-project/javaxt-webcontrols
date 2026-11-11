@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Calendar Demo</title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<link  href="../style.css" rel="stylesheet" type="text/css" />
+
+<!-- The Calendar and its sub-components. No other javaxt components are
+     required - the calendar renders with its own built-in inline styles. -->
+<script src="../../src/utils/Utils.js"></script>
+<script src="../../src/calendar/EventStore.js"></script>
+<script src="../../src/calendar/Event.js"></script>
+<script src="../../src/calendar/Utils.js"></script>
+<script src="../../src/calendar/View.js"></script>
+<script src="../../src/calendar/Day.js"></script>
+<script src="../../src/calendar/Week.js"></script>
+<script src="../../src/calendar/Month.js"></script>
+<script src="../../src/calendar/Calendar.js"></script>
+
+<style>
+
+  /**************************************************************************/
+  /** Demo layout
+  /**************************************************************************/
+
+    .demo-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+    }
+
+    .demo-toolbar button {
+        font: inherit;
+        font-size: 13px;
+        padding: 5px 12px;
+        border: 1px solid #c7ced6;
+        background: #f5f7fa;
+        border-radius: 4px;
+        cursor: pointer;
+        color: #333;
+    }
+    .demo-toolbar button:hover { background: #eaeef3; }
+    .demo-toolbar button.active {
+        background: #3b6ea5;
+        border-color: #3b6ea5;
+        color: #fff;
+    }
+
+    .demo-toolbar .spacer { flex: 1 1 auto; }
+
+    .demo-toolbar .title {
+        font-size: 15px;
+        font-weight: 600;
+        color: #2b3a4a;
+        min-width: 220px;
+        text-align: center;
+    }
+
+  /* The calendar needs an explicitly sized container to render into. The
+     height is set by JavaScript (see fitCalendar): the month view is sized so
+     its day cells are square; the week/day views use a fixed height. */
+    #calendar {
+        position: relative;
+        width: 100%;
+        max-width: 1100px;
+        height: 600px;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        overflow: hidden; /* the day/week grid scrolls internally; keep the outer box stable */
+    }
+
+  /* The week/day sections are time-based (a scrollable hour grid), so they use
+     a fixed height rather than the square-cell sizing used for the month. */
+    .view-demo {
+        position: relative;
+        width: 100%;
+        max-width: 1100px;
+        height: 560px;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        overflow: hidden;
+    }
+
+  /* Each theme preview gets its own row so it has room to render. The iframe
+     height is set by JavaScript (see fitFrame) to fit its square month grid. */
+    .theme-block { margin-top: 24px; }
+
+    .theme-block p.hint { font-size: 12px; color: #888; margin: 0 0 10px 0; }
+
+    .theme-frame {
+        display: block;
+        width: 100%;
+        max-width: 900px;
+        height: 700px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    .theme-frame-dark { border-color: #3a3f4a; }
+
+</style>
+
+
+
+<script>
+window.onload = function() {
+
+    var container = document.getElementById("calendar");
+    var titleLabel = document.getElementById("cal-title");
+
+
+  //**************************************************************************
+  //** Square month cells (aspect ratio)
+  //**************************************************************************
+  /** The month grid is 7 columns wide with a variable number of week-rows. A
+   *  square day cell is therefore (width / 7) tall, so the grid body needs to
+   *  be that times the number of weeks, plus the day-name header row. The
+   *  week/day views are time-based (tall), so they keep a fixed height.
+   */
+    var monthWeeks = function(date){
+        var first = new Date(date.getFullYear(), date.getMonth(), 1);
+        var last  = new Date(date.getFullYear(), date.getMonth()+1, 0);
+        return Math.ceil((first.getDay() + last.getDate()) / 7);
+    };
+
+    var fitCalendar = function(cal){
+        var view = cal.getView();
+        if (view && !view.hasHours()){ // month view -> square day cells
+            var cellSize = container.clientWidth / 7;
+            var header = container.querySelector('[desc="header-row"]');
+            var headerH = header ? Math.round(header.getBoundingClientRect().height) : 26;
+            container.style.height = Math.round(headerH + monthWeeks(cal.getDate()) * cellSize) + "px";
+        }
+        else { // week / day view -> fixed height
+            container.style.height = "600px";
+        }
+    };
+
+
+  //**************************************************************************
+  //** Sample events
+  //**************************************************************************
+  /** Events are anchored to the CURRENT month so the demo always shows data,
+   *  regardless of when it is opened. "at(day, hour, min)" builds a date in the
+   *  current month.
+   */
+    var now = new Date();
+    var at = function(day, hour, min){
+        return new Date(now.getFullYear(), now.getMonth(), day, hour, min||0, 0);
+    };
+
+  //A small palette. Each event carries its own inline style so the default
+  //(no-stylesheet) calendar shows a splash of color.
+    var colors = {
+        blue:   {bg: "#dbeafe", border: "#3b82f6"},
+        purple: {bg: "#ede9fe", border: "#8b5cf6"},
+        red:    {bg: "#fee2e2", border: "#ef4444"},
+        teal:   {bg: "#cffafe", border: "#0891b2"},
+        yellow: {bg: "#fef9c3", border: "#ca8a04"},
+        green:  {bg: "#dcfce7", border: "#16a34a"}
+    };
+
+    var makeEvent = function(id, subject, start, end, colorName){
+        var c = colors[colorName];
+        return new javaxt.dhtml.calendar.Event({
+            id: id,
+            subject: subject,
+            startDate: start,
+            endDate: end,
+            editable: true,
+            style: {
+                event: {
+                    fontFamily: "tahoma,arial,verdana,sans-serif",
+                    fontSize: "11px",
+                    padding: "1px 4px",
+                    whiteSpace: "nowrap",
+                    cursor: "pointer",
+                    color: "#333",
+                    border: "1px solid " + c.border,
+                    borderRadius: "3px",
+                    backgroundColor: c.bg
+                }
+            }
+        });
+    };
+
+    var events = [
+        makeEvent(1,  "Team Standup",     at(3, 9, 0),   at(3, 9, 30),  "blue"),
+        makeEvent(2,  "Design Review",    at(3, 13, 0),  at(3, 14, 30), "purple"),
+        makeEvent(3,  "Dentist",          at(8, 10, 0),  at(8, 11, 0),  "red"),
+        makeEvent(4,  "Sprint Planning",  at(10, 10, 0), at(10, 12, 0), "teal"),
+        makeEvent(5,  "Conference",       at(15, 0, 0),  at(17, 23, 59),"yellow"), // multi-day
+        makeEvent(6,  "1:1 with Manager", at(18, 15, 0), at(18, 15, 30),"blue"),
+        makeEvent(7,  "Release Cut",      at(22, 17, 0), at(22, 18, 0), "red"),
+        makeEvent(8,  "Birthday Party",   at(24, 18, 0), at(24, 21, 0), "purple"),
+        makeEvent(9,  "Retrospective",    at(26, 14, 0), at(26, 15, 0), "green")
+    ];
+
+  //Pre-populate a shared event store so events appear in every view.
+    var eventStore = new javaxt.dhtml.calendar.EventStore();
+    for (var i=0; i<events.length; i++) eventStore.add(events[i]);
+
+
+  //**************************************************************************
+  //** Create the calendar
+  //**************************************************************************
+  /** No "style" config is provided, so the calendar renders using its built-in
+   *  inline default styles - no stylesheet required (see the theme examples
+   *  below for the stylesheet-based look).
+   */
+    var calendar = new javaxt.dhtml.Calendar(container, {
+        view: "month",
+        date: new Date(),
+        eventStore: eventStore,
+        listeners: {
+
+          //Keep the toolbar title in sync and (re)square the month grid.
+            update: function(cal){
+                titleLabel.innerHTML = cal.getTitle();
+                fitCalendar(cal);
+            },
+
+          //Log interactions to the console.
+            cellclick: function(date){
+                console.log("Cell clicked: " + date);
+            },
+            eventclick: function(event){
+                console.log("Event clicked: " + event.getSubject() + " (" + event.getStartDate() + ")");
+            }
+        }
+    });
+
+
+  //**************************************************************************
+  //** Wire up the toolbar
+  //**************************************************************************
+    var viewButtons = {
+        month: document.getElementById("btn-month"),
+        week:  document.getElementById("btn-week"),
+        day:   document.getElementById("btn-day")
+    };
+
+    var setView = function(name){
+        calendar.setView(name);
+        for (var key in viewButtons){
+            if (viewButtons.hasOwnProperty(key)){
+                if (key===name) viewButtons[key].classList.add("active");
+                else viewButtons[key].classList.remove("active");
+            }
+        }
+    };
+
+    document.getElementById("btn-prev").onclick  = function(){ calendar.back(); };
+    document.getElementById("btn-next").onclick  = function(){ calendar.next(); };
+    document.getElementById("btn-today").onclick = function(){ calendar.setDate(new Date()); };
+    viewButtons.month.onclick = function(){ setView("month"); };
+    viewButtons.week.onclick  = function(){ setView("week"); };
+    viewButtons.day.onclick   = function(){ setView("day"); };
+
+  //Reflect the initial view + title, and keep the month square on resize.
+    viewButtons.month.classList.add("active");
+    titleLabel.innerHTML = calendar.getTitle();
+    fitCalendar(calendar);
+    window.addEventListener("resize", function(){ fitCalendar(calendar); });
+
+
+  //**************************************************************************
+  //** Week view (denser)
+  //**************************************************************************
+  /** A calendar fixed to the week view with several events per weekday - some
+   *  overlapping - plus a multi-day event, to show the timeline layout.
+   */
+    var weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay()); // Sunday
+    var wk = function(dayOffset, hour, min){
+        return new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate()+dayOffset, hour, min||0, 0);
+    };
+
+    var weekStore = new javaxt.dhtml.calendar.EventStore();
+    [
+        makeEvent(101, "Conference",      wk(2, 0, 0),  wk(4, 23, 59), "yellow"), // multi-day (Tue-Thu)
+        makeEvent(102, "Standup",         wk(1, 9, 0),  wk(1, 9, 30),  "blue"),
+        makeEvent(103, "Sprint Planning", wk(1, 10, 0), wk(1, 12, 0),  "teal"),
+        makeEvent(104, "Design Review",   wk(1, 13, 0), wk(1, 14, 30), "purple"),
+        makeEvent(105, "Interview",       wk(2, 9, 30), wk(2, 10, 30), "red"),
+        makeEvent(106, "Team Sync",       wk(2, 10, 0), wk(2, 10, 30), "blue"),   // overlaps Interview
+        makeEvent(107, "Lunch & Learn",   wk(2, 12, 0), wk(2, 13, 0),  "green"),
+        makeEvent(108, "Workshop",        wk(3, 9, 0),  wk(3, 11, 0),  "yellow"),
+        makeEvent(109, "1:1",             wk(3, 10, 0), wk(3, 10, 30), "blue"),   // overlaps Workshop
+        makeEvent(110, "Retro",           wk(3, 15, 0), wk(3, 16, 0),  "green"),
+        makeEvent(111, "Client Call",     wk(4, 11, 0), wk(4, 12, 30), "red"),
+        makeEvent(112, "Design Sync",     wk(4, 14, 0), wk(4, 15, 0),  "purple"),
+        makeEvent(113, "Demo",            wk(5, 11, 0), wk(5, 12, 0),  "teal"),
+        makeEvent(114, "Happy Hour",      wk(5, 16, 0), wk(5, 18, 0),  "yellow")
+    ].forEach(function(e){ weekStore.add(e); });
+
+    new javaxt.dhtml.Calendar(document.getElementById("week"), {
+        view: "week",
+        date: new Date(),
+        eventStore: weekStore
+    });
+
+
+  //**************************************************************************
+  //** Day view (denser)
+  //**************************************************************************
+  /** A calendar fixed to the day view showing a busy day. The heavily
+   *  overlapping events demonstrate how the view splits them into columns.
+   */
+    var dy = function(hour, min){
+        return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, min||0, 0);
+    };
+
+    var dayStore = new javaxt.dhtml.calendar.EventStore();
+    [
+        makeEvent(201, "Standup",        dy(8, 0),   dy(9, 0),   "blue"),
+        makeEvent(202, "Design Review",  dy(9, 0),   dy(10, 30), "purple"),
+        makeEvent(203, "Interview",      dy(9, 30),  dy(11, 0),  "red"),    // overlaps Design Review
+        makeEvent(204, "Quick Sync",     dy(10, 0),  dy(10, 30), "teal"),   // overlaps both
+        makeEvent(205, "Sprint Planning",dy(11, 0),  dy(12, 30), "teal"),
+        makeEvent(206, "Lunch",          dy(12, 0),  dy(13, 0),  "green"),  // overlaps Sprint Planning
+        makeEvent(207, "Workshop",       dy(13, 30), dy(15, 0),  "yellow"),
+        makeEvent(208, "1:1 w/ Manager", dy(14, 0),  dy(14, 30), "blue"),   // overlaps Workshop
+        makeEvent(209, "Client Call",    dy(15, 0),  dy(16, 0),  "red"),
+        makeEvent(210, "Retrospective",  dy(16, 0),  dy(17, 0),  "green")
+    ].forEach(function(e){ dayStore.add(e); });
+
+    new javaxt.dhtml.Calendar(document.getElementById("day"), {
+        view: "day",
+        date: new Date(),
+        eventStore: dayStore
+    });
+
+
+  //**************************************************************************
+  //** Size the theme preview iframes so their month grid is square too
+  //**************************************************************************
+  /** Each theme iframe shows the current month at its own (fixed) width, so we
+   *  size the iframe to the same square-cell height used above: header + weeks
+   *  x (width / 7). Computed here (rather than inside the iframe) to avoid a
+   *  resize feedback loop between the two frames.
+   */
+    var frames = document.querySelectorAll("iframe.theme-frame");
+    var fitFrame = function(frame){
+        var w = frame.clientWidth;
+        if (w > 0) frame.style.height = Math.round(26 + monthWeeks(new Date()) * (w/7)) + "px";
+    };
+    var fitFrames = function(){ for (var i=0; i<frames.length; i++) fitFrame(frames[i]); };
+
+    for (var f=0; f<frames.length; f++){
+        frames[f].addEventListener("load", (function(frame){ return function(){ fitFrame(frame); }; })(frames[f]));
+    }
+    fitFrames();
+    window.addEventListener("resize", fitFrames);
+
+};
+</script>
+
+
+</head>
+<body>
+<div class="demo-container">
+<h1>Calendar Demo</h1>
+<p>An interactive month/week/day calendar. This example uses the component's
+<b>default style</b>, which is defined inline (no stylesheet required). Use the
+toolbar to navigate and switch views; open the web console to see click events.
+The colored events carry their own inline style, and the month view is sized so
+its day cells stay square. Scroll down for the same calendar styled with the
+JavaXT themes.</p>
+
+
+<div class="demo-toolbar">
+    <button id="btn-prev" title="Previous">&lsaquo;</button>
+    <button id="btn-today">Today</button>
+    <button id="btn-next" title="Next">&rsaquo;</button>
+    <span class="title" id="cal-title"></span>
+    <span class="spacer"></span>
+    <button id="btn-month">Month</button>
+    <button id="btn-week">Week</button>
+    <button id="btn-day">Day</button>
+</div>
+
+<div id="calendar"></div>
+
+
+<h2>Week View</h2>
+<p>The week view lays out a seven-day timeline. Timed events are positioned by
+the hour, overlapping events are split into side-by-side columns, and multi-day
+events span across a bar at the top. This example packs several meetings into
+each weekday &mdash; denser than the month view above &mdash; to show the
+overlap layout. The grid scrolls to reveal the full day.</p>
+
+<div id="week" class="view-demo"></div>
+
+
+<h2>Day View</h2>
+<p>The day view is a single-day timeline that shares the week view's rendering.
+This example shows a busy day whose many overlapping appointments are
+automatically divided into columns so nothing is hidden. Scroll the grid to see
+earlier and later hours.</p>
+
+<div id="day" class="view-demo"></div>
+
+
+<h2>JavaXT Themes</h2>
+<p>The same calendar styled with the JavaXT themes (themes/light.css and
+themes/dark.css). The header, grid, hour lines and events are all drawn with
+CSS classes that follow the active theme. Each theme is shown on its own row in
+an iframe (so the two stylesheets don't collide) and is auto-sized to fit its
+square month grid.</p>
+
+
+<div class="theme-block">
+    <h3>Light theme</h3>
+    <p class="hint">themes/light.css &mdash; javaxt-calendar</p>
+    <iframe class="theme-frame" src="calendar-theme.html?theme=light"></iframe>
+</div>
+
+<div class="theme-block">
+    <h3>Dark theme</h3>
+    <p class="hint">themes/dark.css &mdash; javaxt-calendar</p>
+    <iframe class="theme-frame theme-frame-dark" src="calendar-theme.html?theme=dark"></iframe>
+</div>
+</div>
+</body>
+</html>

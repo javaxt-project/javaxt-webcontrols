@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Themed Calendar</title>
+
+<!-- The theme stylesheet is swapped at runtime based on the ?theme= param -->
+<link id="theme" href="../../themes/light.css" rel="stylesheet" type="text/css" />
+
+<script src="../../src/utils/Utils.js"></script>
+<script src="../../src/calendar/EventStore.js"></script>
+<script src="../../src/calendar/Event.js"></script>
+<script src="../../src/calendar/Utils.js"></script>
+<script src="../../src/calendar/View.js"></script>
+<script src="../../src/calendar/Day.js"></script>
+<script src="../../src/calendar/Week.js"></script>
+<script src="../../src/calendar/Month.js"></script>
+<script src="../../src/calendar/Calendar.js"></script>
+<script src="../../themes/default.js"></script>
+
+<style>
+    /* The parent page sizes this iframe so the month cells are square; the
+       calendar just fills it. overflow:hidden avoids a stray 1px scrollbar. */
+    html, body { height: 100%; margin: 0; overflow: hidden; }
+    #calendar { position: relative; width: 100%; height: 100%; box-sizing: border-box; }
+</style>
+
+<script>
+window.onload = function() {
+
+    var container = document.getElementById("calendar");
+    var themeLink = document.getElementById("theme");
+    var theme = (javaxt.dhtml.utils.getParameter("theme") || "light").toLowerCase();
+    document.body.style.backgroundColor = theme==="dark" ? "#2b2e35" : "#ffffff";
+
+
+  //Sample events anchored to the current month, each using a theme event color.
+    var now = new Date();
+    var at = function(day, hour, min){
+        return new Date(now.getFullYear(), now.getMonth(), day, hour, min||0, 0);
+    };
+    var ev = function(id, subject, start, end, color){
+        return new javaxt.dhtml.calendar.Event({
+            id: id, subject: subject, startDate: start, endDate: end, editable: true,
+            style: { event: "javaxt-cal-event javaxt-cal-event-" + color }
+        });
+    };
+
+    var eventStore = new javaxt.dhtml.calendar.EventStore();
+    [
+        ev(1, "Team Standup",   at(3, 9, 0),   at(3, 9, 30),   "blue"),
+        ev(2, "Dentist",        at(8, 10, 0),  at(8, 11, 0),   "red"),
+        ev(3, "Conference",     at(15, 0, 0),  at(17, 23, 59), "yellow"), // multi-day
+        ev(4, "Release Cut",    at(22, 17, 0), at(22, 18, 0),  "green"),
+        ev(5, "Birthday Party", at(24, 18, 0), at(24, 21, 0),  "purple")
+    ].forEach(function(e){ eventStore.add(e); });
+
+
+  //Style the calendar using the active theme's "calendar" map (CSS class names).
+  //This is exactly what the kitchen sink demo passes, so the two match.
+    new javaxt.dhtml.Calendar(container, {
+        view: "month",
+        date: new Date(),
+        eventStore: eventStore,
+        style: javaxt.dhtml.style.default.calendar
+    });
+
+
+  //Swap in the dark theme stylesheet if requested (the parent page sizes this
+  //iframe so the month grid renders as squares).
+    if (theme==="dark") themeLink.href = "../../themes/dark.css";
+};
+</script>
+</head>
+<body>
+<div id="calendar"></div>
+</body>
+</html>
